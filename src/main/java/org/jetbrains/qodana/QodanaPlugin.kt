@@ -2,64 +2,71 @@ package org.jetbrains.qodana
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.Exec
 import java.io.File
 
+@Suppress("unused")
 class QodanaPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create("qodana", QodanaExtension::class.java)
-        val inspections = project.tasks.create("inspections", Exec::class.java).apply {
+        val runInspections = project.tasks.create("runInspections", Exec::class.java).apply {
             group = "Qodana"
             description = "Starts Qodana in docker container"
         }
-        val cleanInspections = project.tasks.create("cleanInspections", Exec::class.java).apply {
+        val stopInspections = project.tasks.create("stopInspections", Exec::class.java).apply {
             group = "Qodana"
-            description = "Stops docker container with Qodana and cleanup output directory"
+            description = "Stops docker container with Qodana"
             isIgnoreExitValue = true
+        }
+        val cleanInspections = project.tasks.create("cleanInspections", Delete::class.java).apply {
+            group = "Qodana"
+            description = "Cleanups Qodana output directory"
         }
 
         project.afterEvaluate {
-            val projectDir = extension.projectPath?.let(::File) ?: project.projectDir
-            val resultsDir = extension.resultsPath?.let(::File) ?: File(project.projectDir, "build/results")
-            val profileFile = extension.profilePath?.let(::File)
-            val disabledPluginsFile = extension.disabledPluginsPath?.let(::File)
+            val projectPath = extension.projectPath ?: project.projectDir.path
+            val resultsPath = extension.resultsPath ?: "$projectPath/build/results"
+            val profilePath = extension.profilePath
+            val disabledPluginsPath = extension.disabledPluginsPath
 
             val dockerImageName = extension.dockerImageName ?: "jetbrains/qodana:2020.3-eap"
             val dockerContainerName = extension.dockerContainerName ?: "idea-inspections"
 
-            val dockerVolumeBindings = HashMap(extension.dockerVolumeBindings).apply {
-                put(projectDir.canonicalPath, "/data/project")
-                put(resultsDir.canonicalPath, "/data/results")
-                profileFile?.let { put(it.canonicalPath, "/data/profile.xml") }
-                disabledPluginsFile?.let { put(it.canonicalPath, "/root/.config/idea/disabled_plugins.txt") }
+            extension.mount(projectPath, "/data/project")
+            extension.mount(resultsPath, "/data/results")
+            if (profilePath != null) {
+                extension.mount(profilePath, "/data/profile.xml")
             }
-            val dockerEnvParameters = HashMap(extension.dockerEnvParameters).apply {
-                if (extension.jvmParameters.isNotEmpty()) {
-                    put("IDE_PROPERTIES_PROPERTY", extension.jvmParameters.joinToString(" "))
-                }
+            if (disabledPluginsPath != null) {
+                extension.mount(disabledPluginsPath, "/root/.config/idea/disabled_plugins.txt")
             }
-            val dockerPortBindings = HashMap(extension.dockerPortBindings).apply {
+            if (extension.jvmParameters.isNotEmpty()) {
+                extension.env("IDE_PROPERTIES_PROPERTY", extension.jvmParameters.joinToString(" "))
             }
 
-            inspections.apply {
+            runInspections.apply {
                 executable = "docker"
                 args("run")
                 args("--label", "org.jetbrains.analysis=inspection")
                 args("--rm")
                 args("--name", dockerContainerName)
-                dockerPortBindings.forEach { (from, to) -> args("-p", "$from:$to") }
-                dockerVolumeBindings.forEach { (from, to) -> args("-v", "$from:$to") }
-                dockerEnvParameters.forEach { (name, value) -> args("-e", "$name=$value") }
+                extension.dockerPortBindings
+                    .forEach { (outer, docker) -> args("-p", "$outer:$docker") }
+                extension.dockerVolumeBindings
+                    .map { (outer, docker) -> File(outer).canonicalPath to docker }
+                    .forEach { (outer, docker) -> args("-v", "$outer:$docker") }
+                extension.dockerEnvParameters
+                    .forEach { (name, value) -> args("-e", "$name=$value") }
                 args(extension.dockerArguments)
                 args(dockerImageName)
             }
-            cleanInspections.apply {
+            stopInspections.apply {
                 executable = "docker"
                 args("stop", dockerContainerName)
-
-                doLast {
-                    project.delete(resultsDir)
-                }
+            }
+            cleanInspections.apply {
+                delete(resultsPath)
             }
         }
     }
