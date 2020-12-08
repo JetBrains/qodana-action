@@ -1,0 +1,67 @@
+name: Qodana - Code Inspection
+
+# The name of the GitHub event that triggers the workflow.
+on:
+  # You can manually trigger workflow runs
+  # https://docs.github.com/en/free-pro-team@latest/actions/managing-workflow-runs/manually-running-a-workflow
+  workflow_dispatch:
+
+  # You can trigger workflow on push or pull-request event and configure a workflow to run on specific branches or tags
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main
+
+jobs:
+  code_inspection:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Logins against a Docker registry. [optional step]
+      # https://github.com/marketplace/actions/docker-login
+      # - name: Login to DockerHub
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKER_HUB_USERNAME }}
+      #     password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      # Runs Qodana
+      - name: Qodana - Code Inspection
+        timeout-minutes: 600
+        run: docker run -v ${GITHUB_WORKSPACE}:/data/project -v ${GITHUB_WORKSPACE}/qodana:/data/results jetbrains/qodana:2020.3-eap --save-report
+
+      # Archives Qodana results to workflow artifacts
+      - name: Archive results
+        uses: actions/upload-artifact@v2
+        with:
+          name: qodana-results
+          if-no-files-found: error
+          path: qodana/report/results
+
+      # Prints Qodana results
+      - name: Print results
+        run: |
+         echo "🎉 Qodana has finished successfully!"
+         echo "Download an artifact qodana-results.zip. Code Inspection results are part of file result-allProblems.json."
+         echo "________________________________________________________________"
+         cat ${GITHUB_WORKSPACE}/qodana/report/results/result-allProblems.json
+
+      # Archives Qodana error logs if Qodana fails
+      - name: Archive error logs
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: qodana-error-logs
+          path: qodana
+
+      # Prints error message
+      - name: Print error message
+        if: failure()
+        run: |
+         echo "❌ Qodana has failed"
+         echo "Please contact our support team by email at qodana-support@jetbrains.com. Attach qodana-error-logs.zip to your message."
