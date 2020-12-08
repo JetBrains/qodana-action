@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Qodana - Code Inspection
-        uses:  a-kuznetsova/java-examples@v1.0
+        uses: JetBrains/qodana-action@v1.0-eap
 
       - name: Archive results
         uses: actions/upload-artifact@v2
