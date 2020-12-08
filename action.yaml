@@ -1,1 +1,42 @@
 
+name: 'Qodana - Code Inspection'
+description: 'Qodana is a code quality monitoring tool to identify and suggest fixes for bugs, security vulnerabilities, duplications, and imperfections. 
+It brings all the smart features you love in the IntelliJ IDEs into your project pipelines.'
+author: 'JetBrains'
+
+runs:
+  using: "composite"
+  steps: 
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Qodana - Code Inspection
+      timeout-minutes: 600
+      run: docker run -v ${GITHUB_WORKSPACE}:/data/project -v ${GITHUB_WORKSPACE}/qodana:/data/results jetbrains/qodana:2020.3-eap --save-report
+  
+    - name: Archive results
+      uses: actions/upload-artifact@v2
+      with:
+        name: qodana-results
+        if-no-files-found: error
+        path: qodana/report/results
+         
+    - name: Print results
+      run: |
+        echo "Qodana - Code Inspection has finished successfully!"
+        echo "Download an artifact qodana-results.zip. Code Inspection results are part of file result-allProblems.json."
+        echo "________________________________________________________________"
+        cat ${GITHUB_WORKSPACE}/qodana/report/results/result-allProblems.json
+         
+    - name: Archive error logs
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: qodana-error-logs
+        path: qodana
+        
+    - name: Print error message
+      if: failure()
+      run: |
+        echo "Qodana - Code Inspection has failed"
+        echo "Please contact our support team by email at qodana-support@jetbrains.com. Attach qodana-error-logs.zip to your message."
