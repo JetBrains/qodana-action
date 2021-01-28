@@ -1,11 +1,26 @@
 
 name: 'Qodana - Code Inspection'
-description: 'Qodana is a code quality monitoring tool to identify and suggest fixes for bugs, security vulnerabilities, duplications, and imperfections.
-It brings all the smart features you love in the IntelliJ IDEs into your project pipelines.'
+description: 'Qodana is a code quality monitoring tool that identifies and suggests fixes for bugs, security vulnerabilities, duplications, and imperfections.'
 author: 'JetBrains'
 
+inputs:
+  project-dir:
+    description: 'Project folder to inspect  (default: current work dir /data/project)'
+    required: false
+  results-dir:
+    description: 'Save results to folder (default: /data/results)'
+    required: false
+  report-dir:
+    description: 'Save html report to folder (default: /data/results/report)'
+    required: false
+  save-report:
+    description: 'Generate html report (default: false)'
+    required: false
 runs:
-  using: "composite"
-  steps:
-    - run: docker run -v ${GITHUB_WORKSPACE}:/data/project -v ${GITHUB_WORKSPACE}/qodana:/data/results jetbrains/qodana:2020.3-eap --save-report
-      shell: sh
+  using: 'docker'
+  image: 'docker:://jetbrains/qodana'
+  args:
+    - --project-dir ${{ inputs.project-dir }}
+    - --results-dir ${{ inputs.results-dir }}
+    - --report-dir ${{ inputs.report-dir }}
+    - ${{ inputs.save-report }}
