@@ -34,7 +34,7 @@ All action's inputs are optional.
 ```
 
 See [action.yaml](action.yaml) for the full documentation for this action's inputs.
-Pay attention to the page with [Supported Technologies](https://github.com/JetBrains/Qodana/blob/main/General/supported-technologies.md) before you begin.
+Before you begin, view the list of [Supported Technologies](https://github.com/JetBrains/Qodana/blob/main/General/supported-technologies.md). For the full documentation of the action's inputs, see [action.yaml](action.yaml).
 
 ## Output Results
 
