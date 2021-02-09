@@ -4,20 +4,20 @@ author: 'JetBrains'
 
 inputs:
   project-dir:
-    description: 'Project folder to inspect  (default: whole project)'
+    description: 'Project folder to inspect'
     required: false
     default: '/github/workspace'
   results-dir:
-    description: 'Save results to folder (default: qodana)'
+    description: 'Save results to folder'
     required: false
     default: 'qodana'
   report-dir:
-    description: 'Save html report to folder (default: report)'
+    description: 'Save html report to folder'
     required: false
     default: 'report'
 runs:
   using: 'docker'
-  image: 'docker:://jetbrains/qodana'
+  image: 'docker:://jetbrains/qodana:latest'
   args:
     - --project-dir=${{inputs.project-dir}}
     - --results-dir=${{inputs.project-dir}}/${{inputs.results-dir}}
