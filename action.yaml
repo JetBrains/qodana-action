@@ -17,7 +17,7 @@ inputs:
     default: 'report'
 runs:
   using: 'docker'
-  image: 'docker:://jetbrains/qodana:latest'
+  image: 'docker:://jetbrains/qodana:2020.3-eap'
   args:
     - --project-dir=${{inputs.project-dir}}
     - --results-dir=${{inputs.project-dir}}/${{inputs.results-dir}}
