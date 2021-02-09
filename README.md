@@ -3,7 +3,7 @@
 ![Qodana EAP version alert](resources/eap-alert.png)
 
 **Qodana** is a code quality monitoring tool that identifies and suggests fixes for bugs, security vulnerabilities, duplications, and imperfections.
-Qodana already supports PHP, Java, and Kotlin projects, and will eventually support [all languages and technologies](General/supported-technologies.md) covered by JetBrains IDEs.
+Qodana already supports PHP, Java, and Kotlin projects, and will eventually support all languages and technologies covered by JetBrains IDEs.
 
 **Table of Contents**
 
