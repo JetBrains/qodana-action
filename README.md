@@ -38,7 +38,7 @@ Before you begin, view the list of [Supported Technologies](https://github.com/J
 
 ## Output Results
 
-An example of the Qodana summary from the command line.
+An example of the Qodana command-line summary output:
 ```
 ---- Qodana - Code Inspection ----
 
