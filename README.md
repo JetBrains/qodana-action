@@ -52,7 +52,7 @@ An example of the Qodana summary from the command line.
 ```
 
 Full Qodana results will be available in the `results-dir` in the file `results-allProblems.json`.
-An HTML report will be located in the `report-dir`.
+An HTML report is located in the `report-dir` folder.
 
 ## License Summary
 
