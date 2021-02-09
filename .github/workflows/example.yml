@@ -1,0 +1,15 @@
+name: Qodana - Code Inspection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  code_inspection:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Qodana - Code Inspection
+        uses: JetBrains/qodana-action@v1.0-eap

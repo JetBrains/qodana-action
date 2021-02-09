@@ -1,0 +1,25 @@
+name: 'Qodana - Code Inspection'
+description: 'Qodana is a code quality monitoring tool that identifies and suggests fixes for bugs, security vulnerabilities, duplications, and imperfections.'
+author: 'JetBrains'
+
+inputs:
+  project-dir:
+    description: 'Project folder to inspect'
+    required: false
+    default: '/github/workspace'
+  results-dir:
+    description: 'Save results to folder'
+    required: false
+    default: 'qodana'
+  report-dir:
+    description: 'Save html report to folder'
+    required: false
+    default: 'report'
+runs:
+  using: 'docker'
+  image: 'docker://jetbrains/qodana:2020.3-eap'
+  args:
+    - --project-dir=${{inputs.project-dir}}
+    - --results-dir=${{inputs.project-dir}}/${{inputs.results-dir}}
+    - --report-dir=${{inputs.project-dir}}/${{inputs.report-dir}}
+    - --save-report
