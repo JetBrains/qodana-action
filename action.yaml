@@ -1,5 +1,5 @@
 name: 'Qodana - Code Inspection'
-description: 'Qodana is a code quality monitoring tool that identifies and suggests fixes for bugs, security vulnerabilities, duplications, and imperfections.'
+description: 'Qodana is a code quality monitoring tool that identifies bugs, duplications, and imperfections.'
 author: 'JetBrains'
 
 inputs:
