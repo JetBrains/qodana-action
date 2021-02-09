@@ -51,7 +51,7 @@ An example of the Qodana summary from the command line.
 ---- Problems reported: 3 ----
 ```
 
-Full Qodana results will be available in the `results-dir` in the file `results-allProblems.json`.
+Full Qodana results are available in the file `results-allProblems.json` located in the `results-dir` folder.
 An HTML report is located in the `report-dir` folder.
 
 ## License Summary
