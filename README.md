@@ -33,7 +33,6 @@ All action's inputs are optional.
           report-dir: qodana-report # will be resolved as /github/workspace/myproject/qodana-report
 ```
 
-See [action.yaml](action.yaml) for the full documentation for this action's inputs.
 Before you begin, view the list of [Supported Technologies](https://github.com/JetBrains/Qodana/blob/main/General/supported-technologies.md). For the full documentation of the action's inputs, see [action.yaml](action.yaml).
 
 ## Output Results
