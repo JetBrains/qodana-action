@@ -28,14 +28,14 @@ Elements to configure plugin available in `qodana { }` top level configuration g
 * `jvmParameters` JVM parameters to start IDEA JVM
 
 
-* `bind(local port, docker port)` mounts net port between local machine and docker container
+* `bind(local port, docker port)` binds port between local machine and docker container
 * `mount(local path, docker path)` mounts directory between local machine and docker container
 * `env(name, value)` defines environment variable
 
 
 * `dockerImageName` name of docker image with Qodana tool
 * `dockerContainerName` docker container name to identify qodana container
-* `dockerPortBindings` bounded docker and local net ports
+* `dockerPortBindings` bounded docker and local ports
 * `dockerVolumeBindings` mounted docker and local directories
 * `dockerEnvParameters` defined environment variables
 * `dockerArguments` custom docker arguments to start docker container with Qodana tool
