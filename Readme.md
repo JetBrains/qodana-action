@@ -66,7 +66,7 @@ By default, plugin will be published into `~/.mvn/org/jetbrins/qodana/` director
 
 ### Apply
 
-Add maven local repository into available repositories.
+Add maven local repository into available repositories in your Gradle project.
 For this you need to add following lines at the beginning of `settings.gradle[.kts]` file:
 ```
 pluginManagement {
