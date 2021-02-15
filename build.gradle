@@ -1,12 +1,13 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.10'
 
+    id 'maven-publish'
     id "java-gradle-plugin"
     id "com.gradle.plugin-publish" version "0.12.0"
 }
 
 group 'org.jetbrains.qodana'
-version '0.1.0'
+version '0.1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
