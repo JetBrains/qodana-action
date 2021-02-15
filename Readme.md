@@ -1,6 +1,5 @@
 # Qodana Gradle Plugin
-##### Gradle interface to run code inspections from Intellij IDEA
-___
+Gradle interface to run code inspections from Intellij IDEA
 
 ## Docker Image with Qodana tool
 
