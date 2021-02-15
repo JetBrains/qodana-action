@@ -78,3 +78,9 @@ pluginManagement {
     }
 }
 ```
+Apply Qodana plugin with snapshot version in `build.gradle` file:
+```
+plugins {
+    id 'org.jetbrains.qodana' version "0.1.0-SNAPSHOT"
+}
+```
