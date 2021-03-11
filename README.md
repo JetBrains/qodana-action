@@ -29,8 +29,9 @@ All action's inputs are optional.
   uses: JetBrains/qodana-action@v1.0-eap
   with:
       project-dir: /github/workspace/myproject
-      results-dir: qodana-results # will be resolved as /github/workspace/myproject/qodana-results
-      report-dir: qodana-report # will be resolved as /github/workspace/myproject/qodana-report
+      results-dir: /github/workspace/myproject/qodana-results
+      report-dir: /github/workspace/myproject/qodana-report
+      cache-dir: /github/home/qodana-cache
 ```
 
 Before you begin, view the list of [Supported Technologies](https://github.com/JetBrains/Qodana/blob/main/General/supported-technologies.md). For the full documentation of the action's inputs, see [action.yaml](action.yaml).

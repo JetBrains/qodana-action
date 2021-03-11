@@ -10,16 +10,21 @@ inputs:
   results-dir:
     description: 'Save results to folder'
     required: false
-    default: 'qodana'
+    default: '/github/workspace/qodana'
   report-dir:
     description: 'Save html report to folder'
     required: false
-    default: 'report'
+    default: '/github/workspace/report'
+  cache-dir:
+    description: 'Save cache to folder'
+    required: false
+    default: '/github/home/qodana-cache'
 runs:
   using: 'docker'
-  image: 'docker://jetbrains/qodana:2020.3-eap'
+  image: 'docker://jetbrains/qodana:2021.1-eap'
   args:
     - --project-dir=${{inputs.project-dir}}
-    - --results-dir=${{inputs.project-dir}}/${{inputs.results-dir}}
-    - --report-dir=${{inputs.project-dir}}/${{inputs.report-dir}}
+    - --results-dir=${{inputs.results-dir}}
+    - --report-dir=${{inputs.report-dir}}
+    - --cache-dir=${{inputs.cache-dir}}
     - --save-report
