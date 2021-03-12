@@ -14,14 +14,14 @@ inputs:
   report-dir:
     description: 'Save html report to folder'
     required: false
-    default: '/github/workspace/report'
+    default: '/github/workspace/qodana-report'
   cache-dir:
     description: 'Save cache to folder'
     required: false
     default: '/github/home/qodana-cache'
 runs:
   using: 'docker'
-  image: 'docker://jetbrains/qodana:2021.1-eap'
+  image: 'docker://jetbrains/qodana:latest'
   args:
     - --project-dir=${{inputs.project-dir}}
     - --results-dir=${{inputs.results-dir}}

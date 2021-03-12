@@ -13,7 +13,7 @@ jobs:
       - name: Cache Qodana dependencies
         uses: actions/cache@v2
         with:
-          path: ~/work/_temp/_github_home/cache
+          path: ${{ env.HOME }}/qodana-cache
           key: ${{ runner.os }}-qodana-${{ github.ref }}
           restore-keys: |
             ${{ runner.os }}-qodana-${{ github.ref }}
@@ -27,9 +27,4 @@ jobs:
         with:
           name: qodana-results
           if-no-files-found: error
-          path: report/results
-
-      - name: Print error message
-        if: failure()
-        run: |
-          echo "Qodana - has failed. Please contact our support team by email at qodana-support@jetbrains.com. Attach qodana-error-logs.zip to your message."
+          path: qodana-report/results

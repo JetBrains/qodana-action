@@ -18,18 +18,24 @@ Qodana already supports PHP, Java, and Kotlin projects, and will eventually supp
 
 ## Usage
 
+Input parameters:
+* `project-dir` - Project folder to inspect (default `{{env.GITHUB_WORKSPACE}}`)
+* `results-dir` - Save results to folder (default `{{env.GITHUB_WORKSPACE}}/qodana`)
+* `report-dir` - Save html report to folder (default `{{env.GITHUB_WORKSPACE}}/qodana-report`)
+* `cache-dir` - Save cache to folder (default `{{env.HOME}}/qodana-cache`)
+
 ```yaml
 - name: Qodana - Code Inspection
-  uses: JetBrains/qodana-action@v1.0-eap
+  uses: JetBrains/qodana-action@v2.0-eap
 ```
 
 All action's inputs are optional. 
 ```yaml
 - name: Qodana - Code Inspection
-  uses: JetBrains/qodana-action@v1.0-eap
+  uses: JetBrains/qodana-action@v2.0-eap
   with:
-      project-dir: /github/workspace/myproject
-      results-dir: /github/workspace/myproject/qodana-results
+      project-dir: /github/workspace/myproject/
+      results-dir: /github/workspace/myproject/qodana
       report-dir: /github/workspace/myproject/qodana-report
       cache-dir: /github/home/qodana-cache
 ```
@@ -51,7 +57,7 @@ An example of the Qodana command-line summary output:
 ---- Problems reported: 3 ----
 ```
 
-Full Qodana results are available in the file `results-allProblems.json` located in the `results-dir` folder.
+Full Qodana results are available in the file `results-allProblems.json` located in the `report-dir` folder.
 An HTML report is located in the `report-dir` folder.
 
 ## License Summary
