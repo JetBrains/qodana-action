@@ -6,14 +6,13 @@ on:
 jobs:
   code_inspection:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
 
       - name: Cache Qodana dependencies
         uses: actions/cache@v2
         with:
-          path: ${{ env.HOME }}/qodana-cache
+          path: /home/runner/work/qodana-cache
           key: ${{ runner.os }}-qodana-${{ github.ref }}
           restore-keys: |
             ${{ runner.os }}-qodana-${{ github.ref }}
@@ -22,9 +21,6 @@ jobs:
       - name: Qodana - Code Inspection
         uses: JetBrains/qodana-action@v2.0-eap
 
-      - name: Archive results
-        uses: actions/upload-artifact@v2
-        with:
-          name: qodana-results
-          if-no-files-found: error
-          path: qodana-report/results
+#     Changes permissions of files in the cache folder in case of permissions issues during post-cache task
+      - name: Change cache folder permissions
+        run: sudo chmod -R 555 /home/runner/work/qodana-cache
