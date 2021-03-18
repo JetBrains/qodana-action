@@ -18,7 +18,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - run: mkdir -p ${{inputs.cache-dir}} ${{inputs.results-dir}}
-      shell: bash
     - run: docker run -v ${{inputs.project-dir}}:/data/project -v ${{inputs.results-dir}}:/data/results -v  ${{inputs.cache-dir}}:/data/cache jetbrains/qodana:2021.1-eap --save-report
+      shell: bash
+    - run: sudo find ${{inputs.cache-dir}} -type d -exec chmod 755 {} + ; sudo find ${{inputs.cache-dir}} -type f -exec chmod 544 {} +
       shell: bash
