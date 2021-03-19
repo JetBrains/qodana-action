@@ -14,11 +14,11 @@ inputs:
   cache-dir:
     description: 'Save cache to folder'
     required: false
-    default: "/home/runner/work/qodana-cache"
+    default: "/home/runner/work/_temp/_github_home/qodana-cache"
 runs:
   using: 'composite'
   steps:
-    - run: docker run -v ${{inputs.project-dir}}:/data/project -v ${{inputs.results-dir}}:/data/results -v  ${{inputs.cache-dir}}:/data/cache jetbrains/qodana:2021.1-eap --save-report
+    - run: mkdir -p "${{inputs.results-dir}}" "${{inputs.cache-dir}}"
       shell: bash
-    - run: sudo find ${{inputs.cache-dir}} -type d -exec chmod 755 {} + ; sudo find ${{inputs.cache-dir}} -type f -exec chmod 544 {} +
+    - run: docker run -u $UID -v ${{inputs.project-dir}}:/data/project -v ${{inputs.results-dir}}:/data/results -v ${{inputs.cache-dir}}:/data/cache jetbrains/qodana:2021.1-eap --save-report
       shell: bash

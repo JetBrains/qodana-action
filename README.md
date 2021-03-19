@@ -21,7 +21,7 @@ Qodana already supports PHP, Java, and Kotlin projects, and will eventually supp
 Input parameters:
 * `project-dir` - Project folder to inspect (default `${{ github.workspace }}`)
 * `results-dir` - Save results to folder (default `${{ github.workspace }}/qodana`)
-* `cache-dir` - Save cache to folder (default `/home/runner/work/qodana-cache`)
+* `cache-dir` - Save cache to folder (default `/home/runner/work/_temp/_github_home/qodana-cache`)
 
 ```yaml
 - name: Qodana - Code Inspection
@@ -35,7 +35,7 @@ All action's inputs are optional.
   with:
       project-dir: ${{ github.workspace }}
       results-dir: ${{ github.workspace }}/qodana
-      cache-dir: /home/runner/work/qodana-cache
+      cache-dir: /home/runner/work/_temp/_github_home/qodana-cache
 ```
 
 Before you begin, view the list of [Supported Technologies](https://github.com/JetBrains/Qodana/blob/main/General/supported-technologies.md). For the full documentation of the action's inputs, see [action.yaml](action.yaml).
