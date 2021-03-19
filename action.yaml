@@ -6,20 +6,19 @@ inputs:
   project-dir:
     description: 'Project folder to inspect'
     required: false
-    default: '/github/workspace'
+    default: "${{ github.workspace }}"
   results-dir:
     description: 'Save results to folder'
     required: false
-    default: 'qodana'
-  report-dir:
-    description: 'Save html report to folder'
+    default: "${{ github.workspace }}/qodana"
+  cache-dir:
+    description: 'Save cache to folder'
     required: false
-    default: 'report'
+    default: "/home/runner/work/_temp/_github_home/qodana-cache"
 runs:
-  using: 'docker'
-  image: 'docker://jetbrains/qodana:2020.3-eap'
-  args:
-    - --project-dir=${{inputs.project-dir}}
-    - --results-dir=${{inputs.project-dir}}/${{inputs.results-dir}}
-    - --report-dir=${{inputs.project-dir}}/${{inputs.report-dir}}
-    - --save-report
+  using: 'composite'
+  steps:
+    - run: mkdir -p "${{inputs.results-dir}}" "${{inputs.cache-dir}}"
+      shell: bash
+    - run: docker run -u $UID -v ${{inputs.project-dir}}:/data/project -v ${{inputs.results-dir}}:/data/results -v ${{inputs.cache-dir}}:/data/cache jetbrains/qodana:2021.1-eap --save-report
+      shell: bash
