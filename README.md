@@ -38,7 +38,7 @@ All action's inputs are optional.
       cache-dir: /home/runner/work/_temp/_github_home/qodana-cache
 ```
 
-Before you begin, view the list of [Supported Technologies](https://github.com/JetBrains/Qodana/blob/main/General/supported-technologies.md). For the full documentation of the action's inputs, see [action.yaml](action.yaml).
+Before you begin, view the list of [Supported Technologies](https://www.jetbrains.com/help/qodana/supported-technologies.html). For the full documentation of the action's inputs, see [action.yaml](action.yaml).
 
 ## Output Results
 
