@@ -30,7 +30,7 @@ class QodanaPlugin : Plugin<Project> {
             val profilePath = extension.profilePath
             val disabledPluginsPath = extension.disabledPluginsPath
 
-            val dockerImageName = extension.dockerImageName ?: "jetbrains/qodana:2020.3-eap"
+            val dockerImageName = extension.dockerImageName ?: "jetbrains/qodana:latest"
             val dockerContainerName = extension.dockerContainerName ?: "idea-inspections"
 
             extension.mount(projectPath, "/data/project")

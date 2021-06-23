@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'org.jetbrains.qodana'
-version '0.1.0-SNAPSHOT'
+version '0.1.' + buildNumber
 
 repositories {
     mavenCentral()
@@ -35,15 +35,15 @@ gradlePlugin {
 }
 
 pluginBundle {
-    website = 'https://github.com/jetbrains/gradle-code-inspection-plugin'
-    vcsUrl = 'https://github.com/jetbrains/gradle-code-inspection-plugin'
+    website = 'https://github.com/JetBrains/qodana-gradle-plugin'
+    vcsUrl = 'https://github.com/JetBrains/qodana-gradle-plugin'
 
     description = 'Qodana Gradle plugin allows to run and configure Idea inspections for Gradle project'
     tags = ["qodana", "intellij", "idea", "inspections"]
 
     plugins {
         qodana {
-            displayName = "Gradle Qodana plugin"
+            displayName = "Qodana Gradle plugin"
         }
     }
 }
