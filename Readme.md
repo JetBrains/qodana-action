@@ -16,7 +16,7 @@ Docker Hub: https://hub.docker.com/r/jetbrains/qodana
 Apply Gradle plugin `org.jetbrains.qodana` in `build.gradle`
 ```
 plugins {
-    id 'org.jetbrains.qodana' version "0.1.0"
+    id 'org.jetbrains.qodana' version "0.1.5"
 }
 ```
 Elements to configure plugin available in `qodana { }` top level configuration group:
@@ -41,21 +41,30 @@ Elements to configure plugin available in `qodana { }` top level configuration g
 * `dockerArguments` custom docker arguments to start docker container with Qodana tool
 
 ### Simple example
+Add this to your build.gradle:
 ```
+
 plugins {
     // applies Gradle Qodana plugin to use it in project
-    id 'org.jetbrains.qodana' version "0.1.0"
+    id 'org.jetbrains.qodana' version "0.1.5"
 }
 
 qodana {
-    // bind port 5005 to debug intellij idea in docker
-    bind(5005, 5005)
-    // mount directory with JVMs to use it as Gradle JVM in project
-    mount("~/Library/Java/JavaVirtualMachines", "/root/.jdk")
-    // mount gradle caches to reduce time of Gradle sync in IDEA
-    mount("~/.gradle", "/root/.gradle")
+    //by default qodana.recommended will be used
+    profilePath = "./someExternalyStoredProfile.xml
+    //by deffault result path is $projectPath/build/results
+    resultsPath = "some/output/path"
 }
 ```
+
+and then you can run inspections by 
+```
+gradle runInspections 
+//or
+./gradlew runInspections[]()
+```
+
+Full guide for options and configuration parameters could be found on [qodana docs page](https://www.jetbrains.com/help/qodana/qodana-intellij-docker-readme.html#Using+an+existing+profile) 
 
 ## Build Locally
 
