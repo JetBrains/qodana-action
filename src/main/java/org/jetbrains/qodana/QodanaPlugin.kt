@@ -58,6 +58,7 @@ class QodanaPlugin : Plugin<Project> {
                     .forEach { (outer, docker) -> args("-v", "$outer:$docker") }
                 extension.dockerEnvParameters
                     .forEach { (name, value) -> args("-e", "$name=$value") }
+                args("--mount", "type=volume,dst=/data/project/.gradle")
                 args(extension.dockerArguments)
                 args(dockerImageName)
             }
