@@ -61,7 +61,7 @@ and then you can run inspections by
 ```
 gradle runInspections 
 //or
-./gradlew runInspections[]()
+./gradlew runInspections
 ```
 
 Full guide for options and configuration parameters could be found on [qodana docs page](https://www.jetbrains.com/help/qodana/qodana-intellij-docker-readme.html#Using+an+existing+profile) 
