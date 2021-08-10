@@ -4,24 +4,29 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.Exec
+import org.jetbrains.qodana.tasks.CleanInspectionsTask
+import org.jetbrains.qodana.tasks.RunInspectionsTask
+import org.jetbrains.qodana.tasks.StopInspectionsTask
 import java.io.File
 
 @Suppress("unused")
 class QodanaPlugin : Plugin<Project> {
+
     override fun apply(project: Project) {
-        val extension = project.extensions.create("qodana", QodanaExtension::class.java)
-        val runInspections = project.tasks.create("runInspections", Exec::class.java).apply {
-            group = "Qodana"
-            description = "Starts Qodana in docker container"
+        val extension = project.extensions.create(QodanaPluginConstants.EXTENSION_NAME, QodanaExtension::class.java)
+
+        val runInspections = project.tasks.register(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME, RunInspectionsTask::class.java) {
+            it.group = QodanaPluginConstants.GROUP_NAME
+            it.description = "Starts Qodana in Docker container"
         }
-        val stopInspections = project.tasks.create("stopInspections", Exec::class.java).apply {
-            group = "Qodana"
-            description = "Stops docker container with Qodana"
-            isIgnoreExitValue = true
+        val stopInspections = project.tasks.register(QodanaPluginConstants.STOP_INSPECTIONS_TASK_NAME, StopInspectionsTask::class.java) {
+            it.group = QodanaPluginConstants.GROUP_NAME
+            it.description = "Stops Docker container with Qodana"
+            it.isIgnoreExitValue = true
         }
-        val cleanInspections = project.tasks.create("cleanInspections", Delete::class.java).apply {
-            group = "Qodana"
-            description = "Cleanups Qodana output directory"
+        val cleanInspections = project.tasks.register(QodanaPluginConstants.CLEAN_INSPECTIONS_TASK_NAME, CleanInspectionsTask::class.java) {
+            it.group = QodanaPluginConstants.GROUP_NAME
+            it.description = "Cleans up Qodana output directory"
         }
 
         project.afterEvaluate {
@@ -45,7 +50,7 @@ class QodanaPlugin : Plugin<Project> {
                 extension.env("IDE_PROPERTIES_PROPERTY", extension.jvmParameters.joinToString(" "))
             }
 
-            runInspections.apply {
+            runInspections.get().apply {
                 executable = "docker"
                 args("run")
                 args("--label", "org.jetbrains.analysis=inspection")
@@ -62,11 +67,11 @@ class QodanaPlugin : Plugin<Project> {
                 args(extension.dockerArguments)
                 args(dockerImageName)
             }
-            stopInspections.apply {
+            stopInspections.get().apply {
                 executable = "docker"
                 args("stop", dockerContainerName)
             }
-            cleanInspections.apply {
+            cleanInspections.get().apply {
                 delete(resultsPath)
             }
         }
