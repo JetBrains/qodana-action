@@ -26,6 +26,11 @@ tasks {
     test {
         useJUnitPlatform()
     }
+
+    wrapper {
+        gradleVersion = properties("gradleVersion")
+        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    }
 }
 
 gradlePlugin {
@@ -42,5 +47,4 @@ pluginBundle {
 
     description = "Gradle Qodana Plugin allows to run and configure Idea inspections for Gradle project."
     tags = listOf("qodana", "intellij", "idea", "inspections")
-
 }
