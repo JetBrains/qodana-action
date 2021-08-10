@@ -1,3 +1,8 @@
+[![official JetBrains project](https://jb.gg/badges/official.svg)][jb:confluence-on-gh]
+[![Twitter Follow](https://img.shields.io/twitter/follow/QodanaEvolves?style=flat)][jb:twitter]
+[![Build](https://github.com/JetBrains/gradle-grammar-kit-plugin/workflows/Build/badge.svg)][gh:build]
+[![Slack](https://img.shields.io/badge/Slack-%23qodana-blue)][jb:slack]
+
 # Gradle Qodana Plugin
 Gradle interface to run code inspections from Intellij IDEA.
 
@@ -139,3 +144,8 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file:
       id("org.jetbrains.qodana") version "0.1.0-SNAPSHOT"
   }
   ```
+
+[gh:build]: https://github.com/JetBrains/gradle-qodana-plugin/actions?query=workflow%3ABuild
+[jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
+[jb:slack]: https://plugins.jetbrains.com/slack
+[jb:twitter]: https://twitter.com/QodanaEvolves
