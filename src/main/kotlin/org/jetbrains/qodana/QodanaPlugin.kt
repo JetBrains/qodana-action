@@ -2,77 +2,64 @@ package org.jetbrains.qodana
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.tasks.Delete
-import org.gradle.api.tasks.Exec
 import org.jetbrains.qodana.tasks.CleanInspectionsTask
 import org.jetbrains.qodana.tasks.RunInspectionsTask
 import org.jetbrains.qodana.tasks.StopInspectionsTask
-import java.io.File
 
-@Suppress("unused")
+@Suppress("unused", "UnstableApiUsage")
 class QodanaPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
-        val extension = project.extensions.create(QodanaPluginConstants.EXTENSION_NAME, QodanaExtension::class.java)
+        val projectDir = project.projectDir
 
-        val runInspections = project.tasks.register(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME, RunInspectionsTask::class.java) {
+        val extension = project.extensions.create(QodanaPluginConstants.EXTENSION_NAME, QodanaExtension::class.java).also {
+            it.projectPath.convention(projectDir.canonicalPath)
+            it.resultsPath.convention(project.provider {
+                "${it.projectPath.get()}/build/results"
+            })
+            it.jvmParameters.convention(emptyList())
+            it.dockerImageName.convention(QodanaPluginConstants.DEFAULT_DOCKER_IMAGE_NAME)
+            it.dockerContainerName.convention(QodanaPluginConstants.DEFAULT_DOCKER_CONTAINER_NAME)
+        }
+
+        project.tasks.register(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME, RunInspectionsTask::class.java) {
             it.group = QodanaPluginConstants.GROUP_NAME
             it.description = "Starts Qodana in Docker container"
+
+            it.dockerContainerName.convention(extension.dockerContainerName)
+            it.dockerImageName.convention(extension.dockerImageName)
+            it.dockerPortBindings.convention(extension.dockerPortBindings)
+            it.dockerVolumeBindings.convention(extension.dockerVolumeBindings)
+            it.dockerEnvParameters.convention(extension.dockerEnvParameters)
+            it.dockerArguments.convention(extension.dockerArguments)
         }
-        val stopInspections = project.tasks.register(QodanaPluginConstants.STOP_INSPECTIONS_TASK_NAME, StopInspectionsTask::class.java) {
+
+        project.tasks.register(QodanaPluginConstants.STOP_INSPECTIONS_TASK_NAME, StopInspectionsTask::class.java) {
             it.group = QodanaPluginConstants.GROUP_NAME
             it.description = "Stops Docker container with Qodana"
             it.isIgnoreExitValue = true
+
+            it.dockerContainerName.convention(extension.dockerContainerName)
         }
-        val cleanInspections = project.tasks.register(QodanaPluginConstants.CLEAN_INSPECTIONS_TASK_NAME, CleanInspectionsTask::class.java) {
+
+        project.tasks.register(QodanaPluginConstants.CLEAN_INSPECTIONS_TASK_NAME, CleanInspectionsTask::class.java) {
             it.group = QodanaPluginConstants.GROUP_NAME
             it.description = "Cleans up Qodana output directory"
+
+            it.resultsPath.convention(extension.resultsPath)
         }
 
         project.afterEvaluate {
-            val projectPath = extension.projectPath ?: project.projectDir.path
-            val resultsPath = extension.resultsPath ?: "$projectPath/build/results"
-            val profilePath = extension.profilePath
-            val disabledPluginsPath = extension.disabledPluginsPath
-
-            val dockerImageName = extension.dockerImageName ?: "jetbrains/qodana:latest"
-            val dockerContainerName = extension.dockerContainerName ?: "idea-inspections"
-
-            extension.mount(projectPath, "/data/project")
-            extension.mount(resultsPath, "/data/results")
-            if (profilePath != null) {
-                extension.mount(profilePath, "/data/profile.xml")
+            extension.mount(extension.projectPath.get(), "/data/project")
+            extension.mount(extension.resultsPath.get(), "/data/results")
+            extension.profilePath.orNull?.let {
+                extension.mount(it, "/data/profile.xml")
             }
-            if (disabledPluginsPath != null) {
-                extension.mount(disabledPluginsPath, "/root/.config/idea/disabled_plugins.txt")
+            extension.disabledPluginsPath.orNull?.let {
+                extension.mount(it, "/root/.config/idea/disabled_plugins.txt")
             }
-            if (extension.jvmParameters.isNotEmpty()) {
-                extension.env("IDE_PROPERTIES_PROPERTY", extension.jvmParameters.joinToString(" "))
-            }
-
-            runInspections.get().apply {
-                executable = "docker"
-                args("run")
-                args("--label", "org.jetbrains.analysis=inspection")
-                args("--rm")
-                args("--name", dockerContainerName)
-                extension.dockerPortBindings
-                    .forEach { (outer, docker) -> args("-p", "$outer:$docker") }
-                extension.dockerVolumeBindings
-                    .map { (outer, docker) -> File(outer).canonicalPath to docker }
-                    .forEach { (outer, docker) -> args("-v", "$outer:$docker") }
-                extension.dockerEnvParameters
-                    .forEach { (name, value) -> args("-e", "$name=$value") }
-                args("--mount", "type=volume,dst=/data/project/.gradle")
-                args(extension.dockerArguments)
-                args(dockerImageName)
-            }
-            stopInspections.get().apply {
-                executable = "docker"
-                args("stop", dockerContainerName)
-            }
-            cleanInspections.get().apply {
-                delete(resultsPath)
+            extension.jvmParameters.get().takeIf { it.isNotEmpty() }?.let {
+                extension.env("IDE_PROPERTIES_PROPERTY", it.joinToString(" "))
             }
         }
     }

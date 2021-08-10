@@ -1,28 +1,68 @@
 package org.jetbrains.qodana
 
-open class QodanaExtension {
-    var projectPath: String? = null
-    var resultsPath: String? = null
-    var profilePath: String? = null
-    var disabledPluginsPath: String? = null
-    val jvmParameters = ArrayList<String>()
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import java.io.File
+import javax.inject.Inject
 
-    var dockerImageName: String? = null
-    var dockerContainerName: String? = null
-    val dockerPortBindings = ArrayList<Pair<Int, Int>>()
-    val dockerVolumeBindings = ArrayList<Pair<String, String>>()
-    val dockerEnvParameters = HashMap<String, String>()
-    val dockerArguments = ArrayList<String>()
+open class QodanaExtension @Inject constructor(objectFactory: ObjectFactory) {
+
+    @Input
+    @Optional
+    val projectPath: Property<String> = objectFactory.property(String::class.java)
+
+    @Input
+    @Optional
+    val resultsPath: Property<String> = objectFactory.property(String::class.java)
+
+    @Input
+    @Optional
+    val profilePath: Property<String> = objectFactory.property(String::class.java)
+
+    @Input
+    @Optional
+    val disabledPluginsPath: Property<String> = objectFactory.property(String::class.java)
+
+    @Input
+    @Optional
+    val jvmParameters: ListProperty<String> = objectFactory.listProperty(String::class.java)
+
+    @Input
+    @Optional
+    val dockerImageName: Property<String> = objectFactory.property(String::class.java)
+
+    @Input
+    @Optional
+    val dockerContainerName: Property<String> = objectFactory.property(String::class.java)
+
+    @Input
+    @Optional
+    val dockerPortBindings: ListProperty<String> = objectFactory.listProperty(String::class.java)
+
+    @Input
+    @Optional
+    val dockerVolumeBindings: ListProperty<String> = objectFactory.listProperty(String::class.java)
+
+    @Input
+    @Optional
+    val dockerEnvParameters: ListProperty<String> = objectFactory.listProperty(String::class.java)
+
+    @Input
+    @Optional
+    val dockerArguments: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
     fun bind(outerPort: Int, dockerPort: Int) {
-        dockerPortBindings.add(outerPort to dockerPort)
+        dockerPortBindings.add("$outerPort:$dockerPort")
     }
 
     fun mount(outerPath: String, dockerPath: String) {
-        dockerVolumeBindings.add(outerPath to dockerPath)
+        dockerVolumeBindings.add("${File(outerPath).canonicalPath}:$dockerPath")
     }
 
     fun env(name: String, value: String) {
-        dockerEnvParameters[name] = value
+        dockerEnvParameters.add("$name=$value")
     }
 }
