@@ -4,6 +4,7 @@
 [![Slack](https://img.shields.io/badge/Slack-%23qodana-blue)][jb:slack]
 
 # Gradle Qodana Plugin
+
 Gradle interface to run code inspections from Intellij IDEA.
 
 ## Docker Image with Qodana tool
@@ -17,6 +18,8 @@ Docker Hub: https://hub.docker.com/r/jetbrains/qodana
 - `cleanInspections` cleanups Qodana output directory
 
 ## Gradle Qodana Configuration
+
+> **Note:** Make sure you have `docker` already installed and available in your environment. 
 
 Apply Gradle plugin `org.jetbrains.qodana` in Gradle configuration file:
 
@@ -58,11 +61,12 @@ Elements to configure plugin available in `qodana { }` top level configuration g
 - `dockerArguments` custom docker arguments to start docker container with Qodana tool
 
 ### Simple example
+
 Add this to your Gradle configuration file:
 
 - Groovy – `build.gradle`
+
   ```groovy
-  
   plugins {
       // applies Gradle Qodana plugin to use it in project
       id "org.jetbrains.qodana" version "0.1.5"
@@ -70,7 +74,7 @@ Add this to your Gradle configuration file:
   
   qodana {
       // by default qodana.recommended will be used
-      profilePath = "./someExternalyStoredProfile.xml"
+      profilePath = "./someExternallyStoredProfile.xml"
 
       // by default result path is $projectPath/build/results
       resultsPath = "some/output/path"
@@ -78,8 +82,8 @@ Add this to your Gradle configuration file:
   ```
 
 - Kotlin – `build.gradle.kts`
-  ```groovy
-  
+
+  ```kotlin
   plugins {
       // applies Gradle Qodana plugin to use it in project
       id("org.jetbrains.qodana") version "0.1.5"
@@ -87,12 +91,14 @@ Add this to your Gradle configuration file:
   
   qodana {
       // by default qodana.recommended will be used
-      profilePath = "./someExternalyStoredProfile.xml"
+      profilePath.set("./someExternallyStoredProfile.xml")
 
       // by default result path is $projectPath/build/results
-      resultsPath = "some/output/path"
+      resultsPath.set("some/output/path")
   }
   ```
+
+> **Note:** Docker requires at least 4GB of memory. Set it in Docker `Preferences > Resources > Memory` section.
 
 Now you can run inspections with `runInspections` Gradle task:
 
@@ -116,24 +122,26 @@ By default, plugin will be published into `~/.mvn/org/jetbrins/qodana/` director
 Add Maven local repository into available repositories in your Gradle project.
 For this you need to add following lines at the beginning of `settings.gradle[.kts]` file:
 
-```
+```groovy
 pluginManagement {
     repositories {
-        // Add maven local repository
         mavenLocal()
-        // Add defulat plugins repository
         gradlePluginPortal()
     }
 }
 ```
 
-Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file:
+Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file and mount the Maven Local directory:
 
 - Groovy – `build.gradle`
 
   ```groovy
   plugins {
       id "org.jetbrains.qodana" version "0.1.0-SNAPSHOT"
+  }
+  
+  qodana {
+      mount("/Users/me/.m2", "/root/.m2")
   }
   ```
 
@@ -143,9 +151,13 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file:
   plugins {
       id("org.jetbrains.qodana") version "0.1.0-SNAPSHOT"
   }
+
+  qodana {
+      mount("/Users/me/.m2", "/root/.m2")
+  }
   ```
 
 [gh:build]: https://github.com/JetBrains/gradle-qodana-plugin/actions?query=workflow%3ABuild
 [jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
-[jb:slack]: https://plugins.jetbrains.com/slack
+[jb:slack]: https://qodana.slack.com
 [jb:twitter]: https://twitter.com/QodanaEvolves
