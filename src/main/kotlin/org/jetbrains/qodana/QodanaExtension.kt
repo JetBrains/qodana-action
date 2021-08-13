@@ -1,68 +1,59 @@
 package org.jetbrains.qodana
 
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import java.io.File
 import javax.inject.Inject
 
 open class QodanaExtension @Inject constructor(objectFactory: ObjectFactory) {
 
+    /**
+     * Path to the project folder to inspect.
+     * Default: current project path
+     */
     @Input
     @Optional
     val projectPath: Property<String> = objectFactory.property(String::class.java)
 
+    /**
+     * Path to directory to store results of the task.
+     * Default: `$projectPath/build/results`
+     */
     @Input
     @Optional
     val resultsPath: Property<String> = objectFactory.property(String::class.java)
 
+    /**
+     * Path to cache directory.
+     */
     @Input
     @Optional
-    val profilePath: Property<String> = objectFactory.property(String::class.java)
+    val cachePath: Property<String> = objectFactory.property(String::class.java)
 
+    /**
+     * Generate HTML report.
+     * Disabled by default.
+     */
     @Input
     @Optional
-    val disabledPluginsPath: Property<String> = objectFactory.property(String::class.java)
+    val saveReport: Property<Boolean> = objectFactory.property(Boolean::class.java)
 
+    /**
+     * Serve an HTML report on [showReportPort] port.
+     * Disabled by default.
+     */
     @Input
     @Optional
-    val jvmParameters: ListProperty<String> = objectFactory.listProperty(String::class.java)
+    val showReport: Property<Boolean> = objectFactory.property(Boolean::class.java)
 
+    /**
+     * Default port used to show an HTML report.
+     * Default: 8080
+     *
+     * @see [showReport]
+     */
     @Input
     @Optional
-    val dockerImageName: Property<String> = objectFactory.property(String::class.java)
-
-    @Input
-    @Optional
-    val dockerContainerName: Property<String> = objectFactory.property(String::class.java)
-
-    @Input
-    @Optional
-    val dockerPortBindings: ListProperty<String> = objectFactory.listProperty(String::class.java)
-
-    @Input
-    @Optional
-    val dockerVolumeBindings: ListProperty<String> = objectFactory.listProperty(String::class.java)
-
-    @Input
-    @Optional
-    val dockerEnvParameters: ListProperty<String> = objectFactory.listProperty(String::class.java)
-
-    @Input
-    @Optional
-    val dockerArguments: ListProperty<String> = objectFactory.listProperty(String::class.java)
-
-    fun bind(outerPort: Int, dockerPort: Int) {
-        dockerPortBindings.add("$outerPort:$dockerPort")
-    }
-
-    fun mount(outerPath: String, dockerPath: String) {
-        dockerVolumeBindings.add("${File(outerPath).canonicalPath}:$dockerPath")
-    }
-
-    fun env(name: String, value: String) {
-        dockerEnvParameters.add("$name=$value")
-    }
+    val showReportPort: Property<Int> = objectFactory.property(Int::class.java)
 }

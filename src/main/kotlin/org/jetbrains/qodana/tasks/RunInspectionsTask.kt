@@ -2,77 +2,38 @@ package org.jetbrains.qodana.tasks
 
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.TaskAction
 
-open class RunInspectionsTask : Exec() {
+open class RunInspectionsTask : RunTask() {
 
+    /**
+     * List of JVM parameters to be passed to the IntelliJ instance via the `IDE_PROPERTIES_PROPERTY` environment variable.
+     */
     @Input
     @Optional
-    val dockerContainerName: Property<String> = objectFactory.property(String::class.java)
+    val jvmParameters: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
+    /**
+     * Path to the profile file to be mounted as `/data/profile.xml`.
+     * See [Order of resolving a profile](https://www.jetbrains.com/help/qodana/qodana-intellij-docker-techs.html#Order+of+resolving+a+profile).
+     */
     @Input
     @Optional
-    val dockerImageName: Property<String> = objectFactory.property(String::class.java)
+    val profilePath: Property<String> = objectFactory.property(String::class.java)
 
+    /**
+     * Path to the list of plugins to be disabled in the Qodana IDE instance to be mounted as `/root/.config/idea/disabled_plugins.txt`
+     */
     @Input
     @Optional
-    val dockerPortBindings: ListProperty<String> = objectFactory.listProperty(String::class.java)
+    val disabledPluginsPath: Property<String> = objectFactory.property(String::class.java)
 
+    /**
+     * Inspect uncommitted changes and report new problems.
+     * Disabled by default.
+     */
     @Input
     @Optional
-    val dockerVolumeBindings: ListProperty<String> = objectFactory.listProperty(String::class.java)
-
-    @Input
-    @Optional
-    val dockerEnvParameters: ListProperty<String> = objectFactory.listProperty(String::class.java)
-
-    @Input
-    @Optional
-    val dockerArguments: ListProperty<String> = objectFactory.listProperty(String::class.java)
-
-    init {
-        executable = "docker"
-    }
-
-    @TaskAction
-    override fun exec() {
-        args = getArguments()
-        super.exec()
-    }
-
-    private fun getArguments(): List<String> {
-        val args = mutableListOf(
-            "run",
-            "--label", "org.jetbrains.analysis=inspection",
-            "--rm",
-            "--name", dockerContainerName.get(),
-        )
-
-        dockerPortBindings.get().forEach {
-            args.add("-p")
-            args.add(it)
-        }
-        dockerVolumeBindings.get().forEach {
-            args.add("-v")
-            args.add(it)
-        }
-        dockerEnvParameters.get().forEach {
-            args.add("-e")
-            args.add(it)
-        }
-
-        args.add("--mount")
-        args.add("type=volume,dst=/data/project/.gradle")
-
-        dockerArguments.get().forEach {
-            args.add(it)
-        }
-
-        args.add(dockerImageName.get())
-
-        return args
-    }
+    val changes: Property<Boolean> = objectFactory.property(Boolean::class.java)
 }
