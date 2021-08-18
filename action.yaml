@@ -20,5 +20,5 @@ runs:
   steps:
     - run: mkdir -p "${{inputs.results-dir}}" "${{inputs.cache-dir}}"
       shell: bash
-    - run: docker run -u $UID -v ${{inputs.project-dir}}:/data/project -v ${{inputs.results-dir}}:/data/results -v ${{inputs.cache-dir}}:/data/cache jetbrains/qodana:2021.1-eap --save-report
+    - run: docker run -u $UID -v ${{inputs.project-dir}}:/data/project -v ${{inputs.results-dir}}:/data/results -v ${{inputs.cache-dir}}:/data/cache jetbrains/qodana:2021.2-eap --save-report
       shell: bash
