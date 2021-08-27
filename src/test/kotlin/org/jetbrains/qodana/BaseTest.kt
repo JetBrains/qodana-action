@@ -49,7 +49,7 @@ open class BaseTest {
     protected fun runTaskForCommand(taskName: String, vararg arguments: String) =
         prepareTask(taskName, *arguments).build().output.lines().run {
             get(indexOf("> Task :$taskName") + 1)
-        }.apply(::adjustWindowsPath)
+        }.run(::adjustWindowsPath)
 
     protected fun runTask(taskName: String, vararg arguments: String): BuildResult =
         prepareTask(taskName, *arguments).build()
