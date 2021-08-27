@@ -15,6 +15,7 @@ open class BaseTest {
     internal val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: gradleDefault
 
     val dir: File = createTempDirectory("tmp").toFile()
+    val root = adjustWindowsPath(dir.canonicalPath)
     val buildFile = file("build.gradle")
 
     @BeforeTest
@@ -48,7 +49,7 @@ open class BaseTest {
     protected fun runTaskForCommand(taskName: String, vararg arguments: String) =
         prepareTask(taskName, *arguments).build().output.lines().run {
             get(indexOf("> Task :$taskName") + 1)
-        }
+        }.apply(::adjustWindowsPath)
 
     protected fun runTask(taskName: String, vararg arguments: String): BuildResult =
         prepareTask(taskName, *arguments).build()
@@ -68,6 +69,8 @@ open class BaseTest {
         val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2
         drop(start).takeWhile(String::isNotEmpty).map { it.substringBefore(' ') }
     }
+
+    fun adjustWindowsPath(s: String) = s.replace("\\", "/")
 
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517

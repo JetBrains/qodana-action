@@ -19,8 +19,8 @@ class RunInspectionsTaskTest : BaseTest() {
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p 8080:8080 " +
-                "-v ${dir.canonicalPath}:/data/project " +
-                "-v ${dir.canonicalPath}/build/results:/data/results " +
+                "-v $root:/data/project " +
+                "-v $root/build/results:/data/results " +
                 "--mount type=volume,dst=/data/project/.gradle " +
                 DOCKER_IMAGE_NAME_INSPECTIONS,
             result
