@@ -15,22 +15,32 @@ repositories {
 }
 
 dependencies {
-    implementation(gradleApi())
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation(gradleTestKit())
+    testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 }
 
 tasks {
     test {
-        useJUnitPlatform()
+        configureTests(this)
     }
 
     wrapper {
         gradleVersion = properties("gradleVersion")
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
     }
+}
+
+fun configureTests(testTask: Test) {
+    val testGradleHomePath = "$buildDir/testGradleHome"
+    testTask.doFirst {
+        File(testGradleHomePath).mkdir()
+    }
+    testTask.systemProperties["test.gradle.home"] = testGradleHomePath
+    testTask.systemProperties["test.gradle.default"] = properties("gradleVersion")
+    testTask.systemProperties["test.gradle.version"] = properties("testGradleVersion")
+    testTask.systemProperties["test.gradle.arguments"] = properties("testGradleArguments")
+    testTask.outputs.dir(testGradleHomePath)
 }
 
 gradlePlugin {

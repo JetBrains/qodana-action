@@ -6,7 +6,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import javax.inject.Inject
 
-open class QodanaExtension @Inject constructor(objectFactory: ObjectFactory) {
+open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactory) {
 
     /**
      * Path to the project folder to inspect.

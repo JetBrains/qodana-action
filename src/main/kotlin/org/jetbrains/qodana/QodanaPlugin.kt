@@ -24,7 +24,7 @@ class QodanaPlugin : Plugin<Project> {
     override fun apply(project: Project) {
 
         // `qodana {}` Extension
-        val extension = project.extensions.create(QodanaPluginConstants.EXTENSION_NAME, QodanaExtension::class.java).also {
+        val extension = project.extensions.create(QodanaPluginConstants.EXTENSION_NAME, QodanaPluginExtension::class.java).also {
             it.projectPath.convention(project.projectDir.canonicalPath)
             it.resultsPath.convention(project.provider {
                 "${it.projectPath.get()}/build/results"
@@ -149,13 +149,13 @@ class QodanaPlugin : Plugin<Project> {
     /**
      * Configures common properties of tasks based on [RunTask].
      *
-     * @param extension [QodanaExtension] instance
+     * @param extension [QodanaPluginExtension] instance
      * @param taskDescription current task description
      * @param containerName default Docker container name
      * @param imageName default Docker image name
      */
     private fun RunTask.configure(
-        extension: QodanaExtension,
+        extension: QodanaPluginExtension,
         taskDescription: String,
         containerName: String,
         imageName: String,
