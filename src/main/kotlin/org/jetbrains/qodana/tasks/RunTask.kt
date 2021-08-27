@@ -10,6 +10,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
+@Suppress("MemberVisibilityCanBePrivate")
 open class RunTask : Exec() {
 
     /**
@@ -118,13 +119,17 @@ open class RunTask : Exec() {
     @Optional
     val arguments: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
-    init {
-        executable = "docker"
-    }
+    /**
+     * Docker executable.
+     */
+    @Input
+    @Optional
+    val dockerExecutable: Property<String> = objectFactory.property(String::class.java)
 
     @TaskAction
     override fun exec() {
         args = getArguments()
+        executable = dockerExecutable.get()
         super.exec()
     }
 

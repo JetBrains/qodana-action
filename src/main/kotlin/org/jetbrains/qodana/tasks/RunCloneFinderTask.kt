@@ -21,5 +21,4 @@ open class RunCloneFinderTask : RunTask() {
     @Input
     @Optional
     val language: ListProperty<String> = objectFactory.listProperty(String::class.java)
-
 }

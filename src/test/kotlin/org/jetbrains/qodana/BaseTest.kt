@@ -23,12 +23,15 @@ open class BaseTest {
 
         buildFile.groovy("""
             plugins {
-                id 'java'
                 id 'org.jetbrains.qodana'
             }
 
             repositories {
                 mavenCentral()
+            }
+            
+            qodana {
+                executable = "echo"
             }
         """)
     }
@@ -41,6 +44,11 @@ open class BaseTest {
             .withPluginClasspath()
             .withTestKitDir(File(gradleHome))
             .withArguments(taskName, "--console=plain", "--stacktrace", "--configuration-cache", *arguments)
+
+    protected fun runTaskForCommand(taskName: String, vararg arguments: String) =
+        prepareTask(taskName, *arguments).build().output.lines().run {
+            get(indexOf("> Task :$taskName") + 1)
+        }
 
     protected fun runTask(taskName: String, vararg arguments: String): BuildResult =
         prepareTask(taskName, *arguments).build()

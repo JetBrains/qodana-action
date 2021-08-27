@@ -56,4 +56,11 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
     @Input
     @Optional
     val showReportPort: Property<Int> = objectFactory.property(Int::class.java)
+
+    /**
+     * Docker executable.
+     */
+    @Input
+    @Optional
+    val executable: Property<String> = objectFactory.property(String::class.java)
 }
