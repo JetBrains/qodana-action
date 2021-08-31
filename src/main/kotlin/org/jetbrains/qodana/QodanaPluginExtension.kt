@@ -9,6 +9,20 @@ import javax.inject.Inject
 open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactory) {
 
     /**
+     * Name of the Docker container to identify current container.
+     */
+    @Input
+    @Optional
+    val dockerContainerName: Property<String> = objectFactory.property(String::class.java)
+
+    /**
+     * Docker image name.
+     */
+    @Input
+    @Optional
+    val dockerImageName: Property<String> = objectFactory.property(String::class.java)
+
+    /**
      * Path to the project folder to inspect.
      * Default: current project path
      */
@@ -17,7 +31,7 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
     val projectPath: Property<String> = objectFactory.property(String::class.java)
 
     /**
-     * Path to directory to store results of the task.
+     * Path to the directory to store results of the task.
      * Default: `$projectPath/build/results`
      */
     @Input
@@ -25,7 +39,7 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
     val resultsPath: Property<String> = objectFactory.property(String::class.java)
 
     /**
-     * Path to cache directory.
+     * Path to the cache directory.
      */
     @Input
     @Optional
@@ -58,7 +72,7 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
     val showReportPort: Property<Int> = objectFactory.property(Int::class.java)
 
     /**
-     * Docker executable.
+     * Docker executable name.
      */
     @Input
     @Optional

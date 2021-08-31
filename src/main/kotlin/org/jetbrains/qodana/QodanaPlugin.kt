@@ -26,6 +26,8 @@ class QodanaPlugin : Plugin<Project> {
             ext.showReport.convention(false)
             ext.showReportPort.convention(8080)
             ext.autoUpdate.convention(true)
+            ext.dockerContainerName.convention(QodanaPluginConstants.DOCKER_CONTAINER_NAME_INSPECTIONS)
+            ext.dockerImageName.convention(QodanaPluginConstants.DOCKER_IMAGE_NAME_INSPECTIONS)
         }
 
         // `updateInspections` task
@@ -33,22 +35,18 @@ class QodanaPlugin : Plugin<Project> {
             task.group = QodanaPluginConstants.GROUP_NAME
             task.description = "Pulls the latest Qodana Inspections Docker container"
 
-            task.dockerImageName.convention(project.provider {
-                val runInspectionsTaskProvider = project.tasks.named(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME)
-                val runInspectionsTask = runInspectionsTaskProvider.get() as RunInspectionsTask
-                runInspectionsTask.dockerImageName.get()
-            })
+            task.dockerImageName.convention(extension.dockerImageName)
             task.dockerExecutable.convention(extension.executable)
         }
 
         // `runInspections` task
         project.tasks.register(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME, RunInspectionsTask::class.java) { task ->
             task.group = QodanaPluginConstants.GROUP_NAME
-            task.description = "Starts Qodana Inspections in Docker container"
+            task.description = "Starts Qodana Inspections in a Docker container"
 
             task.dockerExecutable.convention(extension.executable)
-            task.dockerContainerName.convention(QodanaPluginConstants.DOCKER_CONTAINER_NAME_INSPECTIONS)
-            task.dockerImageName.convention(QodanaPluginConstants.DOCKER_IMAGE_NAME_INSPECTIONS)
+            task.dockerContainerName.convention(extension.dockerContainerName)
+            task.dockerImageName.convention(extension.dockerImageName)
             task.projectDir.convention(project.provider {
                 project.file(extension.projectPath)
             })
@@ -110,25 +108,21 @@ class QodanaPlugin : Plugin<Project> {
         // `stopInspections` task
         project.tasks.register(QodanaPluginConstants.STOP_INSPECTIONS_TASK_NAME, StopInspectionsTask::class.java) { task ->
             task.group = QodanaPluginConstants.GROUP_NAME
-            task.description = "Stops Qodana Inspections Docker container"
+            task.description = "Stops the Qodana Inspections Docker container"
             task.isIgnoreExitValue = true
 
-            task.dockerContainerName.convention(project.provider {
-                val runInspectionsTaskProvider = project.tasks.named(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME)
-                val runInspectionsTask = runInspectionsTaskProvider.get() as RunInspectionsTask
-                runInspectionsTask.dockerContainerName.get()
-            })
+            task.dockerContainerName.convention(extension.dockerContainerName)
             task.dockerExecutable.convention(extension.executable)
         }
 
         // `cleanInspections` task
         project.tasks.register(QodanaPluginConstants.CLEAN_INSPECTIONS_TASK_NAME, CleanInspectionsTask::class.java) { task ->
             task.group = QodanaPluginConstants.GROUP_NAME
-            task.description = "Cleans up Qodana Inspections output directory"
+            task.description = "Cleans up the Qodana Inspections output directory"
 
-            val runInspectionsTaskProvider = project.tasks.named(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME)
-            val runInspectionsTask = runInspectionsTaskProvider.get() as RunInspectionsTask
-            task.resultsDir.convention(runInspectionsTask.resultsDir)
+            task.resultsDir.convention(project.provider {
+                project.file(extension.resultsPath)
+            })
         }
     }
 }
