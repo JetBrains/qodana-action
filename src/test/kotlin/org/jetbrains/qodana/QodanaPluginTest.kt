@@ -14,6 +14,7 @@ class QodanaPluginTest : BaseTest() {
                 QodanaPluginConstants.CLEAN_INSPECTIONS_TASK_NAME,
                 QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME,
                 QodanaPluginConstants.STOP_INSPECTIONS_TASK_NAME,
+                QodanaPluginConstants.UPDATE_INSPECTIONS_TASK_NAME,
             ),
             tasks(QodanaPluginConstants.GROUP_NAME),
         )
