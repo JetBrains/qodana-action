@@ -5,6 +5,7 @@ import org.gradle.api.Project
 import org.jetbrains.qodana.tasks.CleanInspectionsTask
 import org.jetbrains.qodana.tasks.RunInspectionsTask
 import org.jetbrains.qodana.tasks.StopInspectionsTask
+import org.jetbrains.qodana.tasks.UpdateInspectionsTask
 
 @Suppress("unused", "UnstableApiUsage")
 class QodanaPlugin : Plugin<Project> {
@@ -24,6 +25,20 @@ class QodanaPlugin : Plugin<Project> {
             ext.saveReport.convention(false)
             ext.showReport.convention(false)
             ext.showReportPort.convention(8080)
+            ext.autoUpdate.convention(true)
+        }
+
+        // `updateInspections` task
+        project.tasks.register(QodanaPluginConstants.UPDATE_INSPECTIONS_TASK_NAME, UpdateInspectionsTask::class.java) { task ->
+            task.group = QodanaPluginConstants.GROUP_NAME
+            task.description = "Pulls the latest Qodana Inspections Docker container"
+
+            task.dockerImageName.convention(project.provider {
+                val runInspectionsTaskProvider = project.tasks.named(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME)
+                val runInspectionsTask = runInspectionsTaskProvider.get() as RunInspectionsTask
+                runInspectionsTask.dockerImageName.get()
+            })
+            task.dockerExecutable.convention(extension.executable)
         }
 
         // `runInspections` task
@@ -84,6 +99,12 @@ class QodanaPlugin : Plugin<Project> {
                     "-changes".takeIf { task.changes.get() }
                 )
             })
+
+            val updateInspectionsTaskProvider = project.tasks.named(QodanaPluginConstants.UPDATE_INSPECTIONS_TASK_NAME)
+            val updateInspectionsTask = updateInspectionsTaskProvider.get() as UpdateInspectionsTask
+
+            task.dependsOn(updateInspectionsTask)
+            updateInspectionsTask.onlyIf { extension.autoUpdate.get() }
         }
 
         // `stopInspections` task
@@ -92,9 +113,11 @@ class QodanaPlugin : Plugin<Project> {
             task.description = "Stops Qodana Inspections Docker container"
             task.isIgnoreExitValue = true
 
-            val runTaskProvider = project.tasks.named(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME)
-            val runInspectionsTask = runTaskProvider.get() as RunInspectionsTask
-            task.dockerContainerName.convention(runInspectionsTask.dockerContainerName)
+            task.dockerContainerName.convention(project.provider {
+                val runInspectionsTaskProvider = project.tasks.named(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME)
+                val runInspectionsTask = runInspectionsTaskProvider.get() as RunInspectionsTask
+                runInspectionsTask.dockerContainerName.get()
+            })
             task.dockerExecutable.convention(extension.executable)
         }
 
@@ -103,8 +126,8 @@ class QodanaPlugin : Plugin<Project> {
             task.group = QodanaPluginConstants.GROUP_NAME
             task.description = "Cleans up Qodana Inspections output directory"
 
-            val runTaskProvider = project.tasks.named(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME)
-            val runInspectionsTask = runTaskProvider.get() as RunInspectionsTask
+            val runInspectionsTaskProvider = project.tasks.named(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME)
+            val runInspectionsTask = runInspectionsTaskProvider.get() as RunInspectionsTask
             task.resultsDir.convention(runInspectionsTask.resultsDir)
         }
     }

@@ -7,6 +7,7 @@ object QodanaPluginConstants {
 
     const val RUN_INSPECTIONS_TASK_NAME = "runInspections"
     const val STOP_INSPECTIONS_TASK_NAME = "stopInspections"
+    const val UPDATE_INSPECTIONS_TASK_NAME = "updateInspections"
     const val CLEAN_INSPECTIONS_TASK_NAME = "cleanInspections"
 
     const val DOCKER_CONTAINER_NAME_INSPECTIONS = "idea-inspections"

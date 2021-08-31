@@ -63,4 +63,11 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
     @Input
     @Optional
     val executable: Property<String> = objectFactory.property(String::class.java)
+
+    /**
+     * Automatically pull the latest Docker image before running the inspection.
+     */
+    @Input
+    @Optional
+    val autoUpdate: Property<Boolean> = objectFactory.property(Boolean::class.java)
 }
