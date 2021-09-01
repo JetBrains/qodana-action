@@ -1,7 +1,8 @@
 [![official JetBrains project](https://jb.gg/badges/official.svg)][jb:confluence-on-gh]
-[![Twitter Follow](https://img.shields.io/twitter/follow/QodanaEvolves?style=flat)][jb:twitter]
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.jetbrains.qodana?color=green&label=Gradle%20Plugin%20Portal&logo=gradle)][gradle-plugin-page]
 [![Build](https://github.com/JetBrains/gradle-grammar-kit-plugin/workflows/Build/badge.svg)][gh:build]
 [![Slack](https://img.shields.io/badge/Slack-%23qodana-blue)][jb:slack]
+[![Twitter Follow](https://img.shields.io/twitter/follow/QodanaEvolves?style=flat)][jb:twitter]
 
 # Gradle Qodana Plugin
 
@@ -21,7 +22,7 @@ Apply Gradle plugin `org.jetbrains.qodana` in Gradle configuration file:
 
   ```groovy
   plugins {
-      id "org.jetbrains.qodana" version "0.1.8"
+      id "org.jetbrains.qodana" version "..."
   }
   ```
   
@@ -29,9 +30,11 @@ Apply Gradle plugin `org.jetbrains.qodana` in Gradle configuration file:
 
   ```kotlin
   plugins {
-      id("org.jetbrains.qodana") version "0.1.8"
+      id("org.jetbrains.qodana") version "..."
   }
   ```
+  
+> **Note:** The latest version is: [![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.jetbrains.qodana?color=green&label=Gradle%20Plugin%20Portal&logo=gradle)][gradle-plugin-page]
 
 ### `qodana { }` extension configuration
 Properties available for configuration in the `qodana { }` top level configuration closure:
@@ -100,7 +103,7 @@ Add this to your Gradle configuration file:
   ```groovy
   plugins {
       // applies Gradle Qodana plugin to use it in project
-      id "org.jetbrains.qodana" version "0.1.8"
+      id "org.jetbrains.qodana" version "..."
   }
   
   qodana {
@@ -117,7 +120,7 @@ Add this to your Gradle configuration file:
   ```kotlin
   plugins {
       // applies Gradle Qodana plugin to use it in project
-      id("org.jetbrains.qodana") version "0.1.8"
+      id("org.jetbrains.qodana") version "..."
   }
   
   qodana {
@@ -189,6 +192,9 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
   ```
 
 [gh:build]: https://github.com/JetBrains/gradle-qodana-plugin/actions?query=workflow%3ABuild
+[gradle-plugin-page]: https://plugins.gradle.org/plugin/org.jetbrains.qodana
 [jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
 [jb:slack]: https://qodana.slack.com
 [jb:twitter]: https://twitter.com/QodanaEvolves
+
+https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/jetbrains/org.jetbrains.qodana/maven-metadata.xml.svg?label=gradle
