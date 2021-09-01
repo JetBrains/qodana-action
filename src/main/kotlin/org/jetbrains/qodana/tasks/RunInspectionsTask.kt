@@ -186,7 +186,6 @@ open class RunInspectionsTask : Exec() {
     private fun getArguments(): List<String> {
         val args = mutableListOf(
             "run",
-            "--label", "org.jetbrains.analysis=inspection",
             "--rm",
             "--name", dockerContainerName.get(),
         )

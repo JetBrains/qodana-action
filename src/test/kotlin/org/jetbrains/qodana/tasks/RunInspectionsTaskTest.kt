@@ -19,7 +19,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -44,7 +43,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name FOO " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -74,7 +72,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -101,7 +98,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p 12345:8080 " +
@@ -158,7 +154,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -183,7 +178,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -208,7 +202,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -233,7 +226,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -260,7 +252,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -285,7 +276,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -310,7 +300,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
@@ -335,7 +324,6 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--label org.jetbrains.analysis=inspection " +
                 "--rm " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
