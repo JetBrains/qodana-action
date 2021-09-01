@@ -185,7 +185,10 @@ open class RunInspectionsTask : Exec() {
             }
 
             if (saveReport.orNull == true) {
-                println("Report generated: ${reportDir.get().resolve("index.html").canonicalPath}")
+                println("Generated report path: ${reportDir.get().resolve("index.html").canonicalPath}")
+            }
+            if (showReport.orNull == true) {
+                println("Generated report URL: http://localhost:${showReportPort.get()}")
             }
         }
     }
