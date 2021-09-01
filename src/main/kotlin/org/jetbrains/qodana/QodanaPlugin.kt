@@ -68,6 +68,12 @@ class QodanaPlugin : Plugin<Project> {
             task.showReport.convention(extension.showReport)
             task.showReportPort.convention(extension.showReportPort)
             task.changes.convention(false)
+            task.baselineDir.convention(project.provider {
+                extension.baselinePath.orNull?.let {
+                    project.file(it)
+                }
+            })
+            task.baselineIncludeAbsent.convention(extension.baselineIncludeAbsent)
 
             task.dockerPortBindings.set(project.provider {
                 listOfNotNull(
@@ -103,7 +109,13 @@ class QodanaPlugin : Plugin<Project> {
                 listOfNotNull(
                     "--save-report".takeIf { task.saveReport.get() },
                     "--show-report".takeIf { task.showReport.get() },
-                    "-changes".takeIf { task.changes.get() }
+                    "-changes".takeIf { task.changes.get() },
+                    task.baselineDir.orNull?.let {
+                        "--baseline ${it.canonicalPath}"
+                    },
+                    "--baseline-include-absent".takeIf {
+                        task.baselineDir.isPresent && task.baselineIncludeAbsent.orNull == true
+                    },
                 )
             })
 

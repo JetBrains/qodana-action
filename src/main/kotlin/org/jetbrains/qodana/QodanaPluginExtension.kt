@@ -47,6 +47,21 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
     val reportPath: Property<String> = objectFactory.property(String::class.java)
 
     /**
+     * Run in baseline mode. Provide the path to an existing SARIF report to be used in the baseline state calculation.
+     * See: https://www.jetbrains.com/help/qodana/qodana-intellij-docker-techs.html#Run+in+baseline+mode
+     */
+    @Input
+    @Optional
+    val baselinePath: Property<String> = objectFactory.property(String::class.java)
+
+    /**
+     * Include in the output report the results from the baseline run that are absent in the current run.
+     */
+    @Input
+    @Optional
+    val baselineIncludeAbsent: Property<Boolean> = objectFactory.property(Boolean::class.java)
+
+    /**
      * Path to the cache directory.
      */
     @Input

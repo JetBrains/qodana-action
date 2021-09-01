@@ -39,19 +39,21 @@ Apply Gradle plugin `org.jetbrains.qodana` in Gradle configuration file:
 ### `qodana { }` extension configuration
 Properties available for configuration in the `qodana { }` top level configuration closure:
 
-| Name                  | Description                                                               | Type      | Default Value                           |
-| --------------------- | ------------------------------------------------------------------------- | --------- | --------------------------------------- |
-| `autoUpdate`          | Automatically pull the latest Docker image before running the inspection. | `Boolean` | `true`                                  |
-| `cachePath`           | Path to the cache directory.                                              | `String`  | `null`                                  |
-| `dockerContainerName` | Name of the Qodana Docker container.                                      | `String`  | `idea-inspections`                      |
-| `dockerImageName`     | Name of the Qodana Docker image.                                          | `String`  | `jetbrains/qodana:latest`               |
-| `executable`          | Docker executable name.                                                   | `String`  | `docker`                                |
-| `projectPath`         | Path to the project folder to inspect.                                    | `String`  | `project.projectDir`                    |
-| `resultsPath`         | Path to directory to store results of the task.                           | `String`  | `"${projectPath}/build/results"`        |
-| `reportPath`          | Path to the directory to store the generated report.                      | `String`  | `"${projectPath}/build/results/report"` |
-| `saveReport`          | Generate HTML report.                                                     | `Boolean` | `false`                                 |
-| `showReport`          | Serve an HTML report on `showReportPort` port.                            | `Boolean` | `false`                                 |
-| `showReportPort`      | Default port used to show an HTML report.                                 | `Int`     | `8080`                                  |
+| Name                    | Description                                                                                                                       | Type      | Default Value                           |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------- | --------------------------------------- |
+| `autoUpdate`            | Automatically pull the latest Docker image before running the inspection.                                                         | `Boolean` | `true`                                  |
+| `baselinePath`          | Run in [baseline][docs:baseline] mode. Provide the path to an existing SARIF report to be used in the baseline state calculation. | `String`  | `null`                                  |
+| `baselineIncludeAbsent` | Include in the output report the results from the baseline run that are absent in the current run.                                | `Boolean` | `false`                                 |
+| `cachePath`             | Path to the cache directory.                                                                                                      | `String`  | `null`                                  |
+| `dockerContainerName`   | Name of the Qodana Docker container.                                                                                              | `String`  | `idea-inspections`                      |
+| `dockerImageName`       | Name of the Qodana Docker image.                                                                                                  | `String`  | `jetbrains/qodana:latest`               |
+| `executable`            | Docker executable name.                                                                                                           | `String`  | `docker`                                |
+| `projectPath`           | Path to the project folder to inspect.                                                                                            | `String`  | `project.projectDir`                    |
+| `resultsPath`           | Path to directory to store results of the task.                                                                                   | `String`  | `"${projectPath}/build/results"`        |
+| `reportPath`            | Path to the directory to store the generated report.                                                                              | `String`  | `"${projectPath}/build/results/report"` |
+| `saveReport`            | Generate HTML report.                                                                                                             | `Boolean` | `false`                                 |
+| `showReport`            | Serve an HTML report on `showReportPort` port.                                                                                    | `Boolean` | `false`                                 |
+| `showReportPort`        | Default port used to show an HTML report.                                                                                         | `Int`     | `8080`                                  |
 
 ## Gradle Qodana Tasks
 
@@ -63,12 +65,12 @@ Task relies on the `qodana { }` extension configuration, however it provides als
 
 #### Properties
 
-| Name                  | Description                                                                                                                      | Type           | Default Value |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------- |
-| `profilePath`         | Path to the profile file to be mounted as `/data/profile.xml`.                                                                   | `String`       | `null`        |
-| `disabledPluginsPath` | Path to the list of plugins to be disabled in the Qodana IDE instance to be mounted as `/root/.config/idea/disabled_plugins.txt` | `String`       | `null`        |
-| `changes`             | Inspect uncommitted changes and report new problems.                                                                             | `Boolean`      | `false`       |
-| `jvmParameters`       | JVM parameters to start IDEA JVM.                                                                                                | `List<String>` | `empty`       |
+| Name                  | Description                                                                                                                       | Type           | Default Value |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------- |
+| `disabledPluginsPath` | Path to the list of plugins to be disabled in the Qodana IDE instance to be mounted as `/root/.config/idea/disabled_plugins.txt`. | `String`       | `null`        |
+| `changes`             | Inspect uncommitted changes and report new problems.                                                                              | `Boolean`      | `false`       |
+| `jvmParameters`       | JVM parameters to start IDEA JVM.                                                                                                 | `List<String>` | `empty`       |
+| `profilePath`         | Path to the profile file to be mounted as `/data/profile.xml`.                                                                    | `String`       | `null`        |
 
 #### Helper methods
 
@@ -192,6 +194,7 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
   }
   ```
 
+[docs:baseline]: https://www.jetbrains.com/help/qodana/qodana-intellij-docker-techs.html#Run+in+baseline+mode
 [gh:build]: https://github.com/JetBrains/gradle-qodana-plugin/actions?query=workflow%3ABuild
 [gradle-plugin-page]: https://plugins.gradle.org/plugin/org.jetbrains.qodana
 [jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
