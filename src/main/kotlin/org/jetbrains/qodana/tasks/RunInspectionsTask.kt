@@ -1,5 +1,7 @@
 package org.jetbrains.qodana.tasks
 
+import org.apache.tools.ant.util.TeeOutputStream
+import org.gradle.api.GradleException
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Exec
@@ -8,6 +10,7 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -160,7 +163,24 @@ open class RunInspectionsTask : Exec() {
     override fun exec() {
         args = getArguments()
         executable = dockerExecutable.get()
-        super.exec()
+
+        ByteArrayOutputStream().use { os ->
+            standardOutput = TeeOutputStream(System.out, os)
+
+            runCatching {
+                super.exec()
+            }.exceptionOrNull()?.let {
+                val message = os.toString().lines().find { line ->
+                    line.startsWith("Inspection run is terminating")
+                } ?: "Qodana inspection finished with failure. Check logs and Qodana report for more details."
+
+                throw GradleException(message, it)
+            }
+
+            if (saveReport.orNull == true) {
+                println("Report generated: ${resultsDir.get().resolve("report/index.html").canonicalPath}")
+            }
+        }
     }
 
     fun bind(outerPort: Int, dockerPort: Int) {
