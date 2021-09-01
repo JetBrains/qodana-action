@@ -3,6 +3,7 @@ package org.jetbrains.qodana.tasks
 import org.jetbrains.qodana.BaseTest
 import org.jetbrains.qodana.QodanaPluginConstants.DOCKER_CONTAINER_NAME_INSPECTIONS
 import org.jetbrains.qodana.QodanaPluginConstants.DOCKER_IMAGE_NAME_INSPECTIONS
+import org.jetbrains.qodana.QodanaPluginConstants.EXTENSION_NAME
 import org.jetbrains.qodana.QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME
 import org.jetbrains.qodana.QodanaPluginConstants.SHOW_REPORT_PORT
 import org.jetbrains.qodana.QodanaPluginConstants.UPDATE_INSPECTIONS_TASK_NAME
@@ -59,12 +60,14 @@ class RunInspectionsTaskTest : BaseTest() {
         val projectPath = File("$root/tmp/project").apply { mkdirs() }.canonicalPath.run(::adjustWindowsPath)
         val resultsPath = File("$root/tmp/results").apply { mkdirs() }.canonicalPath.run(::adjustWindowsPath)
         val cachePath = File("$root/tmp/cache").apply { mkdirs() }.canonicalPath.run(::adjustWindowsPath)
+        val reportPath = File("$root/tmp/report").apply { mkdirs() }.canonicalPath.run(::adjustWindowsPath)
 
         buildFile.groovy("""
             qodana {
                 projectPath = '$projectPath'
                 resultsPath = '$resultsPath'
                 cachePath = '$cachePath'
+                reportPath = '$reportPath'
             }
         """)
 
@@ -77,6 +80,7 @@ class RunInspectionsTaskTest : BaseTest() {
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $projectPath:/data/project " +
                 "-v $resultsPath:/data/results " +
+                "-v $reportPath:/data/results/report " +
                 "-v $cachePath:/data/cache " +
                 "--mount type=volume,dst=/data/project/.gradle " +
                 DOCKER_IMAGE_NAME_INSPECTIONS,
@@ -332,6 +336,58 @@ class RunInspectionsTaskTest : BaseTest() {
                 "--mount type=volume,dst=/data/project/.gradle " +
                 "$DOCKER_IMAGE_NAME_INSPECTIONS " +
                 "--foo",
+            result
+        )
+    }
+
+    @Test
+    fun `run inspections with custom baseline configuration`() {
+        val baselinePath = File("$root/tmp/baseline").apply { mkdirs() }.canonicalPath.run(::adjustWindowsPath)
+
+        buildFile.groovy("""
+            $EXTENSION_NAME {
+                baselinePath = '$baselinePath'
+                baselineIncludeAbsent = true
+            }
+        """)
+
+        val result = runTaskForCommand(RUN_INSPECTIONS_TASK_NAME)
+
+        assertEquals(
+            "run " +
+                "--rm " +
+                "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
+                "-p $SHOW_REPORT_PORT:8080 " +
+                "-v $root:/data/project " +
+                "-v $root/build/results:/data/results " +
+                "--mount type=volume,dst=/data/project/.gradle " +
+                "$DOCKER_IMAGE_NAME_INSPECTIONS " +
+                "--baseline $baselinePath " +
+                "--baseline-include-absent",
+            result
+        )
+    }
+
+    @Test
+    fun `run inspections with custom failThreshold configuration`() {
+        buildFile.groovy("""
+            $EXTENSION_NAME {
+                failThreshold = 123
+            }
+        """)
+
+        val result = runTaskForCommand(RUN_INSPECTIONS_TASK_NAME)
+
+        assertEquals(
+            "run " +
+                "--rm " +
+                "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
+                "-p $SHOW_REPORT_PORT:8080 " +
+                "-v $root:/data/project " +
+                "-v $root/build/results:/data/results " +
+                "--mount type=volume,dst=/data/project/.gradle " +
+                "$DOCKER_IMAGE_NAME_INSPECTIONS " +
+                "--fail-threshold 123",
             result
         )
     }

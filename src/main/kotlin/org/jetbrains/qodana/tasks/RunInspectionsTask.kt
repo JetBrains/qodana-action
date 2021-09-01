@@ -207,7 +207,8 @@ open class RunInspectionsTask : Exec() {
             }
 
             if (saveReport.orNull == true) {
-                println("Generated report path: ${reportDir.get().resolve("index.html").canonicalPath}")
+                val path = reportDir.orNull ?: resultsDir.get().resolve("report")
+                println("Generated report path: ${path.resolve("index.html").canonicalPath}")
             }
             if (showReport.orNull == true) {
                 println("Generated report URL: http://localhost:${showReportPort.get()}")
