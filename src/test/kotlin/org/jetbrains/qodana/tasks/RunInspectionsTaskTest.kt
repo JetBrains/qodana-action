@@ -64,9 +64,9 @@ class RunInspectionsTaskTest : BaseTest() {
 
         buildFile.groovy("""
             qodana {
-                projectPath = "$projectPath"
-                resultsPath = "$resultsPath"
-                cachePath = "$cachePath"
+                projectPath = '$projectPath'
+                resultsPath = '$resultsPath'
+                cachePath = '$cachePath'
             }
         """)
 
@@ -119,9 +119,12 @@ class RunInspectionsTaskTest : BaseTest() {
     fun `run inspections with autoUpdate enabled`() {
         val result = runTask(RUN_INSPECTIONS_TASK_NAME)
 
-        assertTrue {
-            result.output.contains("> Task :$UPDATE_INSPECTIONS_TASK_NAME\n")
-        }
+        assertEquals(
+            "> Task :$UPDATE_INSPECTIONS_TASK_NAME",
+            result.output.lines().find {
+                it.contains("> Task :$UPDATE_INSPECTIONS_TASK_NAME")
+            }
+        )
     }
 
     @Test
@@ -134,9 +137,13 @@ class RunInspectionsTaskTest : BaseTest() {
 
         val result = runTask(RUN_INSPECTIONS_TASK_NAME)
 
-        assertTrue {
-            result.output.contains("> Task :$UPDATE_INSPECTIONS_TASK_NAME SKIPPED\n")
-        }
+        assertEquals(
+            "> Task :$UPDATE_INSPECTIONS_TASK_NAME SKIPPED",
+            result.output.lines().find {
+                it.contains("> Task :$UPDATE_INSPECTIONS_TASK_NAME")
+            }
+        )
+
     }
 
     @Test
@@ -241,9 +248,11 @@ class RunInspectionsTaskTest : BaseTest() {
 
     @Test
     fun `run inspections with 'mount' helper method called`() {
+        val path = File("$root/tmp").apply { mkdirs() }.canonicalPath
+
         buildFile.groovy("""
             $RUN_INSPECTIONS_TASK_NAME {
-                mount('/foo', '/bar')
+                mount('$path', '/bar')
             }
         """)
 
@@ -257,7 +266,7 @@ class RunInspectionsTaskTest : BaseTest() {
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
                 "-v $root/build/results:/data/results " +
-                "-v /foo:/bar " +
+                "-v $path:/bar " +
                 "--mount type=volume,dst=/data/project/.gradle " +
                 DOCKER_IMAGE_NAME_INSPECTIONS,
             result
