@@ -196,5 +196,3 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
 [jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
 [jb:slack]: https://qodana.slack.com
 [jb:twitter]: https://twitter.com/QodanaEvolves
-
-https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/jetbrains/org.jetbrains.qodana/maven-metadata.xml.svg?label=gradle
