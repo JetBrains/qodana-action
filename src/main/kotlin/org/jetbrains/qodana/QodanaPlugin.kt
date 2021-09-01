@@ -74,6 +74,7 @@ class QodanaPlugin : Plugin<Project> {
                 }
             })
             task.baselineIncludeAbsent.convention(extension.baselineIncludeAbsent)
+            task.failThreshold.convention(extension.failThreshold)
 
             task.dockerPortBindings.set(project.provider {
                 listOfNotNull(
@@ -115,6 +116,9 @@ class QodanaPlugin : Plugin<Project> {
                     },
                     "--baseline-include-absent".takeIf {
                         task.baselineDir.isPresent && task.baselineIncludeAbsent.orNull == true
+                    },
+                    task.failThreshold.orNull?.let {
+                        "--fail-threshold $it"
                     },
                 )
             })

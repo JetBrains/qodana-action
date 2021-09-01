@@ -181,6 +181,13 @@ open class RunInspectionsTask : Exec() {
     @Optional
     val baselineIncludeAbsent: Property<Boolean> = objectFactory.property(Boolean::class.java)
 
+    /**
+     * A number of problems that will serve as a quality gate. If this number is reached, the inspection run is terminated.
+     */
+    @Input
+    @Optional
+    val failThreshold: Property<Int> = objectFactory.property(Int::class.java)
+
     @TaskAction
     override fun exec() {
         args = getArguments()

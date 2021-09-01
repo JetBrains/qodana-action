@@ -95,6 +95,13 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
     val showReportPort: Property<Int> = objectFactory.property(Int::class.java)
 
     /**
+     * A number of problems that will serve as a quality gate. If this number is reached, the inspection run is terminated.
+     */
+    @Input
+    @Optional
+    val failThreshold: Property<Int> = objectFactory.property(Int::class.java)
+
+    /**
      * Docker executable name.
      */
     @Input
