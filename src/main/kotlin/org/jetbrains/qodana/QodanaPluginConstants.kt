@@ -4,6 +4,7 @@ object QodanaPluginConstants {
     const val GROUP_NAME = "qodana"
     const val EXTENSION_NAME = "qodana"
     const val EXECUTABLE = "docker"
+    const val SHOW_REPORT_PORT = 8080
 
     const val RUN_INSPECTIONS_TASK_NAME = "runInspections"
     const val STOP_INSPECTIONS_TASK_NAME = "stopInspections"

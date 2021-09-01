@@ -24,7 +24,7 @@ class QodanaPlugin : Plugin<Project> {
             })
             ext.saveReport.convention(false)
             ext.showReport.convention(false)
-            ext.showReportPort.convention(8080)
+            ext.showReportPort.convention(QodanaPluginConstants.SHOW_REPORT_PORT)
             ext.autoUpdate.convention(true)
             ext.dockerContainerName.convention(QodanaPluginConstants.DOCKER_CONTAINER_NAME_INSPECTIONS)
             ext.dockerImageName.convention(QodanaPluginConstants.DOCKER_IMAGE_NAME_INSPECTIONS)
@@ -85,8 +85,6 @@ class QodanaPlugin : Plugin<Project> {
             })
             task.dockerEnvParameters.set(project.provider {
                 listOfNotNull(
-                    "--save-report".takeIf { task.saveReport.get() },
-                    "--show-report".takeIf { task.showReport.get() },
                     task.jvmParameters.get().takeIf { it.isNotEmpty() }?.let {
                         "IDE_PROPERTIES_PROPERTY=${it.joinToString(" ")}"
                     },
@@ -94,6 +92,8 @@ class QodanaPlugin : Plugin<Project> {
             })
             task.arguments.set(project.provider {
                 listOfNotNull(
+                    "--save-report".takeIf { task.saveReport.get() },
+                    "--show-report".takeIf { task.showReport.get() },
                     "-changes".takeIf { task.changes.get() }
                 )
             })
@@ -120,9 +120,7 @@ class QodanaPlugin : Plugin<Project> {
             task.group = QodanaPluginConstants.GROUP_NAME
             task.description = "Cleans up the Qodana Inspections output directory"
 
-            task.resultsDir.convention(project.provider {
-                project.file(extension.resultsPath)
-            })
+            task.resultsDir.convention(extension.resultsPath)
         }
     }
 }
