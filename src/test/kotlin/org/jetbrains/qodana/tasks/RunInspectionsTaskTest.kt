@@ -58,9 +58,9 @@ class RunInspectionsTaskTest : BaseTest() {
 
     @Test
     fun `run inspections with custom directories paths`() {
-        val projectPath = File("$root/tmp/project").apply { mkdirs() }.canonicalPath
-        val resultsPath = File("$root/tmp/results").apply { mkdirs() }.canonicalPath
-        val cachePath = File("$root/tmp/cache").apply { mkdirs() }.canonicalPath
+        val projectPath = File("$root/tmp/project").apply { mkdirs() }.canonicalPath.run(::adjustWindowsPath)
+        val resultsPath = File("$root/tmp/results").apply { mkdirs() }.canonicalPath.run(::adjustWindowsPath)
+        val cachePath = File("$root/tmp/cache").apply { mkdirs() }.canonicalPath.run(::adjustWindowsPath)
 
         buildFile.groovy("""
             qodana {
@@ -248,7 +248,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
     @Test
     fun `run inspections with 'mount' helper method called`() {
-        val path = File("$root/tmp").apply { mkdirs() }.canonicalPath
+        val path = File("$root/tmp").apply { mkdirs() }.canonicalPath.run(::adjustWindowsPath)
 
         buildFile.groovy("""
             $RUN_INSPECTIONS_TASK_NAME {
