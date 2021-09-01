@@ -10,6 +10,7 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskExecutionException
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -203,15 +204,7 @@ open class RunInspectionsTask : Exec() {
                     line.startsWith("Inspection run is terminating")
                 } ?: "Qodana inspection finished with failure. Check logs and Qodana report for more details."
 
-                throw GradleException(message, it)
-            }
-
-            if (saveReport.orNull == true) {
-                val path = reportDir.orNull ?: resultsDir.get().resolve("report")
-                println("Generated report path: ${path.resolve("index.html").canonicalPath}")
-            }
-            if (showReport.orNull == true) {
-                println("Generated report URL: http://localhost:${showReportPort.get()}")
+                throw TaskExecutionException(this, GradleException(message, it))
             }
         }
     }
