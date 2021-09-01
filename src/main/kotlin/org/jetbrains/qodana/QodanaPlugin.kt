@@ -22,6 +22,9 @@ class QodanaPlugin : Plugin<Project> {
             ext.resultsPath.convention(project.provider {
                 "${ext.projectPath.get()}/build/results"
             })
+            ext.reportPath.convention(project.provider {
+                "${ext.projectPath.get()}/build/results/report"
+            })
             ext.saveReport.convention(false)
             ext.showReport.convention(false)
             ext.showReportPort.convention(QodanaPluginConstants.SHOW_REPORT_PORT)
@@ -53,6 +56,9 @@ class QodanaPlugin : Plugin<Project> {
             task.resultsDir.convention(project.provider {
                 project.file(extension.resultsPath)
             })
+            task.reportDir.convention(project.provider {
+                project.file(extension.reportPath)
+            })
             task.cacheDir.convention(project.provider {
                 extension.cachePath.orNull?.let {
                     project.file(it)
@@ -72,6 +78,9 @@ class QodanaPlugin : Plugin<Project> {
                 listOfNotNull(
                     "${task.projectDir.get().canonicalPath}:/data/project",
                     "${task.resultsDir.get().canonicalPath}:/data/results",
+                    task.reportDir.orNull?.let {
+                        "${it.canonicalPath}:/data/results/report"
+                    },
                     task.cacheDir.orNull?.let {
                         "${it.canonicalPath}:/data/cache"
                     },

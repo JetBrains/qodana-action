@@ -39,6 +39,14 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
     val resultsPath: Property<String> = objectFactory.property(String::class.java)
 
     /**
+     * Path to the directory to store the generated report.
+     * Default: `$projectPath/build/results/report`
+     */
+    @Input
+    @Optional
+    val reportPath: Property<String> = objectFactory.property(String::class.java)
+
+    /**
      * Path to the cache directory.
      */
     @Input

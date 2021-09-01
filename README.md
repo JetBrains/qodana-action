@@ -39,18 +39,19 @@ Apply Gradle plugin `org.jetbrains.qodana` in Gradle configuration file:
 ### `qodana { }` extension configuration
 Properties available for configuration in the `qodana { }` top level configuration closure:
 
-| Name                  | Description                                                               | Type      | Default Value                    |
-| --------------------- | ------------------------------------------------------------------------- | --------- | -------------------------------- |
-| `autoUpdate`          | Automatically pull the latest Docker image before running the inspection. | `Boolean` | `true`                           |
-| `cachePath`           | Path to the cache directory.                                              | `String`  | `null`                           |
-| `dockerContainerName` | Name of the Qodana Docker container.                                      | `String`  | `idea-inspections`               |
-| `dockerImageName`     | Name of the Qodana Docker image.                                          | `String`  | `jetbrains/qodana:latest`        |
-| `executable`          | Docker executable name.                                                   | `String`  | `docker`                         |
-| `projectPath`         | Path to the project folder to inspect.                                    | `String`  | `project.projectDir`             |
-| `resultsPath`         | Path to directory to store results of the task.                           | `String`  | `"${projectPath}/build/results"` |
-| `saveReport`          | Generate HTML report.                                                     | `Boolean` | `false`                          |
-| `showReport`          | Serve an HTML report on `showReportPort` port.                            | `Boolean` | `false`                          |
-| `showReportPort`      | Default port used to show an HTML report.                                 | `Int`     | `8080`                           |
+| Name                  | Description                                                               | Type      | Default Value                           |
+| --------------------- | ------------------------------------------------------------------------- | --------- | --------------------------------------- |
+| `autoUpdate`          | Automatically pull the latest Docker image before running the inspection. | `Boolean` | `true`                                  |
+| `cachePath`           | Path to the cache directory.                                              | `String`  | `null`                                  |
+| `dockerContainerName` | Name of the Qodana Docker container.                                      | `String`  | `idea-inspections`                      |
+| `dockerImageName`     | Name of the Qodana Docker image.                                          | `String`  | `jetbrains/qodana:latest`               |
+| `executable`          | Docker executable name.                                                   | `String`  | `docker`                                |
+| `projectPath`         | Path to the project folder to inspect.                                    | `String`  | `project.projectDir`                    |
+| `resultsPath`         | Path to directory to store results of the task.                           | `String`  | `"${projectPath}/build/results"`        |
+| `reportPath`          | Path to the directory to store the generated report.                      | `String`  | `"${projectPath}/build/results/report"` |
+| `saveReport`          | Generate HTML report.                                                     | `Boolean` | `false`                                 |
+| `showReport`          | Serve an HTML report on `showReportPort` port.                            | `Boolean` | `false`                                 |
+| `showReportPort`      | Default port used to show an HTML report.                                 | `Int`     | `8080`                                  |
 
 ## Gradle Qodana Tasks
 

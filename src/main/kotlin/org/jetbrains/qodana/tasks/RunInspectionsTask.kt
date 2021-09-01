@@ -31,6 +31,13 @@ open class RunInspectionsTask : Exec() {
     val resultsDir: Property<File> = objectFactory.property(File::class.java)
 
     /**
+     * Directory to store the generated report.
+     */
+    @OutputDirectory
+    @Optional
+    val reportDir: Property<File> = objectFactory.property(File::class.java)
+
+    /**
      * Task cache directory.
      */
     @OutputDirectory
@@ -178,7 +185,7 @@ open class RunInspectionsTask : Exec() {
             }
 
             if (saveReport.orNull == true) {
-                println("Report generated: ${resultsDir.get().resolve("report/index.html").canonicalPath}")
+                println("Report generated: ${reportDir.get().resolve("index.html").canonicalPath}")
             }
         }
     }
