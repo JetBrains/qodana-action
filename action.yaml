@@ -15,10 +15,42 @@ inputs:
     description: 'Save cache to folder'
     required: false
     default: "/home/runner/work/_temp/_github_home/qodana-cache"
+  inspected-dir:
+    description: 'Directory to be inspected. If not specified, the whole project is inspected by default'
+    required: false
+  baseline:
+    description: 'Run in baseline mode. Provide the path to an exisitng SARIF report to be used in the baseline state calculation'
+    required: false
+  baseline-include-absent:
+    description: 'Include in the output report the results from the baseline run that are absent in the current run'
+    required: false
+    default: false
+  fail-threshold:
+    description: 'Set the number of problems that will serve as a quality gate. If this number is reached, the inspection run is terminated'
+    required: false
+  save-html-report:
+    description: 'Generate HTML report'
+    required: false
+    default: false
+  profile-name:
+    description: 'Name of a profile defined in project'
+    required: false
+  profile-path:
+    description: 'Absolute path to the profile file'
+    required: false
 runs:
   using: 'composite'
   steps:
-    - run: mkdir -p "${{inputs.results-dir}}" "${{inputs.cache-dir}}"
+    - run: ./run_qodana.sh
       shell: bash
-    - run: docker run -u $UID -v ${{inputs.project-dir}}:/data/project -v ${{inputs.results-dir}}:/data/results -v ${{inputs.cache-dir}}:/data/cache jetbrains/qodana:2021.2-eap --save-report
-      shell: bash
+      env:
+        PROJECT_DIR: "${{ inputs.project-dir }}"
+        RESULTS_DIR: "${{ inputs.results-dir }}"
+        CACHE_DIR: "${{ inputs.cache-dir }}"
+        INSPECTED_DIR: "${{ inputs.inspected-dir }}"
+        BASELINE: "${{ inputs.baseline }}"
+        BASELINE_INCLUDE_ABSENT: "${{ inputs.baseline-include-absent }}"
+        FAIL_THRESHOLD: "${{ inputs.fail-threshold }}"
+        SAVE_HTML_REPORT: "${{ inputs.save-html-report }}"
+        PROFILE_NAME: "${{ inputs.profile-name }}"
+        PROFILE_PATH: "${{ inputs.profile-path }}"

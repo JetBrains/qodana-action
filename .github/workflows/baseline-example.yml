@@ -1,7 +1,8 @@
-name: Qodana - Code Inspection
+name: Qodana - Code Inspection Example
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   qodana:
@@ -20,7 +21,12 @@ jobs:
 
       - name: Qodana - Code Inspection
         uses: JetBrains/qodana-action@v2.2-eap
+        with:
+          fail-threshold: 1
+          baseline: ".github/workflows/baseline.sarif.json"
+          baseline-include-absent: true
 
-      - uses: actions/upload-artifact@v2
+      - name: Save Qodana's results to artifacts
+        uses: actions/upload-artifact@v2
         with:
           path: ${{ github.workspace }}/qodana
