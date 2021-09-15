@@ -41,7 +41,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - run: ./run_qodana.sh
+    - run: ${GITHUB_ACTION_PATH}/run_qodana.sh
       shell: bash
       env:
         PROJECT_DIR: "${{ inputs.project-dir }}"
