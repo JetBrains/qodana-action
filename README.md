@@ -32,7 +32,7 @@ Input parameters:
 
 ```yaml
 - name: Qodana - Code Inspection
-  uses: JetBrains/qodana-action@v2.2-eap
+  uses: JetBrains/qodana-action@v2.2.1-eap
 ```
 
 All action's inputs are optional. 
