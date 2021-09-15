@@ -8,6 +8,12 @@
 
 Gradle interface to run code inspections from Intellij IDEA.
 
+> **Important:**
+> This project requires Gradle 6.6 or newer, however it is recommended to use the [latest Gradle available](https://gradle.org/releases/). Update it with:
+> ```bash
+> ./gradlew wrapper --gradle-version=VERSION
+> ```
+
 ## Docker Image with Qodana tool
 
 Docker Hub: https://hub.docker.com/r/jetbrains/qodana

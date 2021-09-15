@@ -2,6 +2,7 @@ package org.jetbrains.qodana
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.PluginInstantiationException
 import org.jetbrains.qodana.tasks.CleanInspectionsTask
 import org.jetbrains.qodana.tasks.RunInspectionsTask
 import org.jetbrains.qodana.tasks.StopInspectionsTask
@@ -14,6 +15,10 @@ class QodanaPlugin : Plugin<Project> {
      * Configure Qodana tasks and extension.
      */
     override fun apply(project: Project) {
+
+        if (Version.parse(project.gradle.gradleVersion) < Version.parse("6.6")) {
+            throw PluginInstantiationException("gradle-qodana-plugin requires Gradle 6.6 and higher")
+        }
 
         // `qodana {}` Extension
         val extension = project.extensions.create(QodanaPluginConstants.EXTENSION_NAME, QodanaPluginExtension::class.java).also { ext ->
