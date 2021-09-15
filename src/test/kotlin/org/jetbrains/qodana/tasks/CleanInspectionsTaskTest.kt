@@ -12,9 +12,7 @@ class CleanInspectionsTaskTest : BaseTest() {
 
     @Test
     fun `clean inspections`() {
-        val resultsDir = File("$root/build/results").apply {
-            mkdirs()
-        }
+        val resultsDir = File("$root/build/results").apply { mkdirs() }
 
         assertTrue {
             resultsDir.exists()
@@ -29,9 +27,8 @@ class CleanInspectionsTaskTest : BaseTest() {
 
     @Test
     fun `clean custom report folder`() {
-        val reportDir = File("$root/build/report").apply {
-            mkdirs()
-        }
+        val reportDir = File("$root/build/report").apply { mkdirs() }
+        val reportPath = reportDir.canonicalPath.run(::adjustWindowsPath)
 
         assertTrue {
             reportDir.exists()
@@ -39,7 +36,7 @@ class CleanInspectionsTaskTest : BaseTest() {
 
         buildFile.groovy("""
             ${QodanaPluginConstants.EXTENSION_NAME} {
-                reportPath = "${reportDir.canonicalPath}"
+                reportPath = "$reportPath"
             }
         """)
 
@@ -52,9 +49,7 @@ class CleanInspectionsTaskTest : BaseTest() {
 
     @Test
     fun `task loads from the configuration cache`() {
-        val resultsDir = File("$root/build/results").apply {
-            mkdirs()
-        }
+        val resultsDir = File("$root/build/results").apply { mkdirs() }
 
         runTask(CLEAN_INSPECTIONS_TASK_NAME, "--configuration-cache")
 
