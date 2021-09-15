@@ -1,6 +1,7 @@
 package org.jetbrains.qodana.tasks
 
 import org.jetbrains.qodana.BaseTest
+import org.jetbrains.qodana.QodanaPluginConstants
 import org.jetbrains.qodana.QodanaPluginConstants.CLEAN_INSPECTIONS_TASK_NAME
 import java.io.File
 import kotlin.test.Test
@@ -16,13 +17,36 @@ class CleanInspectionsTaskTest : BaseTest() {
         }
 
         assertTrue {
-            (resultsDir.exists())
+            resultsDir.exists()
         }
 
         runTask(CLEAN_INSPECTIONS_TASK_NAME)
 
         assertFalse {
-            (resultsDir.exists())
+            resultsDir.exists()
+        }
+    }
+
+    @Test
+    fun `clean custom report folder`() {
+        val reportDir = File("$root/build/report").apply {
+            mkdirs()
+        }
+
+        assertTrue {
+            reportDir.exists()
+        }
+
+        buildFile.groovy("""
+            ${QodanaPluginConstants.EXTENSION_NAME} {
+                reportPath = "${reportDir.canonicalPath}"
+            }
+        """)
+
+        runTask(CLEAN_INSPECTIONS_TASK_NAME)
+
+        assertFalse {
+            reportDir.exists()
         }
     }
 
@@ -35,7 +59,7 @@ class CleanInspectionsTaskTest : BaseTest() {
         runTask(CLEAN_INSPECTIONS_TASK_NAME, "--configuration-cache")
 
         assertFalse {
-            (resultsDir.exists())
+            resultsDir.exists()
         }
         resultsDir.mkdirs()
 
@@ -45,7 +69,7 @@ class CleanInspectionsTaskTest : BaseTest() {
             result.output.contains("Reusing configuration cache.")
         }
         assertFalse {
-            (resultsDir.exists())
+            resultsDir.exists()
         }
     }
 }

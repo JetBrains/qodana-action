@@ -150,6 +150,9 @@ class QodanaPlugin : Plugin<Project> {
             task.description = "Cleans up the Qodana Inspections output directory"
 
             task.resultsDir.convention(extension.resultsPath)
+            extension.reportPath.orNull?.let {
+                task.reportDir.convention(it)
+            }
         }
     }
 }

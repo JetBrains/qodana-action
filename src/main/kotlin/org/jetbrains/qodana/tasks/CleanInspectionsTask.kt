@@ -16,9 +16,16 @@ open class CleanInspectionsTask @Inject constructor(
     @Optional
     val resultsDir: Property<String> = objectFactory.property(String::class.java)
 
+    @Input
+    @Optional
+    val reportDir: Property<String> = objectFactory.property(String::class.java)
+
     @TaskAction
     override fun clean() {
         delete(resultsDir.get())
+        reportDir.orNull?.let {
+            delete(it)
+        }
         super.clean()
     }
 }
