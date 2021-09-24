@@ -46,6 +46,7 @@ docker run -u $UID -v "$PROJECT_DIR:/data/project" \
     $additional_volumes \
     $additional_env_variables \
     $qodana_image \
+    --save-report \
     $(if [ -n "$INSPECTED_DIR" ]; then echo "-d $INSPECTED_DIR"; fi) \
     $(if [ -n "$BASELINE_PATH" ]; then echo "-b $BASELINE_PATH"; fi) \
     $(if [ "$BASELINE_INCLUDE_ABSENT" == "true" ]; then echo "--baseline-include-absent"; fi) \
