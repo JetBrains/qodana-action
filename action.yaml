@@ -1,8 +1,11 @@
-name: 'Qodana - Code Inspection'
+name: 'Qodana - Linters'
 description: 'Qodana is a code quality monitoring tool that identifies bugs, duplications, and imperfections.'
 author: 'JetBrains'
 
 inputs:
+  linter:
+    descrtiption: 'Qodana linter. Possible values: qodana-jvm-community, qodana-android'
+    required: true
   project-dir:
     description: 'Project folder to inspect'
     required: false
@@ -38,12 +41,20 @@ inputs:
   profile-path:
     description: 'Absolute path to the profile file'
     required: false
+outputs:
+  results-sarif-path:
+    description: 'Qodana results in the SARIF format.'
+    value: "${{ inputs.results-dir }}/report.sarif"
+  results-json-path:
+    description: 'Qodana results in the JSON format.'
+    value: "${{ inputs.results-dir }}/qodana.sarif.json"
 runs:
   using: 'composite'
   steps:
     - run: ${GITHUB_ACTION_PATH}/run_qodana.sh
       shell: bash
       env:
+        LINTER: "${{ inputs.linter }}"
         PROJECT_DIR: "${{ inputs.project-dir }}"
         RESULTS_DIR: "${{ inputs.results-dir }}"
         CACHE_DIR: "${{ inputs.cache-dir }}"
