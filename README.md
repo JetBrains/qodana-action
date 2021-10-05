@@ -23,7 +23,7 @@ Input parameters:
 * `results-dir` - Save results to folder (default `${{ github.workspace }}/qodana`)
 * `cache-dir` - Save cache to folder (default `/home/runner/work/_temp/_github_home/qodana-cache`)
 * `inspected-dir` - Directory to be inspected. If not specified, the whole project is inspected by default
-* `baseline` - Run in baseline mode. Provide the path to an exisitng SARIF report to be used in the baseline state calculation
+* `baseline` - Run in baseline mode. Provide the path to an existing SARIF report to be used in the baseline state calculation
 * `baseline-include-absent` - Include in the output report the results from the baseline run that are absent in the current run (default `false`)
 * `fail-threshold` - Set the number of problems that will serve as a quality gate. If this number is reached, the inspection run is terminated
 * `save-html-report` - Generate HTML report (default `false`)
