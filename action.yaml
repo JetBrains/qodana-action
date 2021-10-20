@@ -4,7 +4,7 @@ author: 'JetBrains'
 
 inputs:
   linter:
-    descrtiption: 'Qodana linter. Possible values: qodana-jvm-community'
+    description: 'Qodana linter. Possible values: qodana-jvm-community'
     required: true
   project-dir:
     description: 'Project folder to inspect'
@@ -21,7 +21,10 @@ inputs:
   inspected-dir:
     description: 'Directory to be inspected. If not specified, the whole project is inspected by default'
     required: false
-  baseline:
+  idea-config-dir:
+    description: 'IntelliJ IDEA configuration directory'
+    required: false
+  baseline-path:
     description: 'Run in baseline mode. Provide the path to an exisitng SARIF report to be used in the baseline state calculation'
     required: false
   baseline-include-absent:
@@ -41,6 +44,15 @@ inputs:
   profile-path:
     description: 'Absolute path to the profile file'
     required: false
+  gradle-settings-path:
+    description: 'Provide path to gradle.properties file. An example: "/your/custom/path/gradle.properties"'
+    required: false
+  additional-volumes:
+    description: 'Mount additional volumes to docker container'
+    required: false
+  additional-env-variables:
+    description: 'Pass additional environment variables to docker container'
+    required: false
 outputs:
   results-sarif-path:
     description: 'Qodana results in the SARIF format.'
@@ -51,7 +63,7 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - run: ${GITHUB_ACTION_PATH}/run_qodana.sh
+    - run: "${GITHUB_ACTION_PATH}/run_qodana.sh"
       shell: bash
       env:
         LINTER: "${{ inputs.linter }}"
@@ -59,9 +71,12 @@ runs:
         RESULTS_DIR: "${{ inputs.results-dir }}"
         CACHE_DIR: "${{ inputs.cache-dir }}"
         INSPECTED_DIR: "${{ inputs.inspected-dir }}"
-        BASELINE: "${{ inputs.baseline }}"
+        BASELINE_PATH: "${{ inputs.baseline-path }}"
         BASELINE_INCLUDE_ABSENT: "${{ inputs.baseline-include-absent }}"
         FAIL_THRESHOLD: "${{ inputs.fail-threshold }}"
         SAVE_HTML_REPORT: "${{ inputs.save-html-report }}"
         PROFILE_NAME: "${{ inputs.profile-name }}"
         PROFILE_PATH: "${{ inputs.profile-path }}"
+        GRADLE_SETTINGS_PATH: "${{ inputs.gradle-settings-path }}"
+        ADDITIONAL_VOLUMES: "${{ inputs.additional-volumes }}"
+        ADDITIONAL_ENV_VARIABLES: "${{ inputs.additional-env-variables }}"
