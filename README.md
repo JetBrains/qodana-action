@@ -9,7 +9,7 @@ Qodana already supports PHP, Java, and Kotlin projects, and will eventually supp
 
 - [Qodana Linters](#qodana-linters)
   - [Usage](#usage)
-  - [License Summary](#license-summary)
+  - [License](#license)
 
 <!-- tocstop -->
 
@@ -17,7 +17,7 @@ Qodana already supports PHP, Java, and Kotlin projects, and will eventually supp
 ## Usage
 
 Input parameters:
-* `linter` - Qodana Linter. Possible values: `qodana-jvm-community`, `qodana-android`
+* `linter` - Qodana Linter. Possible values: `qodana-jvm-community`
 * `project-dir` - Project folder to inspect (default `${{ github.workspace }}`)
 * `results-dir` - Save results to folder (default `${{ github.workspace }}/qodana`)
 * `cache-dir` - Save cache to folder (default `/home/runner/work/_temp/_github_home/qodana-cache`)
@@ -43,6 +43,10 @@ Input parameters:
 
 Before you begin, view the list of [Supported Technologies](https://www.jetbrains.com/help/qodana/supported-technologies.html). For the full documentation of the action's inputs, see [action.yaml](action.yaml).
 
-## License Summary
+## License
 
-By using Qodana, you agree to the [JetBrains privacy policy](https://www.jetbrains.com/company/privacy.html).
+View [license information](https://www.jetbrains.com/legal/?fromFooter#licensing) for the Qodana for JVM Community linter software contained in this image.
+
+This Docker image may contain other software which is subject to other licenses, for example, Bash relating to the base distribution or with any direct or indirect dependencies of the primary software).
+
+As for any pre-built image usage, it is the image user's responsibility to ensure that any use of this image complies with any relevant licenses for all software contained within.

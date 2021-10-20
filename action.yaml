@@ -4,7 +4,7 @@ author: 'JetBrains'
 
 inputs:
   linter:
-    descrtiption: 'Qodana linter. Possible values: qodana-jvm-community, qodana-android'
+    descrtiption: 'Qodana linter. Possible values: qodana-jvm-community'
     required: true
   project-dir:
     description: 'Project folder to inspect'
