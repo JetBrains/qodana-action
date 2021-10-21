@@ -17,7 +17,7 @@ Qodana already supports PHP, Java, and Kotlin projects, and will eventually supp
 ## Usage
 
 Input parameters:
-* `linter` - Qodana Linter. Possible values: `qodana-jvm-community`
+* `linter` - Qodana Linter (default `qodana-jvm-community`). Possible values: `qodana-jvm-community`
 * `project-dir` - Project folder to inspect (default `${{ github.workspace }}`)
 * `results-dir` - Save results to folder (default `${{ github.workspace }}/qodana`)
 * `cache-dir` - Save cache to folder (default `/home/runner/work/_temp/_github_home/qodana-cache`)
