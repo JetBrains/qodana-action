@@ -33,7 +33,7 @@ Input parameters:
 * `additional-env-variables` - Additional environment variables to pass to qodana docker image
 
 ```yaml
-- uses: JetBrains/qodana-action@v3.1.1
+- uses: JetBrains/qodana-action@v3.2.1
   with:
     linter: qodana-jvm-community
     fail-threshold: 10
