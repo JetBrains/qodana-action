@@ -17,8 +17,6 @@ jobs:
             ${{ runner.os }}-qodana-
 
       - uses: JetBrains/qodana-action@v3.1.1
-        with:
-          linter: qodana-jvm-community
 
       - uses: actions/upload-artifact@v2
         with:

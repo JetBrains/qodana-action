@@ -6,6 +6,7 @@ inputs:
   linter:
     description: 'Qodana linter. Possible values: qodana-jvm-community'
     required: true
+    default: "qodana-jvm-community"
   project-dir:
     description: 'Project folder to inspect'
     required: false
