@@ -81,3 +81,10 @@ runs:
         GRADLE_SETTINGS_PATH: "${{ inputs.gradle-settings-path }}"
         ADDITIONAL_VOLUMES: "${{ inputs.additional-volumes }}"
         ADDITIONAL_ENV_VARIABLES: "${{ inputs.additional-env-variables }}"
+    - name: Upload Report
+      uses: actions/upload-artifact@v2.2.4
+      with:
+        name: Qodana Report
+        path: "${{ inputs.results-dir }}/results/*"
+        if-no-files-found: ignore
+
