@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.5.30"
     id("java-gradle-plugin")
     id("maven-publish")
-    id("com.gradle.plugin-publish") version "0.15.0"
+    id("com.gradle.plugin-publish") version "0.17.0"
 }
 
 group = "org.jetbrains.qodana"
