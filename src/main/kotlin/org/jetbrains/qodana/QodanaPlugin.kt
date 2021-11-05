@@ -36,92 +36,92 @@ class QodanaPlugin : Plugin<Project> {
         }
 
         // `updateInspections` task
-        project.tasks.register(QodanaPluginConstants.UPDATE_INSPECTIONS_TASK_NAME, UpdateInspectionsTask::class.java) { task ->
-            task.group = QodanaPluginConstants.GROUP_NAME
-            task.description = "Pulls the latest Qodana Inspections Docker container"
+        project.tasks.register(QodanaPluginConstants.UPDATE_INSPECTIONS_TASK_NAME, UpdateInspectionsTask::class.java) {
+            group = QodanaPluginConstants.GROUP_NAME
+            description = "Pulls the latest Qodana Inspections Docker container"
 
-            task.dockerImageName.convention(extension.dockerImageName)
-            task.dockerExecutable.convention(extension.executable)
+            dockerImageName.convention(extension.dockerImageName)
+            dockerExecutable.convention(extension.executable)
         }
 
         // `runInspections` task
-        project.tasks.register(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME, RunInspectionsTask::class.java) { task ->
-            task.group = QodanaPluginConstants.GROUP_NAME
-            task.description = "Starts Qodana Inspections in a Docker container"
+        project.tasks.register(QodanaPluginConstants.RUN_INSPECTIONS_TASK_NAME, RunInspectionsTask::class.java) {
+            group = QodanaPluginConstants.GROUP_NAME
+            description = "Starts Qodana Inspections in a Docker container"
 
-            task.dockerExecutable.convention(extension.executable)
-            task.dockerContainerName.convention(extension.dockerContainerName)
-            task.dockerImageName.convention(extension.dockerImageName)
-            task.projectDir.convention(project.provider {
+            dockerExecutable.convention(extension.executable)
+            dockerContainerName.convention(extension.dockerContainerName)
+            dockerImageName.convention(extension.dockerImageName)
+            projectDir.convention(project.provider {
                 project.file(extension.projectPath)
             })
-            task.resultsDir.convention(project.provider {
+            resultsDir.convention(project.provider {
                 project.file(extension.resultsPath)
             })
-            task.reportDir.convention(project.provider {
+            reportDir.convention(project.provider {
                 extension.reportPath.orNull?.let {
                     project.file(it)
                 }
             })
-            task.cacheDir.convention(project.provider {
+            cacheDir.convention(project.provider {
                 extension.cachePath.orNull?.let {
                     project.file(it)
                 }
             })
-            task.saveReport.convention(extension.saveReport)
-            task.showReport.convention(extension.showReport)
-            task.showReportPort.convention(extension.showReportPort)
-            task.changes.convention(false)
-            task.baselineDir.convention(project.provider {
+            saveReport.convention(extension.saveReport)
+            showReport.convention(extension.showReport)
+            showReportPort.convention(extension.showReportPort)
+            changes.convention(false)
+            baselineDir.convention(project.provider {
                 extension.baselinePath.orNull?.let {
                     project.file(it)
                 }
             })
-            task.baselineIncludeAbsent.convention(extension.baselineIncludeAbsent)
-            task.failThreshold.convention(extension.failThreshold)
+            baselineIncludeAbsent.convention(extension.baselineIncludeAbsent)
+            failThreshold.convention(extension.failThreshold)
 
-            task.dockerPortBindings.set(project.provider {
+            dockerPortBindings.set(project.provider {
                 listOfNotNull(
-                    "${task.showReportPort.get()}:8080",
+                    "${showReportPort.get()}:8080",
                 )
             })
-            task.dockerVolumeBindings.set(project.provider {
+            dockerVolumeBindings.set(project.provider {
                 listOfNotNull(
-                    "${task.projectDir.get().canonicalPath}:/data/project",
-                    "${task.resultsDir.get().canonicalPath}:/data/results",
-                    task.reportDir.orNull?.let {
+                    "${projectDir.get().canonicalPath}:/data/project",
+                    "${resultsDir.get().canonicalPath}:/data/results",
+                    reportDir.orNull?.let {
                         "${it.canonicalPath}:/data/results/report"
                     },
-                    task.cacheDir.orNull?.let {
+                    cacheDir.orNull?.let {
                         "${it.canonicalPath}:/data/cache"
                     },
-                    task.profilePath.orNull?.let {
+                    profilePath.orNull?.let {
                         "$it:/data/profile.xml"
                     },
-                    task.disabledPluginsPath.orNull?.let {
+                    disabledPluginsPath.orNull?.let {
                         "$it:/root/.config/idea/disabled_plugins.txt"
                     },
                 )
             })
-            task.dockerEnvParameters.set(project.provider {
+            dockerEnvParameters.set(project.provider {
                 listOfNotNull(
-                    task.jvmParameters.get().takeIf { it.isNotEmpty() }?.let {
+                    jvmParameters.get().takeIf { it.isNotEmpty() }?.let {
                         "IDE_PROPERTIES_PROPERTY=${it.joinToString(" ")}"
                     },
                 )
             })
-            task.arguments.set(project.provider {
+            arguments.set(project.provider {
                 listOfNotNull(
-                    "--save-report".takeIf { task.saveReport.get() },
-                    "--show-report".takeIf { task.showReport.get() },
-                    "-changes".takeIf { task.changes.get() },
-                    task.baselineDir.orNull?.let {
+                    "--save-report".takeIf { saveReport.get() },
+                    "--show-report".takeIf { showReport.get() },
+                    "-changes".takeIf { changes.get() },
+                    baselineDir.orNull?.let {
                         "--baseline ${it.canonicalPath}"
                     },
                     "--baseline-include-absent".takeIf {
-                        task.baselineDir.isPresent && task.baselineIncludeAbsent.orNull == true
+                        baselineDir.isPresent && baselineIncludeAbsent.orNull == true
                     },
-                    task.failThreshold.orNull?.let {
+                    failThreshold.orNull?.let {
                         "--fail-threshold $it"
                     },
                 )
@@ -130,28 +130,30 @@ class QodanaPlugin : Plugin<Project> {
             val updateInspectionsTaskProvider = project.tasks.named(QodanaPluginConstants.UPDATE_INSPECTIONS_TASK_NAME)
             val updateInspectionsTask = updateInspectionsTaskProvider.get() as UpdateInspectionsTask
 
-            task.dependsOn(updateInspectionsTask)
-            updateInspectionsTask.onlyIf { extension.autoUpdate.get() }
+            dependsOn(updateInspectionsTask)
+
+            val autoUpdateProvider = project.provider { extension.autoUpdate.get() }
+            updateInspectionsTask.onlyIf { autoUpdateProvider.get() }
         }
 
         // `stopInspections` task
-        project.tasks.register(QodanaPluginConstants.STOP_INSPECTIONS_TASK_NAME, StopInspectionsTask::class.java) { task ->
-            task.group = QodanaPluginConstants.GROUP_NAME
-            task.description = "Stops the Qodana Inspections Docker container"
-            task.isIgnoreExitValue = true
+        project.tasks.register(QodanaPluginConstants.STOP_INSPECTIONS_TASK_NAME, StopInspectionsTask::class.java) {
+            group = QodanaPluginConstants.GROUP_NAME
+            description = "Stops the Qodana Inspections Docker container"
+            isIgnoreExitValue = true
 
-            task.dockerContainerName.convention(extension.dockerContainerName)
-            task.dockerExecutable.convention(extension.executable)
+            dockerContainerName.convention(extension.dockerContainerName)
+            dockerExecutable.convention(extension.executable)
         }
 
         // `cleanInspections` task
-        project.tasks.register(QodanaPluginConstants.CLEAN_INSPECTIONS_TASK_NAME, CleanInspectionsTask::class.java) { task ->
-            task.group = QodanaPluginConstants.GROUP_NAME
-            task.description = "Cleans up the Qodana Inspections output directory"
+        project.tasks.register(QodanaPluginConstants.CLEAN_INSPECTIONS_TASK_NAME, CleanInspectionsTask::class.java) {
+            group = QodanaPluginConstants.GROUP_NAME
+            description = "Cleans up the Qodana Inspections output directory"
 
-            task.resultsDir.convention(extension.resultsPath)
+            resultsDir.convention(extension.resultsPath)
             extension.reportPath.orNull?.let {
-                task.reportDir.convention(it)
+                reportDir.convention(it)
             }
         }
     }

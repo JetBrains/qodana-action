@@ -1,9 +1,9 @@
 package org.jetbrains.qodana
 
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
+import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
 open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactory) {
@@ -13,14 +13,14 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
      */
     @Input
     @Optional
-    val dockerContainerName: Property<String> = objectFactory.property(String::class.java)
+    val dockerContainerName = objectFactory.property<String>()
 
     /**
      * Docker image name.
      */
     @Input
     @Optional
-    val dockerImageName: Property<String> = objectFactory.property(String::class.java)
+    val dockerImageName = objectFactory.property<String>()
 
     /**
      * Path to the project folder to inspect.
@@ -28,7 +28,7 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
      */
     @Input
     @Optional
-    val projectPath: Property<String> = objectFactory.property(String::class.java)
+    val projectPath = objectFactory.property<String>()
 
     /**
      * Path to the directory to store results of the task.
@@ -36,7 +36,7 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
      */
     @Input
     @Optional
-    val resultsPath: Property<String> = objectFactory.property(String::class.java)
+    val resultsPath = objectFactory.property<String>()
 
     /**
      * Path to the directory to store the generated report.
@@ -44,7 +44,7 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
      */
     @Input
     @Optional
-    val reportPath: Property<String> = objectFactory.property(String::class.java)
+    val reportPath = objectFactory.property<String>()
 
     /**
      * Run in baseline mode. Provide the path to an existing SARIF report to be used in the baseline state calculation.
@@ -52,21 +52,21 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
      */
     @Input
     @Optional
-    val baselinePath: Property<String> = objectFactory.property(String::class.java)
+    val baselinePath = objectFactory.property<String>()
 
     /**
      * Include in the output report the results from the baseline run that are absent in the current run.
      */
     @Input
     @Optional
-    val baselineIncludeAbsent: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val baselineIncludeAbsent = objectFactory.property<Boolean>()
 
     /**
      * Path to the cache directory.
      */
     @Input
     @Optional
-    val cachePath: Property<String> = objectFactory.property(String::class.java)
+    val cachePath = objectFactory.property<String>()
 
     /**
      * Generate HTML report.
@@ -74,7 +74,7 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
      */
     @Input
     @Optional
-    val saveReport: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val saveReport = objectFactory.property<Boolean>()
 
     /**
      * Serve an HTML report on [showReportPort] port.
@@ -82,7 +82,7 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
      */
     @Input
     @Optional
-    val showReport: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val showReport = objectFactory.property<Boolean>()
 
     /**
      * Default port used to show an HTML report.
@@ -92,26 +92,26 @@ open class QodanaPluginExtension @Inject constructor(objectFactory: ObjectFactor
      */
     @Input
     @Optional
-    val showReportPort: Property<Int> = objectFactory.property(Int::class.java)
+    val showReportPort = objectFactory.property<Int>()
 
     /**
      * A number of problems that will serve as a quality gate. If this number is reached, the inspection run is terminated.
      */
     @Input
     @Optional
-    val failThreshold: Property<Int> = objectFactory.property(Int::class.java)
+    val failThreshold = objectFactory.property<Int>()
 
     /**
      * Docker executable name.
      */
     @Input
     @Optional
-    val executable: Property<String> = objectFactory.property(String::class.java)
+    val executable = objectFactory.property<String>()
 
     /**
      * Automatically pull the latest Docker image before running the inspection.
      */
     @Input
     @Optional
-    val autoUpdate: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val autoUpdate = objectFactory.property<Boolean>()
 }

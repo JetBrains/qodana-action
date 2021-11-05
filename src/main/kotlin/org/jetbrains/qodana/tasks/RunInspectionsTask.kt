@@ -3,7 +3,6 @@ package org.jetbrains.qodana.tasks
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -11,6 +10,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.kotlin.dsl.property
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -22,28 +22,28 @@ open class RunInspectionsTask : Exec() {
      */
     @InputDirectory
     @Optional
-    val projectDir: Property<File> = objectFactory.property(File::class.java)
+    val projectDir = objectFactory.property<File>()
 
     /**
      * Directory to store results of the task.
      */
     @OutputDirectory
     @Optional
-    val resultsDir: Property<File> = objectFactory.property(File::class.java)
+    val resultsDir = objectFactory.property<File>()
 
     /**
      * Directory to store the generated report.
      */
     @OutputDirectory
     @Optional
-    val reportDir: Property<File> = objectFactory.property(File::class.java)
+    val reportDir = objectFactory.property<File>()
 
     /**
      * Task cache directory.
      */
     @OutputDirectory
     @Optional
-    val cacheDir: Property<File> = objectFactory.property(File::class.java)
+    val cacheDir = objectFactory.property<File>()
 
     /**
      * Generate an HTML report.
@@ -51,7 +51,7 @@ open class RunInspectionsTask : Exec() {
      */
     @Input
     @Optional
-    val saveReport: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val saveReport = objectFactory.property<Boolean>()
 
     /**
      * Serve an HTML report on port 8080.
@@ -59,7 +59,7 @@ open class RunInspectionsTask : Exec() {
      */
     @Input
     @Optional
-    val showReport: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val showReport = objectFactory.property<Boolean>()
 
     /**
      * Default port used to show an HTML report.
@@ -69,21 +69,21 @@ open class RunInspectionsTask : Exec() {
      */
     @Input
     @Optional
-    val showReportPort: Property<Int> = objectFactory.property(Int::class.java)
+    val showReportPort = objectFactory.property<Int>()
 
     /**
      * Name of the Docker container to identify current container.
      */
     @Input
     @Optional
-    val dockerContainerName: Property<String> = objectFactory.property(String::class.java)
+    val dockerContainerName = objectFactory.property<String>()
 
     /**
      * Docker image name.
      */
     @Input
     @Optional
-    val dockerImageName: Property<String> = objectFactory.property(String::class.java)
+    val dockerImageName = objectFactory.property<String>()
 
     /**
      * List of port bindings in `OUTER_PORT:DOCKER_PORT` format.
@@ -135,7 +135,7 @@ open class RunInspectionsTask : Exec() {
      */
     @Input
     @Optional
-    val dockerExecutable: Property<String> = objectFactory.property(String::class.java)
+    val dockerExecutable = objectFactory.property<String>()
 
     /**
      * List of JVM parameters to be passed to the IntelliJ instance via the `IDE_PROPERTIES_PROPERTY` environment variable.
@@ -150,14 +150,14 @@ open class RunInspectionsTask : Exec() {
      */
     @Input
     @Optional
-    val profilePath: Property<String> = objectFactory.property(String::class.java)
+    val profilePath = objectFactory.property<String>()
 
     /**
      * Path to the list of plugins to be disabled in the Qodana IDE instance to be mounted as `/root/.config/idea/disabled_plugins.txt`
      */
     @Input
     @Optional
-    val disabledPluginsPath: Property<String> = objectFactory.property(String::class.java)
+    val disabledPluginsPath = objectFactory.property<String>()
 
     /**
      * Inspect uncommitted changes and report new problems.
@@ -165,7 +165,7 @@ open class RunInspectionsTask : Exec() {
      */
     @Input
     @Optional
-    val changes: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val changes = objectFactory.property<Boolean>()
 
     /**
      * Run in baseline mode. Provide the path to an existing SARIF report to be used in the baseline state calculation.
@@ -173,25 +173,25 @@ open class RunInspectionsTask : Exec() {
      */
     @Input
     @Optional
-    val baselineDir: Property<File> = objectFactory.property(File::class.java)
+    val baselineDir = objectFactory.property<File>()
 
     /**
      * Include in the output report the results from the baseline run that are absent in the current run.
      */
     @Input
     @Optional
-    val baselineIncludeAbsent: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val baselineIncludeAbsent = objectFactory.property<Boolean>()
 
     /**
      * A number of problems that will serve as a quality gate. If this number is reached, the inspection run is terminated.
      */
     @Input
     @Optional
-    val failThreshold: Property<Int> = objectFactory.property(Int::class.java)
+    val failThreshold = objectFactory.property<Int>()
 
     @TaskAction
     override fun exec() {
-        args = getArguments()
+        setArgs(getArguments())
         executable = dockerExecutable.get()
 
         ByteArrayOutputStream().use { os ->

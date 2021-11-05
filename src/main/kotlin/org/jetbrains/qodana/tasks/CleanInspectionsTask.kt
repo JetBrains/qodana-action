@@ -1,11 +1,11 @@
 package org.jetbrains.qodana.tasks
 
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
 open class CleanInspectionsTask @Inject constructor(
@@ -14,11 +14,11 @@ open class CleanInspectionsTask @Inject constructor(
 
     @Input
     @Optional
-    val resultsDir: Property<String> = objectFactory.property(String::class.java)
+    val resultsDir = objectFactory.property<String>()
 
     @Input
     @Optional
-    val reportDir: Property<String> = objectFactory.property(String::class.java)
+    val reportDir = objectFactory.property<String>()
 
     @TaskAction
     override fun clean() {
