@@ -14,6 +14,12 @@ Gradle interface to run code inspections from Intellij IDEA.
 > ./gradlew wrapper --gradle-version=VERSION
 > ```
 
+## Issue Tracker
+
+All the issues, feature requests, and support related to the Gradle Qodana Plugin is handled on [YouTrack][youtrack].
+
+If you'd like to file a new issue, please use the following [YouTrack | New Issue][youtrack-new-issue] link.
+
 ## Docker Image with Qodana tool
 
 Docker Hub: https://hub.docker.com/r/jetbrains/qodana
@@ -46,7 +52,7 @@ Apply Gradle plugin `org.jetbrains.qodana` in Gradle configuration file:
 Properties available for configuration in the `qodana { }` top level configuration closure:
 
 | Name                    | Description                                                                                                                       | Type      | Default Value                           |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------- | --------------------------------------- |
+|-------------------------|-----------------------------------------------------------------------------------------------------------------------------------|-----------|-----------------------------------------|
 | `autoUpdate`            | Automatically pull the latest Docker image before running the inspection.                                                         | `Boolean` | `true`                                  |
 | `baselinePath`          | Run in [baseline][docs:baseline] mode. Provide the path to an existing SARIF report to be used in the baseline state calculation. | `String`  | `null`                                  |
 | `baselineIncludeAbsent` | Include in the output report the results from the baseline run that are absent in the current run.                                | `Boolean` | `false`                                 |
@@ -73,7 +79,7 @@ Task relies on the `qodana { }` extension configuration, however it provides als
 #### Properties
 
 | Name                  | Description                                                                                                                       | Type           | Default Value |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------- |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------|----------------|---------------|
 | `disabledPluginsPath` | Path to the list of plugins to be disabled in the Qodana IDE instance to be mounted as `/root/.config/idea/disabled_plugins.txt`. | `String`       | `null`        |
 | `changes`             | Inspect uncommitted changes and report new problems.                                                                              | `Boolean`      | `false`       |
 | `jvmParameters`       | JVM parameters to start IDEA JVM.                                                                                                 | `List<String>` | `empty`       |
@@ -81,13 +87,13 @@ Task relies on the `qodana { }` extension configuration, however it provides als
 
 #### Helper methods
 
-| Name                                            | Description                                           |
-| ----------------------------------------------- | ----------------------------------------------------- |
-| `bind(outerPort: Int, dockerPort: Int)`         | Adds new port binding.                                |
-| `mount(outerPath: String, dockerPath: String)`  | Mounts local directory to the given Docker path.      |
-| `env(name: String, value: String)`              | Adds an environment variable.                         |
-| `dockerArg(argument: String)`                   | Adds a Docker argument to the executed command.       |
-| `arg(argument: String)`                         | Adds a Docker image argument to the executed command. |
+| Name                                           | Description                                           |
+|------------------------------------------------|-------------------------------------------------------|
+| `bind(outerPort: Int, dockerPort: Int)`        | Adds new port binding.                                |
+| `mount(outerPath: String, dockerPath: String)` | Mounts local directory to the given Docker path.      |
+| `env(name: String, value: String)`             | Adds an environment variable.                         |
+| `dockerArg(argument: String)`                  | Adds a Docker argument to the executed command.       |
+| `arg(argument: String)`                        | Adds a Docker image argument to the executed command. |
 
 ### `updateInspections`
 
@@ -213,3 +219,5 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
 [jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
 [jb:slack]: https://qodana.slack.com
 [jb:twitter]: https://twitter.com/QodanaEvolves
+[youtrack]: https://youtrack.jetbrains.com/issues/QD
+[youtrack-new-issue]: https://youtrack.jetbrains.com/newIssue?project=QD&c=Platform%20Gradle%20Plugin&c=Tool%20IntelliJ%20(Code%20Inspection)
