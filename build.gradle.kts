@@ -4,7 +4,7 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     kotlin("jvm") version "1.6.0"
-    id("com.gradle.plugin-publish") version "0.17.0"
+    id("com.gradle.plugin-publish") version "0.18.0"
 }
 
 group = "org.jetbrains.qodana"
