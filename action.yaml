@@ -4,80 +4,75 @@ author: 'JetBrains'
 
 inputs:
   linter:
-    description: 'Qodana linter. Possible values: qodana-jvm-community'
+    description: 'Qodana linter. All possible values can be found here: https://hub.docker.com/r/jetbrains/qodana'
     required: true
-    default: "qodana-jvm-community"
+    default: "jetbrains/qodana-jvm-community"
   project-dir:
-    description: 'Project folder to inspect'
+    description: 'Root directory of the project to be analyzed'
     required: false
     default: "${{ github.workspace }}"
   results-dir:
-    description: 'Save results to folder'
+    description: 'Directory to store the analysis results'
     required: false
-    default: "${{ github.workspace }}/qodana"
+    default: "${{ runner.temp }}/qodana/results"
   cache-dir:
-    description: 'Save cache to folder'
+    description: 'Directory to store Qodana caches'
     required: false
-    default: "/home/runner/work/_temp/_github_home/qodana-cache"
-  inspected-dir:
-    description: 'Directory to be inspected. If not specified, the whole project is inspected by default'
-    required: false
+    default: "${{ runner.temp }}/qodana-caches"
   idea-config-dir:
     description: 'IntelliJ IDEA configuration directory'
+    required: false
+  gradle-settings-path:
+    description: 'Provide path to gradle.properties file. An example: "/your/custom/path/gradle.properties"'
+    required: false
+  additional-volumes:
+    description: 'Mount additional volumes to Docker container'
+    required: false
+  additional-env-variables:
+    description: 'Pass additional environment variables to docker container'
+    required: false
+  inspected-dir:
+    description: 'Directory to be inspected. If not specified, the whole project is inspected by default'
     required: false
   baseline-path:
     description: 'Run in baseline mode. Provide the path to an exisitng SARIF report to be used in the baseline state calculation'
     required: false
   baseline-include-absent:
-    description: 'Include in the output report the results from the baseline run that are absent in the current run'
+    description: 'Include in the output report the results from the baseline docker that are absent in the current docker'
     required: false
-    default: false
+    default: "false"
+  changes:
+    description: 'Inspect uncommitted changes and report new problems'
+    required: false
+    default: "false"
+  script:
+    description: 'Override the default docker scenario'
+    required: false
   fail-threshold:
-    description: 'Set the number of problems that will serve as a quality gate. If this number is reached, the inspection run is terminated'
+    description: 'Set the number of problems that will serve as a quality gate. If this number is reached, the inspection docker is terminated'
     required: false
-  save-html-report:
-    description: 'Generate HTML report'
-    required: false
-    default: false
   profile-name:
     description: 'Name of a profile defined in project'
     required: false
   profile-path:
     description: 'Absolute path to the profile file'
     required: false
-  gradle-settings-path:
-    description: 'Provide path to gradle.properties file. An example: "/your/custom/path/gradle.properties"'
+  upload-result:
+    description: 'Upload Qodana results as an artifact to the job'
     required: false
-  additional-volumes:
-    description: 'Mount additional volumes to docker container'
+    default: "true"
+  use-caches:
+    description: 'Utilize GitHub caches for Qodana runs'
     required: false
-  additional-env-variables:
-    description: 'Pass additional environment variables to docker container'
+    default: "true"
+  use-annotations:
+    description: 'Use annotations to mark the results in GitHub user interface'
     required: false
-outputs:
-  results-sarif-path:
-    description: 'Qodana results in the SARIF format.'
-    value: "${{ inputs.results-dir }}/report.sarif"
-  results-json-path:
-    description: 'Qodana results in the JSON format.'
-    value: "${{ inputs.results-dir }}/qodana.sarif.json"
+    default: "true"
+  github-token:
+    description: 'GitHub token to be used for uploading annotations'
+    required: false
+    default: ${{ github.token }}
 runs:
-  using: 'composite'
-  steps:
-    - run: "${GITHUB_ACTION_PATH}/run_qodana.sh"
-      shell: bash
-      env:
-        LINTER: "${{ inputs.linter }}"
-        PROJECT_DIR: "${{ inputs.project-dir }}"
-        RESULTS_DIR: "${{ inputs.results-dir }}"
-        CACHE_DIR: "${{ inputs.cache-dir }}"
-        INSPECTED_DIR: "${{ inputs.inspected-dir }}"
-        BASELINE_PATH: "${{ inputs.baseline-path }}"
-        BASELINE_INCLUDE_ABSENT: "${{ inputs.baseline-include-absent }}"
-        FAIL_THRESHOLD: "${{ inputs.fail-threshold }}"
-        SAVE_HTML_REPORT: "${{ inputs.save-html-report }}"
-        PROFILE_NAME: "${{ inputs.profile-name }}"
-        PROFILE_PATH: "${{ inputs.profile-path }}"
-        GRADLE_SETTINGS_PATH: "${{ inputs.gradle-settings-path }}"
-        ADDITIONAL_VOLUMES: "${{ inputs.additional-volumes }}"
-        ADDITIONAL_ENV_VARIABLES: "${{ inputs.additional-env-variables }}"
+  using: 'node12'
+  main: 'dist/index.js'
