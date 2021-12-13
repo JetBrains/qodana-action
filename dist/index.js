@@ -41,6 +41,7 @@ exports.publishAnnotations = exports.parseSarif = void 0;
 // https://github.com/SirYwell/sarif-annotator/blob/main/src/qodana-converter.ts
 // (Source: https://github.com/SirYwell/sarif-annotator retrieved in December 2021.)
 /* eslint-disable @typescript-eslint/no-non-null-assertion,github/array-foreach */
+const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
 const utils_1 = __nccwpck_require__(918);
 const github_1 = __nccwpck_require__(5438);
@@ -195,15 +196,20 @@ function publishOutput(token, output) {
  */
 function publishAnnotations(token, path) {
     return __awaiter(this, void 0, void 0, function* () {
-        const output = parseSarif(path);
-        if (output.annotations.length >= utils_1.MAX_ANNOTATIONS) {
-            for (let i = 0; i < output.annotations.length; i += utils_1.MAX_ANNOTATIONS) {
-                output.annotations = output.annotations.slice(i, i + utils_1.MAX_ANNOTATIONS);
+        try {
+            const output = parseSarif(path);
+            if (output.annotations.length >= utils_1.MAX_ANNOTATIONS) {
+                for (let i = 0; i < output.annotations.length; i += utils_1.MAX_ANNOTATIONS) {
+                    output.annotations = output.annotations.slice(i, i + utils_1.MAX_ANNOTATIONS);
+                    yield publishOutput(token, output);
+                }
+            }
+            else {
                 yield publishOutput(token, output);
             }
         }
-        else {
-            yield publishOutput(token, output);
+        catch (error) {
+            core.warning(`Failed to publish annotations – ${error.message}`);
         }
     });
 }
@@ -569,13 +575,18 @@ exports.uploadCaches = uploadCaches;
  */
 function uploadReport(path) {
     return __awaiter(this, void 0, void 0, function* () {
-        const globber = yield glob.create(`${path}/*`);
-        const files = yield globber.glob();
-        yield artifact
-            .create()
-            .uploadArtifact('Qodana report', files, `${process.env['RUNNER_TEMP']}/qodana/`, {
-            continueOnError: true
-        });
+        try {
+            const globber = yield glob.create(`${path}/*`);
+            const files = yield globber.glob();
+            yield artifact
+                .create()
+                .uploadArtifact('Qodana report', files, `${process.env['RUNNER_TEMP']}/qodana/`, {
+                continueOnError: true
+            });
+        }
+        catch (error) {
+            core.warning(`Failed to upload report – ${error.message}`);
+        }
     });
 }
 exports.uploadReport = uploadReport;

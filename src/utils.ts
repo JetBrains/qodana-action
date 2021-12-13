@@ -56,16 +56,20 @@ export async function uploadCaches(path: string): Promise<void> {
  * @param path The path to upload report from (should be somewhere in tmp).
  */
 export async function uploadReport(path: string): Promise<void> {
-  const globber = await glob.create(`${path}/*`)
-  const files = await globber.glob()
-  await artifact
-    .create()
-    .uploadArtifact(
-      'Qodana report',
-      files,
-      `${process.env['RUNNER_TEMP']}/qodana/`,
-      {
-        continueOnError: true
-      }
-    )
+  try {
+    const globber = await glob.create(`${path}/*`)
+    const files = await globber.glob()
+    await artifact
+      .create()
+      .uploadArtifact(
+        'Qodana report',
+        files,
+        `${process.env['RUNNER_TEMP']}/qodana/`,
+        {
+          continueOnError: true
+        }
+      )
+  } catch (error) {
+    core.warning(`Failed to upload report – ${(error as Error).message}`)
+  }
 }

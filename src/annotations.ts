@@ -3,6 +3,7 @@
 // https://github.com/SirYwell/sarif-annotator/blob/main/src/qodana-converter.ts
 // (Source: https://github.com/SirYwell/sarif-annotator retrieved in December 2021.)
 /* eslint-disable @typescript-eslint/no-non-null-assertion,github/array-foreach */
+import * as core from '@actions/core'
 import * as fs from 'fs'
 import {
   ANNOTATION_FAILURE,
@@ -221,13 +222,17 @@ export async function publishAnnotations(
   token: string,
   path: string
 ): Promise<void> {
-  const output = parseSarif(path)
-  if (output.annotations.length >= MAX_ANNOTATIONS) {
-    for (let i = 0; i < output.annotations.length; i += MAX_ANNOTATIONS) {
-      output.annotations = output.annotations.slice(i, i + MAX_ANNOTATIONS)
+  try {
+    const output = parseSarif(path)
+    if (output.annotations.length >= MAX_ANNOTATIONS) {
+      for (let i = 0; i < output.annotations.length; i += MAX_ANNOTATIONS) {
+        output.annotations = output.annotations.slice(i, i + MAX_ANNOTATIONS)
+        await publishOutput(token, output)
+      }
+    } else {
       await publishOutput(token, output)
     }
-  } else {
-    await publishOutput(token, output)
+  } catch (error) {
+    core.warning(`Failed to publish annotations – ${(error as Error).message}`)
   }
 }
