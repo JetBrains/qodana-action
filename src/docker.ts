@@ -17,7 +17,7 @@ export async function docker(args: string[]): Promise<exec.ExecOutput> {
  * @param inputs GitHub Actions inputs.
  * @returns The Docker run command arguments.
  */
-export function getDockerRunArgs(inputs: Inputs): string[] {
+export function getQodanaRunArgs(inputs: Inputs): string[] {
   const args: string[] = [
     'run',
     '--rm',

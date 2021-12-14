@@ -15,8 +15,7 @@ import {
   QODANA_HELP_STRING,
   SUCCESS_STATUS
 } from './utils'
-// eslint-disable-next-line import/no-unresolved
-import {Log, Result, Tool} from 'sarif'
+import type {Log, Result, Tool} from 'sarif'
 import {context, getOctokit} from '@actions/github'
 import {GitHub} from '@actions/github/lib/utils'
 
@@ -102,7 +101,7 @@ function parseRules(tool: Tool): Map<string, Rule> {
  * @returns GitHub Check Output with annotations are created for each result.
  */
 export function parseSarif(path: string): Output {
-  const sarif = JSON.parse(fs.readFileSync(path, {encoding: 'utf8'})) as Log
+  const sarif: Log = JSON.parse(fs.readFileSync(path, {encoding: 'utf8'}))
   const run = sarif.runs[0]
   const rules = parseRules(run.tool)
   let summary = 'No problems found.'
@@ -226,8 +225,12 @@ export async function publishAnnotations(
     const output = parseSarif(path)
     if (output.annotations.length >= MAX_ANNOTATIONS) {
       for (let i = 0; i < output.annotations.length; i += MAX_ANNOTATIONS) {
-        output.annotations = output.annotations.slice(i, i + MAX_ANNOTATIONS)
-        await publishOutput(token, output)
+        await publishOutput(token, {
+          title: output.title,
+          text: QODANA_HELP_STRING,
+          summary: output.summary,
+          annotations: output.annotations.slice(i, i + MAX_ANNOTATIONS)
+        })
       }
     } else {
       await publishOutput(token, output)
