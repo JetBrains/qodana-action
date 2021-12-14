@@ -200,8 +200,12 @@ function publishAnnotations(token, path) {
             const output = parseSarif(path);
             if (output.annotations.length >= utils_1.MAX_ANNOTATIONS) {
                 for (let i = 0; i < output.annotations.length; i += utils_1.MAX_ANNOTATIONS) {
-                    output.annotations = output.annotations.slice(i, i + utils_1.MAX_ANNOTATIONS);
-                    yield publishOutput(token, output);
+                    yield publishOutput(token, {
+                        title: output.title,
+                        text: utils_1.QODANA_HELP_STRING,
+                        summary: output.summary,
+                        annotations: output.annotations.slice(i, i + utils_1.MAX_ANNOTATIONS)
+                    });
                 }
             }
             else {
@@ -312,7 +316,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDockerRunArgs = exports.docker = void 0;
+exports.getQodanaRunArgs = exports.docker = void 0;
 const exec = __importStar(__nccwpck_require__(1514));
 /**
  * Runs the docker command with the given arguments.
@@ -332,7 +336,7 @@ exports.docker = docker;
  * @param inputs GitHub Actions inputs.
  * @returns The Docker run command arguments.
  */
-function getDockerRunArgs(inputs) {
+function getQodanaRunArgs(inputs) {
     var _a;
     const args = [
         'run',
@@ -391,7 +395,7 @@ function getDockerRunArgs(inputs) {
     }
     return args;
 }
-exports.getDockerRunArgs = getDockerRunArgs;
+exports.getQodanaRunArgs = getQodanaRunArgs;
 
 
 /***/ }),
@@ -456,7 +460,7 @@ function main() {
             if (inputs.useCaches) {
                 yield (0, utils_1.restoreCaches)(inputs.cacheDir);
             }
-            const args = (0, docker_1.getDockerRunArgs)(inputs);
+            const args = (0, docker_1.getQodanaRunArgs)(inputs);
             const dockerExec = yield (0, docker_1.docker)(args);
             if (inputs.uploadResults) {
                 yield (0, utils_1.uploadReport)(inputs.resultsDir);

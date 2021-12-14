@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as io from '@actions/io'
-import {docker, getDockerRunArgs} from './docker'
+import {docker, getQodanaRunArgs} from './docker'
 import {restoreCaches, uploadCaches, uploadReport} from './utils'
 import {getInputs} from './context'
 import {publishAnnotations} from './annotations'
@@ -27,7 +27,7 @@ async function main(): Promise<void> {
       await restoreCaches(inputs.cacheDir)
     }
 
-    const args = getDockerRunArgs(inputs)
+    const args = getQodanaRunArgs(inputs)
     const dockerExec = await docker(args)
 
     if (inputs.uploadResults) {
