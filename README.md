@@ -30,7 +30,7 @@ Before you begin, view the list of [Supported Technologies](https://www.jetbrain
 
 ## Configuration
 
-- `linter`: Qodana linter. All possible values can be found here: https://hub.docker.com/r/jetbrains/qodana. Is required. Defaults to `jetbrains/qodana-jvm-community`
+- `linter`: Qodana linter. All possible values can be found here: https://hub.docker.com/r/jetbrains/qodana. Required. Defaults to `jetbrains/qodana-jvm-community`
 - `project-dir`: Root directory of the project to be analyzed. Optional. Defaults to `${{ github.workspace }}`
 - `results-dir`: Directory to store the analysis results. Optional. Defaults to `${{ github.workspace }}/qodana`
 - `cache-dir`: Directory to store Qodana caches. Optional. Defaults to `${{ runner.temp }}/qodana`
@@ -53,9 +53,16 @@ Before you begin, view the list of [Supported Technologies](https://www.jetbrain
 
 ## License
 
+### The GitHub Action repository
+
 This repository contains source code for Qodana GitHub Action and is licensed under [Apache-2.0](./LICENSE).
-View [license information](https://www.jetbrains.com/legal/?fromFooter#licensing) for the Qodana images.
+
+### Qodana Docker images
+
+View [license information](https://www.jetbrains.com/legal/?fromFooter#licensing) for the Qodana Community images.
 
 Qodana Docker images may contain other software which is subject to other licenses, for example, Bash relating to the base distribution or with any direct or indirect dependencies of the primary software).
 
 As for any pre-built image usage, it is the image user's responsibility to ensure that any use of this image complies with any relevant licenses for all software contained within.
+
+Using Qodana EAP Docker image you agree to [JetBrains EAP user agreement](https://www.jetbrains.com/legal/docs/toolbox/user_eap/) and [JetBrains privacy policy](https://www.jetbrains.com/legal/docs/privacy/privacy/). The docker image includes an evaluation license which will expire in 30-day. Please ensure you pull a new image on time.
