@@ -4,9 +4,9 @@ author: 'JetBrains'
 
 inputs:
   linter:
-    description: 'Qodana linter. All possible values can be found here: https://hub.docker.com/r/jetbrains/qodana'
+    description: 'Qodana linter – [official Qodana Docker image](#supported-qodana-docker-images).'
     required: true
-    default: "jetbrains/qodana-jvm-community"
+    default: "jetbrains/qodana-jvm-community:latest"
   project-dir:
     description: 'Root directory of the project to be analyzed'
     required: false

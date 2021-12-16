@@ -2,7 +2,7 @@ import {expect, test} from '@jest/globals'
 import {Output, parseSarif} from '../src/annotations'
 import {Inputs} from '../src/context'
 import {getQodanaRunArgs} from '../src/docker'
-import {QODANA_HELP_STRING} from '../src/utils'
+import {QODANA_HELP_STRING, validateContext} from '../src/utils'
 
 function outputEmptyFixture(): Output {
   return {
@@ -113,4 +113,11 @@ test('test sarif with no problems to output annotations', () => {
   const output = outputEmptyFixture()
   const result = parseSarif('__tests__/data/empty.sarif.json')
   expect(result).toEqual(output)
+})
+
+test('input validation', () => {
+  const inputs = inputsDefaultFixture()
+  inputs.linter = 'jetbrains/qodana-clone-finder'
+  // expect the exception
+  expect(() => validateContext(inputs)).toThrow()
 })
