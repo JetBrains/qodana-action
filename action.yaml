@@ -35,10 +35,10 @@ inputs:
     description: 'Directory to be inspected. If not specified, the whole project is inspected by default'
     required: false
   baseline-path:
-    description: 'Run in baseline mode. Provide the path to an exisitng SARIF report to be used in the baseline state calculation'
+    description: 'Run in baseline mode. Provide the path to an existing SARIF report to be used in the baseline state calculation'
     required: false
   baseline-include-absent:
-    description: 'Include in the output report the results from the baseline docker that are absent in the current docker'
+    description: 'Include the results from the baseline absent in the current Qodana run in the output report'
     required: false
     default: "false"
   changes:
@@ -49,10 +49,10 @@ inputs:
     description: 'Override the default docker scenario'
     required: false
   fail-threshold:
-    description: 'Set the number of problems that will serve as a quality gate. If this number is reached, the inspection docker is terminated'
+    description: 'Set the number of problems that will serve as a quality gate. If this number is reached, the pipeline run is terminated'
     required: false
   profile-name:
-    description: 'Name of a profile defined in project'
+    description: 'Name of a profile defined in the project'
     required: false
   profile-path:
     description: 'Absolute path to the profile file'
@@ -66,7 +66,7 @@ inputs:
     required: false
     default: "true"
   use-annotations:
-    description: 'Use annotations to mark the results in GitHub user interface'
+    description: 'Use annotation to mark the results in the GitHub user interface'
     required: false
     default: "true"
   github-token:
