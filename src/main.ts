@@ -1,13 +1,15 @@
 import * as core from '@actions/core'
 import * as io from '@actions/io'
-import {docker, getQodanaRunArgs} from './docker'
 import {
+  FAIL_THRESHOLD_OUTPUT,
   isExecutionSuccessful,
+  isFailedByThreshold,
   restoreCaches,
   uploadCaches,
   uploadReport,
   validateContext
 } from './utils'
+import {docker, getQodanaRunArgs} from './docker'
 import {getInputs} from './context'
 import {publishAnnotations} from './annotations'
 
@@ -47,16 +49,21 @@ async function main(): Promise<void> {
       await uploadReport(inputs.resultsDir)
     }
 
+    const failedByThreshold = isFailedByThreshold(dockerExec.exitCode)
     if (isExecutionSuccessful(dockerExec.exitCode)) {
       if (inputs.useCaches) {
         await uploadCaches(inputs.cacheDir)
       }
+
       if (inputs.useAnnotations) {
         await publishAnnotations(
+          failedByThreshold,
           inputs.githubToken,
           `${inputs.resultsDir}/qodana.sarif.json`
         )
       }
+
+      if (failedByThreshold) core.setFailed(FAIL_THRESHOLD_OUTPUT)
     } else {
       core.setFailed(dockerExec.stderr.trim())
     }

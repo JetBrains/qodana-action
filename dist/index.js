@@ -154,26 +154,30 @@ function updateCheck(octokit, conclusion, check_run_id, output) {
 /**
  * Get a conclusion for the given set of annotations
  * @param annotations GitHub Check annotations.
+ * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @returns The conclusion to use for the GitHub Check.
  */
-function getConclusion(annotations) {
-    const s = new Set(annotations.map(a => a.annotation_level));
-    if (s.has(utils_1.ANNOTATION_FAILURE)) {
+function getConclusion(annotations, failedByThreshold) {
+    if (failedByThreshold) {
         return utils_1.FAILURE_STATUS;
     }
-    if (s.has(utils_1.ANNOTATION_NOTICE) || s.has(utils_1.ANNOTATION_WARNING)) {
+    const s = new Set(annotations.map(a => a.annotation_level));
+    if (s.has(utils_1.ANNOTATION_FAILURE) ||
+        s.has(utils_1.ANNOTATION_NOTICE) ||
+        s.has(utils_1.ANNOTATION_WARNING)) {
         return utils_1.NEUTRAL_STATUS;
     }
     return utils_1.SUCCESS_STATUS;
 }
 /**
  * Publish GitHub Checks output to GitHub Checks.
+ * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param token The GitHub token to use.
  * @param output The output to publish.
  */
-function publishOutput(token, output) {
+function publishOutput(failedByThreshold, token, output) {
     return __awaiter(this, void 0, void 0, function* () {
-        const conclusion = getConclusion(output.annotations);
+        const conclusion = getConclusion(output.annotations, failedByThreshold);
         let sha = github_1.context.sha;
         if (github_1.context.payload.pull_request) {
             sha = github_1.context.payload.pull_request.head.sha;
@@ -191,16 +195,17 @@ function publishOutput(token, output) {
 }
 /**
  * Publish SARIF to GitHub Checks.
+ * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param token The GitHub token to use.
  * @param path The path to the SARIF file to publish.
  */
-function publishAnnotations(token, path) {
+function publishAnnotations(failedByThreshold, token, path) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const output = parseSarif(path);
             if (output.annotations.length >= utils_1.MAX_ANNOTATIONS) {
                 for (let i = 0; i < output.annotations.length; i += utils_1.MAX_ANNOTATIONS) {
-                    yield publishOutput(token, {
+                    yield publishOutput(failedByThreshold, token, {
                         title: output.title,
                         text: utils_1.QODANA_HELP_STRING,
                         summary: output.summary,
@@ -209,7 +214,7 @@ function publishAnnotations(token, path) {
                 }
             }
             else {
-                yield publishOutput(token, output);
+                yield publishOutput(failedByThreshold, token, output);
             }
         }
         catch (error) {
@@ -436,8 +441,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const io = __importStar(__nccwpck_require__(7436));
-const docker_1 = __nccwpck_require__(3758);
 const utils_1 = __nccwpck_require__(918);
+const docker_1 = __nccwpck_require__(3758);
 const context_1 = __nccwpck_require__(3842);
 const annotations_1 = __nccwpck_require__(5598);
 /**
@@ -470,13 +475,16 @@ function main() {
             if (inputs.uploadResults) {
                 yield (0, utils_1.uploadReport)(inputs.resultsDir);
             }
+            const failedByThreshold = (0, utils_1.isFailedByThreshold)(dockerExec.exitCode);
             if ((0, utils_1.isExecutionSuccessful)(dockerExec.exitCode)) {
                 if (inputs.useCaches) {
                     yield (0, utils_1.uploadCaches)(inputs.cacheDir);
                 }
                 if (inputs.useAnnotations) {
-                    yield (0, annotations_1.publishAnnotations)(inputs.githubToken, `${inputs.resultsDir}/qodana.sarif.json`);
+                    yield (0, annotations_1.publishAnnotations)(failedByThreshold, inputs.githubToken, `${inputs.resultsDir}/qodana.sarif.json`);
                 }
+                if (failedByThreshold)
+                    core.setFailed(utils_1.FAIL_THRESHOLD_OUTPUT);
             }
             else {
                 core.setFailed(dockerExec.stderr.trim());
@@ -527,7 +535,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isExecutionSuccessful = exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.validateContext = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.QODANA_HELP_STRING = exports.QODANA_CHECK_NAME = void 0;
+exports.isFailedByThreshold = exports.isExecutionSuccessful = exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.validateContext = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.FAIL_THRESHOLD_OUTPUT = exports.QODANA_HELP_STRING = exports.QODANA_CHECK_NAME = void 0;
 const artifact = __importStar(__nccwpck_require__(2605));
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
@@ -539,6 +547,7 @@ exports.QODANA_HELP_STRING = `
   👀 Or via our issue tracker: https://jb.gg/qodana-issue
   🔥 Or share your feedback in our Slack: https://jb.gg/qodana-slack
 `;
+exports.FAIL_THRESHOLD_OUTPUT = 'The number of problems exceeds the failThreshold';
 exports.FAILURE_STATUS = 'failure';
 exports.NEUTRAL_STATUS = 'neutral';
 exports.SUCCESS_STATUS = 'success';
@@ -546,6 +555,9 @@ exports.ANNOTATION_FAILURE = 'failure';
 exports.ANNOTATION_WARNING = 'warning';
 exports.ANNOTATION_NOTICE = 'notice';
 exports.MAX_ANNOTATIONS = 50;
+const NOT_SUPPORTED_LINTER = 'linter is not supported by the action!';
+const UNOFFICIAL_LINTER_MESSAGE = `You are using an unofficial Qodana Docker image. 
+      This CI pipeline could be not working as expected!`;
 const QODANA_SUCCESS_EXIT_CODE = 0;
 const QODANA_FAILTHRESHOLD_EXIT_CODE = 255;
 const OFFICIAL_DOCKER_PREFIX = 'jetbrains/';
@@ -560,11 +572,10 @@ const NOT_SUPPORTED_IMAGES = [
  */
 function validateContext(inputs) {
     if (NOT_SUPPORTED_IMAGES.includes(inputs.linter)) {
-        throw Error(`The linter ${inputs.linter} is not supported by the action!`);
+        throw Error(`${inputs.linter} ${NOT_SUPPORTED_LINTER}`);
     }
     if (!inputs.linter.startsWith(OFFICIAL_DOCKER_PREFIX)) {
-        core.warning(`You are using an unofficial Qodana Docker image. 
-      This CI pipeline could be not working as expected!`);
+        core.warning(UNOFFICIAL_LINTER_MESSAGE);
     }
     return inputs;
 }
@@ -629,10 +640,18 @@ exports.uploadReport = uploadReport;
  * @param exitCode
  */
 function isExecutionSuccessful(exitCode) {
-    return (exitCode === QODANA_SUCCESS_EXIT_CODE ||
-        exitCode === QODANA_FAILTHRESHOLD_EXIT_CODE);
+    return exitCode === QODANA_SUCCESS_EXIT_CODE || isFailedByThreshold(exitCode);
 }
 exports.isExecutionSuccessful = isExecutionSuccessful;
+/**
+ * Check if Qodana Docker image execution is failed by threshold set.
+ * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
+ * @param exitCode
+ */
+function isFailedByThreshold(exitCode) {
+    return exitCode === QODANA_FAILTHRESHOLD_EXIT_CODE;
+}
+exports.isFailedByThreshold = isFailedByThreshold;
 
 
 /***/ }),

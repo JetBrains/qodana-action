@@ -1,5 +1,5 @@
-name: 'Qodana - Linters'
-description: 'Qodana is a code quality monitoring tool that identifies bugs, duplications, and imperfections.'
+name: 'Qodana Scan'
+description: 'Scan your projects with Qodana on GitHub. Docs: https://jb.gg/qodana-github-action'
 author: 'JetBrains'
 branding:
   color: "black"
@@ -20,7 +20,7 @@ inputs:
   cache-dir:
     description: 'Directory to store Qodana caches'
     required: false
-    default: "${{ runner.temp }}/qodana-caches"
+    default: "${{ runner.temp }}/qodana/caches"
   idea-config-dir:
     description: 'IntelliJ IDEA configuration directory'
     required: false
@@ -32,6 +32,9 @@ inputs:
     required: false
   additional-env-variables:
     description: 'Pass additional environment variables to docker container'
+    required: false
+  fail-threshold:
+    description: 'Set the number of problems that will serve as a quality gate. If this number is reached, the pipeline run is terminated'
     required: false
   inspected-dir:
     description: 'Directory to be inspected. If not specified, the whole project is inspected by default'
@@ -49,9 +52,6 @@ inputs:
     default: "false"
   script:
     description: 'Override the default docker scenario'
-    required: false
-  fail-threshold:
-    description: 'Set the number of problems that will serve as a quality gate. If this number is reached, the pipeline run is terminated'
     required: false
   profile-name:
     description: 'Name of a profile defined in the project'

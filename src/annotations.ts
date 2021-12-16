@@ -174,14 +174,22 @@ async function updateCheck(
 /**
  * Get a conclusion for the given set of annotations
  * @param annotations GitHub Check annotations.
+ * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @returns The conclusion to use for the GitHub Check.
  */
-function getConclusion(annotations: Annotation[]): string {
-  const s = new Set(annotations.map(a => a.annotation_level))
-  if (s.has(ANNOTATION_FAILURE)) {
+function getConclusion(
+  annotations: Annotation[],
+  failedByThreshold: boolean
+): string {
+  if (failedByThreshold) {
     return FAILURE_STATUS
   }
-  if (s.has(ANNOTATION_NOTICE) || s.has(ANNOTATION_WARNING)) {
+  const s = new Set(annotations.map(a => a.annotation_level))
+  if (
+    s.has(ANNOTATION_FAILURE) ||
+    s.has(ANNOTATION_NOTICE) ||
+    s.has(ANNOTATION_WARNING)
+  ) {
     return NEUTRAL_STATUS
   }
   return SUCCESS_STATUS
@@ -189,11 +197,16 @@ function getConclusion(annotations: Annotation[]): string {
 
 /**
  * Publish GitHub Checks output to GitHub Checks.
+ * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param token The GitHub token to use.
  * @param output The output to publish.
  */
-async function publishOutput(token: string, output: Output): Promise<void> {
-  const conclusion = getConclusion(output.annotations)
+async function publishOutput(
+  failedByThreshold: boolean,
+  token: string,
+  output: Output
+): Promise<void> {
+  const conclusion = getConclusion(output.annotations, failedByThreshold)
   let sha = context.sha
   if (context.payload.pull_request) {
     sha = context.payload.pull_request.head.sha
@@ -215,10 +228,12 @@ async function publishOutput(token: string, output: Output): Promise<void> {
 
 /**
  * Publish SARIF to GitHub Checks.
+ * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param token The GitHub token to use.
  * @param path The path to the SARIF file to publish.
  */
 export async function publishAnnotations(
+  failedByThreshold: boolean,
   token: string,
   path: string
 ): Promise<void> {
@@ -226,7 +241,7 @@ export async function publishAnnotations(
     const output = parseSarif(path)
     if (output.annotations.length >= MAX_ANNOTATIONS) {
       for (let i = 0; i < output.annotations.length; i += MAX_ANNOTATIONS) {
-        await publishOutput(token, {
+        await publishOutput(failedByThreshold, token, {
           title: output.title,
           text: QODANA_HELP_STRING,
           summary: output.summary,
@@ -234,7 +249,7 @@ export async function publishAnnotations(
         })
       }
     } else {
-      await publishOutput(token, output)
+      await publishOutput(failedByThreshold, token, output)
     }
   } catch (error) {
     core.warning(`Failed to publish annotations – ${(error as Error).message}`)
