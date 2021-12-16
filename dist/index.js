@@ -454,7 +454,7 @@ const annotations_1 = __nccwpck_require__(5598);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const inputs = (0, context_1.getInputs)();
+            const inputs = (0, utils_1.validateContext)((0, context_1.getInputs)());
             yield io.mkdirP(inputs.cacheDir);
             yield io.mkdirP(inputs.resultsDir);
             if (inputs.useCaches) {
@@ -522,7 +522,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.QODANA_HELP_STRING = void 0;
+exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.validateContext = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.QODANA_HELP_STRING = void 0;
 const artifact = __importStar(__nccwpck_require__(2605));
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
@@ -531,7 +531,7 @@ exports.QODANA_HELP_STRING = `
   📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
   📭 Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   👀 Or via our issue tracker: https://jb.gg/qodana-issue
-  🔥 Or share your feedback in our Slack: https://jb.gg/qodana-slack!
+  🔥 Or share your feedback in our Slack: https://jb.gg/qodana-slack
 `;
 exports.FAILURE_STATUS = 'failure';
 exports.NEUTRAL_STATUS = 'neutral';
@@ -540,6 +540,28 @@ exports.ANNOTATION_FAILURE = 'failure';
 exports.ANNOTATION_WARNING = 'warning';
 exports.ANNOTATION_NOTICE = 'notice';
 exports.MAX_ANNOTATIONS = 50;
+const OFFICIAL_DOCKER_PREFIX = 'jetbrains/';
+const NOT_SUPPORTED_IMAGES = [
+    'jetbrains/qodana-clone-finder',
+    'jetbrains/qodana-license-audit'
+];
+/**
+ * Validates the given inputs.
+ * @param inputs action inputs.
+ * @return action inputs.
+ */
+function validateContext(inputs) {
+    if (NOT_SUPPORTED_IMAGES.includes(inputs.linter)) {
+        throw Error(`The linter ${inputs.linter} is not supported by the action! https://github.com/jetbrains/qodana-action#supported-qodana-docker-images`);
+    }
+    if (!inputs.linter.startsWith(OFFICIAL_DOCKER_PREFIX)) {
+        core.warning(`You are using an unofficial Qodana Docker image. 
+      This CI pipeline could be not working as expected!
+      https://github.com/jetbrains/qodana-action#supported-qodana-docker-images`);
+    }
+    return inputs;
+}
+exports.validateContext = validateContext;
 /**
  * Restores the cache from GitHub Actions cache to the given path.
  * @param path The path to restore the cache to.

@@ -1,7 +1,12 @@
 import * as core from '@actions/core'
 import * as io from '@actions/io'
 import {docker, getQodanaRunArgs} from './docker'
-import {restoreCaches, uploadCaches, uploadReport} from './utils'
+import {
+  restoreCaches,
+  uploadCaches,
+  uploadReport,
+  validateContext
+} from './utils'
 import {getInputs} from './context'
 import {publishAnnotations} from './annotations'
 
@@ -18,7 +23,7 @@ import {publishAnnotations} from './annotations'
  */
 async function main(): Promise<void> {
   try {
-    const inputs = getInputs()
+    const inputs = validateContext(getInputs())
 
     await io.mkdirP(inputs.cacheDir)
     await io.mkdirP(inputs.resultsDir)

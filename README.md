@@ -1,7 +1,12 @@
 # Qodana Linters
 
-**Qodana** is a code quality monitoring tool that identifies and suggests fixes for bugs, security vulnerabilities, duplications, and imperfections.
-Qodana already supports PHP, Java, and Kotlin projects, and will eventually support all languages and technologies covered by JetBrains IDEs.
+[![official JetBrains project](https://jb.gg/badges/official.svg)][jb:confluence-on-gh]
+[![build-test](https://github.com/jetbrains/qodana-action/actions/workflows/test.yml/badge.svg)][gh:build]
+[![Slack](https://img.shields.io/badge/Slack-%23qodana-blue)][jb:slack]
+[![Twitter Follow](https://img.shields.io/twitter/follow/QodanaEvolves?style=flat)][jb:twitter]
+
+
+**Qodana** is a code quality monitoring tool that identifies and suggests fixes for bugs, security vulnerabilities, duplications, and imperfections. This action allows running Qodana Docker images with your GitHub workflow.
 
 **Table of Contents**
 
@@ -10,27 +15,28 @@ Qodana already supports PHP, Java, and Kotlin projects, and will eventually supp
 - [Qodana Linters](#qodana-linters)
     - [Usage](#usage)
     - [Configuration](#configuration)
+    - [Supported Qodana Docker images](#supported-qodana-docker-images)
+    - [Issue Tracker](#issue-tracker)
     - [License](#license)
 
 <!-- tocstop -->
 
-
 ## Usage
 
 ```yaml
-- uses: JetBrains/qodana-action@v3.2.1
+- uses: JetBrains/qodana-action@v4.0.0  # you can use @main if you want to use the latest version
   with:  # optional
-    linter: jetbrains/qodana-jvm-community:2021.2  # Docker image full name
+    linter: jetbrains/qodana-jvm-community:latest  # Docker image full name with a tag
     fail-threshold: 10  # to set a quality gate to the number of found problems
     additional-env-variables: |
         IDEA_PROPERTIES='/data/project/idea.properties'
 ```
 
-Before you begin, view the list of [Supported Technologies](https://www.jetbrains.com/help/qodana/supported-technologies.html). For the full documentation of the action's inputs, see [action.yaml](action.yaml).
+Before you begin, view the list of [Supported Technologies](https://www.jetbrains.com/help/qodana/supported-technologies.html).
 
 ## Configuration
 
-- `linter`: Qodana linter. All possible values can be found here: https://hub.docker.com/r/jetbrains/qodana. Required. Defaults to `jetbrains/qodana-jvm-community`
+- `linter`: Qodana linter – [official Qodana Docker image](#supported-qodana-docker-images). Required. Defaults to `jetbrains/qodana-jvm-community:latest`
 - `project-dir`: Root directory of the project to be analyzed. Optional. Defaults to `${{ github.workspace }}`
 - `results-dir`: Directory to store the analysis results. Optional. Defaults to `${{ github.workspace }}/qodana`
 - `cache-dir`: Directory to store Qodana caches. Optional. Defaults to `${{ runner.temp }}/qodana`
@@ -51,6 +57,20 @@ Before you begin, view the list of [Supported Technologies](https://www.jetbrain
 - `use-annotations`: Use annotation to mark the results in GitHub user interface. Optional. Defaults to `true`
 - `github-token`: GitHub token to be used for uploading results. Optional. Defaults to `${{ github.token }}`
 
+## Supported Qodana Docker images
+
+This action supports running all IntelliJ-based Qodana images – https://www.jetbrains.com/help/qodana/docker-images.html.
+
+Qodana experimental images (Clone Finder and License Audit) **are not supported** by the action.
+- Clone Finder – please use https://github.com/marketplace/actions/qodana-clone-finder
+- License Audit – please use https://github.com/marketplace/actions/qodana-license-audit
+
+## Issue Tracker
+
+All the issues, feature requests, and support related to the Qodana GitHub Action is handled on [YouTrack][youtrack].
+
+If you'd like to file a new issue, please use the following [YouTrack | New Issue][youtrack-new-issue] link.
+
 ## License
 
 ### The GitHub Action repository
@@ -59,10 +79,21 @@ This repository contains source code for Qodana GitHub Action and is licensed un
 
 ### Qodana Docker images
 
+#### Qodana Community images
+
 View [license information](https://www.jetbrains.com/legal/?fromFooter#licensing) for the Qodana Community images.
 
 Qodana Docker images may contain other software which is subject to other licenses, for example, Bash relating to the base distribution or with any direct or indirect dependencies of the primary software).
 
 As for any pre-built image usage, it is the image user's responsibility to ensure that any use of this image complies with any relevant licenses for all software contained within.
 
+#### Qodana EAP images
+
 Using Qodana EAP Docker image you agree to [JetBrains EAP user agreement](https://www.jetbrains.com/legal/docs/toolbox/user_eap/) and [JetBrains privacy policy](https://www.jetbrains.com/legal/docs/privacy/privacy/). The docker image includes an evaluation license which will expire in 30-day. Please ensure you pull a new image on time.
+
+[gh:build]: https://github.com/jetbrains/qodana-action/actions/workflows/test.yml
+[youtrack]: https://youtrack.jetbrains.com/issues/QD
+[youtrack-new-issue]: https://youtrack.jetbrains.com/newIssue?project=QD&c=Platform%20GitHub%20Action
+[jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
+[jb:slack]: https://jb.gg/qodana-slack
+[jb:twitter]: https://twitter.com/QodanaEvolves
