@@ -1,7 +1,9 @@
 name: 'Qodana - Linters'
 description: 'Qodana is a code quality monitoring tool that identifies bugs, duplications, and imperfections.'
 author: 'JetBrains'
-
+branding:
+  color: "black"
+  icon: "bar-chart-2"
 inputs:
   linter:
     description: 'Qodana linter – [official Qodana Docker image](#supported-qodana-docker-images).'
