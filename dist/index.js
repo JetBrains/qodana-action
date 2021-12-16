@@ -552,12 +552,11 @@ const NOT_SUPPORTED_IMAGES = [
  */
 function validateContext(inputs) {
     if (NOT_SUPPORTED_IMAGES.includes(inputs.linter)) {
-        throw Error(`The linter ${inputs.linter} is not supported by the action! https://github.com/jetbrains/qodana-action#supported-qodana-docker-images`);
+        throw Error(`The linter ${inputs.linter} is not supported by the action!`);
     }
     if (!inputs.linter.startsWith(OFFICIAL_DOCKER_PREFIX)) {
         core.warning(`You are using an unofficial Qodana Docker image. 
-      This CI pipeline could be not working as expected!
-      https://github.com/jetbrains/qodana-action#supported-qodana-docker-images`);
+      This CI pipeline could be not working as expected!`);
     }
     return inputs;
 }
@@ -1770,9 +1769,7 @@ class UploadHttpClient {
         return __awaiter(this, void 0, void 0, function* () {
             const fileStat = yield stat(parameters.file);
             const totalFileSize = fileStat.size;
-            // on Windows with mkfifo from MSYS2 stats.isFIFO returns false, so we check if running on Windows node and
-            // if the file has size of 0 to compensate
-            const isFIFO = fileStat.isFIFO() || (process.platform === 'win32' && totalFileSize === 0);
+            const isFIFO = fileStat.isFIFO();
             let offset = 0;
             let isUploadSuccessful = true;
             let failedChunkSizes = 0;

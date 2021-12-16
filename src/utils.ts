@@ -30,16 +30,13 @@ const NOT_SUPPORTED_IMAGES = [
  */
 export function validateContext(inputs: Inputs): Inputs {
   if (NOT_SUPPORTED_IMAGES.includes(inputs.linter)) {
-    throw Error(
-      `The linter ${inputs.linter} is not supported by the action! https://github.com/jetbrains/qodana-action#supported-qodana-docker-images`
-    )
+    throw Error(`The linter ${inputs.linter} is not supported by the action!`)
   }
 
   if (!inputs.linter.startsWith(OFFICIAL_DOCKER_PREFIX)) {
     core.warning(
       `You are using an unofficial Qodana Docker image. 
-      This CI pipeline could be not working as expected!
-      https://github.com/jetbrains/qodana-action#supported-qodana-docker-images`
+      This CI pipeline could be not working as expected!`
     )
   }
   return inputs

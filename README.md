@@ -27,14 +27,14 @@
     linter: jetbrains/qodana-jvm-community:latest  # Docker image full name with a tag
     fail-threshold: 10  # to set a quality gate to the number of found problems
     additional-env-variables: |
-        IDEA_PROPERTIES='/data/project/idea.properties'
+      IDEA_PROPERTIES='/data/project/idea.properties'
 ```
 
 Before you begin, view the [Supported Technologies](https://www.jetbrains.com/help/qodana/supported-technologies.html).
 
 ## Configuration
 
-- `linter`: Qodana linter – [official Qodana Docker image](#supported-qodana-docker-images). Required. Defaults to `jetbrains/qodana-jvm-community:latest`. This action supports running all [IntelliJ-based Qodana images](https://www.jetbrains.com/help/qodana/docker-images.html).
+- `linter`: Qodana linter – official Qodana Docker image. Required. Defaults to `jetbrains/qodana-jvm-community:latest`. This action supports running all [IntelliJ-based Qodana images](https://www.jetbrains.com/help/qodana/docker-images.html).
   Use the following images depending on what technologies are used in your project:
   - `jetbrains/qodana-jvm-community` – for Java/Kotlin projects
   - `jetbrains/qodana-jvm` – same as Qodana Community for JVM, but with advanced inspections from IntelliJ IDEA Ultimate
@@ -42,10 +42,6 @@ Before you begin, view the [Supported Technologies](https://www.jetbrains.com/he
   - `jetbrains/qodana-js` – for JavaScript/TypeScript projects
   - `jetbrains/qodana-python` – for Python projects
 
-  Qodana experimental images (Clone Finder and License Audit) **are not supported** by the action.
-  - Clone Finder – please use https://github.com/marketplace/actions/qodana-clone-finder
-  - License Audit – please use https://github.com/marketplace/actions/qodana-license-audit
-    
 - `project-dir`: The project's root directory to be analyzed. Optional. Defaults to `${{ github.workspace }}`
 - `results-dir`: Directory to store the analysis results. Optional. Defaults to `${{ github.workspace }}/qodana`
 - `cache-dir`: Directory to store Qodana caches. Optional. Defaults to `${{ runner.temp }}/qodana`
