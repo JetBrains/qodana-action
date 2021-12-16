@@ -577,7 +577,7 @@ function restoreCaches(path) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield cache.restoreCache([path], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`, [
-                `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`,
+                `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-`,
                 `${process.env['RUNNER_OS']}-qodana-`
             ]);
         }
@@ -594,7 +594,7 @@ exports.restoreCaches = restoreCaches;
 function uploadCaches(path) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield cache.saveCache([path], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`);
+            yield cache.saveCache([path], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${process.env['GITHUB_SHA']}`);
         }
         catch (error) {
             core.warning(`Failed to upload caches – ${error.message}`);

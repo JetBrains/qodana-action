@@ -55,7 +55,7 @@ export async function restoreCaches(path: string): Promise<void> {
       [path],
       `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`,
       [
-        `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`,
+        `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-`,
         `${process.env['RUNNER_OS']}-qodana-`
       ]
     )
@@ -72,7 +72,7 @@ export async function uploadCaches(path: string): Promise<void> {
   try {
     await cache.saveCache(
       [path],
-      `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`
+      `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${process.env['GITHUB_SHA']}`
     )
   } catch (error) {
     core.warning(`Failed to upload caches – ${(error as Error).message}`)
