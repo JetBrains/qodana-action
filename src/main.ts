@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as io from '@actions/io'
 import {docker, getQodanaRunArgs} from './docker'
 import {
+  isExecutionSuccessful,
   restoreCaches,
   uploadCaches,
   uploadReport,
@@ -33,24 +34,31 @@ async function main(): Promise<void> {
     }
 
     const args = getQodanaRunArgs(inputs)
+
+    const dockerPull = await docker(['pull', inputs.linter])
+    if (dockerPull.stderr.length > 0 && dockerPull.exitCode !== 0) {
+      core.setFailed(dockerPull.stderr.trim())
+      return
+    }
+
     const dockerExec = await docker(args)
 
     if (inputs.uploadResults) {
       await uploadReport(inputs.resultsDir)
     }
-    if (inputs.useCaches) {
-      await uploadCaches(inputs.cacheDir)
-    }
 
-    if (dockerExec.stderr.length > 0 && dockerExec.exitCode !== 0) {
-      core.setFailed(dockerExec.stderr.trim())
-    } else {
+    if (isExecutionSuccessful(dockerExec.exitCode)) {
+      if (inputs.useCaches) {
+        await uploadCaches(inputs.cacheDir)
+      }
       if (inputs.useAnnotations) {
         await publishAnnotations(
           inputs.githubToken,
           `${inputs.resultsDir}/qodana.sarif.json`
         )
       }
+    } else {
+      core.setFailed(dockerExec.stderr.trim())
     }
   } catch (error) {
     core.setFailed((error as Error).message)

@@ -4,6 +4,7 @@ import * as core from '@actions/core'
 import * as glob from '@actions/glob'
 import {Inputs} from './context'
 
+export const QODANA_CHECK_NAME = 'Qodana'
 export const QODANA_HELP_STRING = `
   📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
   📭 Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
@@ -17,6 +18,8 @@ export const ANNOTATION_FAILURE = 'failure'
 export const ANNOTATION_WARNING = 'warning'
 export const ANNOTATION_NOTICE = 'notice'
 export const MAX_ANNOTATIONS = 50
+const QODANA_SUCCESS_EXIT_CODE = 0
+const QODANA_FAILTHRESHOLD_EXIT_CODE = 255
 const OFFICIAL_DOCKER_PREFIX = 'jetbrains/'
 const NOT_SUPPORTED_IMAGES = [
   'jetbrains/qodana-clone-finder',
@@ -97,4 +100,16 @@ export async function uploadReport(path: string): Promise<void> {
   } catch (error) {
     core.warning(`Failed to upload report – ${(error as Error).message}`)
   }
+}
+
+/**
+ * Check if Qodana Docker image execution is successful.
+ * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
+ * @param exitCode
+ */
+export function isExecutionSuccessful(exitCode: number): boolean {
+  return (
+    exitCode === QODANA_SUCCESS_EXIT_CODE ||
+    exitCode === QODANA_FAILTHRESHOLD_EXIT_CODE
+  )
 }

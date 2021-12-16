@@ -2,14 +2,18 @@ import {expect, test} from '@jest/globals'
 import {Output, parseSarif} from '../src/annotations'
 import {Inputs} from '../src/context'
 import {getQodanaRunArgs} from '../src/docker'
-import {QODANA_HELP_STRING, validateContext} from '../src/utils'
+import {
+  QODANA_CHECK_NAME,
+  QODANA_HELP_STRING,
+  validateContext
+} from '../src/utils'
 
 function outputEmptyFixture(): Output {
   return {
     annotations: [],
     summary: 'No problems found.',
     text: QODANA_HELP_STRING,
-    title: 'Qodana for JVM'
+    title: QODANA_CHECK_NAME
   }
 }
 
@@ -49,7 +53,7 @@ function outputDefaultFixture(): Output {
     ],
     summary: '3 problems were detected.',
     text: QODANA_HELP_STRING,
-    title: 'Qodana for JVM'
+    title: QODANA_CHECK_NAME
   }
 }
 

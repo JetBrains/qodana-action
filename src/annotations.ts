@@ -12,6 +12,7 @@ import {
   FAILURE_STATUS,
   MAX_ANNOTATIONS,
   NEUTRAL_STATUS,
+  QODANA_CHECK_NAME,
   QODANA_HELP_STRING,
   SUCCESS_STATUS
 } from './utils'
@@ -114,7 +115,7 @@ export function parseSarif(path: string): Output {
       .filter((a): a is Annotation => a !== null && a !== undefined)
   }
   return {
-    title: run.tool.driver.fullName!!,
+    title: QODANA_CHECK_NAME,
     text: QODANA_HELP_STRING,
     summary,
     annotations

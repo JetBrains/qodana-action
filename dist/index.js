@@ -114,7 +114,7 @@ function parseSarif(path) {
             .filter((a) => a !== null && a !== undefined);
     }
     return {
-        title: run.tool.driver.fullName,
+        title: utils_1.QODANA_CHECK_NAME,
         text: utils_1.QODANA_HELP_STRING,
         summary,
         annotations
@@ -461,20 +461,25 @@ function main() {
                 yield (0, utils_1.restoreCaches)(inputs.cacheDir);
             }
             const args = (0, docker_1.getQodanaRunArgs)(inputs);
+            const dockerPull = yield (0, docker_1.docker)(['pull', inputs.linter]);
+            if (dockerPull.stderr.length > 0 && dockerPull.exitCode !== 0) {
+                core.setFailed(dockerPull.stderr.trim());
+                return;
+            }
             const dockerExec = yield (0, docker_1.docker)(args);
             if (inputs.uploadResults) {
                 yield (0, utils_1.uploadReport)(inputs.resultsDir);
             }
-            if (inputs.useCaches) {
-                yield (0, utils_1.uploadCaches)(inputs.cacheDir);
-            }
-            if (dockerExec.stderr.length > 0 && dockerExec.exitCode !== 0) {
-                core.setFailed(dockerExec.stderr.trim());
-            }
-            else {
+            if ((0, utils_1.isExecutionSuccessful)(dockerExec.exitCode)) {
+                if (inputs.useCaches) {
+                    yield (0, utils_1.uploadCaches)(inputs.cacheDir);
+                }
                 if (inputs.useAnnotations) {
                     yield (0, annotations_1.publishAnnotations)(inputs.githubToken, `${inputs.resultsDir}/qodana.sarif.json`);
                 }
+            }
+            else {
+                core.setFailed(dockerExec.stderr.trim());
             }
         }
         catch (error) {
@@ -522,11 +527,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.validateContext = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.QODANA_HELP_STRING = void 0;
+exports.isExecutionSuccessful = exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.validateContext = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.QODANA_HELP_STRING = exports.QODANA_CHECK_NAME = void 0;
 const artifact = __importStar(__nccwpck_require__(2605));
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
+exports.QODANA_CHECK_NAME = 'Qodana';
 exports.QODANA_HELP_STRING = `
   📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
   📭 Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
@@ -540,6 +546,8 @@ exports.ANNOTATION_FAILURE = 'failure';
 exports.ANNOTATION_WARNING = 'warning';
 exports.ANNOTATION_NOTICE = 'notice';
 exports.MAX_ANNOTATIONS = 50;
+const QODANA_SUCCESS_EXIT_CODE = 0;
+const QODANA_FAILTHRESHOLD_EXIT_CODE = 255;
 const OFFICIAL_DOCKER_PREFIX = 'jetbrains/';
 const NOT_SUPPORTED_IMAGES = [
     'jetbrains/qodana-clone-finder',
@@ -615,6 +623,16 @@ function uploadReport(path) {
     });
 }
 exports.uploadReport = uploadReport;
+/**
+ * Check if Qodana Docker image execution is successful.
+ * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
+ * @param exitCode
+ */
+function isExecutionSuccessful(exitCode) {
+    return (exitCode === QODANA_SUCCESS_EXIT_CODE ||
+        exitCode === QODANA_FAILTHRESHOLD_EXIT_CODE);
+}
+exports.isExecutionSuccessful = isExecutionSuccessful;
 
 
 /***/ }),
