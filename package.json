@@ -48,7 +48,7 @@
     "@types/sarif": "^2.1.4"
   },
   "devDependencies": {
-    "@types/node": "^17.0.0",
+    "@types/node": "^17.0.1",
     "@typescript-eslint/parser": "^5.6.0",
     "@vercel/ncc": "^0.33.0",
     "eslint": "^8.4.1",
