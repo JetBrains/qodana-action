@@ -3,6 +3,7 @@ import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as glob from '@actions/glob'
 import {Inputs} from './context'
+import path from 'path'
 
 export const QODANA_CHECK_NAME = 'Qodana'
 export const QODANA_HELP_STRING = `
@@ -50,12 +51,12 @@ export function validateContext(inputs: Inputs): Inputs {
 
 /**
  * Restores the cache from GitHub Actions cache to the given path.
- * @param path The path to restore the cache to.
+ * @param cacheDir The path to restore the cache to.
  */
-export async function restoreCaches(path: string): Promise<void> {
+export async function restoreCaches(cacheDir: string): Promise<void> {
   try {
     await cache.restoreCache(
-      [path],
+      [cacheDir],
       `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`,
       [
         `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-`,
@@ -69,12 +70,12 @@ export async function restoreCaches(path: string): Promise<void> {
 
 /**
  * Uploads the cache to GitHub Actions cache from the given path.
- * @param path The path to upload the cache from.
+ * @param cacheDir The path to upload the cache from.
  */
-export async function uploadCaches(path: string): Promise<void> {
+export async function uploadCaches(cacheDir: string): Promise<void> {
   try {
     await cache.saveCache(
-      [path],
+      [cacheDir],
       `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${process.env['GITHUB_SHA']}`
     )
   } catch (error) {
@@ -84,22 +85,17 @@ export async function uploadCaches(path: string): Promise<void> {
 
 /**
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
- * @param path The path to upload report from (should be somewhere in tmp).
+ * @param resultsDir The path to upload report from (should be somewhere in tmp).
  */
-export async function uploadReport(path: string): Promise<void> {
+export async function uploadReport(resultsDir: string): Promise<void> {
   try {
-    const globber = await glob.create(`${path}/*`)
+    const globber = await glob.create(`${resultsDir}/*`)
     const files = await globber.glob()
     await artifact
       .create()
-      .uploadArtifact(
-        'Qodana report',
-        files,
-        `${process.env['RUNNER_TEMP']}/qodana/`,
-        {
-          continueOnError: true
-        }
-      )
+      .uploadArtifact('Qodana report', files, path.dirname(resultsDir), {
+        continueOnError: true
+      })
   } catch (error) {
     core.warning(`Failed to upload report – ${(error as Error).message}`)
   }

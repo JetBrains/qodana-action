@@ -534,12 +534,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isFailedByThreshold = exports.isExecutionSuccessful = exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.validateContext = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.FAIL_THRESHOLD_OUTPUT = exports.QODANA_HELP_STRING = exports.QODANA_CHECK_NAME = void 0;
 const artifact = __importStar(__nccwpck_require__(2605));
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
+const path_1 = __importDefault(__nccwpck_require__(1017));
 exports.QODANA_CHECK_NAME = 'Qodana';
 exports.QODANA_HELP_STRING = `
   📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
@@ -582,12 +586,12 @@ function validateContext(inputs) {
 exports.validateContext = validateContext;
 /**
  * Restores the cache from GitHub Actions cache to the given path.
- * @param path The path to restore the cache to.
+ * @param cacheDir The path to restore the cache to.
  */
-function restoreCaches(path) {
+function restoreCaches(cacheDir) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield cache.restoreCache([path], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`, [
+            yield cache.restoreCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`, [
                 `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-`,
                 `${process.env['RUNNER_OS']}-qodana-`
             ]);
@@ -600,12 +604,12 @@ function restoreCaches(path) {
 exports.restoreCaches = restoreCaches;
 /**
  * Uploads the cache to GitHub Actions cache from the given path.
- * @param path The path to upload the cache from.
+ * @param cacheDir The path to upload the cache from.
  */
-function uploadCaches(path) {
+function uploadCaches(cacheDir) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield cache.saveCache([path], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${process.env['GITHUB_SHA']}`);
+            yield cache.saveCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${process.env['GITHUB_SHA']}`);
         }
         catch (error) {
             core.warning(`Failed to upload caches – ${error.message}`);
@@ -615,16 +619,16 @@ function uploadCaches(path) {
 exports.uploadCaches = uploadCaches;
 /**
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
- * @param path The path to upload report from (should be somewhere in tmp).
+ * @param resultsDir The path to upload report from (should be somewhere in tmp).
  */
-function uploadReport(path) {
+function uploadReport(resultsDir) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const globber = yield glob.create(`${path}/*`);
+            const globber = yield glob.create(`${resultsDir}/*`);
             const files = yield globber.glob();
             yield artifact
                 .create()
-                .uploadArtifact('Qodana report', files, `${process.env['RUNNER_TEMP']}/qodana/`, {
+                .uploadArtifact('Qodana report', files, path_1.default.dirname(resultsDir), {
                 continueOnError: true
             });
         }
