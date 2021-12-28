@@ -24,6 +24,7 @@ inputs:
   additional-cache-hash:
     description: 'Pass additional cache hash extension'
     required: false
+    default: "${{ github.sha }}"
   idea-config-dir:
     description: 'IntelliJ IDEA configuration directory'
     required: false
