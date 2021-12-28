@@ -8,6 +8,7 @@ export interface Inputs {
   projectDir: string
   resultsDir: string
   cacheDir: string
+  additionalCacheHash: string
   additionalVolumes: string[]
   additionalEnvVars: string[]
   inspectedDir: string
@@ -36,6 +37,7 @@ export function getInputs(): Inputs {
     projectDir: core.getInput('project-dir'),
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
+    additionalCacheHash: core.getInput('additional-cache-hash'),
     additionalVolumes: core.getMultilineInput('additional-volumes'),
     additionalEnvVars: core.getMultilineInput('additional-env-variables'),
     inspectedDir: core.getInput('inspected-dir'),

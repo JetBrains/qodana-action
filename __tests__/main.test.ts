@@ -63,6 +63,7 @@ function inputsDefaultFixture(): Inputs {
     projectDir: '${{ github.workspace }}',
     resultsDir: '${{ runner.temp }}/qodana-results',
     cacheDir: '${{ runner.temp }}/qodana-caches',
+    additionalCacheHash: '',
     additionalVolumes: [],
     additionalEnvVars: [],
     inspectedDir: '',

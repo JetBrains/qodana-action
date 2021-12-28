@@ -32,7 +32,7 @@ async function main(): Promise<void> {
     await io.mkdirP(inputs.resultsDir)
 
     if (inputs.useCaches) {
-      await restoreCaches(inputs.cacheDir)
+      await restoreCaches(inputs.cacheDir, inputs.additionalCacheHash)
     }
 
     const args = getQodanaRunArgs(inputs)
@@ -52,7 +52,7 @@ async function main(): Promise<void> {
     const failedByThreshold = isFailedByThreshold(dockerExec.exitCode)
     if (isExecutionSuccessful(dockerExec.exitCode)) {
       if (inputs.useCaches) {
-        await uploadCaches(inputs.cacheDir)
+        await uploadCaches(inputs.cacheDir, inputs.additionalCacheHash)
       }
 
       if (inputs.useAnnotations) {
