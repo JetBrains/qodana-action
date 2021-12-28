@@ -264,6 +264,7 @@ function getInputs() {
         projectDir: core.getInput('project-dir'),
         resultsDir: core.getInput('results-dir'),
         cacheDir: core.getInput('cache-dir'),
+        additionalCacheHash: core.getInput('additional-cache-hash'),
         additionalVolumes: core.getMultilineInput('additional-volumes'),
         additionalEnvVars: core.getMultilineInput('additional-env-variables'),
         inspectedDir: core.getInput('inspected-dir'),
@@ -463,7 +464,7 @@ function main() {
             yield io.mkdirP(inputs.cacheDir);
             yield io.mkdirP(inputs.resultsDir);
             if (inputs.useCaches) {
-                yield (0, utils_1.restoreCaches)(inputs.cacheDir);
+                yield (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.additionalCacheHash);
             }
             const args = (0, docker_1.getQodanaRunArgs)(inputs);
             const dockerPull = yield (0, docker_1.docker)(['pull', inputs.linter]);
@@ -478,7 +479,7 @@ function main() {
             const failedByThreshold = (0, utils_1.isFailedByThreshold)(dockerExec.exitCode);
             if ((0, utils_1.isExecutionSuccessful)(dockerExec.exitCode)) {
                 if (inputs.useCaches) {
-                    yield (0, utils_1.uploadCaches)(inputs.cacheDir);
+                    yield (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.additionalCacheHash);
                 }
                 if (inputs.useAnnotations) {
                     yield (0, annotations_1.publishAnnotations)(failedByThreshold, inputs.githubToken, `${inputs.resultsDir}/qodana.sarif.json`);
@@ -587,13 +588,14 @@ exports.validateContext = validateContext;
 /**
  * Restores the cache from GitHub Actions cache to the given path.
  * @param cacheDir The path to restore the cache to.
+ * @param additionalCacheHash Addition to the generated cache hash
  */
-function restoreCaches(cacheDir) {
+function restoreCaches(cacheDir, additionalCacheHash) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield cache.restoreCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`, [
-                `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-`,
-                `${process.env['RUNNER_OS']}-qodana-`
+            yield cache.restoreCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}${additionalCacheHash}`, [
+                `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`,
+                `${process.env['RUNNER_OS']}-qodana-${additionalCacheHash}`
             ]);
         }
         catch (error) {
@@ -605,11 +607,12 @@ exports.restoreCaches = restoreCaches;
 /**
  * Uploads the cache to GitHub Actions cache from the given path.
  * @param cacheDir The path to upload the cache from.
+ * @param additionalCacheHash Addition to the generated cache hash
  */
-function uploadCaches(cacheDir) {
+function uploadCaches(cacheDir, additionalCacheHash) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield cache.saveCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${process.env['GITHUB_SHA']}`);
+            yield cache.saveCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`);
         }
         catch (error) {
             core.warning(`Failed to upload caches – ${error.message}`);

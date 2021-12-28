@@ -21,6 +21,9 @@ inputs:
     description: 'Directory to store Qodana caches'
     required: false
     default: "${{ runner.temp }}/qodana/caches"
+  additional-cache-hash:
+    description: 'Pass additional cache hash extension'
+    required: false
   idea-config-dir:
     description: 'IntelliJ IDEA configuration directory'
     required: false

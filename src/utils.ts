@@ -52,15 +52,19 @@ export function validateContext(inputs: Inputs): Inputs {
 /**
  * Restores the cache from GitHub Actions cache to the given path.
  * @param cacheDir The path to restore the cache to.
+ * @param additionalCacheHash Addition to the generated cache hash
  */
-export async function restoreCaches(cacheDir: string): Promise<void> {
+export async function restoreCaches(
+  cacheDir: string,
+  additionalCacheHash: string
+): Promise<void> {
   try {
     await cache.restoreCache(
       [cacheDir],
-      `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}`,
+      `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}${additionalCacheHash}`,
       [
-        `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-`,
-        `${process.env['RUNNER_OS']}-qodana-`
+        `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`,
+        `${process.env['RUNNER_OS']}-qodana-${additionalCacheHash}`
       ]
     )
   } catch (error) {
@@ -71,12 +75,16 @@ export async function restoreCaches(cacheDir: string): Promise<void> {
 /**
  * Uploads the cache to GitHub Actions cache from the given path.
  * @param cacheDir The path to upload the cache from.
+ * @param additionalCacheHash Addition to the generated cache hash
  */
-export async function uploadCaches(cacheDir: string): Promise<void> {
+export async function uploadCaches(
+  cacheDir: string,
+  additionalCacheHash: string
+): Promise<void> {
   try {
     await cache.saveCache(
       [cacheDir],
-      `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${process.env['GITHUB_SHA']}`
+      `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`
     )
   } catch (error) {
     core.warning(`Failed to upload caches – ${(error as Error).message}`)
