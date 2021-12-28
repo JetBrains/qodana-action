@@ -23,9 +23,9 @@
 
 To start running Qodana in your CI pipeline on GitHub all you need is to add the following lines to your workflow file:
 ```yaml
-- uses: JetBrains/qodana-action@v4.1.0  # you can use @main if you want to use the latest version
+- uses: JetBrains/qodana-action@v4.2.0  # you can use @main if you want to use the latest version
   with:
-    linter: jetbrains/qodana-js:2021.3  # Docker image full name with a tag
+    linter: jetbrains/qodana-js:latest  # Docker image full name with a tag
 ```
 
 If you don't have any prepared workflow file in your repository, you can create a new one by using the example (store it
@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v4.1.0
+        uses: JetBrains/qodana-action@v4.2.0
         with:
           linter: jetbrains/qodana-jvm
 ```
@@ -87,8 +87,8 @@ You can set up [GitHub code scanning](https://docs.github.com/en/code-security/c
 | `cache-dir`                | Directory to store Qodana caches. Optional.                                                                                        | `${{ runner.temp }}/qodana/caches`      |
 | `idea-config-dir`          | IntelliJ IDEA configuration directory. Optional.                                                                                   | -                                       |
 | `gradle-settings-path`     | Provide path to gradle.properties file. An example: "/your/custom/path/gradle.properties". Optional.                               | -                                       |
-| `additional-volumes`       | Mount additional volumes to Docker container. Optional.                                                                            | -                                       |
-| `additional-env-variables` | Pass additional environment variables to docker container. Optional.                                                               | -                                       |
+| `additional-volumes`       | Mount additional volumes to Docker container. Multiline input variable: specify multiple values with newlines. Optional.                                                                            | -                                       |
+| `additional-env-variables` | Pass additional environment variables to docker container. Multiline input variable: specify multiple values with newlines. Optional.                                                               | -                                       |
 | `fail-threshold`           | Set the number of problems that will serve as a quality gate. If this number is reached, the pipeline run is terminated. Optional. | -                                       |
 | `inspected-dir`            | Directory to be inspected. If not specified, the whole project is inspected by default. Optional.                                  | -                                       |
 | `baseline-path`            | Run in baseline mode. Provide the path to an existing SARIF report to be used in the baseline state calculation. Optional.         | -                                       |
@@ -99,7 +99,7 @@ You can set up [GitHub code scanning](https://docs.github.com/en/code-security/c
 | `profile-path`             | Absolute path to the profile file. Optional.                                                                                       | -                                       |
 | `upload-result`            | Upload Qodana results as an artifact to the job. Optional.                                                                         | `true`                                  |
 | `use-caches`               | Utilize GitHub caches for Qodana runs. Optional.                                                                                   | `true`                                  |
-| `additional-cache-hash`    | Allows customizing the generated cache hash. Optional.                                                                             |                                         |
+| `additional-cache-hash`    | Allows customizing the generated cache hash. Optional.                                                                             |                                         `${{ github.sha }}` |
 | `use-annotations`          | Use annotation to mark the results in the GitHub user interface. Optional.                                                         | `true`                                  |
 | `github-token`             | GitHub token to be used for uploading results. Optional.                                                                           | `${{ github.token }}`                   |
 
