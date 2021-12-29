@@ -1,9 +1,10 @@
-# Qodana Scan
+# Qodana Scan [<img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=304841&theme=dark&period=daily" alt="" align="right" width="190" height="41">](https://www.producthunt.com/posts/jetbrains-qodana)
 
 [![official JetBrains project](https://jb.gg/badges/official.svg)][jb:confluence-on-gh]
 [![build-test](https://github.com/jetbrains/qodana-action/actions/workflows/test.yml/badge.svg)][gh:build]
 [![Slack](https://img.shields.io/badge/Slack-%23qodana-blue)][jb:slack]
 [![Twitter Follow](https://img.shields.io/twitter/follow/QodanaEvolves?style=flat)][jb:twitter]
+[![Docker Hub](https://img.shields.io/docker/pulls/jetbrains/qodana.svg)](jb:docker)
 
 **Qodana** is a code quality monitoring tool that identifies and suggests fixes for bugs, security vulnerabilities, duplications, and imperfections. Using this GitHub Action, run Qodana with your GitHub workflow to scan your Java, Kotlin, PHP, Python, JavaScript, TypeScript projects (and [other supported technologies by Qodana](https://www.jetbrains.com/help/qodana/supported-technologies.html)).
 
@@ -135,3 +136,4 @@ Using the Qodana EAP Docker images, you agree to [JetBrains EAP user agreement](
 [jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
 [jb:slack]: https://jb.gg/qodana-slack
 [jb:twitter]: https://twitter.com/QodanaEvolves
+[jb:docker]: https://hub.docker.com/r/jetbrains/qodana
