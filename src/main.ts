@@ -46,7 +46,7 @@ async function main(): Promise<void> {
     const dockerExec = await docker(args)
 
     if (inputs.uploadResults) {
-      await uploadReport(inputs.resultsDir)
+      await uploadReport(inputs.resultsDir, inputs.artifactName)
     }
 
     const failedByThreshold = isFailedByThreshold(dockerExec.exitCode)

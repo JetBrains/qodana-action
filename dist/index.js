@@ -278,6 +278,7 @@ function getInputs() {
         changes: core.getBooleanInput('changes'),
         script: core.getInput('script'),
         uploadResults: core.getBooleanInput('upload-result'),
+        artifactName: core.getInput('artifact-name'),
         useCaches: core.getBooleanInput('use-caches'),
         githubToken: core.getInput('github-token'),
         useAnnotations: core.getBooleanInput('use-annotations')
@@ -474,7 +475,7 @@ function main() {
             }
             const dockerExec = yield (0, docker_1.docker)(args);
             if (inputs.uploadResults) {
-                yield (0, utils_1.uploadReport)(inputs.resultsDir);
+                yield (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName);
             }
             const failedByThreshold = (0, utils_1.isFailedByThreshold)(dockerExec.exitCode);
             if ((0, utils_1.isExecutionSuccessful)(dockerExec.exitCode)) {
@@ -624,14 +625,14 @@ exports.uploadCaches = uploadCaches;
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
  * @param resultsDir The path to upload report from (should be somewhere in tmp).
  */
-function uploadReport(resultsDir) {
+function uploadReport(resultsDir, artifactName) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const globber = yield glob.create(`${resultsDir}/*`);
             const files = yield globber.glob();
             yield artifact
                 .create()
-                .uploadArtifact('Qodana report', files, path_1.default.dirname(resultsDir), {
+                .uploadArtifact(artifactName, files, path_1.default.dirname(resultsDir), {
                 continueOnError: true
             });
         }

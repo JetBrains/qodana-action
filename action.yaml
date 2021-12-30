@@ -67,6 +67,10 @@ inputs:
     description: 'Upload Qodana results as an artifact to the job'
     required: false
     default: "true"
+  artifact-name:
+    description: 'Specify Qodana results artifact name, used for results uploading'
+    required: false
+    default: "Qodana report"
   use-caches:
     description: 'Utilize GitHub caches for Qodana runs'
     required: false
