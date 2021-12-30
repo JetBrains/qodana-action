@@ -99,10 +99,13 @@ You can set up [GitHub code scanning](https://docs.github.com/en/code-security/c
 | `profile-name`             | Name of a profile defined in the project. Optional.                                                                                | -                                       |
 | `profile-path`             | Absolute path to the profile file. Optional.                                                                                       | -                                       |
 | `upload-result`            | Upload Qodana results as an artifact to the job. Optional.                                                                         | `true`                                  |
+| `artifact-name`            | Specify Qodana results artifact name, used for results uploading. Optional.                                                        | `Qodana report`                                  |
 | `use-caches`               | Utilize GitHub caches for Qodana runs. Optional.                                                                                   | `true`                                  |
 | `additional-cache-hash`    | Allows customizing the generated cache hash. Optional.                                                                             |                                         `${{ github.sha }}` |
 | `use-annotations`          | Use annotation to mark the results in the GitHub user interface. Optional.                                                         | `true`                                  |
 | `github-token`             | GitHub token to be used for uploading results. Optional.                                                                           | `${{ github.token }}`                   |
+
+
 
 ## Issue Tracker
 

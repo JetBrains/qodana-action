@@ -22,6 +22,7 @@ export interface Inputs {
   changes: boolean
   script: string
   uploadResults: boolean
+  artifactName: string
   useCaches: boolean
   githubToken: string
   useAnnotations: boolean
@@ -51,6 +52,7 @@ export function getInputs(): Inputs {
     changes: core.getBooleanInput('changes'),
     script: core.getInput('script'),
     uploadResults: core.getBooleanInput('upload-result'),
+    artifactName: core.getInput('artifact-name'),
     useCaches: core.getBooleanInput('use-caches'),
     githubToken: core.getInput('github-token'),
     useAnnotations: core.getBooleanInput('use-annotations')

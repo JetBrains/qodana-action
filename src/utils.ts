@@ -93,15 +93,19 @@ export async function uploadCaches(
 
 /**
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
- * @param resultsDir The path to upload report from (should be somewhere in tmp).
+ * @param resultsDir The path to upload report from.
+ * @param artifactName Artifact upload name.
  */
-export async function uploadReport(resultsDir: string): Promise<void> {
+export async function uploadReport(
+  resultsDir: string,
+  artifactName: string
+): Promise<void> {
   try {
     const globber = await glob.create(`${resultsDir}/*`)
     const files = await globber.glob()
     await artifact
       .create()
-      .uploadArtifact('Qodana report', files, path.dirname(resultsDir), {
+      .uploadArtifact(artifactName, files, path.dirname(resultsDir), {
         continueOnError: true
       })
   } catch (error) {
