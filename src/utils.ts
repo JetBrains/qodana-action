@@ -93,7 +93,8 @@ export async function uploadCaches(
 
 /**
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
- * @param resultsDir The path to upload report from (should be somewhere in tmp).
+ * @param resultsDir The path to upload report from.
+ * @param artifactName Artifact upload name.
  */
 export async function uploadReport(
   resultsDir: string,

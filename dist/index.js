@@ -623,8 +623,9 @@ function uploadCaches(cacheDir, additionalCacheHash) {
 exports.uploadCaches = uploadCaches;
 /**
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
- * @param resultsDir The path to upload report from (should be somewhere in tmp).
- */
+ * @param resultsDir The path to upload report from.
+ * @param artifactName Artifact upload name.
+*/
 function uploadReport(resultsDir, artifactName) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
