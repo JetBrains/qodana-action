@@ -21,8 +21,6 @@ export function getQodanaRunArgs(inputs: Inputs): string[] {
   const args: string[] = [
     'run',
     '--rm',
-    '-u',
-    `${process.getuid()}:${process.getgid()}` ?? '1001:1001',
     '-e',
     'CI=GITHUB',
     '-v',
@@ -32,6 +30,9 @@ export function getQodanaRunArgs(inputs: Inputs): string[] {
     '-v',
     `${inputs.resultsDir}:/data/results`
   ]
+  if (process.platform !== 'win32') {
+    args.push('-u', `${process.getuid()}:${process.getgid()}` ?? '1001:1001')
+  }
   if (inputs.additionalVolumes.length > 0) {
     for (const volume of inputs.additionalVolumes) {
       args.push('-v', volume)

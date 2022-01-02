@@ -88,8 +88,6 @@ function defaultDockerRunCommandFixture(): string[] {
   return [
     'run',
     '--rm',
-    '-u',
-    `${process.getuid()}:${process.getgid()}`,
     '-e',
     'CI=GITHUB',
     '-v',
@@ -98,6 +96,8 @@ function defaultDockerRunCommandFixture(): string[] {
     '${{ github.workspace }}:/data/project',
     '-v',
     '${{ runner.temp }}/qodana-results:/data/results',
+    '-u',
+    `${process.getuid()}:${process.getgid()}`,
     'jetbrains/qodana-jvm-community',
     '--save-report'
   ]
@@ -124,6 +124,5 @@ test('test sarif with no problems to output annotations', () => {
 test('input validation', () => {
   const inputs = inputsDefaultFixture()
   inputs.linter = 'jetbrains/qodana-clone-finder'
-  // expect the exception
   expect(() => validateContext(inputs)).toThrow()
 })

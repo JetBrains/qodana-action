@@ -348,8 +348,6 @@ function getQodanaRunArgs(inputs) {
     const args = [
         'run',
         '--rm',
-        '-u',
-        (_a = `${process.getuid()}:${process.getgid()}`) !== null && _a !== void 0 ? _a : '1001:1001',
         '-e',
         'CI=GITHUB',
         '-v',
@@ -359,6 +357,9 @@ function getQodanaRunArgs(inputs) {
         '-v',
         `${inputs.resultsDir}:/data/results`
     ];
+    if (process.platform !== 'win32') {
+        args.push('-u', (_a = `${process.getuid()}:${process.getgid()}`) !== null && _a !== void 0 ? _a : '1001:1001');
+    }
     if (inputs.additionalVolumes.length > 0) {
         for (const volume of inputs.additionalVolumes) {
             args.push('-v', volume);
@@ -483,7 +484,7 @@ function main() {
                     yield (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.additionalCacheHash);
                 }
                 if (inputs.useAnnotations) {
-                    yield (0, annotations_1.publishAnnotations)(failedByThreshold, inputs.githubToken, `${inputs.resultsDir}/qodana.sarif.json`);
+                    yield (0, annotations_1.publishAnnotations)(failedByThreshold, inputs.githubToken, `${inputs.resultsDir}/${utils_1.QODANA_SARIF_NAME}`);
                 }
                 if (failedByThreshold)
                     core.setFailed(utils_1.FAIL_THRESHOLD_OUTPUT);
@@ -540,13 +541,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isFailedByThreshold = exports.isExecutionSuccessful = exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.validateContext = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.FAIL_THRESHOLD_OUTPUT = exports.QODANA_HELP_STRING = exports.QODANA_CHECK_NAME = void 0;
+exports.isFailedByThreshold = exports.isExecutionSuccessful = exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.validateContext = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.FAIL_THRESHOLD_OUTPUT = exports.QODANA_HELP_STRING = exports.QODANA_SARIF_NAME = exports.QODANA_CHECK_NAME = void 0;
 const artifact = __importStar(__nccwpck_require__(2605));
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 exports.QODANA_CHECK_NAME = 'Qodana';
+exports.QODANA_SARIF_NAME = 'qodana.sarif.json';
 exports.QODANA_HELP_STRING = `
   📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
   📭 Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
@@ -625,7 +627,7 @@ exports.uploadCaches = uploadCaches;
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
  * @param resultsDir The path to upload report from.
  * @param artifactName Artifact upload name.
-*/
+ */
 function uploadReport(resultsDir, artifactName) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
