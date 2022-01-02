@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as io from '@actions/io'
 import {
   FAIL_THRESHOLD_OUTPUT,
+  QODANA_SARIF_NAME,
   isExecutionSuccessful,
   isFailedByThreshold,
   restoreCaches,
@@ -59,7 +60,7 @@ async function main(): Promise<void> {
         await publishAnnotations(
           failedByThreshold,
           inputs.githubToken,
-          `${inputs.resultsDir}/qodana.sarif.json`
+          `${inputs.resultsDir}/${QODANA_SARIF_NAME}`
         )
       }
 

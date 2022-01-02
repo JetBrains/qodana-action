@@ -15,10 +15,19 @@ jobs:
           npm install
       - run: |
           npm run all
-  test: # make sure the action works on a clean machine without building
+  test-ubuntu: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: ./
         with:
           linter: jetbrains/qodana-js
+
+#   Not possible at the moment for GitHub-hosted Windows agents: https://github.com/JetBrains/qodana-action/pull/31#issue-812728409
+#   test-windows:
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: ./
+#         with:
+#           linter: jetbrains/qodana-js

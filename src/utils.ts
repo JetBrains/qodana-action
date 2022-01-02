@@ -6,6 +6,7 @@ import {Inputs} from './context'
 import path from 'path'
 
 export const QODANA_CHECK_NAME = 'Qodana'
+export const QODANA_SARIF_NAME = 'qodana.sarif.json'
 export const QODANA_HELP_STRING = `
   📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
   📭 Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
