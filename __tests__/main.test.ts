@@ -64,14 +64,14 @@ function inputsDefaultFixture(): Inputs {
     resultsDir: '${{ runner.temp }}/qodana-results',
     cacheDir: '${{ runner.temp }}/qodana-caches',
     additionalCacheHash: '',
-    additionalVolumes: [],
-    additionalEnvVars: [],
+    additionalVolumes: ['/tmp/project:/data/project'],
+    additionalEnvVars: ['TESTS=1', 'RANDOM_SEED=42'],
     inspectedDir: '',
     ideaConfigDir: '',
     baselinePath: '',
     baselineIncludeAbsent: false,
-    failThreshold: '',
-    profileName: '',
+    failThreshold: '10',
+    profileName: 'qodana.recommended',
     profilePath: '',
     gradleSettingsPath: '',
     changes: false,
@@ -98,8 +98,18 @@ function defaultDockerRunCommandFixture(): string[] {
     '${{ runner.temp }}/qodana-results:/data/results',
     '-u',
     `${process.getuid()}:${process.getgid()}`,
+    '-v',
+    '/tmp/project:/data/project',
+    '-e',
+    'TESTS=1',
+    '-e',
+    'RANDOM_SEED=42',
     'jetbrains/qodana-jvm-community',
-    '--save-report'
+    '--save-report',
+    '--fail-threshold',
+    '10',
+    '-n',
+    'qodana.recommended'
   ]
 }
 
