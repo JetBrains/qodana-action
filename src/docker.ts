@@ -40,7 +40,7 @@ export function getQodanaRunArgs(inputs: Inputs): string[] {
   }
   if (inputs.additionalEnvVars.length > 0) {
     for (const envVar of inputs.additionalEnvVars) {
-      args.push('e', envVar)
+      args.push('-e', envVar)
     }
   }
   if (inputs.ideaConfigDir !== '') {
