@@ -1,10 +1,10 @@
 # Qodana Scan [<img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=304841&theme=dark&period=daily" alt="" align="right" width="190" height="41">](https://www.producthunt.com/posts/jetbrains-qodana)
 
 [![official JetBrains project](https://jb.gg/badges/official.svg)][jb:confluence-on-gh]
-[![build-test](https://github.com/jetbrains/qodana-action/actions/workflows/test.yml/badge.svg)][gh:build]
+[![Qodana](https://github.com/JetBrains/qodana-action/actions/workflows/code_scanning.yml/badge.svg)][gh:qodana]
+[![Docker Hub](https://img.shields.io/docker/pulls/jetbrains/qodana.svg)][jb:docker]
 [![Slack](https://img.shields.io/badge/Slack-%23qodana-blue)][jb:slack]
-[![Twitter Follow](https://img.shields.io/twitter/follow/QodanaEvolves?style=flat)][jb:twitter]
-[![Docker Hub](https://img.shields.io/docker/pulls/jetbrains/qodana.svg)](jb:docker)
+[![Twitter Follow](https://img.shields.io/twitter/follow/QodanaEvolves?style=social&logo=twitter)][jb:twitter]
 
 **Qodana** is a code quality monitoring tool that identifies and suggests fixes for bugs, security vulnerabilities, duplications, and imperfections. Using this GitHub Action, run Qodana with your GitHub workflow to scan your Java, Kotlin, PHP, Python, JavaScript, TypeScript projects (and [other supported technologies by Qodana](https://www.jetbrains.com/help/qodana/supported-technologies.html)).
 
@@ -33,7 +33,7 @@ If you don't have any prepared workflow file in your repository, you can create 
 at `.github/workflows/code_scanning.yml`):
 
 ```yaml
-name: Code Scanning
+name: Qodana
 on:
   workflow_dispatch:
   pull_request:
@@ -54,6 +54,13 @@ jobs:
 ```
 
 With the above workflow, Qodana will run on the main branch, release branches and on the pull requests coming to your repository. You will be able to see the results of the scan in the GitHub UI.
+
+### Get a Qodana badge
+
+To set up a badge with the workflow [![Qodana](https://github.com/JetBrains/qodana-action/actions/workflows/code_scanning.yml/badge.svg)](https://github.com/JetBrains/qodana-action/actions/workflows/code_scanning.yml), go to the workflow run you've just configured then click "Create status badge," copy the suggested Markdown text to your repository README file.
+
+![create_status_badge](https://user-images.githubusercontent.com/13538286/148529278-5d585f1d-adc4-4b22-9a20-769901566924.png)
+
 
 ### GitHub Pages
 
@@ -133,7 +140,7 @@ As for any pre-built image usage, it is the image user's responsibility to ensur
 
 Using the Qodana EAP Docker images, you agree to [JetBrains EAP user agreement](https://www.jetbrains.com/legal/docs/toolbox/user_eap/) and [JetBrains privacy policy](https://www.jetbrains.com/legal/docs/privacy/privacy/). The docker image includes an evaluation license which will expire in 30-day. Please ensure you pull a new image on time.
 
-[gh:build]: https://github.com/jetbrains/qodana-action/actions/workflows/test.yml
+[gh:qodana]: https://github.com/JetBrains/qodana-action/actions/workflows/code_scanning.yml
 [youtrack]: https://youtrack.jetbrains.com/issues/QD
 [youtrack-new-issue]: https://youtrack.jetbrains.com/newIssue?project=QD&c=Platform%20GitHub%20Action
 [jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
