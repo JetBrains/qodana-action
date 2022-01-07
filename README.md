@@ -24,7 +24,7 @@
 
 To start running Qodana in your CI pipeline on GitHub all you need is to add the following lines to your workflow file:
 ```yaml
-- uses: JetBrains/qodana-action@v4.2.1  # you can use @main if you want to use the latest version
+- uses: JetBrains/qodana-action@v4.2.2  # you can use @main if you want to use the latest version
   with:
     linter: jetbrains/qodana-js:latest  # Docker image full name with a tag
 ```
@@ -48,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v4.2.1
+        uses: JetBrains/qodana-action@v4.2.2
         with:
           linter: jetbrains/qodana-jvm
 ```
