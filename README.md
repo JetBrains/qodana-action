@@ -22,15 +22,7 @@
 
 ## Usage
 
-To start running Qodana in your CI pipeline on GitHub all you need is to add the following lines to your workflow file:
-```yaml
-- uses: JetBrains/qodana-action@v4.2.2  # you can use @main if you want to use the latest version
-  with:
-    linter: jetbrains/qodana-js:latest  # Docker image full name with a tag
-```
-
-If you don't have any prepared workflow file in your repository, you can create a new one by using the example (store it
-at `.github/workflows/code_scanning.yml`):
+Add `.github/workflows/code_scanning.yml` with the following contents:
 
 ```yaml
 name: Qodana
@@ -50,10 +42,13 @@ jobs:
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v4.2.2
         with:
-          linter: jetbrains/qodana-jvm
+          linter: jetbrains/qodana-jvm  # pick the needed linter – https://www.jetbrains.com/help/qodana/docker-images.html
 ```
+We recommend you to have a separated workflow file for Qodana, because [different jobs run in parallel](https://help.github.com/en/actions/getting-started-with-github-actions/core-concepts-for-github-actions#job). 
 
-With the above workflow, Qodana will run on the main branch, release branches and on the pull requests coming to your repository. You will be able to see the results of the scan in the GitHub UI.
+
+With the above workflow, Qodana will run on the main branch, release branches and on the pull requests coming to your repository.
+You will be able to see the results of the scan in the GitHub UI.
 
 ### Get a Qodana badge
 
