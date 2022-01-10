@@ -80,6 +80,33 @@ You can set up [GitHub code scanning](https://docs.github.com/en/code-security/c
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
 ```
 
+### Pull request quality gate
+
+You can enforce GitHub to block the merge of pull requests if the Qodana quality gate has failed. To do it, create a 
+branch protection rule as described below:
+
+1. Create new or open an existing GitHub workflow with the Qodana Action specified.
+2. Set the workflow to run on `pull_request` events that target the `main` branch.
+```yaml
+on:
+  pull_request:
+    branches:
+    - main
+```
+
+Instead of `main`, you can specify your branch here. 
+
+3. Set `1` for the Qodana Action `fail-threshold` option.
+4. Under your repository name, click **Settings**. 
+5. On the left menu, click **Branches**.
+6. In the branch protection rules section, click **Add rule**.
+7. Add `main` to **Branch name pattern**.
+8. Select **Require status checks to pass before merging**. 
+9. Search for the `Qodana` status check, then check it.
+10. Click **Create**.
+
+For more information about branch protection rules, refer to the original [GitHub Documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule).
+
 ## Configuration
 
 | Name                       | Description                                                                                                                        | Default Value                           |
