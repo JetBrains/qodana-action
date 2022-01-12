@@ -5,3 +5,5 @@ exclude:
   - name: All
     paths:
       - jest.config.js
+      - .qodana
+      - lib
