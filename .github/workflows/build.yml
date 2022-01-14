@@ -25,8 +25,8 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v2.4.0
 
-      - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v3.2.1
+      - name: Qodana Scan
+        uses: JetBrains/qodana-action@v4.2.2
 
   test:
     name: Test
