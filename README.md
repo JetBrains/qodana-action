@@ -33,7 +33,6 @@ on:
     branches:
       - main
       - 'releases/*'
-
 jobs:
   qodana:
     runs-on: ubuntu-latest
@@ -63,6 +62,34 @@ To do it, follow these steps:
 
 ![create_status_badge](https://user-images.githubusercontent.com/13538286/148529278-5d585f1d-adc4-4b22-9a20-769901566924.png)
 
+### GitHub code scanning
+
+You can set up [GitHub code scanning](https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/about-code-scanning) for your project using Qodana and manage problems found by Qodana on GitHub. To do it, add `.github/workflows/code_scanning.yml` to your repository with the following contents:
+
+```yaml
+name: Qodana
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+jobs:
+  qodana:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v4.2.2
+        with:
+          linter: jetbrains/qodana-jvm  # pick the needed linter – https://www.jetbrains.com/help/qodana/docker-images.html
+          use-annotations: false  # disabled to make sure the found problems are not duplicated on GitHub
+      - uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
+```
+
 ### GitHub Pages
 
 If you want to study [Qodana reports](https://www.jetbrains.com/help/qodana/html-report.html) directly on GitHub, you 
@@ -77,17 +104,6 @@ can host it on your repository [GitHub Pages](https://docs.github.com/en/pages) 
           destination_dir: ./
 ```
 <note>Hosting of multiple Qodana reports in a single GitHub Pages repository is not supported.</note>
-
-### GitHub code scanning
-
-You can set up [GitHub code scanning](https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/about-code-scanning) for your project using Qodana. To do it, add these lines to the workflow file right after the `Qodana` 
-action configuration:
-
-```yaml
-      - uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
-```
 
 ### Pull request quality gate
 
