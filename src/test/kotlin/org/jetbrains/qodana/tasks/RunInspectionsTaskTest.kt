@@ -20,7 +20,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -44,7 +44,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name FOO " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -75,7 +75,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $projectPath:/data/project " +
@@ -102,7 +102,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p 12345:8080 " +
                 "-v $root:/data/project " +
@@ -158,7 +158,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -182,7 +182,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -206,7 +206,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -230,7 +230,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-p 123:456 " +
@@ -256,7 +256,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -280,7 +280,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -304,7 +304,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -328,7 +328,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -355,7 +355,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
@@ -380,7 +380,7 @@ class RunInspectionsTaskTest : BaseTest() {
 
         assertEquals(
             "run " +
-                "--rm " +
+                "--rm -e QODANA_ENV=gradle " +
                 "--name $DOCKER_CONTAINER_NAME_INSPECTIONS " +
                 "-p $SHOW_REPORT_PORT:8080 " +
                 "-v $root:/data/project " +
