@@ -3,6 +3,6 @@ contact_links:
   - name: Report a problem
     url: https://jb.gg/qodana-issue
     about: Report a bug to Qodana team.
-  - name: Give your feedback
-    url: https://jb.gg/qodana-slack
-    about: Share your feedback with the Qodana team on our Slack.
+  - name: Share your feedback
+    url: https://jb.gg/qodana-discussions
+    about: Share your feedback with the Qodana team on our Discussions.
