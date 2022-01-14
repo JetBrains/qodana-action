@@ -5,8 +5,8 @@ fun properties(key: String) = project.findProperty(key)?.toString()
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    kotlin("jvm") version "1.6.0"
-    id("com.gradle.plugin-publish") version "0.18.0"
+    kotlin("jvm") version "1.6.10"
+    id("com.gradle.plugin-publish") version "0.19.0"
 }
 
 group = "org.jetbrains.qodana"
