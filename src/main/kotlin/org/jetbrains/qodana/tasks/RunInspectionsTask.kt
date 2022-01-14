@@ -3,14 +3,9 @@ package org.jetbrains.qodana.tasks
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.tasks.Exec
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.property
+import org.jetbrains.qodana.QodanaPluginConstants
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -233,6 +228,7 @@ open class RunInspectionsTask : Exec() {
         val args = mutableListOf(
             "run",
             "--rm",
+            "-e QODANA_ENV=${QodanaPluginConstants.QODANA_ENV_NAME}",
             "--name", dockerContainerName.get(),
         )
 

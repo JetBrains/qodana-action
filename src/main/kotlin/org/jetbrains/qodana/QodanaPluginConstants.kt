@@ -11,7 +11,8 @@ object QodanaPluginConstants {
     const val UPDATE_INSPECTIONS_TASK_NAME = "updateInspections"
     const val CLEAN_INSPECTIONS_TASK_NAME = "cleanInspections"
 
+    const val QODANA_ENV_NAME = "gradle"
     const val DOCKER_CONTAINER_NAME_INSPECTIONS = "idea-inspections"
-    const val DOCKER_IMAGE_NAME_INSPECTIONS = "jetbrains/qodana:latest"
+    const val DOCKER_IMAGE_NAME_INSPECTIONS = "jetbrains/qodana-jvm-community:latest"
 }
 
