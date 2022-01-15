@@ -7,10 +7,9 @@ import {
   isFailedByThreshold,
   restoreCaches,
   uploadCaches,
-  uploadReport,
-  validateContext
+  uploadReport
 } from './utils'
-import {docker, getQodanaRunArgs} from './docker'
+import {docker, dockerPull, getQodanaRunArgs} from './docker'
 import {getInputs} from './context'
 import {publishAnnotations} from './annotations'
 
@@ -27,46 +26,43 @@ import {publishAnnotations} from './annotations'
  */
 async function main(): Promise<void> {
   try {
-    const inputs = validateContext(getInputs())
-
-    await io.mkdirP(inputs.cacheDir)
-    await io.mkdirP(inputs.resultsDir)
-
-    if (inputs.useCaches) {
-      await restoreCaches(inputs.cacheDir, inputs.additionalCacheHash)
-    }
-
-    const args = getQodanaRunArgs(inputs)
-
-    const dockerPull = await docker(['pull', inputs.linter])
-    if (dockerPull.stderr.length > 0 && dockerPull.exitCode !== 0) {
-      core.setFailed(dockerPull.stderr.trim())
-      return
-    }
-
-    const dockerExec = await docker(args)
-
-    if (inputs.uploadResults) {
-      await uploadReport(inputs.resultsDir, inputs.artifactName)
-    }
-
+    const inputs = getInputs()
+    await Promise.all([
+      io.mkdirP(inputs.resultsDir),
+      io.mkdirP(inputs.cacheDir)
+    ])
+    await Promise.all([
+      dockerPull(inputs.linter),
+      restoreCaches(
+        inputs.cacheDir,
+        inputs.additionalCacheHash,
+        inputs.useCaches
+      )
+    ])
+    const dockerExec = await docker(getQodanaRunArgs(inputs))
     const failedByThreshold = isFailedByThreshold(dockerExec.exitCode)
-    if (isExecutionSuccessful(dockerExec.exitCode)) {
-      if (inputs.useCaches) {
-        await uploadCaches(inputs.cacheDir, inputs.additionalCacheHash)
-      }
-
-      if (inputs.useAnnotations) {
-        await publishAnnotations(
-          failedByThreshold,
-          inputs.githubToken,
-          `${inputs.resultsDir}/${QODANA_SARIF_NAME}`
-        )
-      }
-
-      if (failedByThreshold) core.setFailed(FAIL_THRESHOLD_OUTPUT)
-    } else {
+    await Promise.all([
+      uploadReport(
+        inputs.resultsDir,
+        inputs.artifactName,
+        inputs.uploadResults
+      ),
+      uploadCaches(
+        inputs.cacheDir,
+        inputs.additionalCacheHash,
+        inputs.useCaches && isExecutionSuccessful(dockerExec.exitCode)
+      ),
+      publishAnnotations(
+        failedByThreshold,
+        inputs.githubToken,
+        `${inputs.resultsDir}/${QODANA_SARIF_NAME}`,
+        inputs.useAnnotations && isExecutionSuccessful(dockerExec.exitCode)
+      )
+    ])
+    if (!isExecutionSuccessful(dockerExec.exitCode)) {
       core.setFailed(dockerExec.stderr.trim())
+    } else if (failedByThreshold) {
+      core.setFailed(FAIL_THRESHOLD_OUTPUT)
     }
   } catch (error) {
     core.setFailed((error as Error).message)

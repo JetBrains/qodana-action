@@ -1,4 +1,11 @@
+import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+import {
+  NOT_SUPPORTED_IMAGES,
+  NOT_SUPPORTED_LINTER,
+  OFFICIAL_DOCKER_PREFIX,
+  UNOFFICIAL_LINTER_MESSAGE
+} from './utils'
 import {Inputs} from './context'
 
 /**
@@ -12,6 +19,20 @@ export async function docker(args: string[]): Promise<exec.ExecOutput> {
   })
 }
 
+export async function dockerPull(image: string): Promise<void> {
+  if (NOT_SUPPORTED_IMAGES.includes(image)) {
+    throw Error(`${image} ${NOT_SUPPORTED_LINTER}`)
+  }
+  if (!image.startsWith(OFFICIAL_DOCKER_PREFIX)) {
+    core.warning(UNOFFICIAL_LINTER_MESSAGE)
+  }
+  const pull = await docker(['pull', image])
+  if (pull.stderr.length > 0 && pull.exitCode !== 0) {
+    core.setFailed(pull.stderr.trim())
+    return
+  }
+}
+
 /**
  * Builds the `docker run` command arguments.
  * @param inputs GitHub Actions inputs.
@@ -22,7 +43,7 @@ export function getQodanaRunArgs(inputs: Inputs): string[] {
     'run',
     '--rm',
     '-e',
-    'CI=GITHUB',
+    'QODANA_ENV=github',
     '-v',
     `${inputs.cacheDir}:/data/cache`,
     '-v',

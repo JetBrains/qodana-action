@@ -2,7 +2,6 @@ import * as artifact from '@actions/artifact'
 import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as glob from '@actions/glob'
-import {Inputs} from './context'
 import path from 'path'
 
 export const QODANA_CHECK_NAME = 'Qodana'
@@ -11,7 +10,7 @@ export const QODANA_HELP_STRING = `
   📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
   📭 Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   👀 Or via our issue tracker: https://jb.gg/qodana-issue
-  🔥 Or share your feedback in our Slack: https://jb.gg/qodana-slack
+  🔥 Or share your feedback: https://jb.gg/qodana-discussions
 `
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
@@ -23,42 +22,31 @@ export const ANNOTATION_WARNING = 'warning'
 export const ANNOTATION_NOTICE = 'notice'
 export const MAX_ANNOTATIONS = 50
 
-const NOT_SUPPORTED_LINTER = 'linter is not supported by the action!'
-const UNOFFICIAL_LINTER_MESSAGE = `You are using an unofficial Qodana Docker image. 
+export const NOT_SUPPORTED_LINTER = 'linter is not supported by the action!'
+export const UNOFFICIAL_LINTER_MESSAGE = `You are using an unofficial Qodana Docker image. 
       This CI pipeline could be not working as expected!`
 const QODANA_SUCCESS_EXIT_CODE = 0
 const QODANA_FAILTHRESHOLD_EXIT_CODE = 255
-const OFFICIAL_DOCKER_PREFIX = 'jetbrains/'
-const NOT_SUPPORTED_IMAGES = [
+export const OFFICIAL_DOCKER_PREFIX = 'jetbrains/'
+export const NOT_SUPPORTED_IMAGES = [
   'jetbrains/qodana-clone-finder',
   'jetbrains/qodana-license-audit'
 ]
 
 /**
- * Validates the given inputs.
- * @param inputs action inputs.
- * @return action inputs.
- */
-export function validateContext(inputs: Inputs): Inputs {
-  if (NOT_SUPPORTED_IMAGES.includes(inputs.linter)) {
-    throw Error(`${inputs.linter} ${NOT_SUPPORTED_LINTER}`)
-  }
-
-  if (!inputs.linter.startsWith(OFFICIAL_DOCKER_PREFIX)) {
-    core.warning(UNOFFICIAL_LINTER_MESSAGE)
-  }
-  return inputs
-}
-
-/**
  * Restores the cache from GitHub Actions cache to the given path.
  * @param cacheDir The path to restore the cache to.
- * @param additionalCacheHash Addition to the generated cache hash
+ * @param additionalCacheHash Addition to the generated cache hash.
+ * @param execute whether to execute promise or not.
  */
 export async function restoreCaches(
   cacheDir: string,
-  additionalCacheHash: string
+  additionalCacheHash: string,
+  execute: boolean
 ): Promise<void> {
+  if (!execute) {
+    return
+  }
   try {
     await cache.restoreCache(
       [cacheDir],
@@ -77,11 +65,16 @@ export async function restoreCaches(
  * Uploads the cache to GitHub Actions cache from the given path.
  * @param cacheDir The path to upload the cache from.
  * @param additionalCacheHash Addition to the generated cache hash
+ * @param execute whether to execute promise or not.
  */
 export async function uploadCaches(
   cacheDir: string,
-  additionalCacheHash: string
+  additionalCacheHash: string,
+  execute: boolean
 ): Promise<void> {
+  if (!execute) {
+    return
+  }
   try {
     await cache.saveCache(
       [cacheDir],
@@ -96,11 +89,16 @@ export async function uploadCaches(
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
  * @param resultsDir The path to upload report from.
  * @param artifactName Artifact upload name.
+ * @param execute whether to execute promise or not.
  */
 export async function uploadReport(
   resultsDir: string,
-  artifactName: string
+  artifactName: string,
+  execute: boolean
 ): Promise<void> {
+  if (!execute) {
+    return
+  }
   try {
     const globber = await glob.create(`${resultsDir}/*`)
     const files = await globber.glob()

@@ -231,12 +231,17 @@ async function publishOutput(
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param token The GitHub token to use.
  * @param path The path to the SARIF file to publish.
+ * @param execute whether to execute the promise or not.
  */
 export async function publishAnnotations(
   failedByThreshold: boolean,
   token: string,
-  path: string
+  path: string,
+  execute: boolean
 ): Promise<void> {
+  if (!execute) {
+    return
+  }
   try {
     const output = parseSarif(path)
     if (output.annotations.length >= MAX_ANNOTATIONS) {

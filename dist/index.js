@@ -198,9 +198,13 @@ function publishOutput(failedByThreshold, token, output) {
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param token The GitHub token to use.
  * @param path The path to the SARIF file to publish.
+ * @param execute whether to execute the promise or not.
  */
-function publishAnnotations(failedByThreshold, token, path) {
+function publishAnnotations(failedByThreshold, token, path, execute) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!execute) {
+            return;
+        }
         try {
             const output = parseSarif(path);
             if (output.annotations.length >= utils_1.MAX_ANNOTATIONS) {
@@ -323,8 +327,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getQodanaRunArgs = exports.docker = void 0;
+exports.getQodanaRunArgs = exports.dockerPull = exports.docker = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
+const utils_1 = __nccwpck_require__(918);
 /**
  * Runs the docker command with the given arguments.
  * @param args docker command arguments.
@@ -338,6 +344,22 @@ function docker(args) {
     });
 }
 exports.docker = docker;
+function dockerPull(image) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (utils_1.NOT_SUPPORTED_IMAGES.includes(image)) {
+            throw Error(`${image} ${utils_1.NOT_SUPPORTED_LINTER}`);
+        }
+        if (!image.startsWith(utils_1.OFFICIAL_DOCKER_PREFIX)) {
+            core.warning(utils_1.UNOFFICIAL_LINTER_MESSAGE);
+        }
+        const pull = yield docker(['pull', image]);
+        if (pull.stderr.length > 0 && pull.exitCode !== 0) {
+            core.setFailed(pull.stderr.trim());
+            return;
+        }
+    });
+}
+exports.dockerPull = dockerPull;
 /**
  * Builds the `docker run` command arguments.
  * @param inputs GitHub Actions inputs.
@@ -349,7 +371,7 @@ function getQodanaRunArgs(inputs) {
         'run',
         '--rm',
         '-e',
-        'CI=GITHUB',
+        'QODANA_ENV=github',
         '-v',
         `${inputs.cacheDir}:/data/cache`,
         '-v',
@@ -462,35 +484,27 @@ const annotations_1 = __nccwpck_require__(5598);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const inputs = (0, utils_1.validateContext)((0, context_1.getInputs)());
-            yield io.mkdirP(inputs.cacheDir);
-            yield io.mkdirP(inputs.resultsDir);
-            if (inputs.useCaches) {
-                yield (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.additionalCacheHash);
-            }
-            const args = (0, docker_1.getQodanaRunArgs)(inputs);
-            const dockerPull = yield (0, docker_1.docker)(['pull', inputs.linter]);
-            if (dockerPull.stderr.length > 0 && dockerPull.exitCode !== 0) {
-                core.setFailed(dockerPull.stderr.trim());
-                return;
-            }
-            const dockerExec = yield (0, docker_1.docker)(args);
-            if (inputs.uploadResults) {
-                yield (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName);
-            }
+            const inputs = (0, context_1.getInputs)();
+            yield Promise.all([
+                io.mkdirP(inputs.resultsDir),
+                io.mkdirP(inputs.cacheDir)
+            ]);
+            yield Promise.all([
+                (0, docker_1.dockerPull)(inputs.linter),
+                (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.additionalCacheHash, inputs.useCaches)
+            ]);
+            const dockerExec = yield (0, docker_1.docker)((0, docker_1.getQodanaRunArgs)(inputs));
             const failedByThreshold = (0, utils_1.isFailedByThreshold)(dockerExec.exitCode);
-            if ((0, utils_1.isExecutionSuccessful)(dockerExec.exitCode)) {
-                if (inputs.useCaches) {
-                    yield (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.additionalCacheHash);
-                }
-                if (inputs.useAnnotations) {
-                    yield (0, annotations_1.publishAnnotations)(failedByThreshold, inputs.githubToken, `${inputs.resultsDir}/${utils_1.QODANA_SARIF_NAME}`);
-                }
-                if (failedByThreshold)
-                    core.setFailed(utils_1.FAIL_THRESHOLD_OUTPUT);
-            }
-            else {
+            yield Promise.all([
+                (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResults),
+                (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.additionalCacheHash, inputs.useCaches && (0, utils_1.isExecutionSuccessful)(dockerExec.exitCode)),
+                (0, annotations_1.publishAnnotations)(failedByThreshold, inputs.githubToken, `${inputs.resultsDir}/${utils_1.QODANA_SARIF_NAME}`, inputs.useAnnotations && (0, utils_1.isExecutionSuccessful)(dockerExec.exitCode))
+            ]);
+            if (!(0, utils_1.isExecutionSuccessful)(dockerExec.exitCode)) {
                 core.setFailed(dockerExec.stderr.trim());
+            }
+            else if (failedByThreshold) {
+                core.setFailed(utils_1.FAIL_THRESHOLD_OUTPUT);
             }
         }
         catch (error) {
@@ -541,7 +555,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isFailedByThreshold = exports.isExecutionSuccessful = exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.validateContext = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.FAIL_THRESHOLD_OUTPUT = exports.QODANA_HELP_STRING = exports.QODANA_SARIF_NAME = exports.QODANA_CHECK_NAME = void 0;
+exports.isFailedByThreshold = exports.isExecutionSuccessful = exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.NOT_SUPPORTED_IMAGES = exports.OFFICIAL_DOCKER_PREFIX = exports.UNOFFICIAL_LINTER_MESSAGE = exports.NOT_SUPPORTED_LINTER = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.FAIL_THRESHOLD_OUTPUT = exports.QODANA_HELP_STRING = exports.QODANA_SARIF_NAME = exports.QODANA_CHECK_NAME = void 0;
 const artifact = __importStar(__nccwpck_require__(2605));
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
@@ -553,7 +567,7 @@ exports.QODANA_HELP_STRING = `
   📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
   📭 Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   👀 Or via our issue tracker: https://jb.gg/qodana-issue
-  🔥 Or share your feedback in our Slack: https://jb.gg/qodana-slack
+  🔥 Or share your feedback: https://jb.gg/qodana-discussions
 `;
 exports.FAIL_THRESHOLD_OUTPUT = 'The number of problems exceeds the failThreshold';
 exports.FAILURE_STATUS = 'failure';
@@ -563,38 +577,27 @@ exports.ANNOTATION_FAILURE = 'failure';
 exports.ANNOTATION_WARNING = 'warning';
 exports.ANNOTATION_NOTICE = 'notice';
 exports.MAX_ANNOTATIONS = 50;
-const NOT_SUPPORTED_LINTER = 'linter is not supported by the action!';
-const UNOFFICIAL_LINTER_MESSAGE = `You are using an unofficial Qodana Docker image. 
+exports.NOT_SUPPORTED_LINTER = 'linter is not supported by the action!';
+exports.UNOFFICIAL_LINTER_MESSAGE = `You are using an unofficial Qodana Docker image. 
       This CI pipeline could be not working as expected!`;
 const QODANA_SUCCESS_EXIT_CODE = 0;
 const QODANA_FAILTHRESHOLD_EXIT_CODE = 255;
-const OFFICIAL_DOCKER_PREFIX = 'jetbrains/';
-const NOT_SUPPORTED_IMAGES = [
+exports.OFFICIAL_DOCKER_PREFIX = 'jetbrains/';
+exports.NOT_SUPPORTED_IMAGES = [
     'jetbrains/qodana-clone-finder',
     'jetbrains/qodana-license-audit'
 ];
 /**
- * Validates the given inputs.
- * @param inputs action inputs.
- * @return action inputs.
- */
-function validateContext(inputs) {
-    if (NOT_SUPPORTED_IMAGES.includes(inputs.linter)) {
-        throw Error(`${inputs.linter} ${NOT_SUPPORTED_LINTER}`);
-    }
-    if (!inputs.linter.startsWith(OFFICIAL_DOCKER_PREFIX)) {
-        core.warning(UNOFFICIAL_LINTER_MESSAGE);
-    }
-    return inputs;
-}
-exports.validateContext = validateContext;
-/**
  * Restores the cache from GitHub Actions cache to the given path.
  * @param cacheDir The path to restore the cache to.
- * @param additionalCacheHash Addition to the generated cache hash
+ * @param additionalCacheHash Addition to the generated cache hash.
+ * @param execute whether to execute promise or not.
  */
-function restoreCaches(cacheDir, additionalCacheHash) {
+function restoreCaches(cacheDir, additionalCacheHash, execute) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!execute) {
+            return;
+        }
         try {
             yield cache.restoreCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}${additionalCacheHash}`, [
                 `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`,
@@ -611,9 +614,13 @@ exports.restoreCaches = restoreCaches;
  * Uploads the cache to GitHub Actions cache from the given path.
  * @param cacheDir The path to upload the cache from.
  * @param additionalCacheHash Addition to the generated cache hash
+ * @param execute whether to execute promise or not.
  */
-function uploadCaches(cacheDir, additionalCacheHash) {
+function uploadCaches(cacheDir, additionalCacheHash, execute) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!execute) {
+            return;
+        }
         try {
             yield cache.saveCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`);
         }
@@ -627,9 +634,13 @@ exports.uploadCaches = uploadCaches;
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
  * @param resultsDir The path to upload report from.
  * @param artifactName Artifact upload name.
+ * @param execute whether to execute promise or not.
  */
-function uploadReport(resultsDir, artifactName) {
+function uploadReport(resultsDir, artifactName, execute) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!execute) {
+            return;
+        }
         try {
             const globber = yield glob.create(`${resultsDir}/*`);
             const files = yield globber.glob();
