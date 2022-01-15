@@ -81,7 +81,7 @@ function inputsDefaultFixture(): Inputs {
 }
 
 function defaultDockerRunCommandFixture(): string[] {
-  return [
+  let args = [
     'run',
     '--rm',
     '-e',
@@ -91,9 +91,12 @@ function defaultDockerRunCommandFixture(): string[] {
     '-v',
     '${{ github.workspace }}:/data/project',
     '-v',
-    '${{ runner.temp }}/qodana-results:/data/results',
-    '-u',
-    `${process.getuid()}:${process.getgid()}`,
+    '${{ runner.temp }}/qodana-results:/data/results'
+  ]
+  if (process.platform !== 'win32') {
+    args.push('-u', `${process.getuid()}:${process.getgid()}` ?? '1001:1001')
+  }
+  args.push(
     '-v',
     '/tmp/project:/data/project',
     '-e',
@@ -106,7 +109,8 @@ function defaultDockerRunCommandFixture(): string[] {
     '10',
     '-n',
     'qodana.recommended'
-  ]
+  )
+  return args
 }
 
 test('docker run command args', () => {
