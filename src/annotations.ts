@@ -99,7 +99,7 @@ function parseRules(tool: Tool): Map<string, Rule> {
 /**
  * Converts a SARIF from the given path to a GitHub Check Output.
  * @param path The SARIF path to convert.
- * @returns GitHub Check Output with annotations are created for each result.
+ * @returns GitHub Check Outputs with annotations are created for each result.
  */
 export function parseSarif(path: string): Output {
   const sarif: Log = JSON.parse(fs.readFileSync(path, {encoding: 'utf8'}))
@@ -231,12 +231,17 @@ async function publishOutput(
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param token The GitHub token to use.
  * @param path The path to the SARIF file to publish.
+ * @param execute whether to execute the promise or not.
  */
 export async function publishAnnotations(
   failedByThreshold: boolean,
   token: string,
-  path: string
+  path: string,
+  execute: boolean
 ): Promise<void> {
+  if (!execute) {
+    return
+  }
   try {
     const output = parseSarif(path)
     if (output.annotations.length >= MAX_ANNOTATIONS) {

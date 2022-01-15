@@ -1,6 +1,10 @@
 version: "1.0"
 profile:
   name: qodana.recommended
+include:
+  - name: GrazieInspection
+  - name: IdentifierGrammar
+  - name: LanguageDetectionInspection
 exclude:
   - name: All
     paths:

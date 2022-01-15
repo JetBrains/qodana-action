@@ -1,12 +1,8 @@
 import {expect, test} from '@jest/globals'
 import {Output, parseSarif} from '../src/annotations'
 import {Inputs} from '../src/context'
-import {getQodanaRunArgs} from '../src/docker'
-import {
-  QODANA_CHECK_NAME,
-  QODANA_HELP_STRING,
-  validateContext
-} from '../src/utils'
+import {dockerPull, getQodanaRunArgs} from '../src/docker'
+import {QODANA_CHECK_NAME, QODANA_HELP_STRING} from '../src/utils'
 
 function outputEmptyFixture(): Output {
   return {
@@ -85,19 +81,22 @@ function inputsDefaultFixture(): Inputs {
 }
 
 function defaultDockerRunCommandFixture(): string[] {
-  return [
+  let args = [
     'run',
     '--rm',
     '-e',
-    'CI=GITHUB',
+    'QODANA_ENV=github',
     '-v',
     '${{ runner.temp }}/qodana-caches:/data/cache',
     '-v',
     '${{ github.workspace }}:/data/project',
     '-v',
-    '${{ runner.temp }}/qodana-results:/data/results',
-    '-u',
-    `${process.getuid()}:${process.getgid()}`,
+    '${{ runner.temp }}/qodana-results:/data/results'
+  ]
+  if (process.platform !== 'win32') {
+    args.push('-u', `${process.getuid()}:${process.getgid()}` ?? '1001:1001')
+  }
+  args.push(
     '-v',
     '/tmp/project:/data/project',
     '-e',
@@ -110,7 +109,8 @@ function defaultDockerRunCommandFixture(): string[] {
     '10',
     '-n',
     'qodana.recommended'
-  ]
+  )
+  return args
 }
 
 test('docker run command args', () => {
@@ -131,8 +131,8 @@ test('test sarif with no problems to output annotations', () => {
   expect(result).toEqual(output)
 })
 
-test('input validation', () => {
+test('fail pulling unsuppored linter', async () => {
   const inputs = inputsDefaultFixture()
   inputs.linter = 'jetbrains/qodana-clone-finder'
-  expect(() => validateContext(inputs)).toThrow()
+  await expect(dockerPull(inputs.linter)).rejects.toThrow()
 })
