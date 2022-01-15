@@ -36,7 +36,7 @@ export async function dockerPull(image: string): Promise<void> {
 /**
  * Builds the `docker run` command arguments.
  * @param inputs GitHub Actions inputs.
- * @returns The Docker run command arguments.
+ * @returns The Dockers run command arguments.
  */
 export function getQodanaRunArgs(inputs: Inputs): string[] {
   const args: string[] = [

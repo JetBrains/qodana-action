@@ -122,7 +122,7 @@ export function isExecutionSuccessful(exitCode: number): boolean {
 }
 
 /**
- * Check if Qodana Docker image execution is failed by threshold set.
+ * Check if Qodana Docker image execution is failed by a threshold set.
  * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
  * @param exitCode
  */

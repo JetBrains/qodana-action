@@ -99,7 +99,7 @@ function parseRules(tool: Tool): Map<string, Rule> {
 /**
  * Converts a SARIF from the given path to a GitHub Check Output.
  * @param path The SARIF path to convert.
- * @returns GitHub Check Output with annotations are created for each result.
+ * @returns GitHub Check Outputs with annotations are created for each result.
  */
 export function parseSarif(path: string): Output {
   const sarif: Log = JSON.parse(fs.readFileSync(path, {encoding: 'utf8'}))

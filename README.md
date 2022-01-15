@@ -11,7 +11,7 @@
 
 <!-- toc -->
 
-- [Qodana Scan](#qodana-scan)
+- Qodana Scan
   - [Usage](#usage)
   - [Configuration](#configuration)
   - [Issue Tracker](#issue-tracker)
@@ -21,7 +21,7 @@
 
 ## Usage
 
-You can run Qodana with GitHub Actions using [Qodana Scan](https://github.com/marketplace/actions/qodana-scan). 
+You can run Qodana with GitHub Actions using [Qodana Scan](https://github.com/marketplace/actions/qodana-scan).
 To do it, add `.github/workflows/code_scanning.yml` to your repository with the following contents:
 
 ```yaml
@@ -45,7 +45,7 @@ jobs:
 ```
 We recommend that you have a separate workflow file for Qodana because [different jobs run in parallel](https://help.github.com/en/actions/getting-started-with-github-actions/core-concepts-for-github-actions#job). 
 
-Using this workflow, Qodana will run on the main branch, release branches, and on the pull requests coming to your 
+Using this workflow, Qodana will run on the main branch, release branches, and on the pull requests coming to your
 repository. Inspection results will be available in the GitHub UI.
 
 ### Get a Qodana badge
@@ -92,7 +92,7 @@ jobs:
 
 ### GitHub Pages
 
-If you want to study [Qodana reports](https://www.jetbrains.com/help/qodana/html-report.html) directly on GitHub, you 
+If you want to study [Qodana reports](https://www.jetbrains.com/help/qodana/html-report.html) directly on GitHub, you
 can host it on your repository [GitHub Pages](https://docs.github.com/en/pages) using this example workflow:
 
 ```yaml
@@ -107,7 +107,7 @@ can host it on your repository [GitHub Pages](https://docs.github.com/en/pages) 
 
 ### Pull request quality gate
 
-You can enforce GitHub to block the merge of pull requests if the Qodana quality gate has failed. To do it, create a 
+You can enforce GitHub to block the merge of pull requests if the Qodana quality gate has failed. To do it, create a
 branch protection rule as described below:
 
 1. Create new or open an existing GitHub workflow with the Qodana Action specified.
@@ -179,7 +179,7 @@ This repository contains source code for Qodana GitHub Action and is licensed un
 
 View [license information](https://www.jetbrains.com/legal/?fromFooter#licensing) for the Qodana Community images.
 
-Qodana Docker images may contain other software which is subject to other licenses, for example, Bash relating to the base distribution or with any direct or indirect dependencies of the primary software).
+Qodana Docker images may contain other software which is subject to other licenses, for example, Bash relating to the base distribution or with any direct or indirect dependencies of the primary software.
 
 As for any pre-built image usage, it is the image user's responsibility to ensure that any use of this image complies with any relevant licenses for all software contained within.
 
