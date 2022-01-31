@@ -5,6 +5,7 @@ import * as core from '@actions/core'
  */
 export interface Inputs {
   linter: string
+  token: string
   projectDir: string
   resultsDir: string
   cacheDir: string
@@ -35,6 +36,7 @@ export interface Inputs {
 export function getInputs(): Inputs {
   return {
     linter: core.getInput('linter'),
+    token: core.getInput('token'),
     projectDir: core.getInput('project-dir'),
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),

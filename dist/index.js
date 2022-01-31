@@ -97,7 +97,7 @@ function parseRules(tool) {
 /**
  * Converts a SARIF from the given path to a GitHub Check Output.
  * @param path The SARIF path to convert.
- * @returns GitHub Check Output with annotations are created for each result.
+ * @returns GitHub Check Outputs with annotations are created for each result.
  */
 function parseSarif(path) {
     var _a;
@@ -265,6 +265,7 @@ const core = __importStar(__nccwpck_require__(2186));
 function getInputs() {
     return {
         linter: core.getInput('linter'),
+        token: core.getInput('token'),
         projectDir: core.getInput('project-dir'),
         resultsDir: core.getInput('results-dir'),
         cacheDir: core.getInput('cache-dir'),
@@ -363,7 +364,7 @@ exports.dockerPull = dockerPull;
 /**
  * Builds the `docker run` command arguments.
  * @param inputs GitHub Actions inputs.
- * @returns The Docker run command arguments.
+ * @returns The Dockers run command arguments.
  */
 function getQodanaRunArgs(inputs) {
     var _a;
@@ -422,6 +423,9 @@ function getQodanaRunArgs(inputs) {
     }
     if (inputs.script !== '') {
         args.push('--script', inputs.script);
+    }
+    if (inputs.token !== '') {
+        args.push('--send-report', '-t', inputs.token);
     }
     return args;
 }
@@ -666,7 +670,7 @@ function isExecutionSuccessful(exitCode) {
 }
 exports.isExecutionSuccessful = isExecutionSuccessful;
 /**
- * Check if Qodana Docker image execution is failed by threshold set.
+ * Check if Qodana Docker image execution is failed by a threshold set.
  * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
  * @param exitCode
  */
@@ -51297,9 +51301,17 @@ AbortError.prototype = Object.create(Error.prototype);
 AbortError.prototype.constructor = AbortError;
 AbortError.prototype.name = 'AbortError';
 
+const URL$1 = Url.URL || whatwgUrl.URL;
+
 // fix an issue where "PassThrough", "resolve" aren't a named export for node <10
 const PassThrough$1 = Stream.PassThrough;
-const resolve_url = Url.resolve;
+
+const isDomainOrSubdomain = function isDomainOrSubdomain(destination, original) {
+	const orig = new URL$1(original).hostname;
+	const dest = new URL$1(destination).hostname;
+
+	return orig === dest || orig[orig.length - dest.length - 1] === '.' && orig.endsWith(dest);
+};
 
 /**
  * Fetch function
@@ -51387,7 +51399,19 @@ function fetch(url, opts) {
 				const location = headers.get('Location');
 
 				// HTTP fetch step 5.3
-				const locationURL = location === null ? null : resolve_url(request.url, location);
+				let locationURL = null;
+				try {
+					locationURL = location === null ? null : new URL$1(location, request.url).toString();
+				} catch (err) {
+					// error here can only be invalid URL in Location: header
+					// do not throw when options.redirect == manual
+					// let the user extract the errorneous redirect URL
+					if (request.redirect !== 'manual') {
+						reject(new FetchError(`uri requested responds with an invalid redirect URL: ${location}`, 'invalid-redirect'));
+						finalize();
+						return;
+					}
+				}
 
 				// HTTP fetch step 5.5
 				switch (request.redirect) {
@@ -51434,6 +51458,12 @@ function fetch(url, opts) {
 							timeout: request.timeout,
 							size: request.size
 						};
+
+						if (!isDomainOrSubdomain(request.url, locationURL)) {
+							for (const name of ['authorization', 'www-authenticate', 'cookie', 'cookie2']) {
+								requestOpts.headers.delete(name);
+							}
+						}
 
 						// HTTP-redirect fetch step 9
 						if (res.statusCode !== 303 && request.body && getTotalBytes(request) === null) {

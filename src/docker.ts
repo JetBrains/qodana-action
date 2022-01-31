@@ -98,5 +98,8 @@ export function getQodanaRunArgs(inputs: Inputs): string[] {
   if (inputs.script !== '') {
     args.push('--script', inputs.script)
   }
+  if (inputs.token !== '') {
+    args.push('--send-report', '-t', inputs.token)
+  }
   return args
 }
