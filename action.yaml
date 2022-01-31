@@ -57,6 +57,9 @@ inputs:
   script:
     description: 'Override the default docker scenario'
     required: false
+  token:
+    description: 'Qodana Cloud token'
+    required: false
   profile-name:
     description: 'Name of a profile defined in the project'
     required: false
