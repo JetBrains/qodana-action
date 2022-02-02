@@ -559,12 +559,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isFailedByThreshold = exports.isExecutionSuccessful = exports.uploadReport = exports.uploadCaches = exports.restoreCaches = exports.NOT_SUPPORTED_IMAGES = exports.OFFICIAL_DOCKER_PREFIX = exports.UNOFFICIAL_LINTER_MESSAGE = exports.NOT_SUPPORTED_LINTER = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.FAIL_THRESHOLD_OUTPUT = exports.QODANA_HELP_STRING = exports.QODANA_SARIF_NAME = exports.QODANA_CHECK_NAME = void 0;
+exports.isGhes = exports.isFailedByThreshold = exports.isExecutionSuccessful = exports.uploadReport = exports.restoreCaches = exports.uploadCaches = exports.NOT_SUPPORTED_IMAGES = exports.OFFICIAL_DOCKER_PREFIX = exports.UNOFFICIAL_LINTER_MESSAGE = exports.NOT_SUPPORTED_LINTER = exports.MAX_ANNOTATIONS = exports.ANNOTATION_NOTICE = exports.ANNOTATION_WARNING = exports.ANNOTATION_FAILURE = exports.SUCCESS_STATUS = exports.NEUTRAL_STATUS = exports.FAILURE_STATUS = exports.FAIL_THRESHOLD_OUTPUT = exports.QODANA_HELP_STRING = exports.QODANA_SARIF_NAME = exports.QODANA_CHECK_NAME = void 0;
 const artifact = __importStar(__nccwpck_require__(2605));
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
 const path_1 = __importDefault(__nccwpck_require__(1017));
+// Catch and log any unhandled exceptions.  These exceptions can leak out of the uploadChunk method in
+// @actions/toolkit when a failed upload closes the file descriptor causing any in-process reads to
+// throw an uncaught exception.  Instead of failing this action, just warn.
+process.on('uncaughtException', e => core.warning(e.message));
 exports.QODANA_CHECK_NAME = 'Qodana';
 exports.QODANA_SARIF_NAME = 'qodana.sarif.json';
 exports.QODANA_HELP_STRING = `
@@ -592,29 +596,6 @@ exports.NOT_SUPPORTED_IMAGES = [
     'jetbrains/qodana-license-audit'
 ];
 /**
- * Restores the cache from GitHub Actions cache to the given path.
- * @param cacheDir The path to restore the cache to.
- * @param additionalCacheHash Addition to the generated cache hash.
- * @param execute whether to execute promise or not.
- */
-function restoreCaches(cacheDir, additionalCacheHash, execute) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!execute) {
-            return;
-        }
-        try {
-            yield cache.restoreCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}${additionalCacheHash}`, [
-                `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`,
-                `${process.env['RUNNER_OS']}-qodana-${additionalCacheHash}`
-            ]);
-        }
-        catch (error) {
-            core.warning(`Failed to download caches – ${error.message}`);
-        }
-    });
-}
-exports.restoreCaches = restoreCaches;
-/**
  * Uploads the cache to GitHub Actions cache from the given path.
  * @param cacheDir The path to upload the cache from.
  * @param additionalCacheHash Addition to the generated cache hash
@@ -626,7 +607,18 @@ function uploadCaches(cacheDir, additionalCacheHash, execute) {
             return;
         }
         try {
-            yield cache.saveCache([cacheDir], `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`);
+            if (isGhes()) {
+                core.warning('Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details');
+                return;
+            }
+            const primaryKey = `qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`;
+            try {
+                yield cache.saveCache([cacheDir], primaryKey);
+                core.info(`Cache saved with key ${primaryKey}`);
+            }
+            catch (error) {
+                core.warning(`Failed to save cache with key ${primaryKey} – ${error.message}`);
+            }
         }
         catch (error) {
             core.warning(`Failed to upload caches – ${error.message}`);
@@ -634,6 +626,42 @@ function uploadCaches(cacheDir, additionalCacheHash, execute) {
     });
 }
 exports.uploadCaches = uploadCaches;
+/**
+ * Restores the cache from GitHub Actions cache to the given path.
+ * @param cacheDir The path to restore the cache to.
+ * @param additionalCacheHash Addition to the generated cache hash.
+ * @param execute whether to execute promise or not.
+ */
+function restoreCaches(cacheDir, additionalCacheHash, execute) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!execute) {
+            return;
+        }
+        try {
+            if (isGhes()) {
+                core.warning('Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details');
+                return;
+            }
+            const primaryKey = `qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`;
+            const restoreKeys = [`qodana-${process.env['GITHUB_REF']}-`, `qodana-`];
+            try {
+                const cacheKey = yield cache.restoreCache([cacheDir], primaryKey, restoreKeys);
+                if (!cacheKey) {
+                    core.info(`Cache not found for input keys: ${[primaryKey, ...restoreKeys].join(', ')}`);
+                    return;
+                }
+                core.info(`Cache restored from key: ${cacheKey}`);
+            }
+            catch (error) {
+                core.warning(`Failed to restore cache with key ${primaryKey} – ${error.message}`);
+            }
+        }
+        catch (error) {
+            core.warning(`Failed to download caches – ${error.message}`);
+        }
+    });
+}
+exports.restoreCaches = restoreCaches;
 /**
  * Uploads the Qodana report files from temp directory to GitHub job artifact.
  * @param resultsDir The path to upload report from.
@@ -646,6 +674,7 @@ function uploadReport(resultsDir, artifactName, execute) {
             return;
         }
         try {
+            core.info('Uploading report...');
             const globber = yield glob.create(`${resultsDir}/*`);
             const files = yield globber.glob();
             yield artifact
@@ -678,6 +707,14 @@ function isFailedByThreshold(exitCode) {
     return exitCode === QODANA_FAILTHRESHOLD_EXIT_CODE;
 }
 exports.isFailedByThreshold = isFailedByThreshold;
+/**
+ * Check if the action is run on GHE.
+ */
+function isGhes() {
+    const ghUrl = new URL(process.env['GITHUB_SERVER_URL'] || 'https://github.com');
+    return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM';
+}
+exports.isGhes = isGhes;
 
 
 /***/ }),
