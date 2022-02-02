@@ -4,6 +4,11 @@ import * as core from '@actions/core'
 import * as glob from '@actions/glob'
 import path from 'path'
 
+// Catch and log any unhandled exceptions.  These exceptions can leak out of the uploadChunk method in
+// @actions/toolkit when a failed upload closes the file descriptor causing any in-process reads to
+// throw an uncaught exception.  Instead of failing this action, just warn.
+process.on('uncaughtException', e => core.warning(e.message))
+
 export const QODANA_CHECK_NAME = 'Qodana'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
 export const QODANA_HELP_STRING = `
@@ -34,34 +39,6 @@ export const NOT_SUPPORTED_IMAGES = [
 ]
 
 /**
- * Restores the cache from GitHub Actions cache to the given path.
- * @param cacheDir The path to restore the cache to.
- * @param additionalCacheHash Addition to the generated cache hash.
- * @param execute whether to execute promise or not.
- */
-export async function restoreCaches(
-  cacheDir: string,
-  additionalCacheHash: string,
-  execute: boolean
-): Promise<void> {
-  if (!execute) {
-    return
-  }
-  try {
-    await cache.restoreCache(
-      [cacheDir],
-      `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}${additionalCacheHash}`,
-      [
-        `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`,
-        `${process.env['RUNNER_OS']}-qodana-${additionalCacheHash}`
-      ]
-    )
-  } catch (error) {
-    core.warning(`Failed to download caches – ${(error as Error).message}`)
-  }
-}
-
-/**
  * Uploads the cache to GitHub Actions cache from the given path.
  * @param cacheDir The path to upload the cache from.
  * @param additionalCacheHash Addition to the generated cache hash
@@ -76,12 +53,75 @@ export async function uploadCaches(
     return
   }
   try {
-    await cache.saveCache(
-      [cacheDir],
-      `${process.env['RUNNER_OS']}-qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`
-    )
+    if (isGhes()) {
+      core.warning(
+        'Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details'
+      )
+      return
+    }
+    const primaryKey = `qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`
+    try {
+      await cache.saveCache([cacheDir], primaryKey)
+      core.info(`Cache saved with key ${primaryKey}`)
+    } catch (error) {
+      core.warning(
+        `Failed to save cache with key ${primaryKey} – ${
+          (error as Error).message
+        }`
+      )
+    }
   } catch (error) {
     core.warning(`Failed to upload caches – ${(error as Error).message}`)
+  }
+}
+
+/**
+ * Restores the cache from GitHub Actions cache to the given path.
+ * @param cacheDir The path to restore the cache to.
+ * @param additionalCacheHash Addition to the generated cache hash.
+ * @param execute whether to execute promise or not.
+ */
+export async function restoreCaches(
+  cacheDir: string,
+  additionalCacheHash: string,
+  execute: boolean
+): Promise<void> {
+  if (!execute) {
+    return
+  }
+  try {
+    if (isGhes()) {
+      core.warning(
+        'Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details'
+      )
+      return
+    }
+    const primaryKey = `qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`
+    const restoreKeys = [`qodana-${process.env['GITHUB_REF']}-`, `qodana-`]
+    try {
+      const cacheKey = await cache.restoreCache(
+        [cacheDir],
+        primaryKey,
+        restoreKeys
+      )
+      if (!cacheKey) {
+        core.info(
+          `Cache not found for input keys: ${[primaryKey, ...restoreKeys].join(
+            ', '
+          )}`
+        )
+        return
+      }
+      core.info(`Cache restored from key: ${cacheKey}`)
+    } catch (error) {
+      core.warning(
+        `Failed to restore cache with key ${primaryKey} – ${
+          (error as Error).message
+        }`
+      )
+    }
+  } catch (error) {
+    core.warning(`Failed to download caches – ${(error as Error).message}`)
   }
 }
 
@@ -100,6 +140,7 @@ export async function uploadReport(
     return
   }
   try {
+    core.info('Uploading report...')
     const globber = await glob.create(`${resultsDir}/*`)
     const files = await globber.glob()
     await artifact
@@ -128,4 +169,14 @@ export function isExecutionSuccessful(exitCode: number): boolean {
  */
 export function isFailedByThreshold(exitCode: number): boolean {
   return exitCode === QODANA_FAILTHRESHOLD_EXIT_CODE
+}
+
+/**
+ * Check if the action is run on GHE.
+ */
+export function isGhes(): boolean {
+  const ghUrl = new URL(
+    process.env['GITHUB_SERVER_URL'] || 'https://github.com'
+  )
+  return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM'
 }
