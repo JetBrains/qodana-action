@@ -5,14 +5,14 @@ branding:
   color: "black"
   icon: "bar-chart-2"
 inputs:
-  linter:
-    description: 'Qodana linter – [official Qodana Docker image](#supported-qodana-docker-images).'
+  args:
+    description: 'Arguments for Qodana CLI'
     required: true
     default: "jetbrains/qodana-jvm-community:latest"
-  project-dir:
-    description: 'Root directory of the project to be analyzed'
+  cli-version:
+    description: 'Qodana CLI version'
     required: false
-    default: "${{ github.workspace }}"
+    default: "0.7.1"
   results-dir:
     description: 'Directory to store the analysis results'
     required: false
@@ -25,47 +25,6 @@ inputs:
     description: 'Pass additional cache hash extension'
     required: false
     default: "${{ github.sha }}"
-  idea-config-dir:
-    description: 'IntelliJ IDEA configuration directory'
-    required: false
-  gradle-settings-path:
-    description: 'Provide path to gradle.properties file. An example: "/your/custom/path/gradle.properties"'
-    required: false
-  additional-volumes:
-    description: 'Mount additional volumes to Docker container'
-    required: false
-  additional-env-variables:
-    description: 'Pass additional environment variables to docker container'
-    required: false
-  fail-threshold:
-    description: 'Set the number of problems that will serve as a quality gate. If this number is reached, the pipeline run is terminated'
-    required: false
-  inspected-dir:
-    description: 'Directory to be inspected. If not specified, the whole project is inspected by default'
-    required: false
-  baseline-path:
-    description: 'Run in baseline mode. Provide the path to an existing SARIF report to be used in the baseline state calculation'
-    required: false
-  baseline-include-absent:
-    description: 'Include the results from the baseline absent in the current Qodana run in the output report'
-    required: false
-    default: "false"
-  changes:
-    description: 'Inspect uncommitted changes and report new problems'
-    required: false
-    default: "false"
-  script:
-    description: 'Override the default docker scenario'
-    required: false
-  token:
-    description: 'Qodana Cloud token'
-    required: false
-  profile-name:
-    description: 'Name of a profile defined in the project'
-    required: false
-  profile-path:
-    description: 'Absolute path to the profile file'
-    required: false
   upload-result:
     description: 'Upload Qodana results as an artifact to the job'
     required: false
