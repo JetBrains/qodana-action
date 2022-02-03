@@ -1,7 +1,7 @@
 import {expect, test} from '@jest/globals'
 import {Output, parseSarif} from '../src/annotations'
 import {Inputs} from '../src/context'
-import {dockerPull, getQodanaRunArgs} from '../src/docker'
+import {getQodanaScanArgs} from '../src/cli'
 import {QODANA_CHECK_NAME, QODANA_HELP_STRING} from '../src/utils'
 
 function outputEmptyFixture(): Output {
@@ -55,68 +55,37 @@ function outputDefaultFixture(): Output {
 
 function inputsDefaultFixture(): Inputs {
   return {
-    linter: 'jetbrains/qodana-jvm-community',
-    projectDir: '${{ github.workspace }}',
+    args: ['--baseline', 'qodana.sarif.json'],
+    cliVersion: '0.0.1',
     resultsDir: '${{ runner.temp }}/qodana-results',
     cacheDir: '${{ runner.temp }}/qodana-caches',
     additionalCacheHash: '',
-    additionalVolumes: ['/tmp/project:/data/project'],
-    additionalEnvVars: ['TESTS=1', 'RANDOM_SEED=42'],
-    inspectedDir: '',
-    ideaConfigDir: '',
-    baselinePath: '',
-    baselineIncludeAbsent: false,
-    failThreshold: '10',
-    profileName: 'qodana.recommended',
-    profilePath: '',
-    gradleSettingsPath: '',
-    changes: false,
-    script: '',
     uploadResults: true,
     artifactName: 'Qodana report',
     useCaches: true,
     useAnnotations: true,
-    githubToken: '',
-    token: ''
+    githubToken: ''
   }
 }
 
 function defaultDockerRunCommandFixture(): string[] {
-  let args = [
-    'run',
-    '--rm',
+  return [
+    'scan',
     '-e',
     'QODANA_ENV=github',
-    '-v',
-    '${{ runner.temp }}/qodana-caches:/data/cache',
-    '-v',
-    '${{ github.workspace }}:/data/project',
-    '-v',
-    '${{ runner.temp }}/qodana-results:/data/results'
+    '--cache-dir',
+    '${{ runner.temp }}/qodana-caches',
+    '--results-dir',
+    '${{ runner.temp }}/qodana-results',
+    '--skip-pull',
+    '--baseline',
+    'qodana.sarif.json'
   ]
-  if (process.platform !== 'win32') {
-    args.push('-u', `${process.getuid()}:${process.getgid()}` ?? '1001:1001')
-  }
-  args.push(
-    '-v',
-    '/tmp/project:/data/project',
-    '-e',
-    'TESTS=1',
-    '-e',
-    'RANDOM_SEED=42',
-    'jetbrains/qodana-jvm-community',
-    '--save-report',
-    '--fail-threshold',
-    '10',
-    '-n',
-    'qodana.recommended'
-  )
-  return args
 }
 
-test('docker run command args', () => {
+test('qodana scan command args', () => {
   const inputs = inputsDefaultFixture()
-  const result = getQodanaRunArgs(inputs)
+  const result = getQodanaScanArgs(inputs)
   expect(result).toEqual(defaultDockerRunCommandFixture())
 })
 
@@ -130,10 +99,4 @@ test('test sarif with no problems to output annotations', () => {
   const output = outputEmptyFixture()
   const result = parseSarif('__tests__/data/empty.sarif.json')
   expect(result).toEqual(output)
-})
-
-test('fail pulling unsuppored linter', async () => {
-  const inputs = inputsDefaultFixture()
-  inputs.linter = 'jetbrains/qodana-clone-finder'
-  await expect(dockerPull(inputs.linter)).rejects.toThrow()
 })

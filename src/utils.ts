@@ -26,17 +26,8 @@ export const ANNOTATION_FAILURE = 'failure'
 export const ANNOTATION_WARNING = 'warning'
 export const ANNOTATION_NOTICE = 'notice'
 export const MAX_ANNOTATIONS = 50
-
-export const NOT_SUPPORTED_LINTER = 'linter is not supported by the action!'
-export const UNOFFICIAL_LINTER_MESSAGE = `You are using an unofficial Qodana Docker image. 
-      This CI pipeline could be not working as expected!`
 const QODANA_SUCCESS_EXIT_CODE = 0
 const QODANA_FAILTHRESHOLD_EXIT_CODE = 255
-export const OFFICIAL_DOCKER_PREFIX = 'jetbrains/'
-export const NOT_SUPPORTED_IMAGES = [
-  'jetbrains/qodana-clone-finder',
-  'jetbrains/qodana-license-audit'
-]
 
 /**
  * Uploads the cache to GitHub Actions cache from the given path.

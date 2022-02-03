@@ -9,7 +9,7 @@ import {
   uploadCaches,
   uploadReport
 } from './utils'
-import {docker, dockerPull, getQodanaRunArgs} from './docker'
+import {getQodanaScanArgs, prepareAgent, qodana} from './cli'
 import {getInputs} from './context'
 import {publishAnnotations} from './annotations'
 
@@ -25,6 +25,10 @@ import {publishAnnotations} from './annotations'
  * Every step except the Qodana image run is optional.
  */
 async function main(): Promise<void> {
+  if (process.platform !== 'linux') {
+    core.setFailed('Qodana Scan action is only supported on Linux runners')
+    return
+  }
   try {
     const inputs = getInputs()
     await Promise.all([
@@ -32,15 +36,15 @@ async function main(): Promise<void> {
       io.mkdirP(inputs.cacheDir)
     ])
     await Promise.all([
-      dockerPull(inputs.linter),
+      prepareAgent(inputs.cliVersion, inputs.args),
       restoreCaches(
         inputs.cacheDir,
         inputs.additionalCacheHash,
         inputs.useCaches
       )
     ])
-    const dockerExec = await docker(getQodanaRunArgs(inputs))
-    const failedByThreshold = isFailedByThreshold(dockerExec.exitCode)
+    const cliExec = await qodana(getQodanaScanArgs(inputs))
+    const failedByThreshold = isFailedByThreshold(cliExec.exitCode)
     await Promise.all([
       uploadReport(
         inputs.resultsDir,
@@ -50,17 +54,17 @@ async function main(): Promise<void> {
       uploadCaches(
         inputs.cacheDir,
         inputs.additionalCacheHash,
-        inputs.useCaches && isExecutionSuccessful(dockerExec.exitCode)
+        inputs.useCaches && isExecutionSuccessful(cliExec.exitCode)
       ),
       publishAnnotations(
         failedByThreshold,
         inputs.githubToken,
         `${inputs.resultsDir}/${QODANA_SARIF_NAME}`,
-        inputs.useAnnotations && isExecutionSuccessful(dockerExec.exitCode)
+        inputs.useAnnotations && isExecutionSuccessful(cliExec.exitCode)
       )
     ])
-    if (!isExecutionSuccessful(dockerExec.exitCode)) {
-      core.setFailed(dockerExec.stderr.trim())
+    if (!isExecutionSuccessful(cliExec.exitCode)) {
+      core.setFailed(cliExec.stderr.trim())
     } else if (failedByThreshold) {
       core.setFailed(FAIL_THRESHOLD_OUTPUT)
     }
