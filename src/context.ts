@@ -5,7 +5,6 @@ import * as core from '@actions/core'
  */
 export interface Inputs {
   args: string[]
-  cliVersion: string
   resultsDir: string
   cacheDir: string
   additionalCacheHash: string
@@ -23,7 +22,6 @@ export interface Inputs {
 export function getInputs(): Inputs {
   return {
     args: core.getInput('args').split(' '),
-    cliVersion: core.getInput('cli-version'),
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
     additionalCacheHash: core.getInput('additional-cache-hash'),

@@ -4,11 +4,12 @@ import * as tc from '@actions/tool-cache'
 import {Inputs} from './context'
 
 const cliPath = '/home/runner/work/_temp/qodana/cli'
+const cliVersion = '0.7.1'
 
 /**
- * Runs the docker command with the given arguments.
+ * Runs the qodana command with the given arguments.
  * @param args docker command arguments.
- * @returns The docker command execution output.
+ * @returns The qodana command execution output.
  */
 export async function qodana(args: string[]): Promise<exec.ExecOutput> {
   return await exec.getExecOutput('qodana', args, {
@@ -16,6 +17,11 @@ export async function qodana(args: string[]): Promise<exec.ExecOutput> {
   })
 }
 
+/**
+ * Finds linter argument in the given args, if there is one.
+ * @param args qodana command arguments.
+ * @returns the linter to use.
+ */
 function extractArgsLinter(args: string[]): string {
   let linter = ''
   for (let i = 0; i < args.length; i++) {
@@ -27,10 +33,11 @@ function extractArgsLinter(args: string[]): string {
   return linter
 }
 
-export async function prepareAgent(
-  cliVersion: string,
-  args: string[]
-): Promise<void> {
+/**
+ * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
+ * @param args qodana arguments
+ */
+export async function prepareAgent(args: string[]): Promise<void> {
   const cliUrl = `https://github.com/JetBrains/qodana-cli/releases/download/v${cliVersion}/qodana_${cliVersion}_Linux_x86_64.tar.gz`
   const qodanaTarPath = await tc.downloadTool(cliUrl)
   await tc.extractTar(qodanaTarPath, cliPath)
@@ -49,9 +56,9 @@ export async function prepareAgent(
 }
 
 /**
- * Builds the `docker run` command arguments.
+ * Builds the `qodana scan` command arguments.
  * @param inputs GitHub Actions inputs.
- * @returns The Dockers run command arguments.
+ * @returns The `qodana scan` command arguments.
  */
 export function getQodanaScanArgs(inputs: Inputs): string[] {
   const cliArgs: string[] = [
