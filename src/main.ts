@@ -36,7 +36,7 @@ async function main(): Promise<void> {
       io.mkdirP(inputs.cacheDir)
     ])
     await Promise.all([
-      prepareAgent(inputs.cliVersion, inputs.args),
+      prepareAgent(inputs.args),
       restoreCaches(
         inputs.cacheDir,
         inputs.additionalCacheHash,

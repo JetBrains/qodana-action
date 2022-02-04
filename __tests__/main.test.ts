@@ -56,7 +56,6 @@ function outputDefaultFixture(): Output {
 function inputsDefaultFixture(): Inputs {
   return {
     args: ['--baseline', 'qodana.sarif.json'],
-    cliVersion: '0.0.1',
     resultsDir: '${{ runner.temp }}/qodana-results',
     cacheDir: '${{ runner.temp }}/qodana-caches',
     additionalCacheHash: '',

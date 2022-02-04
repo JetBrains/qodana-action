@@ -270,10 +270,11 @@ const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const tc = __importStar(__nccwpck_require__(7784));
 const cliPath = '/home/runner/work/_temp/qodana/cli';
+const cliVersion = '0.7.1';
 /**
- * Runs the docker command with the given arguments.
+ * Runs the qodana command with the given arguments.
  * @param args docker command arguments.
- * @returns The docker command execution output.
+ * @returns The qodana command execution output.
  */
 function qodana(args) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -283,6 +284,11 @@ function qodana(args) {
     });
 }
 exports.qodana = qodana;
+/**
+ * Finds linter argument in the given args, if there is one.
+ * @param args qodana command arguments.
+ * @returns the linter to use.
+ */
 function extractArgsLinter(args) {
     let linter = '';
     for (let i = 0; i < args.length; i++) {
@@ -293,7 +299,11 @@ function extractArgsLinter(args) {
     }
     return linter;
 }
-function prepareAgent(cliVersion, args) {
+/**
+ * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
+ * @param args qodana arguments
+ */
+function prepareAgent(args) {
     return __awaiter(this, void 0, void 0, function* () {
         const cliUrl = `https://github.com/JetBrains/qodana-cli/releases/download/v${cliVersion}/qodana_${cliVersion}_Linux_x86_64.tar.gz`;
         const qodanaTarPath = yield tc.downloadTool(cliUrl);
@@ -314,9 +324,9 @@ function prepareAgent(cliVersion, args) {
 }
 exports.prepareAgent = prepareAgent;
 /**
- * Builds the `docker run` command arguments.
+ * Builds the `qodana scan` command arguments.
  * @param inputs GitHub Actions inputs.
- * @returns The Dockers run command arguments.
+ * @returns The `qodana scan` command arguments.
  */
 function getQodanaScanArgs(inputs) {
     const cliArgs = [
@@ -373,7 +383,6 @@ const core = __importStar(__nccwpck_require__(2186));
 function getInputs() {
     return {
         args: core.getInput('args').split(' '),
-        cliVersion: core.getInput('cli-version'),
         resultsDir: core.getInput('results-dir'),
         cacheDir: core.getInput('cache-dir'),
         additionalCacheHash: core.getInput('additional-cache-hash'),
@@ -453,7 +462,7 @@ function main() {
                 io.mkdirP(inputs.cacheDir)
             ]);
             yield Promise.all([
-                (0, cli_1.prepareAgent)(inputs.cliVersion, inputs.args),
+                (0, cli_1.prepareAgent)(inputs.args),
                 (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.additionalCacheHash, inputs.useCaches)
             ]);
             const cliExec = yield (0, cli_1.qodana)((0, cli_1.getQodanaScanArgs)(inputs));
