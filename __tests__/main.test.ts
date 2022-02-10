@@ -70,13 +70,13 @@ function inputsDefaultFixture(): Inputs {
 function defaultDockerRunCommandFixture(): string[] {
   return [
     'scan',
+    '--skip-pull',
     '-e',
     'QODANA_ENV=github',
     '--cache-dir',
     '${{ runner.temp }}/qodana-caches',
     '--results-dir',
     '${{ runner.temp }}/qodana-results',
-    '--skip-pull',
     '--baseline',
     'qodana.sarif.json'
   ]

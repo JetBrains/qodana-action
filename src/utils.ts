@@ -19,6 +19,9 @@ export const QODANA_HELP_STRING = `
 `
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
+const QODANA_SUCCESS_EXIT_CODE = 0
+const QODANA_FAILTHRESHOLD_EXIT_CODE = 255
+
 export const FAILURE_STATUS = 'failure'
 export const NEUTRAL_STATUS = 'neutral'
 export const SUCCESS_STATUS = 'success'
@@ -26,8 +29,6 @@ export const ANNOTATION_FAILURE = 'failure'
 export const ANNOTATION_WARNING = 'warning'
 export const ANNOTATION_NOTICE = 'notice'
 export const MAX_ANNOTATIONS = 50
-const QODANA_SUCCESS_EXIT_CODE = 0
-const QODANA_FAILTHRESHOLD_EXIT_CODE = 255
 
 /**
  * Uploads the cache to GitHub Actions cache from the given path.
