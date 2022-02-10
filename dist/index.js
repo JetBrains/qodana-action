@@ -265,25 +265,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getQodanaScanArgs = exports.prepareAgent = exports.qodana = void 0;
+exports.prepareAgent = exports.qodana = exports.getQodanaScanArgs = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const tc = __importStar(__nccwpck_require__(7784));
 const cliPath = '/home/runner/work/_temp/qodana/cli';
-const cliVersion = '0.7.1';
-/**
- * Runs the qodana command with the given arguments.
- * @param args docker command arguments.
- * @returns The qodana command execution output.
- */
-function qodana(args) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return yield exec.getExecOutput('qodana', args, {
-            ignoreReturnCode: true
-        });
-    });
+const version = '0.7.4';
+const tool = 'qodana';
+function getQodanaCliUrl() {
+    const base = `https://github.com/JetBrains/qodana-cli/releases/download/v${version}/`;
+    const arch = process.arch === 'x64' ? 'x86_64' : 'arm64';
+    const archive = process.platform === 'win32' ? 'zip' : 'tar.gz';
+    switch (process.platform) {
+        case 'darwin':
+            return `${base}/qodana_darwin_${arch}.${archive}`;
+        case 'linux':
+            return `${base}/qodana_linux_${arch}.${archive}`;
+        case 'win32':
+            return `${base}/qodana_windows_${arch}.${archive}`;
+        default:
+            throw new Error(`Unsupported platform: ${process.platform}`);
+    }
 }
-exports.qodana = qodana;
 /**
  * Finds linter argument in the given args, if there is one.
  * @param args qodana command arguments.
@@ -300,18 +303,56 @@ function extractArgsLinter(args) {
     return linter;
 }
 /**
+ * Builds the `qodana scan` command arguments.
+ * @param inputs GitHub Actions inputs.
+ * @returns The `qodana scan` command arguments.
+ */
+function getQodanaScanArgs(inputs) {
+    const cliArgs = [
+        'scan',
+        '--skip-pull',
+        '-e',
+        'QODANA_ENV=github',
+        '--cache-dir',
+        inputs.cacheDir,
+        '--results-dir',
+        inputs.resultsDir
+    ];
+    if (inputs.args) {
+        cliArgs.push(...inputs.args);
+    }
+    return cliArgs;
+}
+exports.getQodanaScanArgs = getQodanaScanArgs;
+/**
+ * Runs the qodana command with the given arguments.
+ * @param args docker command arguments.
+ * @returns The qodana command execution output.
+ */
+function qodana(args) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield exec.getExecOutput(tool, args, {
+            ignoreReturnCode: true
+        });
+    });
+}
+exports.qodana = qodana;
+/**
  * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
  * @param args qodana arguments
  */
 function prepareAgent(args) {
     return __awaiter(this, void 0, void 0, function* () {
-        const cliUrl = `https://github.com/JetBrains/qodana-cli/releases/download/v${cliVersion}/qodana_${cliVersion}_Linux_x86_64.tar.gz`;
-        const qodanaTarPath = yield tc.downloadTool(cliUrl);
-        yield tc.extractTar(qodanaTarPath, cliPath);
-        const cachedPath = yield tc.cacheDir(cliPath, 'qodana', cliVersion);
-        core.addPath(cachedPath);
-        const linter = extractArgsLinter(args);
+        const qodanaArchivePath = yield tc.downloadTool(getQodanaCliUrl());
+        if (process.platform === 'win32') {
+            yield tc.extractZip(qodanaArchivePath, cliPath);
+        }
+        else {
+            yield tc.extractTar(qodanaArchivePath, cliPath);
+        }
+        core.addPath(yield tc.cacheDir(cliPath, tool, version));
         const pullArgs = ['pull'];
+        const linter = extractArgsLinter(args);
         if (linter) {
             pullArgs.push('-l', linter);
         }
@@ -323,28 +364,6 @@ function prepareAgent(args) {
     });
 }
 exports.prepareAgent = prepareAgent;
-/**
- * Builds the `qodana scan` command arguments.
- * @param inputs GitHub Actions inputs.
- * @returns The `qodana scan` command arguments.
- */
-function getQodanaScanArgs(inputs) {
-    const cliArgs = [
-        'scan',
-        '-e',
-        'QODANA_ENV=github',
-        '--cache-dir',
-        inputs.cacheDir,
-        '--results-dir',
-        inputs.resultsDir,
-        '--skip-pull'
-    ];
-    if (inputs.args) {
-        cliArgs.push(...inputs.args);
-    }
-    return cliArgs;
-}
-exports.getQodanaScanArgs = getQodanaScanArgs;
 
 
 /***/ }),
@@ -451,10 +470,6 @@ const annotations_1 = __nccwpck_require__(5598);
  */
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        if (process.platform !== 'linux') {
-            core.setFailed('Qodana Scan action is only supported on Linux runners');
-            return;
-        }
         try {
             const inputs = (0, context_1.getInputs)();
             yield Promise.all([
@@ -546,6 +561,8 @@ exports.QODANA_HELP_STRING = `
   🔥 Or share your feedback: https://jb.gg/qodana-discussions
 `;
 exports.FAIL_THRESHOLD_OUTPUT = 'The number of problems exceeds the failThreshold';
+const QODANA_SUCCESS_EXIT_CODE = 0;
+const QODANA_FAILTHRESHOLD_EXIT_CODE = 255;
 exports.FAILURE_STATUS = 'failure';
 exports.NEUTRAL_STATUS = 'neutral';
 exports.SUCCESS_STATUS = 'success';
@@ -553,8 +570,6 @@ exports.ANNOTATION_FAILURE = 'failure';
 exports.ANNOTATION_WARNING = 'warning';
 exports.ANNOTATION_NOTICE = 'notice';
 exports.MAX_ANNOTATIONS = 50;
-const QODANA_SUCCESS_EXIT_CODE = 0;
-const QODANA_FAILTHRESHOLD_EXIT_CODE = 255;
 /**
  * Uploads the cache to GitHub Actions cache from the given path.
  * @param cacheDir The path to upload the cache from.

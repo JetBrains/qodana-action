@@ -25,10 +25,6 @@ import {publishAnnotations} from './annotations'
  * Every step except the Qodana image run is optional.
  */
 async function main(): Promise<void> {
-  if (process.platform !== 'linux') {
-    core.setFailed('Qodana Scan action is only supported on Linux runners')
-    return
-  }
   try {
     const inputs = getInputs()
     await Promise.all([
