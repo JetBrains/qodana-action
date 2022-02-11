@@ -184,7 +184,7 @@ Most likely you won't need other options than `args`: all other options can be u
 | `upload-result`         | Upload Qodana results as an artifact to the job. Optional.                              | `true`                              |
 | `artifact-name`         | Specify Qodana results artifact name, used for results uploading. Optional.             | `Qodana report`                     |
 | `use-annotations`       | Use annotation to mark the results in the GitHub user interface. Optional.              | `true`                              |
-| `github-token`          | GitHub token to be used for uploading results. Optional.                                | `${{ github.token }}`               |
+| `github-token`          | GitHub token to be used for uploading annotations. Optional.                            | `${{ github.token }}`               |
 
 ## Issue Tracker
 
