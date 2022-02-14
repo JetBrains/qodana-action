@@ -1,24 +1,24 @@
-// Some methods are adapted from SirYwell/sarif-annotator repository (MIT license)
-// https://github.com/SirYwell/sarif-annotator/blob/main/src/main.ts
-// https://github.com/SirYwell/sarif-annotator/blob/main/src/qodana-converter.ts
-// (Source: https://github.com/SirYwell/sarif-annotator retrieved in December 2021.)
 /* eslint-disable @typescript-eslint/no-non-null-assertion,github/array-foreach */
 import * as core from '@actions/core'
 import * as fs from 'fs'
-import {
-  ANNOTATION_FAILURE,
-  ANNOTATION_NOTICE,
-  ANNOTATION_WARNING,
-  FAILURE_STATUS,
-  MAX_ANNOTATIONS,
-  NEUTRAL_STATUS,
-  QODANA_CHECK_NAME,
-  QODANA_HELP_STRING,
-  SUCCESS_STATUS
-} from './utils'
 import type {Log, Result, Tool} from 'sarif'
 import {context, getOctokit} from '@actions/github'
 import {GitHub} from '@actions/github/lib/utils'
+
+export const QODANA_HELP_STRING = `
+  📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
+  📭 Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
+  👀 Or via our issue tracker: https://jb.gg/qodana-issue
+  🔥 Or share your feedback: https://jb.gg/qodana-discussions
+`
+export const QODANA_CHECK_NAME = 'Qodana'
+const FAILURE_STATUS = 'failure'
+const NEUTRAL_STATUS = 'neutral'
+const SUCCESS_STATUS = 'success'
+const ANNOTATION_FAILURE = 'failure'
+const ANNOTATION_WARNING = 'warning'
+const ANNOTATION_NOTICE = 'notice'
+const MAX_ANNOTATIONS = 50
 
 export interface Rule {
   shortDescription: string
@@ -60,7 +60,7 @@ function parseResult(
     title: rules.get(result.ruleId!!)?.shortDescription!!,
     path: location.artifactLocation!!.uri!!,
     start_line: region.startLine!!,
-    end_line: region.endLine!! ? region.endLine : region.startLine!!,
+    end_line: region.endLine || region.startLine!!,
     start_column:
       region.startLine === region.endColumn ? region.startColumn : undefined,
     end_column:

@@ -6,41 +6,41 @@ branding:
   icon: "bar-chart-2"
 inputs:
   args:
-    description: 'Qodana CLI arguments'
+    description: 'Additional Qodana CLI arguments. Separate multiple arguments with commas (`,`).'
     required: false
     default: ""
-  results-dir:
+  resultsDir:
     description: 'Directory to store the analysis results'
     required: false
     default: "${{ runner.temp }}/qodana/results"
-  cache-dir:
+  cacheDir:
     description: 'Directory to store Qodana caches'
     required: false
     default: "${{ runner.temp }}/qodana/caches"
-  use-caches:
-    description: 'Utilize GitHub caches for Qodana runs'
+  syncCache:
+    description: 'Automatically restore and save Qodana caches using GitHub caches'
     required: false
     default: "true"
-  additional-cache-hash:
+  additionalCacheHash:
     description: 'Pass additional cache hash extension'
     required: false
     default: "${{ github.sha }}"
-  upload-result:
+  uploadResults:
     description: 'Upload Qodana results as an artifact to the job'
     required: false
     default: "true"
-  artifact-name:
+  artifactName:
     description: 'Specify Qodana results artifact name, used for results uploading'
     required: false
-    default: "Qodana report"
-  use-annotations:
+    default: "qodana-report"
+  useAnnotations:
     description: 'Use annotation to mark the results in the GitHub user interface'
     required: false
     default: "true"
-  github-token:
+  githubToken:
     description: 'GitHub token to be used for uploading annotations'
     required: false
     default: ${{ github.token }}
 runs:
   using: 'node12'
-  main: 'dist/index.js'
+  main: 'scan/dist/index.js'

@@ -1,0 +1,22 @@
+### The repository and extensions
+
+https://github.com/jetbrains/qodana-action repository contains source code for Qodana GitHub action (Qodana Scan) and Qodana Azure Pipelines extension with Qodana Scan task and is licensed under [Apache-2.0](https://github.com/JetBrains/qodana-action/blob/main/LICENSE).
+
+### Qodana Docker images
+
+#### Qodana Community images
+
+View [license information](https://www.jetbrains.com/legal/?fromFooter#licensing) for the Qodana Community images.
+
+Qodana Docker images may contain other software which is subject to other licenses, for example, Bash relating to the
+base distribution or with any direct or indirect dependencies of the primary software.
+
+As for any pre-built image usage, it is the image user's responsibility to ensure that any use of this image complies
+with any relevant licenses for all software contained within.
+
+#### Qodana EAP images
+
+Using the Qodana EAP Docker images, you agree
+to [JetBrains EAP user agreement](https://www.jetbrains.com/legal/docs/toolbox/user_eap/)
+and [JetBrains privacy policy](https://www.jetbrains.com/legal/docs/privacy/privacy/). The docker image includes an
+evaluation license which will expire in 30-day. Please ensure you pull a new image on time.

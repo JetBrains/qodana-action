@@ -1,0 +1,80 @@
+{
+  "manifestVersion": 1,
+  "id": "qodana",
+  "name": "Qodana",
+  "version": "1.0.3",
+  "publisher": "tiulpin",
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "description": "Scan your project with Qodana (https://jetbrains.com/qodana)",
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "icons": {
+    "default": "qodana.png"
+  },
+  "branding": {
+    "color": "rgb(243, 243, 243)",
+    "theme": "light"
+  },
+  "content": {
+    "details": {
+      "path": "README.md"
+    },
+    "license": {
+      "path": "LICENSE"
+    }
+  },
+  "tags": [
+    "build",
+    "ci",
+    "static code analysis",
+    "continuous integration",
+    "code quality",
+    "static analysis",
+    "code inspections"
+  ],
+  "links": {
+    "home": {
+      "uri": "https://jetbrains.com/qodana"
+    },
+    "getstarted": {
+      "uri": "https://jetbrains.com/qodana/help"
+    },
+    "support": {
+      "uri": "mailto:qodana-support@jetbrains.com"
+    },
+    "privacypolicy": {
+      "uri": "https://www.jetbrains.com/legal/docs/privacy/privacy/"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/JetBrains/qodana-action"
+  },
+  "files": [
+    {
+      "path": "QodanaScan"
+    }
+  ],
+  "scopes": [
+    "vso.build",
+    "vso.code",
+    "vso.test"
+  ],
+  "contributions": [
+    {
+      "id": "QodanaScan",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "QodanaScan"
+      }
+    }
+  ]
+}
