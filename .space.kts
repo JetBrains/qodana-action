@@ -4,9 +4,8 @@ job("publish ci-common") {
         shellScript {
             content = """
                 cd common
-                npm ci
+                npm install
                 npm run build --if-present
-                npm run test
                 echo "registry = ${'$'}REGISTRY" >> ~/.npmrc
                 AUTH=${'$'}(echo -ne "${'$'}JB_SPACE_CLIENT_ID:${'$'}JB_SPACE_CLIENT_SECRET" | base64 | tr -d \\n)
                 echo "_auth = ${'$'}AUTH" >> ~/.npmrc
