@@ -8,6 +8,7 @@ include:
 exclude:
   - name: All
     paths:
-      - jest.config.js
-      - .qodana
-      - lib
+      - scan/jest.config.js
+      - scan/lib
+      - vsts/lib
+      - vsts/QodanaScan

@@ -58,7 +58,7 @@
   ],
   "execution": {
     "Node10": {
-      "target": "main.js"
+      "target": "index.js"
     }
   }
 }

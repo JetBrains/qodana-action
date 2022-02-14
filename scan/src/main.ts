@@ -3,9 +3,9 @@ import * as io from '@actions/io'
 import {
   FAIL_THRESHOLD_OUTPUT,
   QODANA_SARIF_NAME,
-  isExecutionSuccessful,
-  isFailedByThreshold
-} from '@qodana/ci-common'
+  QodanaExitCode,
+  isExecutionSuccessful
+} from '../../common/qodana'
 import {
   getInputs,
   prepareAgent,
@@ -50,7 +50,6 @@ async function main(): Promise<void> {
       )
     ])
     const exitCode = await qodana()
-    const failedByThreshold = isFailedByThreshold(exitCode)
     await Promise.all([
       uploadReport(
         inputs.resultsDir,
@@ -63,7 +62,7 @@ async function main(): Promise<void> {
         inputs.useCaches && isExecutionSuccessful(exitCode)
       ),
       publishAnnotations(
-        failedByThreshold,
+        exitCode === QodanaExitCode.FailThreshold,
         inputs.githubToken,
         `${inputs.resultsDir}/${QODANA_SARIF_NAME}`,
         inputs.useAnnotations && isExecutionSuccessful(exitCode)
@@ -71,7 +70,7 @@ async function main(): Promise<void> {
     ])
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)
-    } else if (failedByThreshold) {
+    } else if (exitCode === QodanaExitCode.FailThreshold) {
       setFailed(FAIL_THRESHOLD_OUTPUT)
     }
   } catch (error) {

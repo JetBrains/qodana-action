@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: cd action && npm ci
       - name: Rebuild the dist/ directory
-        run: cd scan && npm run build
+        run: cd scan && npm run build && npm run package
       - name: Compare the expected and actual dist/ directories
         run: |
           if [ "$(git diff --ignore-space-at-eol scan/dist/ | wc -l)" -gt "0" ]; then

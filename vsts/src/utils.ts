@@ -3,23 +3,17 @@ import * as tl from 'azure-pipelines-task-lib/task'
 import * as tool from 'azure-pipelines-tool-lib'
 import {
   EXECUTABLE,
-  extractArgsLinter,
-  FAIL_THRESHOLD_OUTPUT,
+  Inputs,
+  VERSION,
   getQodanaCliUrl,
-  getQodanaScanArgs,
-  Inputs, isExecutionSuccessful,
-  isFailedByThreshold,
-  VERSION
-} from '@qodana/ci-common'
+  getQodanaPullArgs,
+  getQodanaScanArgs
+} from '../../common/qodana'
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 import path = require('path')
 
-// Catch and log any unhandled exceptions. These exceptions can leak out in
-// azure-pipelines-task-lib when a failed upload closes the file descriptor causing any in-process reads to
-// throw an uncaught exception.  Instead of failing this action, just warn.
-process.on('uncaughtException', e => tl.warning(e.message))
-
-function setFailed(message: string): void {
+export function setFailed(message: string): void {
   tl.setResult(tl.TaskResult.Failed, message)
 }
 
@@ -50,9 +44,15 @@ export function getInputs(): Inputs {
  * @returns The qodana command execution output.
  */
 export async function qodana(args: string[] = []): Promise<number> {
+  const env = isServer() ? 'azure-server' : 'azure-services'
   if (args.length === 0) {
     const inputs = getInputs()
-    args = getQodanaScanArgs(inputs)
+    args = getQodanaScanArgs(
+      inputs.args,
+      inputs.resultsDir,
+      inputs.cacheDir,
+      env
+    )
   }
   return tl.exec(EXECUTABLE, args, {
     ignoreReturnCode: true
@@ -72,15 +72,9 @@ export async function prepareAgent(args: string[]): Promise<void> {
     extractRoot = await tool.extractTar(temp)
   }
   tool.prependPath(await tool.cacheDir(extractRoot, EXECUTABLE, VERSION))
-  const pullArgs = ['pull']
-  const linter = extractArgsLinter(args)
-  if (linter) {
-    pullArgs.push('-l', linter)
-  }
-  const pull = await qodana(pullArgs)
+  const pull = await qodana(getQodanaPullArgs(args))
   if (pull !== 0) {
-    tl.setResult(tl.TaskResult.Failed, "Unable to run 'qodana pull'")
-    return
+    setFailed("Unable to run 'qodana pull'")
   }
 }
 
@@ -111,26 +105,9 @@ export async function uploadReport(
   }
 }
 
-async function main(): Promise<void> {
-  try {
-    const inputs = getInputs()
-    tl.mkdirP(inputs.resultsDir)
-    tl.mkdirP(inputs.cacheDir)
-    await Promise.all([prepareAgent(inputs.args)])
-    const exitCode = await qodana()
-    const failedByThreshold = isFailedByThreshold(exitCode)
-    await Promise.all([
-      uploadReport(inputs.resultsDir, inputs.artifactName, inputs.uploadResults)
-    ])
-    if (!isExecutionSuccessful(exitCode)) {
-      setFailed(`qodana scan failed with exit code ${exitCode}`)
-    } else if (failedByThreshold) {
-      setFailed(FAIL_THRESHOLD_OUTPUT)
-    }
-  } catch (error) {
-    setFailed((error as Error).message)
-  }
+/**
+ * Check if the pipeline is run on Azure DevOps Server.
+ */
+function isServer(): boolean {
+  return tl.getVariable('SYSTEM_TEAMFOUNDATIONCOLLECTIONURI') !== undefined
 }
-
-// noinspection JSIgnoredPromiseFromCall
-main()
