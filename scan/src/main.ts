@@ -4,14 +4,26 @@ import {
   FAIL_THRESHOLD_OUTPUT,
   QODANA_SARIF_NAME,
   isExecutionSuccessful,
-  isFailedByThreshold,
+  isFailedByThreshold
+} from '@qodana/ci-common'
+import {
+  getInputs,
+  prepareAgent,
+  qodana,
   restoreCaches,
   uploadCaches,
   uploadReport
 } from './utils'
-import {getQodanaScanArgs, prepareAgent, qodana} from './cli'
-import {getInputs} from './context'
 import {publishAnnotations} from './annotations'
+
+// Catch and log any unhandled exceptions.  These exceptions can leak out of the uploadChunk method in
+// @actions/toolkit when a failed upload closes the file descriptor causing any in-process reads to
+// throw an uncaught exception.  Instead of failing this action, just warn.
+process.on('uncaughtException', e => core.warning(e.message))
+
+function setFailed(message: string): void {
+  core.setFailed(message)
+}
 
 /**
  * Main Qodana GitHub Action entrypoint.
@@ -27,10 +39,8 @@ import {publishAnnotations} from './annotations'
 async function main(): Promise<void> {
   try {
     const inputs = getInputs()
-    await Promise.all([
-      io.mkdirP(inputs.resultsDir),
-      io.mkdirP(inputs.cacheDir)
-    ])
+    await io.mkdirP(inputs.resultsDir)
+    await io.mkdirP(inputs.cacheDir)
     await Promise.all([
       prepareAgent(inputs.args),
       restoreCaches(
@@ -39,8 +49,8 @@ async function main(): Promise<void> {
         inputs.useCaches
       )
     ])
-    const cliExec = await qodana(getQodanaScanArgs(inputs))
-    const failedByThreshold = isFailedByThreshold(cliExec.exitCode)
+    const exitCode = await qodana()
+    const failedByThreshold = isFailedByThreshold(exitCode)
     await Promise.all([
       uploadReport(
         inputs.resultsDir,
@@ -50,22 +60,22 @@ async function main(): Promise<void> {
       uploadCaches(
         inputs.cacheDir,
         inputs.additionalCacheHash,
-        inputs.useCaches && isExecutionSuccessful(cliExec.exitCode)
+        inputs.useCaches && isExecutionSuccessful(exitCode)
       ),
       publishAnnotations(
         failedByThreshold,
         inputs.githubToken,
         `${inputs.resultsDir}/${QODANA_SARIF_NAME}`,
-        inputs.useAnnotations && isExecutionSuccessful(cliExec.exitCode)
+        inputs.useAnnotations && isExecutionSuccessful(exitCode)
       )
     ])
-    if (!isExecutionSuccessful(cliExec.exitCode)) {
-      core.setFailed(cliExec.stderr.trim())
+    if (!isExecutionSuccessful(exitCode)) {
+      setFailed(`qodana scan failed with exit code ${exitCode}`)
     } else if (failedByThreshold) {
-      core.setFailed(FAIL_THRESHOLD_OUTPUT)
+      setFailed(FAIL_THRESHOLD_OUTPUT)
     }
   } catch (error) {
-    core.setFailed((error as Error).message)
+    setFailed((error as Error).message)
   }
 }
 

@@ -1,34 +1,105 @@
 import * as artifact from '@actions/artifact'
 import * as cache from '@actions/cache'
 import * as core from '@actions/core'
+import * as exec from '@actions/exec'
 import * as glob from '@actions/glob'
+import * as tc from '@actions/tool-cache'
+import {
+  EXECUTABLE,
+  Inputs,
+  VERSION,
+  extractArgsLinter,
+  getQodanaCliUrl,
+  getQodanaScanArgs
+} from '@qodana/ci-common'
 import path from 'path'
 
-// Catch and log any unhandled exceptions.  These exceptions can leak out of the uploadChunk method in
-// @actions/toolkit when a failed upload closes the file descriptor causing any in-process reads to
-// throw an uncaught exception.  Instead of failing this action, just warn.
-process.on('uncaughtException', e => core.warning(e.message))
+/**
+ * The context for the action.
+ * @returns The action inputs.
+ */
+export function getInputs(): Inputs {
+  return {
+    args: core.getInput('args').split(','),
+    resultsDir: core.getInput('resultsDir'),
+    cacheDir: core.getInput('cacheDir'),
+    additionalCacheHash: core.getInput('additionalCacheHash'),
+    uploadResults: core.getBooleanInput('uploadResults'),
+    artifactName: core.getInput('artifactName'),
+    useCaches: core.getBooleanInput('useCaches'),
+    githubToken: core.getInput('githubToken'),
+    useAnnotations: core.getBooleanInput('useAnnotations')
+  }
+}
+/**
+ * Runs the qodana command with the given arguments.
+ * @param args docker command arguments.
+ * @returns The qodana command execution output.
+ */
+export async function qodana(args: string[] = []): Promise<number> {
+  if (args.length === 0) {
+    const inputs = getInputs()
+    args = getQodanaScanArgs(inputs, 'github')
+  }
+  return (
+    await exec.getExecOutput(EXECUTABLE, args, {
+      ignoreReturnCode: true
+    })
+  ).exitCode
+}
 
-export const QODANA_CHECK_NAME = 'Qodana'
-export const QODANA_SARIF_NAME = 'qodana.sarif.json'
-export const QODANA_HELP_STRING = `
-  📓 Find out how to view [the whole Qodana report](https://www.jetbrains.com/help/qodana/html-report.html).
-  📭 Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
-  👀 Or via our issue tracker: https://jb.gg/qodana-issue
-  🔥 Or share your feedback: https://jb.gg/qodana-discussions
-`
-export const FAIL_THRESHOLD_OUTPUT =
-  'The number of problems exceeds the failThreshold'
-const QODANA_SUCCESS_EXIT_CODE = 0
-const QODANA_FAILTHRESHOLD_EXIT_CODE = 255
+/**
+ * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
+ * @param args qodana arguments
+ */
+export async function prepareAgent(args: string[]): Promise<void> {
+  const temp = await tc.downloadTool(getQodanaCliUrl())
+  let extractRoot
+  if (process.platform === 'win32') {
+    extractRoot = await tc.extractZip(temp)
+  } else {
+    extractRoot = await tc.extractTar(temp)
+  }
+  core.addPath(await tc.cacheDir(extractRoot, EXECUTABLE, VERSION))
+  const pullArgs = ['pull']
+  const linter = extractArgsLinter(args)
+  if (linter) {
+    pullArgs.push('-l', linter)
+  }
+  const exitCode = await qodana(pullArgs)
+  if (exitCode !== 0) {
+    core.setFailed(`qodana pull failed with exit code ${exitCode}`)
+    return
+  }
+}
 
-export const FAILURE_STATUS = 'failure'
-export const NEUTRAL_STATUS = 'neutral'
-export const SUCCESS_STATUS = 'success'
-export const ANNOTATION_FAILURE = 'failure'
-export const ANNOTATION_WARNING = 'warning'
-export const ANNOTATION_NOTICE = 'notice'
-export const MAX_ANNOTATIONS = 50
+/**
+ * Uploads the Qodana report files from temp directory to GitHub job artifact.
+ * @param resultsDir The path to upload report from.
+ * @param artifactName Artifact upload name.
+ * @param execute whether to execute promise or not.
+ */
+export async function uploadReport(
+  resultsDir: string,
+  artifactName: string,
+  execute: boolean
+): Promise<void> {
+  if (!execute) {
+    return
+  }
+  try {
+    core.info('Uploading report...')
+    const globber = await glob.create(`${resultsDir}/*`)
+    const files = await globber.glob()
+    await artifact
+      .create()
+      .uploadArtifact(artifactName, files, path.dirname(resultsDir), {
+        continueOnError: true
+      })
+  } catch (error) {
+    core.warning(`Failed to upload report – ${(error as Error).message}`)
+  }
+}
 
 /**
  * Uploads the cache to GitHub Actions cache from the given path.
@@ -115,52 +186,6 @@ export async function restoreCaches(
   } catch (error) {
     core.warning(`Failed to download caches – ${(error as Error).message}`)
   }
-}
-
-/**
- * Uploads the Qodana report files from temp directory to GitHub job artifact.
- * @param resultsDir The path to upload report from.
- * @param artifactName Artifact upload name.
- * @param execute whether to execute promise or not.
- */
-export async function uploadReport(
-  resultsDir: string,
-  artifactName: string,
-  execute: boolean
-): Promise<void> {
-  if (!execute) {
-    return
-  }
-  try {
-    core.info('Uploading report...')
-    const globber = await glob.create(`${resultsDir}/*`)
-    const files = await globber.glob()
-    await artifact
-      .create()
-      .uploadArtifact(artifactName, files, path.dirname(resultsDir), {
-        continueOnError: true
-      })
-  } catch (error) {
-    core.warning(`Failed to upload report – ${(error as Error).message}`)
-  }
-}
-
-/**
- * Check if Qodana Docker image execution is successful.
- * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
- * @param exitCode
- */
-export function isExecutionSuccessful(exitCode: number): boolean {
-  return exitCode === QODANA_SUCCESS_EXIT_CODE || isFailedByThreshold(exitCode)
-}
-
-/**
- * Check if Qodana Docker image execution is failed by a threshold set.
- * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
- * @param exitCode
- */
-export function isFailedByThreshold(exitCode: number): boolean {
-  return exitCode === QODANA_FAILTHRESHOLD_EXIT_CODE
 }
 
 /**

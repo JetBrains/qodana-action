@@ -1,0 +1,64 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
+  "id": "822d6cb9-d4d1-431b-9513-e7db7d718a49",
+  "name": "QodanaScan",
+  "friendlyName": "Qodana Scan",
+  "description": "Scan your project with Qodana (https://jetbrains.com/qodana)",
+  "helpMarkDown": "Qodana documentation is available at https://jetbrains.com/help/qodana/. This task will scan your project.",
+  "category": "Utility",
+  "author": "JetBrains",
+  "version": {
+    "Major": 1,
+    "Minor": 0,
+    "Patch": 0
+  },
+  "demands": ["RemoteDockerServerOS -equals linux"],
+  "instanceNameFormat": "Qodana Scan",
+  "inputs": [
+    {
+      "name": "args",
+      "type": "string",
+      "label": "Qodana CLI arguments",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "[Qodana CLI `scan` arguments](https://github.com/jetbrains/qodana-cli#scan)"
+    },
+    {
+      "name": "resultsDir",
+      "type": "string",
+      "label": "Results Directory",
+      "defaultValue": "$(Agent.TempDirectory)/qodana/results",
+      "required": false,
+      "helpMarkDown": "Directory to store the analysis results"
+    },
+    {
+      "name": "uploadResult",
+      "type": "boolean",
+      "label": "Upload Result",
+      "defaultValue": true,
+      "required": false,
+      "helpMarkDown": "Upload Qodana results as an artifact to the job"
+    },
+    {
+      "name": "artifactName",
+      "type": "string",
+      "label": "Artifact Name",
+      "defaultValue": "qodana-report",
+      "required": false,
+      "helpMarkDown": "Specify Qodana results artifact name, used for results uploading"
+    },
+    {
+      "name": "cacheDir",
+      "type": "string",
+      "label": "Cache Directory",
+      "defaultValue": "$(Agent.TempDirectory)/qodana/cache",
+      "required": false,
+      "helpMarkDown": "Directory to store Qodana caches"
+    }
+  ],
+  "execution": {
+    "Node10": {
+      "target": "main.js"
+    }
+  }
+}

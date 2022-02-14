@@ -1,8 +1,11 @@
 import {expect, test} from '@jest/globals'
-import {Output, parseSarif} from '../src/annotations'
-import {Inputs} from '../src/context'
-import {getQodanaScanArgs} from '../src/cli'
-import {QODANA_CHECK_NAME, QODANA_HELP_STRING} from '../src/utils'
+import {
+  Output,
+  parseSarif,
+  QODANA_HELP_STRING,
+  QODANA_CHECK_NAME
+} from '../src/annotations'
+import {getQodanaScanArgs, Inputs} from '@qodana/ci-common'
 
 function outputEmptyFixture(): Output {
   return {
@@ -84,7 +87,7 @@ function defaultDockerRunCommandFixture(): string[] {
 
 test('qodana scan command args', () => {
   const inputs = inputsDefaultFixture()
-  const result = getQodanaScanArgs(inputs)
+  const result = getQodanaScanArgs(inputs, 'github')
   expect(result).toEqual(defaultDockerRunCommandFixture())
 })
 

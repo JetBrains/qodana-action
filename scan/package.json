@@ -1,16 +1,16 @@
 {
-  "name": "qodana-action",
+  "name": "@qodana/action",
   "version": "5.0.0",
   "description": "Qodana is a code quality monitoring tool that identifies bugs, duplications, and imperfections.",
   "main": "lib/main.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf lib && tsc",
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
     "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
     "test": "jest",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
+    "all": "npm run build && npm run format && npm run lint && npm test && npm run package"
   },
   "repository": {
     "type": "git",
@@ -46,12 +46,13 @@
     "@actions/github": "^5.0.0",
     "@actions/tool-cache": "^1.7.1",
     "@octokit/rest": "^18.12.0",
+    "@qodana/ci-common": "^0.7.4",
     "@types/sarif": "^2.1.4"
   },
   "devDependencies": {
     "@types/node": "^17.0.8",
     "@typescript-eslint/parser": "^5.10.1",
-    "@vercel/ncc": "^0.33.1",
+    "@vercel/ncc": "0.33.1",
     "eslint": "^8.8.0",
     "eslint-plugin-github": "^4.3.5",
     "eslint-plugin-jest": "^26.0.0",

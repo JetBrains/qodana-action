@@ -1,0 +1,30 @@
+{
+  "name": "@qodana/ci-common",
+  "version": "0.7.4X",
+  "description": "Qodana CI shared code for various JS extensions",
+  "main": "lib/qodana.js",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JetBrains/qodana-cli.git"
+  },
+  "files": [
+    "qodana.ts",
+    "lib"
+  ],
+  "scripts": {
+    "build": "rm -rf lib/ && tsc",
+    "publish": "npm run build && npm publish --registry https://packages.jetbrains.team/npm/p/sa/npm-public/"
+  },
+  "homepage": "https://github.com/JetBrains/qodana-action",
+  "author": "JetBrains",
+  "contributors": [
+    {
+      "name": "Viktor Tiulpin",
+      "url": "https://github.com/tiulpin"
+    }
+  ],
+  "dependencies": {
+    "@types/node": "^17.0.17"
+  }
+}
