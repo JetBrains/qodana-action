@@ -55,13 +55,13 @@ The task can be run on any OS and x86_64/arm64 CPUs, but it requires the agent t
 
 You probably won't need other options than `args`: all other options can be helpful if you are configuring multiple Qodana Scan jobs in one workflow.
 
-| Name            | Description                                                                                                                  | Default Value                           |
-|-----------------|------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| `args`          | Additional [Qodana CLI](https://github.com/jetbrains/qodana-cli) arguments, split the arguments with commas (`,`). Optional. | -                                       |
-| `resultsDir`    | Directory to store the analysis results. Optional.                                                                           | `$(Agent.TempDirectory)/qodana/results` |
-| `uploadResults` | Upload Qodana results as an artifact to the job. Optional.                                                                   | `true`                                  |
-| `artifactName`  | Specify Qodana results artifact name, used for results uploading. Optional.                                                  | `qodana-report`                         |
-| `cacheDir`      | Directory to store Qodana caches. Optional.                                                                                  | `$(Agent.TempDirectory)/qodana/cache`   |
+| Name            | Description                                                                                                                                      | Default Value                           |
+|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `args`          | Additional [Qodana CLI `scan` command](https://github.com/jetbrains/qodana-cli#scan) arguments, split the arguments with commas (`,`). Optional. | -                                       |
+| `resultsDir`    | Directory to store the analysis results. Optional.                                                                                               | `$(Agent.TempDirectory)/qodana/results` |
+| `uploadResults` | Upload Qodana results as an artifact to the job. Optional.                                                                                       | `true`                                  |
+| `artifactName`  | Specify Qodana results artifact name, used for results uploading. Optional.                                                                      | `qodana-report`                         |
+| `cacheDir`      | Directory to store Qodana caches. Optional.                                                                                                      | `$(Agent.TempDirectory)/qodana/cache`   |
 
 ## Issue Tracker
 
