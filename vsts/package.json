@@ -4,7 +4,7 @@
   "description": "Qodana for Azure Pipelines extension",
   "main": "azure.js",
   "scripts": {
-    "build": "rm -rf lib && tsc --build .",
+    "build": "rm -rf lib && rm -rf ../common/lib && tsc --build .",
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
     "lint": "eslint src/**/*.ts",
