@@ -5,8 +5,21 @@ export const EXECUTABLE = 'qodana'
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
-const QODANA_SUCCESS_EXIT_CODE = 0
-const QODANA_FAILTHRESHOLD_EXIT_CODE = 255
+
+// eslint-disable-next-line no-shadow -- shadowing is intentional here (ESLint bug)
+export enum QodanaExitCode {
+  Success = 0,
+  FailThreshold = 255
+}
+
+/**
+ * Check if Qodana Docker image execution is successful.
+ * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
+ * @param exitCode
+ */
+export function isExecutionSuccessful(exitCode: number): boolean {
+  return Object.values(QodanaExitCode).includes(exitCode)
+}
 
 /**
  * The context of the current run – described in action.yaml.
@@ -43,58 +56,71 @@ export function getQodanaCliUrl(): string {
 }
 
 /**
- * Check if Qodana Docker image execution is successful.
- * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
- * @param exitCode
+ * Finds the wanted argument value in the given args, if there is one.
+ * @param argShort the short argument name.
+ * @param argLong the long argument name.
+ * @param args command arguments.
+ * @returns the arg value to use.
  */
-export function isExecutionSuccessful(exitCode: number): boolean {
-  return exitCode === QODANA_SUCCESS_EXIT_CODE || isFailedByThreshold(exitCode)
-}
-
-/**
- * Check if Qodana Docker image execution is failed by a threshold set.
- * The codes are documented here: https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Invocations
- * @param exitCode
- */
-export function isFailedByThreshold(exitCode: number): boolean {
-  return exitCode === QODANA_FAILTHRESHOLD_EXIT_CODE
-}
-
-/**
- * Finds linter argument in the given args, if there is one.
- * @param args qodana command arguments.
- * @returns the linter to use.
- */
-export function extractArgsLinter(args: string[]): string {
-  let linter = ''
+export function extractArg(
+  argShort: string,
+  argLong: string,
+  args: string[]
+): string {
+  let arg = ''
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '-l' || args[i] === '--linter') {
-      linter = args[i + 1]
+    if (args[i] === argShort || args[i] === argLong) {
+      arg = args[i + 1]
       break
     }
   }
-  return linter
+  return arg
+}
+
+/**
+ * Builds the `qodana pull` command arguments.
+ * @returns The `qodana scan` command arguments.
+ * @param args additional CLI arguments.
+ */
+export function getQodanaPullArgs(args: string[]): string[] {
+  const pullArgs = ['pull']
+  const linter = extractArg('-l', '--linter', args)
+  if (linter) {
+    pullArgs.push('-l', linter)
+  }
+  const project = extractArg('-i', '--project-dir', args)
+  if (project) {
+    pullArgs.push('-i', project)
+  }
+  return pullArgs
 }
 
 /**
  * Builds the `qodana scan` command arguments.
- * @param inputs GitHub Actions inputs.
- * @param env QODANA_ENV value
+ * @param args additional CLI arguments.
+ * @param resultsDir the directory to store the results.
+ * @param cacheDir the directory to store the cache.
+ * @param env QODANA_ENV value.
  * @returns The `qodana scan` command arguments.
  */
-export function getQodanaScanArgs(inputs: Inputs, env: string = "cli"): string[] {
+export function getQodanaScanArgs(
+  args: string[],
+  resultsDir: string,
+  cacheDir: string,
+  env = 'cli'
+): string[] {
   const cliArgs: string[] = [
     'scan',
     '--skip-pull',
     '-e',
     `QODANA_ENV=${env}`,
     '--cache-dir',
-    inputs.cacheDir,
+    cacheDir,
     '--results-dir',
-    inputs.resultsDir
+    resultsDir
   ]
-  if (inputs.args) {
-    cliArgs.push(...inputs.args)
+  if (args) {
+    cliArgs.push(...args)
   }
   return cliArgs
 }

@@ -8,10 +8,10 @@ import {
   EXECUTABLE,
   Inputs,
   VERSION,
-  extractArgsLinter,
   getQodanaCliUrl,
+  getQodanaPullArgs,
   getQodanaScanArgs
-} from '@qodana/ci-common'
+} from '../../common/qodana'
 import path from 'path'
 
 /**
@@ -37,9 +37,15 @@ export function getInputs(): Inputs {
  * @returns The qodana command execution output.
  */
 export async function qodana(args: string[] = []): Promise<number> {
+  const env = isServer() ? 'github-enterprise' : 'github'
   if (args.length === 0) {
     const inputs = getInputs()
-    args = getQodanaScanArgs(inputs, 'github')
+    args = getQodanaScanArgs(
+      inputs.args,
+      inputs.resultsDir,
+      inputs.cacheDir,
+      env
+    )
   }
   return (
     await exec.getExecOutput(EXECUTABLE, args, {
@@ -61,12 +67,7 @@ export async function prepareAgent(args: string[]): Promise<void> {
     extractRoot = await tc.extractTar(temp)
   }
   core.addPath(await tc.cacheDir(extractRoot, EXECUTABLE, VERSION))
-  const pullArgs = ['pull']
-  const linter = extractArgsLinter(args)
-  if (linter) {
-    pullArgs.push('-l', linter)
-  }
-  const exitCode = await qodana(pullArgs)
+  const exitCode = await qodana(getQodanaPullArgs(args))
   if (exitCode !== 0) {
     core.setFailed(`qodana pull failed with exit code ${exitCode}`)
     return
@@ -116,7 +117,7 @@ export async function uploadCaches(
     return
   }
   try {
-    if (isGhes()) {
+    if (isServer()) {
       core.warning(
         'Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details'
       )
@@ -153,7 +154,7 @@ export async function restoreCaches(
     return
   }
   try {
-    if (isGhes()) {
+    if (isServer()) {
       core.warning(
         'Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details'
       )
@@ -191,7 +192,7 @@ export async function restoreCaches(
 /**
  * Check if the action is run on GHE.
  */
-export function isGhes(): boolean {
+export function isServer(): boolean {
   const ghUrl = new URL(
     process.env['GITHUB_SERVER_URL'] || 'https://github.com'
   )

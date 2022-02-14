@@ -1,0 +1,45 @@
+{
+  "name": "@qodana/vsts",
+  "version": "1.0.0",
+  "description": "Qodana for Azure Pipelines extension",
+  "main": "azure.js",
+  "scripts": {
+    "build": "rm -rf lib && tsc --build .",
+    "format": "prettier --write '**/*.ts'",
+    "format-check": "prettier --check '**/*.ts'",
+    "lint": "eslint src/**/*.ts",
+    "package": "cd QodanaScan && npm ci && cd .. && ./node_modules/.bin/esbuild lib/main.js --platform=node --bundle --outfile=QodanaScan/index.js --target=node10.4 --external:shelljs --external:azure-pipelines-task-lib && tfx extension create --manifests vss-extension.json",
+    "all": "npm install && npm run build && npm run format && npm run lint && npm run package"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JetBrains/qodana-action.git"
+  },
+  "keywords": [
+    "actions",
+    "code-quality",
+    "static-analysis",
+    "qodana"
+  ],
+  "author": "JetBrains",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "azure-pipelines-task-lib": "^3.1.10",
+    "azure-pipelines-tasks-utility-common": "^3.198.1",
+    "azure-pipelines-tool-lib": "^0.13.3"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.17",
+    "esbuild": "^0.14.21",
+    "@typescript-eslint/parser": "^5.10.1",
+    "eslint": "^8.8.0",
+    "eslint-plugin-github": "^4.3.5",
+    "eslint-plugin-jest": "^26.0.0",
+    "jest": "^27.4.7",
+    "js-yaml": "^4.1.0",
+    "prettier": "2.5.1",
+    "sync-request": "^6.1.0",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.5.5"
+  }
+}

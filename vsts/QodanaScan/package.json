@@ -1,28 +1,22 @@
 {
-  "name": "@qodana/vsts",
+  "name": "@qodana/scan-task",
   "version": "1.0.0",
-  "description": "",
-  "main": "azure.js",
-  "scripts": {
-    "build": "tsc",
-    "format": "prettier --write '**/*.ts'",
-    "format-check": "prettier --check '**/*.ts'",
-    "lint": "eslint *.ts",
-    "package": "npm run build && cd .. && tfx extension create --manifests vss-extension.json",
-    "all": "npm install && npm run build && npm run format && npm run lint && npm run package"
+  "description": "Defines packages that can't be bundled to index.js, but needed for this Azure Pipelines task.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JetBrains/qodana-action.git"
   },
-  "keywords": [],
-  "author": "Qodana",
+  "keywords": [
+    "actions",
+    "code-quality",
+    "static-analysis",
+    "qodana"
+  ],
+  "author": "JetBrains",
   "license": "Apache-2.0",
   "dependencies": {
-    "@qodana/ci-common": "^0.7.4",
     "azure-pipelines-task-lib": "^3.1.10",
-    "azure-pipelines-tasks-utility-common": "^3.198.1",
-    "azure-pipelines-tool-lib": "^0.13.3"
-  },
-  "devDependencies": {
-    "@types/node": "^17.0.17",
-    "@types/q": "^1.5.5",
-    "sync-request": "^6.1.0"
+    "shelljs": "^0.8.5"
   }
 }
