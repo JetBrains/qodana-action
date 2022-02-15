@@ -4,7 +4,7 @@
   "description": "Qodana is a code quality monitoring tool that identifies bugs, duplications, and imperfections.",
   "main": "lib/main.js",
   "scripts": {
-    "build": "rm -rf lib && tsc --build .",
+    "build": "rm -rf lib && rm -rf ../common/lib && tsc --build .",
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
     "lint": "eslint src/**/*.ts",

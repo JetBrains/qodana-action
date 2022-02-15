@@ -14,21 +14,90 @@ import {
 } from '../../common/qodana'
 import path from 'path'
 
+function getDeprecatedInputs(args: string[]): string[] {
+  const deprecatedInputs = {
+    linter: core.getInput('linter'),
+    projectDir: core.getInput('project-dir'),
+    additionalVolumes: core.getMultilineInput('additional-volumes'),
+    additionalEnvVars: core.getMultilineInput('additional-env-variables'),
+    inspectedDir: core.getInput('inspected-dir'),
+    ideaConfigDir: core.getInput('idea-config-dir'),
+    baselinePath: core.getInput('baseline-path'),
+    baselineIncludeAbsent: core.getBooleanInput('baseline-include-absent'),
+    failThreshold: core.getInput('fail-threshold'),
+    profileName: core.getInput('profile-name'),
+    profilePath: core.getInput('profile-path'),
+    gradleSettingsPath: core.getInput('gradle-settings-path'),
+    changes: core.getBooleanInput('changes'),
+    script: core.getInput('script')
+  }
+  if (deprecatedInputs.linter) {
+    args.push('-l', deprecatedInputs.linter)
+  }
+  if (deprecatedInputs.projectDir) {
+    args.push('-i', deprecatedInputs.projectDir)
+  }
+  if (deprecatedInputs.additionalVolumes) {
+    for (const volume of deprecatedInputs.additionalVolumes) {
+      args.push('-v', volume)
+    }
+  }
+  if (deprecatedInputs.additionalEnvVars) {
+    for (const envVar of deprecatedInputs.additionalEnvVars) {
+      args.push('-e', envVar)
+    }
+  }
+  if (deprecatedInputs.inspectedDir) {
+    args.push('-d', deprecatedInputs.inspectedDir)
+  }
+  if (deprecatedInputs.ideaConfigDir) {
+    args.push('-v', `${deprecatedInputs.ideaConfigDir}:/root/.config/idea`)
+  }
+  if (deprecatedInputs.baselinePath) {
+    args.push('-b', deprecatedInputs.baselinePath)
+  }
+  if (deprecatedInputs.baselineIncludeAbsent) {
+    args.push('--baseline-include-absent')
+  }
+  if (deprecatedInputs.failThreshold) {
+    args.push('--fail-threshold', deprecatedInputs.failThreshold)
+  }
+  if (deprecatedInputs.profileName) {
+    args.push('--profile-name', deprecatedInputs.profileName)
+  }
+  if (deprecatedInputs.profilePath) {
+    args.push('--profile-path', deprecatedInputs.profilePath)
+  }
+  if (deprecatedInputs.gradleSettingsPath) {
+    args.push(
+      '-v',
+      `${deprecatedInputs.gradleSettingsPath}:/root/.gradle/gradle.properties`
+    )
+  }
+  if (deprecatedInputs.changes) {
+    args.push('--changes')
+  }
+  if (deprecatedInputs.script) {
+    args.push('--script', deprecatedInputs.script)
+  }
+  return args
+}
+
 /**
  * The context for the action.
  * @returns The action inputs.
  */
 export function getInputs(): Inputs {
   return {
-    args: core.getInput('args').split(','),
-    resultsDir: core.getInput('resultsDir'),
-    cacheDir: core.getInput('cacheDir'),
-    additionalCacheHash: core.getInput('additionalCacheHash'),
-    uploadResults: core.getBooleanInput('uploadResults'),
-    artifactName: core.getInput('artifactName'),
-    useCaches: core.getBooleanInput('useCaches'),
-    githubToken: core.getInput('githubToken'),
-    useAnnotations: core.getBooleanInput('useAnnotations')
+    args: getDeprecatedInputs(core.getInput('args').split(',')),
+    resultsDir: core.getInput('results-dir'),
+    cacheDir: core.getInput('cache-dir'),
+    additionalCacheHash: core.getInput('additional-cache-hash'),
+    uploadResult: core.getBooleanInput('upload-result'),
+    artifactName: core.getInput('artifact-name'),
+    useCaches: core.getBooleanInput('use-caches'),
+    githubToken: core.getInput('github-token'),
+    useAnnotations: core.getBooleanInput('use-annotations')
   }
 }
 /**

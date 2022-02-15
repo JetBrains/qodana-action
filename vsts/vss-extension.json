@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "id": "qodana",
   "name": "Qodana",
-  "version": "1.0.0",
-  "publisher": "tiulpin",
+  "version": "0.9.1",
+  "publisher": "JetBrains",
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"

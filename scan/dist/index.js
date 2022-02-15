@@ -1815,12 +1815,12 @@ function getQodanaPullArgs(args) {
   }
   return pullArgs;
 }
-function getQodanaScanArgs(args, resultsDir, cacheDir, env = "cli") {
+function getQodanaScanArgs(args, resultsDir, cacheDir, env = `cli`) {
   const cliArgs = [
     "scan",
     "--skip-pull",
     "-e",
-    `QODANA_ENV=${env}`,
+    `QODANA_ENV=${env}:${VERSION}`,
     "--cache-dir",
     cacheDir,
     "--results-dir",
@@ -1834,7 +1834,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir, env = "cli") {
 var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
-    VERSION = "0.7.4";
+    VERSION = "0.7.5";
     EXECUTABLE = "qodana";
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
@@ -66902,17 +66902,82 @@ var require_utils5 = __commonJS({
     var tc = __importStar2(require_tool_cache());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var path_1 = __importDefault(require("path"));
+    function getDeprecatedInputs(args) {
+      const deprecatedInputs = {
+        linter: core2.getInput("linter"),
+        projectDir: core2.getInput("project-dir"),
+        additionalVolumes: core2.getMultilineInput("additional-volumes"),
+        additionalEnvVars: core2.getMultilineInput("additional-env-variables"),
+        inspectedDir: core2.getInput("inspected-dir"),
+        ideaConfigDir: core2.getInput("idea-config-dir"),
+        baselinePath: core2.getInput("baseline-path"),
+        baselineIncludeAbsent: core2.getBooleanInput("baseline-include-absent"),
+        failThreshold: core2.getInput("fail-threshold"),
+        profileName: core2.getInput("profile-name"),
+        profilePath: core2.getInput("profile-path"),
+        gradleSettingsPath: core2.getInput("gradle-settings-path"),
+        changes: core2.getBooleanInput("changes"),
+        script: core2.getInput("script")
+      };
+      if (deprecatedInputs.linter) {
+        args.push("-l", deprecatedInputs.linter);
+      }
+      if (deprecatedInputs.projectDir) {
+        args.push("-i", deprecatedInputs.projectDir);
+      }
+      if (deprecatedInputs.additionalVolumes) {
+        for (const volume of deprecatedInputs.additionalVolumes) {
+          args.push("-v", volume);
+        }
+      }
+      if (deprecatedInputs.additionalEnvVars) {
+        for (const envVar of deprecatedInputs.additionalEnvVars) {
+          args.push("-e", envVar);
+        }
+      }
+      if (deprecatedInputs.inspectedDir) {
+        args.push("-d", deprecatedInputs.inspectedDir);
+      }
+      if (deprecatedInputs.ideaConfigDir) {
+        args.push("-v", `${deprecatedInputs.ideaConfigDir}:/root/.config/idea`);
+      }
+      if (deprecatedInputs.baselinePath) {
+        args.push("-b", deprecatedInputs.baselinePath);
+      }
+      if (deprecatedInputs.baselineIncludeAbsent) {
+        args.push("--baseline-include-absent");
+      }
+      if (deprecatedInputs.failThreshold) {
+        args.push("--fail-threshold", deprecatedInputs.failThreshold);
+      }
+      if (deprecatedInputs.profileName) {
+        args.push("--profile-name", deprecatedInputs.profileName);
+      }
+      if (deprecatedInputs.profilePath) {
+        args.push("--profile-path", deprecatedInputs.profilePath);
+      }
+      if (deprecatedInputs.gradleSettingsPath) {
+        args.push("-v", `${deprecatedInputs.gradleSettingsPath}:/root/.gradle/gradle.properties`);
+      }
+      if (deprecatedInputs.changes) {
+        args.push("--changes");
+      }
+      if (deprecatedInputs.script) {
+        args.push("--script", deprecatedInputs.script);
+      }
+      return args;
+    }
     function getInputs() {
       return {
-        args: core2.getInput("args").split(","),
-        resultsDir: core2.getInput("resultsDir"),
-        cacheDir: core2.getInput("cacheDir"),
-        additionalCacheHash: core2.getInput("additionalCacheHash"),
-        uploadResults: core2.getBooleanInput("uploadResults"),
-        artifactName: core2.getInput("artifactName"),
-        useCaches: core2.getBooleanInput("useCaches"),
-        githubToken: core2.getInput("githubToken"),
-        useAnnotations: core2.getBooleanInput("useAnnotations")
+        args: getDeprecatedInputs(core2.getInput("args").split(",")),
+        resultsDir: core2.getInput("results-dir"),
+        cacheDir: core2.getInput("cache-dir"),
+        additionalCacheHash: core2.getInput("additional-cache-hash"),
+        uploadResult: core2.getBooleanInput("upload-result"),
+        artifactName: core2.getInput("artifact-name"),
+        useCaches: core2.getBooleanInput("use-caches"),
+        githubToken: core2.getInput("github-token"),
+        useAnnotations: core2.getBooleanInput("use-annotations")
       };
     }
     exports2.getInputs = getInputs;
@@ -69671,7 +69736,7 @@ function main() {
       ]);
       const exitCode = yield (0, utils_1.qodana)();
       yield Promise.all([
-        (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResults),
+        (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
         (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.additionalCacheHash, inputs.useCaches && (0, qodana_1.isExecutionSuccessful)(exitCode)),
         (0, annotations_1.publishAnnotations)(exitCode === qodana_1.QodanaExitCode.FailThreshold, inputs.githubToken, `${inputs.resultsDir}/${qodana_1.QODANA_SARIF_NAME}`, inputs.useAnnotations && (0, qodana_1.isExecutionSuccessful)(exitCode))
       ]);
