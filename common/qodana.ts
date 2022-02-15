@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
-export const VERSION = '0.7.4'
+export const VERSION = '0.7.5'
 export const EXECUTABLE = 'qodana'
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
@@ -29,7 +29,7 @@ export interface Inputs {
   resultsDir: string
   cacheDir: string
   additionalCacheHash: string
-  uploadResults: boolean
+  uploadResult: boolean
   artifactName: string
   useCaches: boolean
   githubToken: string
@@ -107,13 +107,13 @@ export function getQodanaScanArgs(
   args: string[],
   resultsDir: string,
   cacheDir: string,
-  env = 'cli'
+  env = `cli`
 ): string[] {
   const cliArgs: string[] = [
     'scan',
     '--skip-pull',
     '-e',
-    `QODANA_ENV=${env}`,
+    `QODANA_ENV=${env}:${VERSION}`,
     '--cache-dir',
     cacheDir,
     '--results-dir',

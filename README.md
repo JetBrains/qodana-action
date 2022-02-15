@@ -172,17 +172,17 @@ To do it, follow these steps:
 
 Most likely you won't need other options than `args`: all other options can be useful if you are configuring multiple Qodana Scan jobs in one workflow.
 
-| Name                  | Description                                                                                                                                                                           | Default Value                       |
-|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
-| `args`                | Additional [Qodana CLI `scan` command](https://github.com/jetbrains/qodana-cli#scan) arguments, split the arguments with commas (`,`), e.g. `-i,frontend,--print-problems`. Optional. | -                                   |
-| `resultsDir`          | Directory to store the analysis results. Optional.                                                                                                                                    | `${{ runner.temp }}/qodana/results` |
-| `uploadResults`       | Upload Qodana results as an artifact to the job. Optional.                                                                                                                            | `true`                              |
-| `artifactName`        | Specify Qodana results artifact name, used for results uploading. Optional.                                                                                                           | `qodana-report`                     |
-| `cacheDir`            | Directory to store Qodana cache. Optional.                                                                                                                                            | `${{ runner.temp }}/qodana/caches`  |
-| `syncCache`           | Utilize GitHub caches for Qodana runs. Optional.                                                                                                                                      | `true`                              |
-| `additionalCacheHash` | Allows customizing the generated cache hash. Optional.                                                                                                                                | `${{ github.sha }}`                 |
-| `useAnnotations`      | Use annotation to mark the results in the GitHub user interface. Optional.                                                                                                            | `true`                              |
-| `githubToken`         | GitHub token to be used for uploading results. Optional.                                                                                                                              | `${{ github.token }}`               |
+| Name                      | Description                                                                                                                                                                           | Default Value                       |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
+| `args`                    | Additional [Qodana CLI `scan` command](https://github.com/jetbrains/qodana-cli#scan) arguments, split the arguments with commas (`,`), e.g. `-i,frontend,--print-problems`. Optional. | -                                   |
+| `results-dir`             | Directory to store the analysis results. Optional.                                                                                                                                    | `${{ runner.temp }}/qodana/results` |
+| `upload-result`           | Upload Qodana results as an artifact to the job. Optional.                                                                                                                            | `true`                              |
+| `artifact-name`           | Specify Qodana results artifact name, used for results uploading. Optional.                                                                                                           | `qodana-report`                     |
+| `cache-dir`               | Directory to store Qodana cache. Optional.                                                                                                                                            | `${{ runner.temp }}/qodana/caches`  |
+| `use-caches`              | Utilize GitHub caches for Qodana runs. Optional.                                                                                                                                      | `true`                              |
+| `additional-cache-hash`   | Allows customizing the generated cache hash. Optional.                                                                                                                                | `${{ github.sha }}`                 |
+| `use-annotations`         | Use annotation to mark the results in the GitHub user interface. Optional.                                                                                                            | `true`                              |
+| `github-token`            | GitHub token to be used for uploading results. Optional.                                                                                                                              | `${{ github.token }}`               |
 
 ## Issue Tracker
 

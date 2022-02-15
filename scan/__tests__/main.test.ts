@@ -5,7 +5,7 @@ import {
   QODANA_HELP_STRING,
   QODANA_CHECK_NAME
 } from '../src/annotations'
-import {getQodanaScanArgs, Inputs} from '../../common/qodana'
+import {getQodanaScanArgs, Inputs, VERSION} from '../../common/qodana'
 
 function outputEmptyFixture(): Output {
   return {
@@ -62,7 +62,7 @@ function inputsDefaultFixture(): Inputs {
     resultsDir: '${{ runner.temp }}/qodana-results',
     cacheDir: '${{ runner.temp }}/qodana-caches',
     additionalCacheHash: '',
-    uploadResults: true,
+    uploadResult: true,
     artifactName: 'Qodana report',
     useCaches: true,
     useAnnotations: true,
@@ -75,7 +75,7 @@ function defaultDockerRunCommandFixture(): string[] {
     'scan',
     '--skip-pull',
     '-e',
-    'QODANA_ENV=github',
+    `QODANA_ENV=github:${VERSION}`,
     '--cache-dir',
     '${{ runner.temp }}/qodana-caches',
     '--results-dir',
@@ -87,7 +87,12 @@ function defaultDockerRunCommandFixture(): string[] {
 
 test('qodana scan command args', () => {
   const inputs = inputsDefaultFixture()
-  const result = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir, 'github')
+  const result = getQodanaScanArgs(
+    inputs.args,
+    inputs.resultsDir,
+    inputs.cacheDir,
+    'github'
+  )
   expect(result).toEqual(defaultDockerRunCommandFixture())
 })
 

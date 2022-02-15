@@ -82,12 +82,12 @@ function getQodanaPullArgs(args) {
   }
   return pullArgs;
 }
-function getQodanaScanArgs(args, resultsDir, cacheDir, env = "cli") {
+function getQodanaScanArgs(args, resultsDir, cacheDir, env = `cli`) {
   const cliArgs = [
     "scan",
     "--skip-pull",
     "-e",
-    `QODANA_ENV=${env}`,
+    `QODANA_ENV=${env}:${VERSION}`,
     "--cache-dir",
     cacheDir,
     "--results-dir",
@@ -101,7 +101,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir, env = "cli") {
 var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
-    VERSION = "0.7.4";
+    VERSION = "0.7.5";
     EXECUTABLE = "qodana";
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
@@ -4358,7 +4358,7 @@ var require_utils2 = __commonJS({
         args: (tl2.getInput("args", false) || "").split(","),
         resultsDir: tl2.getInput("resultsDir", false) || path.join(home, "results"),
         cacheDir: tl2.getInput("cacheDir", false) || path.join(home, "cache"),
-        uploadResults: tl2.getBoolInput("uploadResults", false) || true,
+        uploadResult: tl2.getBoolInput("uploadResult", false) || true,
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
         additionalCacheHash: "",
         githubToken: "",
@@ -4463,7 +4463,7 @@ function main() {
       tl.mkdirP(inputs.cacheDir);
       yield (0, utils_1.prepareAgent)(inputs.args);
       const exitCode = yield (0, utils_1.qodana)();
-      yield (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResults);
+      yield (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         (0, utils_1.setFailed)(`qodana scan failed with exit code ${exitCode}`);
       } else if (exitCode === qodana_1.QodanaExitCode.FailThreshold) {

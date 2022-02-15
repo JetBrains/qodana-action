@@ -21,7 +21,7 @@ async function main(): Promise<void> {
     await uploadReport(
       inputs.resultsDir,
       inputs.artifactName,
-      inputs.uploadResults
+      inputs.uploadResult
     )
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)

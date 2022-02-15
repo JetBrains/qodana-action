@@ -28,7 +28,7 @@ export function getInputs(): Inputs {
     args: (tl.getInput('args', false) || '').split(','),
     resultsDir: tl.getInput('resultsDir', false) || path.join(home, 'results'),
     cacheDir: tl.getInput('cacheDir', false) || path.join(home, 'cache'),
-    uploadResults: tl.getBoolInput('uploadResults', false) || true,
+    uploadResult: tl.getBoolInput('uploadResult', false) || true,
     artifactName: tl.getInput('artifactName', false) || 'qodana-report',
     // Not used by the task
     additionalCacheHash: '',

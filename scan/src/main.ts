@@ -51,11 +51,7 @@ async function main(): Promise<void> {
     ])
     const exitCode = await qodana()
     await Promise.all([
-      uploadReport(
-        inputs.resultsDir,
-        inputs.artifactName,
-        inputs.uploadResults
-      ),
+      uploadReport(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
       uploadCaches(
         inputs.cacheDir,
         inputs.additionalCacheHash,
