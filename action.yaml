@@ -41,11 +41,10 @@ inputs:
     description: 'GitHub token to be used for uploading annotations'
     required: false
     default: ${{ github.token }}
-  # deprecated options
   linter:
     description: '[DEPRECATED] Qodana linter – [official Qodana Docker image](#supported-qodana-docker-images).'
     required: false
-    deprecationMessage: 'Use `args` (e.g. `args: -linter,<linter>`) instead'
+    deprecationMessage: 'Use `args` (e.g. `args: --linter,<linter>`) instead'
   project-dir:
     description: '[DEPRECATED] Root directory of the project to be analyzed'
     required: false
@@ -81,10 +80,12 @@ inputs:
   baseline-include-absent:
     description: '[DEPRECATED] Include the results from the baseline absent in the current Qodana run in the output report'
     required: false
+    default: "false"
     deprecationMessage: 'Use `args` to pass the baseline include absent flag (e.g. `args: --baseline-include-absent`) instead'
   changes:
     description: '[DEPRECATED] Inspect uncommitted changes and report new problems'
     required: false
+    default: "false"
     deprecationMessage: 'Use `args` to pass the changes flag (e.g. `args: --changes`) instead'
   script:
     description: '[DEPRECATED] Override the default docker scenario'
