@@ -29,7 +29,7 @@ jobs:
           with:
             node-version: 12.x
         - name: Install dependencies
-          run: cd action && npm ci
+          run: cd vsts && npm ci
         - name: Rebuild the QodanaScan/ directory
           run: cd vsts && npm run build && npm run package
         - name: Compare the expected and actual QodanaScan/ directories

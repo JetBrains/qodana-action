@@ -9,7 +9,6 @@ on: # rebuild any PRs and main branch changes
 jobs:
   check-dist:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set Node.js 12.x
@@ -17,7 +16,7 @@ jobs:
         with:
           node-version: 12.x
       - name: Install dependencies
-        run: cd action && npm ci
+        run: cd scan && npm ci && cd ../common && npm ci
       - name: Rebuild the dist/ directory
         run: cd scan && npm run build && npm run package
       - name: Compare the expected and actual dist/ directories
@@ -53,7 +52,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          linter: jetbrains/qodana-js
+          args: --linter,jetbrains/qodana-js
 
 #   Not possible at the moment for GitHub-hosted Windows agents: https://github.com/JetBrains/qodana-action/pull/31#issue-812728409
 #   test-windows:

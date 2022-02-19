@@ -15,9 +15,7 @@
     "build": "tsc",
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
-    "lint": "eslint *.ts",
-    "package": "npm run build && cd .. && tfx extension create --manifests vss-extension.json",
-    "all": "npm install && npm run build && npm run format && npm run lint && npm run package"
+    "lint": "eslint *.ts"
   },
   "keywords": [],
   "devDependencies": {
