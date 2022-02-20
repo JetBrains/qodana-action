@@ -1,48 +1,45 @@
-name: 'vsts-build-test'
-on: # rebuild any PRs and main branch changes
-  pull_request:
+name: vsts-build-test
+on:
+  pull_request: null
   push:
     branches:
       - main
-      - 'releases/*'
-
+      - releases/*
 jobs:
-  build: # make sure build/ci work properly
-    runs-on: ${{ matrix.os }}
+  build:
+    runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
-        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
     steps:
       - uses: actions/checkout@v2
-      - run: |
-          cd vsts
-          npm install
-          npm run build
-
-    check-dist:
-      runs-on: ubuntu-latest
-
-      steps:
-        - uses: actions/checkout@v2
-        - name: Set Node.js 12.x
-          uses: actions/setup-node@v2.5.1
-          with:
-            node-version: 12.x
-        - name: Install dependencies
-          run: cd vsts && npm ci
-        - name: Rebuild the QodanaScan/ directory
-          run: cd vsts && npm run build && npm run package
-        - name: Compare the expected and actual QodanaScan/ directories
-          run: |
-            if [ "$(git diff --ignore-space-at-eol vsts/QodanaScan/ | wc -l)" -gt "0" ]; then
-              echo "Detected uncommitted changes after build.  See status below:"
-              git diff
-              exit 1
-            fi
-          id: diff
-        # If index.js was different from expected, upload the expected version as an artifact
-        - uses: actions/upload-artifact@v2
-          if: ${{ failure() && steps.diff.conclusion == 'failure' }}
-          with:
-            name: dist
-            path: vsts/QodanaScan/
+      - run: cd common && npm ci && cd ../vsts && npm install && npm run build
+  check-dist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set Node.js 12.x
+        uses: actions/setup-node@v2.5.1
+        with:
+          node-version: 12.x
+      - name: Install dependencies
+        run: cd vsts && npm ci && cd ../common && npm ci
+      - name: Rebuild the QodanaScan/ directory
+        run: cd vsts && npm run build && npm run package
+      - name: Compare the expected and actual QodanaScan/ directories
+        run: >
+          if [ "$(git diff --ignore-space-at-eol vsts/QodanaScan/ | wc -l)" -gt
+          "0" ]; then
+            echo "Detected uncommitted changes after build.  See status below:"
+            git diff
+            exit 1
+          fi
+        id: diff
+      - uses: actions/upload-artifact@v2
+        if: '${{ failure() && steps.diff.conclusion == ''failure'' }}'
+        with:
+          name: dist
+          path: vsts/QodanaScan/
