@@ -228,7 +228,8 @@ open class RunInspectionsTask : Exec() {
         val args = mutableListOf(
             "run",
             "--rm",
-            "-e QODANA_ENV=${QodanaPluginConstants.QODANA_ENV_NAME}",
+            "-e",
+            "QODANA_ENV=${QodanaPluginConstants.QODANA_ENV_NAME}",
             "--name", dockerContainerName.get(),
         )
 
