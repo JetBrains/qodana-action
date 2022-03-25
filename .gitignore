@@ -99,3 +99,5 @@ Thumbs.db
 # Ignore built ts files
 scan/__tests__/runner/*
 lib/**/*
+
+vsts/QodanaScan/.taskkey
