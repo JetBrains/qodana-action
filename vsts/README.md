@@ -51,6 +51,12 @@ Triggering this job depends on [what type of repository you are using in Azure P
 
 The task can be run on any OS and x86_64/arm64 CPUs, but it requires the agent to have Docker installed. And since most of Qodana Docker images are Linux-based, the docker daemon must run Linux containers.
 
+### SARIF SAST Scans Tab
+
+To display Qodana report summary in Azure DevOps UI in 'Scans' tab, install Microsoft DevLabs’ [SARIF SAST Scans Tab](https://marketplace.visualstudio.com/items?itemName=sariftools.scans) extension.
+
+![Azure Scans Tab](https://user-images.githubusercontent.com/13538286/160094802-df9b86b6-be53-45c1-a70c-8edfcde9412a.png)
+
 ## Configuration
 
 You probably won't need other options than `args`: all other options can be helpful if you are configuring multiple Qodana Scan jobs in one workflow.
