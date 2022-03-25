@@ -101,7 +101,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir, env = `cli`) {
 var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
-    VERSION = "0.8.0";
+    VERSION = "1.0.2";
     EXECUTABLE = "qodana";
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
@@ -3948,6 +3948,11 @@ var require_tool = __commonJS({
   "node_modules/azure-pipelines-tool-lib/tool.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+      function adopt(value) {
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
+        });
+      }
       return new (P || (P = Promise))(function(resolve, reject) {
         function fulfilled(value) {
           try {
@@ -3964,14 +3969,13 @@ var require_tool = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve(result.value) : new P(function(resolve2) {
-            resolve2(result.value);
-          }).then(fulfilled, rejected);
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.scrape = exports2.extractZip = exports2.extractTar = exports2.extract7z = exports2.cacheFile = exports2.cacheDir = exports2.downloadTool = exports2.findLocalToolVersions = exports2.findLocalTool = exports2.evaluateVersions = exports2.cleanVersion = exports2.isExplicitVersion = exports2.prependPath = exports2.debug = void 0;
     var httpm = require_HttpClient();
     var path = require("path");
     var os = require("os");
