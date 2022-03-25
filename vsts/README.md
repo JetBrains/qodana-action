@@ -7,23 +7,24 @@ duplications, and imperfections.
 **Table of Contents**
 
 <!-- toc -->
+
 - Qodana Scan
-  - [Usage](#usage)
-  - [Configuration](#configuration)
-  - [Issue Tracker](#issue-tracker)
-  - [License](#license)
+    - [Usage](#usage)
+    - [Configuration](#configuration)
+    - [Issue Tracker](#issue-tracker)
 
 <!-- tocstop -->
+[//]: # (title: Azure Pipelines)
 
 # Qodana Scan
 
-Qodana Scan is an Azure Pipelines task packed inside this extension to scan your code with Qodana.
+Qodana Scan is an Azure Pipelines task packed inside [Qodana Azure Pipelines extension](https://marketplace.visualstudio.com/items?itemName=JetBrains.qodana) to scan your code with Qodana.
 
 ## Usage
 
 ### Basic configuration
 
-After you've installed [Qodana for Azure Pipelines](https://marketplace.visualstudio.com/items?itemName=JetBrains.qodana) to your organization, to configure the Qodana Scan task, edit your `azure-pipelines.yml` file:
+After you've installed [Qodana Azure Pipelines extension](https://marketplace.visualstudio.com/items?itemName=JetBrains.qodana) to your organization, to configure the Qodana Scan task, edit your `azure-pipelines.yml` file:
 
 ```yaml
 # Start with a minimal pipeline that you can customize to build and deploy your code.
@@ -61,31 +62,24 @@ To display Qodana report summary in Azure DevOps UI in 'Scans' tab, install Micr
 
 You probably won't need other options than `args`: all other options can be helpful if you are configuring multiple Qodana Scan jobs in one workflow.
 
-| Name           | Description                                                                                                                                                          | Default Value                           |
-|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| `args`         | Additional [Qodana CLI `scan` command](https://github.com/jetbrains/qodana-cli#scan) arguments, split the arguments with commas (`,`), e.g. `-i,frontend`. Optional. | -                                       |
-| `resultsDir`   | Directory to store the analysis results. Optional.                                                                                                                   | `$(Agent.TempDirectory)/qodana/results` |
-| `uploadResult` | Upload Qodana results as an artifact to the job. Optional.                                                                                                           | `true`                                  |
-| `artifactName` | Specify Qodana results artifact name, used for results uploading. Optional.                                                                                          | `qodana-report`                         |
-| `cacheDir`     | Directory to store Qodana caches. Optional.                                                                                                                          | `$(Agent.TempDirectory)/qodana/cache`   |
+| Name           | Description                                                                                                                                                                 | Default Value                           |
+|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `args`         | Additional [Qodana CLI `scan` command](https://github.com/jetbrains/qodana-cli#scan) arguments, split the arguments with commas (`,`), for example `-i,frontend`. Optional. | -                                       |
+| `resultsDir`   | Directory to store the analysis results. Optional.                                                                                                                          | `$(Agent.TempDirectory)/qodana/results` |
+| `uploadResult` | Upload Qodana results as an artifact to the job. Optional.                                                                                                                  | `true`                                  |
+| `artifactName` | Specify Qodana results artifact name, used for results uploading. Optional.                                                                                                 | `qodana-report`                         |
+| `cacheDir`     | Directory to store Qodana caches. Optional.                                                                                                                                 | `$(Agent.TempDirectory)/qodana/cache`   |
+
+[gh:qodana]: https://github.com/JetBrains/qodana-action/actions/workflows/code_scanning.yml
+[youtrack]: https://youtrack.jetbrains.com/issues/QD
+[youtrack-new-issue]: https://youtrack.jetbrains.com/newIssue?project=QD&c=Product%20Azure%20extension
+[jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
+[jb:discussions]: https://jb.gg/qodana-discussions
+[jb:twitter]: https://twitter.com/Qodana
+[jb:docker]: https://hub.docker.com/r/jetbrains/qodana
 
 ## Issue Tracker
 
 All the issues, feature requests, and support related to the Qodana Azure Pipelines extension are handled on [YouTrack][youtrack].
 
 If you'd like to file a new issue, please use the link [YouTrack | New Issue][youtrack-new-issue].
-
-
-[gh:qodana]: https://github.com/JetBrains/qodana-action/actions/workflows/code_scanning.yml
-
-[youtrack]: https://youtrack.jetbrains.com/issues/QD
-
-[youtrack-new-issue]: https://youtrack.jetbrains.com/newIssue?project=QD&c=Platform%20Azure%20Pipelines
-
-[jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
-
-[jb:discussions]: https://jb.gg/qodana-discussions
-
-[jb:twitter]: https://twitter.com/Qodana
-
-[jb:docker]: https://hub.docker.com/r/jetbrains/qodana

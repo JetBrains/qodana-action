@@ -3,6 +3,7 @@
   "id": "qodana",
   "name": "Qodana",
   "version": "1.0.2",
+  "public": true,
   "publisher": "JetBrains",
   "targets": [
     {
