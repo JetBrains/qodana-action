@@ -11,7 +11,7 @@ jobs:
     steps:
 
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
 
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1.0.4
@@ -23,7 +23,7 @@ jobs:
     steps:
 
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
 
       - name: Qodana Scan
         uses: JetBrains/qodana-action@v5.0.2
@@ -47,7 +47,7 @@ jobs:
     steps:
 
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
 
       - name: Setup Java
         uses: actions/setup-java@v2
