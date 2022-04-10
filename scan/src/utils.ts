@@ -89,7 +89,12 @@ function getDeprecatedInputs(args: string[]): string[] {
  */
 export function getInputs(): Inputs {
   return {
-    args: getDeprecatedInputs(core.getInput('args').split(',')),
+    args: getDeprecatedInputs(
+      core
+        .getInput('args')
+        .split(',')
+        .map(arg => arg.trim())
+    ),
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
     additionalCacheHash: core.getInput('additional-cache-hash'),
