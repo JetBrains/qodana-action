@@ -1,6 +1,6 @@
 {
   "name": "@qodana/action",
-  "version": "5.0.2",
+  "version": "1.0.0",
   "description": "Qodana is a code quality monitoring tool that identifies bugs, duplications, and imperfections.",
   "main": "lib/main.js",
   "scripts": {

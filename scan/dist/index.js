@@ -1921,7 +1921,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir, env = `cli`) {
 var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
-    VERSION = "1.0.2";
+    VERSION = "1.0.3";
     EXECUTABLE = "qodana";
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
@@ -68158,7 +68158,7 @@ var require_utils5 = __commonJS({
     __name(getDeprecatedInputs, "getDeprecatedInputs");
     function getInputs() {
       return {
-        args: getDeprecatedInputs(core2.getInput("args").split(",")),
+        args: getDeprecatedInputs(core2.getInput("args").split(",").map((arg) => arg.trim())),
         resultsDir: core2.getInput("results-dir"),
         cacheDir: core2.getInput("cache-dir"),
         additionalCacheHash: core2.getInput("additional-cache-hash"),
