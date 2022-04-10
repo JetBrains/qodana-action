@@ -1,6 +1,6 @@
 {
   "name": "@qodana/vsts",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "Qodana for Azure Pipelines extension",
   "main": "azure.js",
   "scripts": {

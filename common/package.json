@@ -1,6 +1,6 @@
 {
   "name": "@qodana/ci-common",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "Common code for Qodana Scan GitHub action and Qodana Azure Pipelines extension.",
   "main": "qodana.js",
   "license": "Apache-2.0",
