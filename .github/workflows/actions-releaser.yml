@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-            fetch-depth: 0
+          fetch-depth: 0
       - run: |
           ./changelog.sh > changelog.md
           gh release create ${GITHUB_REF##*/} -F changelog.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
