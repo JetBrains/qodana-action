@@ -72,10 +72,15 @@ Run all required commands to check everything locally for the release:
 npm run all
 ```
 
+Update the version – edit the following artifacts:
+
+- [ ] [vsts/vss-extension.json](vsts/vss-extension.json)
+- [ ] [vsts/QodanaScan/task.json](vsts/QodanaScan/task.json)
+
 Test extension packing:
 
 ```sh
-npm run azure
+npm run azure-dev
 ```
 
 ## Create a commit
@@ -88,9 +93,8 @@ You can follow the documentation on
 
 ## Submit a pull request
 
-Push your branch to your `qodana` fork and open a pull request against the
+Push your branch to your `qodana-action` fork and open a pull request against the
 main branch.
-
 
 ## Release a new version
 

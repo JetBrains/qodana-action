@@ -1,0 +1,24 @@
+name: 'vsts-releaser'
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Node.js 12.x
+        uses: actions/setup-node@v3.1.0
+        with:
+          node-version: 12.x
+      - name: Install dependencies
+        run: cd vsts && npm install && npm i -g tfx-cli
+      - name: Package and publish
+        run: |
+          cd vsts && npm run azure
+          mv JetBrains.qodana-*.vsix qodana.vsix
+          tfx extension publish --publisher JetBrains --vsix qodana.vsix -t $AZURE_TOKEN
+        env:
+          AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
