@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "qodana",
   "name": "Qodana",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "public": true,
   "publisher": "JetBrains",
   "targets": [

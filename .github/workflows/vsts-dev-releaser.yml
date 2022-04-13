@@ -12,7 +12,7 @@ jobs:
         with:
           node-version: 12.x
       - name: Install dependencies
-        run: cd vsts && npm install && npm i -g tfx-cli
+        run: cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli
       - name: Package and publish
         run: |
           cd vsts && npm run azure-dev
