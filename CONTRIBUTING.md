@@ -20,6 +20,12 @@ Clone the repository anywhere:
 git clone git@github.com:JetBrains/qodana-action.git
 ```
 
+Install all dependencies:
+
+```sh
+cd common && npm install && cd ../scan && npm install && cd ../vsts && npm install
+```
+
 ### GitHub action
 
 `cd` into the project directory (the only action available for now is Qodana Scan) and install project dependencies:

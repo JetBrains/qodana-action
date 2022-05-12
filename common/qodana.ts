@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
-export const VERSION = '1.0.4'
+export const VERSION = '1.1.0'
 export const EXECUTABLE = 'qodana'
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
