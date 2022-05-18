@@ -42,8 +42,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v5.0.2
+        uses: JetBrains/qodana-action@v5.1.0
 ```
 
 Using this workflow, Qodana will run on the main branch, release branches, and on the pull requests coming to your
@@ -61,7 +63,7 @@ for your project using Qodana. To do it, add these lines to the `code_quality.ym
 [the basic configuration](#basic-configuration) of Qodana Scan:
 
 ```yaml
-      - uses: github/codeql-action/upload-sarif@v1
+      - uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
 ```
@@ -190,6 +192,7 @@ Most likely you won't need other options than `args`: all other options can be u
 [jb:discussions]: https://jb.gg/qodana-discussions
 [jb:twitter]: https://twitter.com/Qodana
 [jb:docker]: https://hub.docker.com/r/jetbrains/qodana
+
 
 ## Issue Tracker
 
