@@ -8,6 +8,7 @@ exclude:
     paths:
       - scan/jest.config.js
       - scan/lib
+      - scan/dist
       - vsts/lib
       - vsts/QodanaScan
 include:
