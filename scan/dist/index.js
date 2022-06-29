@@ -1902,12 +1902,10 @@ function getQodanaPullArgs(args) {
   }
   return pullArgs;
 }
-function getQodanaScanArgs(args, resultsDir, cacheDir, env = `cli`) {
+function getQodanaScanArgs(args, resultsDir, cacheDir) {
   const cliArgs = [
     "scan",
     "--skip-pull",
-    "-e",
-    `QODANA_ENV=${env}:${VERSION}`,
     "--cache-dir",
     cacheDir,
     "--results-dir",
@@ -1921,7 +1919,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir, env = `cli`) {
 var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
-    VERSION = "1.1.0";
+    VERSION = "2022.1.1";
     EXECUTABLE = "qodana";
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
@@ -68173,10 +68171,9 @@ var require_utils5 = __commonJS({
     exports2.getInputs = getInputs;
     function qodana(args = []) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const env = isServer() ? "github-enterprise" : "github";
         if (args.length === 0) {
           const inputs = getInputs();
-          args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir, env);
+          args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
         }
         return (yield exec.getExecOutput(qodana_12.EXECUTABLE, args, {
           ignoreReturnCode: true

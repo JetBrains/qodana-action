@@ -26,6 +26,12 @@ Install all dependencies:
 cd common && npm install && cd ../scan && npm install && cd ../vsts && npm install
 ```
 
+Run everything in all subprojects:
+
+```sh
+cd scan && npm run all && cd ../vsts && npm run all && cd ../
+```
+
 ### GitHub action
 
 `cd` into the project directory (the only action available for now is Qodana Scan) and install project dependencies:

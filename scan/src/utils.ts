@@ -111,15 +111,9 @@ export function getInputs(): Inputs {
  * @returns The qodana command execution output.
  */
 export async function qodana(args: string[] = []): Promise<number> {
-  const env = isServer() ? 'github-enterprise' : 'github'
   if (args.length === 0) {
     const inputs = getInputs()
-    args = getQodanaScanArgs(
-      inputs.args,
-      inputs.resultsDir,
-      inputs.cacheDir,
-      env
-    )
+    args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
   }
   return (
     await exec.getExecOutput(EXECUTABLE, args, {
