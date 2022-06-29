@@ -74,8 +74,6 @@ function defaultDockerRunCommandFixture(): string[] {
   return [
     'scan',
     '--skip-pull',
-    '-e',
-    `QODANA_ENV=github:${VERSION}`,
     '--cache-dir',
     '${{ runner.temp }}/qodana-caches',
     '--results-dir',
@@ -90,8 +88,7 @@ test('qodana scan command args', () => {
   const result = getQodanaScanArgs(
     inputs.args,
     inputs.resultsDir,
-    inputs.cacheDir,
-    'github'
+    inputs.cacheDir
   )
   expect(result).toEqual(defaultDockerRunCommandFixture())
 })
