@@ -26,7 +26,7 @@ inputs:
     required: false
     default: "${{ github.sha }}"
   upload-result:
-    description: 'Upload Qodana results as an artifact to the job'
+    description: 'Upload Qodana results on GitHub as an artifact to the job'
     required: false
     default: "true"
   artifact-name:
@@ -41,64 +41,6 @@ inputs:
     description: 'GitHub token to be used for uploading annotations'
     required: false
     default: ${{ github.token }}
-  linter:
-    description: '[DEPRECATED] Qodana linter – [official Qodana Docker image](#supported-qodana-docker-images).'
-    required: false
-    deprecationMessage: 'Use `args` (e.g. `args: --linter,<linter>`) instead'
-  project-dir:
-    description: '[DEPRECATED] Root directory of the project to be analyzed'
-    required: false
-    deprecationMessage: 'Use `args` (e.g. `args: --project-dir,<path>`) instead'
-  idea-config-dir:
-    description: '[DEPRECATED] IntelliJ IDEA configuration directory'
-    required: false
-    deprecationMessage: 'Use `args` to mount the directory (e.g. `args: -v,<path>:/root/.config/idea`) instead'
-  gradle-settings-path:
-    description: '[DEPRECATED] Provide path to gradle.properties file. An example: "/your/custom/path/gradle.properties"'
-    required: false
-    deprecationMessage: 'Use `args` to mount the file (e.g. `args: -v,<path>:/root/.gradle/gradle.properties`) instead'
-  additional-volumes:
-    description: '[DEPRECATED] Mount additional volumes to Docker container'
-    required: false
-    deprecationMessage: 'Use `args` to mount any directory (e.g. `args: -v,<path1>:<path2>,-v,<path3>:<path4>`) instead'
-  additional-env-variables:
-    description: '[DEPRECATED] Pass additional environment variables to docker container'
-    required: false
-    deprecationMessage: 'Use `args` to pass any environment variable (e.g. `args: -e,<key1>=<value1>,-e,<key2>=<value2>`) instead'
-  fail-threshold:
-    description: '[DEPRECATED] Set the number of problems that will serve as a quality gate. If this number is reached, the pipeline run is terminated'
-    required: false
-    deprecationMessage: 'Use `args` to pass the threshold (e.g. `args: --fail-threshold,<number>`) instead'
-  inspected-dir:
-    description: '[DEPRECATED] Directory to be inspected. If not specified, the whole project is inspected by default'
-    required: false
-    deprecationMessage: 'Use `args` to pass the directory (e.g. `args: -d,<path>`) instead'
-  baseline-path:
-    description: '[DEPRECATED] Run in baseline mode. Provide the path to an existing SARIF report to be used in the baseline state calculation'
-    required: false
-    deprecationMessage: 'Use `args` to pass the baseline path (e.g. `args: -b,<path>`) instead'
-  baseline-include-absent:
-    description: '[DEPRECATED] Include the results from the baseline absent in the current Qodana run in the output report'
-    required: false
-    default: "false"
-    deprecationMessage: 'Use `args` to pass the baseline include absent flag (e.g. `args: --baseline-include-absent`) instead'
-  changes:
-    description: '[DEPRECATED] Inspect uncommitted changes and report new problems'
-    required: false
-    default: "false"
-    deprecationMessage: 'Use `args` to pass the changes flag (e.g. `args: --changes`) instead'
-  script:
-    description: '[DEPRECATED] Override the default docker scenario'
-    required: false
-    deprecationMessage: 'Use `args` to pass the script (e.g. `args: --script,<name>`) instead'
-  profile-name:
-    description: '[DEPRECATED] Name of a profile defined in the project'
-    required: false
-    deprecationMessage: 'Use `args` to pass the profile name (e.g. `args: --profile-name,<name>`) instead'
-  profile-path:
-    description: '[DEPRECATED] Absolute path to the profile file'
-    required: false
-    deprecationMessage: 'Use `args` to pass the profile path (e.g. `args: --profile-path,<path>`) instead'
 
 runs:
   using: 'node12'
