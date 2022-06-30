@@ -68088,75 +68088,9 @@ var require_utils5 = __commonJS({
     var tc = __importStar2(require_tool_cache());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var path_1 = __importDefault(require("path"));
-    function getDeprecatedInputs(args) {
-      const deprecatedInputs = {
-        linter: core2.getInput("linter"),
-        projectDir: core2.getInput("project-dir"),
-        additionalVolumes: core2.getMultilineInput("additional-volumes"),
-        additionalEnvVars: core2.getMultilineInput("additional-env-variables"),
-        inspectedDir: core2.getInput("inspected-dir"),
-        ideaConfigDir: core2.getInput("idea-config-dir"),
-        baselinePath: core2.getInput("baseline-path"),
-        baselineIncludeAbsent: core2.getBooleanInput("baseline-include-absent"),
-        failThreshold: core2.getInput("fail-threshold"),
-        profileName: core2.getInput("profile-name"),
-        profilePath: core2.getInput("profile-path"),
-        gradleSettingsPath: core2.getInput("gradle-settings-path"),
-        changes: core2.getBooleanInput("changes"),
-        script: core2.getInput("script")
-      };
-      if (deprecatedInputs.linter) {
-        args.push("-l", deprecatedInputs.linter);
-      }
-      if (deprecatedInputs.projectDir) {
-        args.push("-i", deprecatedInputs.projectDir);
-      }
-      if (deprecatedInputs.additionalVolumes) {
-        for (const volume of deprecatedInputs.additionalVolumes) {
-          args.push("-v", volume);
-        }
-      }
-      if (deprecatedInputs.additionalEnvVars) {
-        for (const envVar of deprecatedInputs.additionalEnvVars) {
-          args.push("-e", envVar);
-        }
-      }
-      if (deprecatedInputs.inspectedDir) {
-        args.push("-d", deprecatedInputs.inspectedDir);
-      }
-      if (deprecatedInputs.ideaConfigDir) {
-        args.push("-v", `${deprecatedInputs.ideaConfigDir}:/root/.config/idea`);
-      }
-      if (deprecatedInputs.baselinePath) {
-        args.push("-b", deprecatedInputs.baselinePath);
-      }
-      if (deprecatedInputs.baselineIncludeAbsent) {
-        args.push("--baseline-include-absent");
-      }
-      if (deprecatedInputs.failThreshold) {
-        args.push("--fail-threshold", deprecatedInputs.failThreshold);
-      }
-      if (deprecatedInputs.profileName) {
-        args.push("--profile-name", deprecatedInputs.profileName);
-      }
-      if (deprecatedInputs.profilePath) {
-        args.push("--profile-path", deprecatedInputs.profilePath);
-      }
-      if (deprecatedInputs.gradleSettingsPath) {
-        args.push("-v", `${deprecatedInputs.gradleSettingsPath}:/root/.gradle/gradle.properties`);
-      }
-      if (deprecatedInputs.changes) {
-        args.push("--changes");
-      }
-      if (deprecatedInputs.script) {
-        args.push("--script", deprecatedInputs.script);
-      }
-      return args;
-    }
-    __name(getDeprecatedInputs, "getDeprecatedInputs");
     function getInputs() {
       return {
-        args: getDeprecatedInputs(core2.getInput("args").split(",").map((arg) => arg.trim())),
+        args: core2.getInput("args").split(",").map((arg) => arg.trim()),
         resultsDir: core2.getInput("results-dir"),
         cacheDir: core2.getInput("cache-dir"),
         additionalCacheHash: core2.getInput("additional-cache-hash"),
