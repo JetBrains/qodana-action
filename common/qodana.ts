@@ -32,7 +32,6 @@ export interface Inputs {
   uploadResult: boolean
   artifactName: string
   useCaches: boolean
-  githubToken: string
   useAnnotations: boolean
 }
 

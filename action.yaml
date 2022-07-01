@@ -37,10 +37,6 @@ inputs:
     description: 'Use annotations to mark the results in the GitHub user interface'
     required: false
     default: "true"
-  github-token:
-    description: 'GitHub token to be used for uploading annotations'
-    required: false
-    default: ${{ github.token }}
 
 runs:
   using: 'node12'

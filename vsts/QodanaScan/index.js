@@ -4363,7 +4363,6 @@ var require_utils2 = __commonJS({
         uploadResult: tl2.getBoolInput("uploadResult", false) || true,
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
         additionalCacheHash: "",
-        githubToken: "",
         useAnnotations: false,
         useCaches: false
       };
