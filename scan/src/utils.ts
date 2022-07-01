@@ -30,7 +30,6 @@ export function getInputs(): Inputs {
     uploadResult: core.getBooleanInput('upload-result'),
     artifactName: core.getInput('artifact-name'),
     useCaches: core.getBooleanInput('use-caches'),
-    githubToken: core.getInput('github-token'),
     useAnnotations: core.getBooleanInput('use-annotations')
   }
 }

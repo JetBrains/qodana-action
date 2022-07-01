@@ -1,59 +1,50 @@
 import {expect, test} from '@jest/globals'
-import {
-  Output,
-  parseSarif,
-  QODANA_HELP_STRING,
-  QODANA_CHECK_NAME
-} from '../src/annotations'
-import {getQodanaScanArgs, Inputs, VERSION} from '../../common/qodana'
+import {parseSarif, Annotation} from '../src/output'
+import {getQodanaScanArgs, Inputs} from '../../common/qodana'
 
-function outputEmptyFixture(): Output {
-  return {
-    annotations: [],
-    summary: 'No problems found.',
-    text: QODANA_HELP_STRING,
-    title: QODANA_CHECK_NAME
-  }
+function outputEmptyFixture(): Annotation[] {
+  return []
 }
 
-function outputDefaultFixture(): Output {
-  return {
-    annotations: [
-      {
-        annotation_level: 'warning',
-        start_line: 271,
-        end_line: 271,
-        message: "'while' has empty body",
-        path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+function outputDefaultFixture(): Annotation[] {
+  return [
+    {
+      level: 'warning',
+      message: "'while' has empty body",
+      properties: {
+        startLine: 271,
+        endLine: 271,
+        file: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
         title: 'Control flow with empty body',
-        start_column: undefined,
-        end_column: undefined
-      },
-      {
-        annotation_level: 'notice',
-        start_line: 268,
-        end_line: 268,
-        message: "Condition is always 'true'",
-        path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
-        title: "Condition of 'if' expression is constant",
-        start_column: undefined,
-        end_column: undefined
-      },
-      {
-        annotation_level: 'notice',
-        end_line: 283,
-        message: "Might be 'const'",
-        path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
-        start_line: 283,
-        title: "Might be 'const'",
-        start_column: undefined,
-        end_column: undefined
+        startColumn: undefined,
+        endColumn: undefined
       }
-    ],
-    summary: '3 problems were detected.',
-    text: QODANA_HELP_STRING,
-    title: QODANA_CHECK_NAME
-  }
+    },
+    {
+      level: 'notice',
+      message: "Condition is always 'true'",
+      properties: {
+        startLine: 268,
+        endLine: 268,
+        file: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+        title: "Condition of 'if' expression is constant",
+        startColumn: undefined,
+        endColumn: undefined
+      }
+    },
+    {
+      level: 'notice',
+      message: "Might be 'const'",
+      properties: {
+        endLine: 283,
+        file: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+        startLine: 283,
+        title: "Might be 'const'",
+        startColumn: undefined,
+        endColumn: undefined
+      }
+    }
+  ]
 }
 
 function inputsDefaultFixture(): Inputs {
@@ -65,8 +56,7 @@ function inputsDefaultFixture(): Inputs {
     uploadResult: true,
     artifactName: 'Qodana report',
     useCaches: true,
-    useAnnotations: true,
-    githubToken: ''
+    useAnnotations: true
   }
 }
 

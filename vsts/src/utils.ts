@@ -32,7 +32,6 @@ export function getInputs(): Inputs {
     artifactName: tl.getInput('artifactName', false) || 'qodana-report',
     // Not used by the task
     additionalCacheHash: '',
-    githubToken: '',
     useAnnotations: false,
     useCaches: false
   }

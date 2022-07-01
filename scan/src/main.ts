@@ -14,7 +14,7 @@ import {
   uploadCaches,
   uploadReport
 } from './utils'
-import {publishAnnotations} from './annotations'
+import {publishOutput} from './output'
 
 // Catch and log any unhandled exceptions.  These exceptions can leak out of the uploadChunk method in
 // @actions/toolkit when a failed upload closes the file descriptor causing any in-process reads to
@@ -57,11 +57,11 @@ async function main(): Promise<void> {
         inputs.additionalCacheHash,
         inputs.useCaches && isExecutionSuccessful(exitCode)
       ),
-      publishAnnotations(
+      publishOutput(
         exitCode === QodanaExitCode.FailThreshold,
-        inputs.githubToken,
         `${inputs.resultsDir}/${QODANA_SARIF_NAME}`,
-        inputs.useAnnotations && isExecutionSuccessful(exitCode)
+        isExecutionSuccessful(exitCode),
+        inputs.useAnnotations
       )
     ])
     if (!isExecutionSuccessful(exitCode)) {
