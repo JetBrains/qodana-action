@@ -4364,7 +4364,8 @@ var require_utils2 = __commonJS({
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
         additionalCacheHash: "",
         useAnnotations: false,
-        useCaches: false
+        useCaches: false,
+        prMode: false
       };
     }
     exports2.getInputs = getInputs;

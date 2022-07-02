@@ -56,7 +56,8 @@ function inputsDefaultFixture(): Inputs {
     uploadResult: true,
     artifactName: 'Qodana report',
     useCaches: true,
-    useAnnotations: true
+    useAnnotations: true,
+    prMode: true
   }
 }
 

@@ -11,9 +11,9 @@ const ANNOTATION_WARNING = 'warning'
 const ANNOTATION_NOTICE = 'notice'
 const SUMMARY_TABLE_HEADER = '| Name | Severity | Problems |'
 const SUMMARY_TABLE_SEP = '| --- | --- | --- |'
-const SUMMARY_MISC = `Find out how to view [the Qodana report](https://www.jetbrains.com/help/qodana/html-report.html)
-
-### Contact us
+const SEE_THE_REPORT =
+  'Find out how to view [the Qodana report](https://www.jetbrains.com/help/qodana/html-report.html)'
+const SUMMARY_MISC = `### Contact us
 
   Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   - Or via our issue tracker: https://jb.gg/qodana-issue
@@ -57,6 +57,17 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
  * @param annotations The annotations to generate the summary from.
  */
 function getSummary(annotations: Annotation[]): string {
+  if (annotations.length === 0) {
+    return [
+      `# ${QODANA_CHECK_NAME}`,
+      '',
+      '**It seems all right 👌**',
+      '',
+      'No problems found according to the checks applied',
+      SUMMARY_MISC
+    ].join('\n')
+  }
+
   return [
     `# ${QODANA_CHECK_NAME}`,
     '',
@@ -83,6 +94,7 @@ function getSummary(annotations: Annotation[]): string {
       .filter(e => e !== '')
       .join('\n'),
     '',
+    SEE_THE_REPORT,
     SUMMARY_MISC
   ].join('\n')
 }

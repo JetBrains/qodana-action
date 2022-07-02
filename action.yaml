@@ -37,6 +37,10 @@ inputs:
     description: 'Use annotations to mark the results in the GitHub user interface'
     required: false
     default: "true"
+  pr-mode:
+    description: 'Analyze only changed files in a pull request'
+    required: false
+    default: "true"
 
 runs:
   using: 'node12'

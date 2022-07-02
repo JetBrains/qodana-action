@@ -2,6 +2,7 @@ import * as artifact from '@actions/artifact'
 import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+import * as github from '@actions/github'
 import * as glob from '@actions/glob'
 import * as tc from '@actions/tool-cache'
 import {
@@ -30,7 +31,8 @@ export function getInputs(): Inputs {
     uploadResult: core.getBooleanInput('upload-result'),
     artifactName: core.getInput('artifact-name'),
     useCaches: core.getBooleanInput('use-caches'),
-    useAnnotations: core.getBooleanInput('use-annotations')
+    useAnnotations: core.getBooleanInput('use-annotations'),
+    prMode: core.getBooleanInput('pr-mode')
   }
 }
 /**
@@ -42,6 +44,10 @@ export async function qodana(args: string[] = []): Promise<number> {
   if (args.length === 0) {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
+    if (inputs.prMode && github.context.payload.pull_request) {
+      const pr = github.context.payload.pull_request
+      args.push('--changes', '--commit', `CI${pr.base.sha}`)
+    }
   }
   return (
     await exec.getExecOutput(EXECUTABLE, args, {
