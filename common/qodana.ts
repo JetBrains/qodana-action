@@ -33,6 +33,7 @@ export interface Inputs {
   artifactName: string
   useCaches: boolean
   useAnnotations: boolean
+  prMode: boolean
 }
 
 /**

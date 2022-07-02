@@ -33,7 +33,8 @@ export function getInputs(): Inputs {
     // Not used by the task
     additionalCacheHash: '',
     useAnnotations: false,
-    useCaches: false
+    useCaches: false,
+    prMode: false
   }
 }
 

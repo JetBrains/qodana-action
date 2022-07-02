@@ -46,32 +46,26 @@ jobs:
           npm install
           npm test
 
-  test-ubuntu: # make sure the action works on a clean machine without building
+  qodana: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: qodana/codeql-action
-          path: project
+          fetch-depth: 0
+      - uses: ./
+        with:
+          args: --print-problems,--log-level,debug
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+
+  qodana-no-pr: # pr mode disabled
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v3
+      - uses: ./
         with:
-          path: action
-      - run: |
-          cat > project/qodana.yaml << EOF
-          linter: jetbrains/qodana-js
-          bootstrap: npm install
-          profile:
-            name: qodana.recommended
-          include:
-            - name: GrazieInspection
-          exclude:
-            - name: All
-              paths:
-                - lib
-                - src/testdata
-      - uses: ./action/
-        with:
-          args: -i,project,--print-problems,--log-level,debug
+          args: --print-problems,--log-level,debug
+          pr-mode: false
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
