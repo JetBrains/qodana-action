@@ -26,7 +26,7 @@ inputs:
     required: false
     default: "${{ github.sha }}"
   upload-result:
-    description: 'Upload Qodana results on GitHub as an artifact to the job'
+    description: 'Upload Qodana results as an artifact to the job'
     required: false
     default: "true"
   artifact-name:
