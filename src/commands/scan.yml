@@ -50,7 +50,8 @@ steps:
         mkdir -p $CLI_DIRECTORY
         if [[ ! -x "$CLI_DIRECTORY/qodana" ]]; then
           curl -fsSL https://jb.gg/qodana-cli/install | bash -s -- \
-          v2022.1.1 $CLI_DIRECTORY
+          v2022.1.1 $CLI_DIRECTORY \
+          1> /dev/null
         fi
         NO_INTERACTIVE=1 $CLI_DIRECTORY/qodana scan \
         --cache-dir << parameters.cache-dir >> \
