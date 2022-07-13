@@ -10,5 +10,4 @@ description: >
 # This information will be displayed in the orb registry and is not mandatory.
 display:
   home_url: "https://jetbrains.com/qodana"
-  source_url: |
-    https://www.github.com/jetbrains/qodana-action
+  source_url: "https://github.com/JetBrains/qodana-action"
