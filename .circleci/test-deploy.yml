@@ -11,7 +11,8 @@ jobs:
   code-quality:
     steps:
       - checkout
-      - qodana/scan
+      - qodana/scan:
+          args: "--print-problems --log-level debug"
 
 workflows:
   test-deploy:
