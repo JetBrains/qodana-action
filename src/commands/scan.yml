@@ -1,28 +1,40 @@
 description: >
-  Scan a project with Qodana. It runs Qodana `scan` command and reports the results.
+  Scan a project with Qodana.
+  It runs Qodana `scan` command and reports the results.
   Note that most options can be configured via qodana.yaml
   (https://www.jetbrains.com/help/qodana/qodana-yaml.html) file.
 parameters:
   args:
     type: string
     default: ""
-    description: "Additional Qodana CLI `scan` command arguments (https://github.com/jetbrains/qodana-cli#scan). Optional."
+    description: >
+      Additional Qodana CLI `scan` command arguments
+      (https://github.com/jetbrains/qodana-cli#scan).
+      Optional.
   results-dir:
     type: string
     default: "/tmp/qodana/results"
-    description: "Directory to store the analysis results. Optional."
+    description: >
+      Directory to store the analysis results. Optional.
   artifact-name:
     type: string
     default: "qodana-report"
-    description: "Specify Qodana results artifact name, used for results uploading. Optional."
+    description: >
+      Specify Qodana results artifact name,
+      used for results uploading.
+      Optional.
   cache-dir:
     type: string
     default: "/tmp/cache/qodana"
-    description: "Directory to store Qodana caches. Optional."
+    description: >
+      Directory to store Qodana caches.
+      Optional.
   additional-cache-hash:
     type: string
     default: << pipeline.git.revision >>
-    description: "Allows customizing the generated cache hash. Optional."
+    description: >
+      Allows customizing the generated cache hash.
+      Optional.
 steps:
   - restore_cache:
       keys:
@@ -37,9 +49,13 @@ steps:
         CLI_DIRECTORY=/tmp/cache/qodana-cli/2022.1.1
         mkdir -p $CLI_DIRECTORY
         if [[ ! -x "$CLI_DIRECTORY/qodana" ]]; then
-          curl -fsSL https://jb.gg/qodana-cli/install | bash -s -- v2022.1.1 $CLI_DIRECTORY
+          curl -fsSL https://jb.gg/qodana-cli/install | bash -s -- \
+          v2022.1.1 $CLI_DIRECTORY
         fi
-        NO_INTERACTIVE=1 $CLI_DIRECTORY/qodana scan --cache-dir << parameters.cache-dir >> -o << parameters.results-dir >> << parameters.args >>
+        NO_INTERACTIVE=1 $CLI_DIRECTORY/qodana scan \
+        --cache-dir << parameters.cache-dir >> \
+        -o << parameters.results-dir >> \
+        << parameters.args >>
   - store_artifacts:
       path: << parameters.results-dir >>
       destination: << parameters.artifact-name >>
