@@ -9,6 +9,8 @@ filters: &filters
 
 jobs:
   code-quality:
+    machine:
+      image: ubuntu-2004:current
     steps:
       - checkout
       - qodana/scan:

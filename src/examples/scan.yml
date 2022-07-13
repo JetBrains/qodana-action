@@ -6,6 +6,8 @@ usage:
     qodana: jetbrains/qodana@2022.1.1
   jobs:
     code-quality:
+      machine:
+        image: ubuntu-2004:current
       steps:
         - checkout
         - qodana/scan
