@@ -21,6 +21,9 @@ duplications, and imperfections.
 
 ## Usage
 
+The [Qodana Scan GitHub action](https://github.com/marketplace/actions/qodana-scan)
+allows you to run Qodana on a GitHub repository.
+
 <anchor name="basic-configuration"></anchor>
 
 ### Basic configuration
@@ -124,10 +127,13 @@ qodana scan --show-report
 
 3. Upload the `qodana.sarif.json` file to your project root folder on GitHub.
 
-4. Append this line to the Qodana Scan action configuration in the `code_quality.yml` file:
+4. Append `--baseline,qodana.sarif.json` argument to the Qodana Scan action configuration `args` parameter in the `code_quality.yml` file:
 
 ```yaml
-args: --baseline,qodana.sarif.json
+- name: Qodana Scan
+  uses: JetBrains/qodana-action@v2022.1.1
+  with:
+    args: --baseline,qodana.sarif.json
 ```
 
 If you want to update the baseline, you must repeat these steps.
@@ -171,7 +177,14 @@ You can set up a Qodana workflow badge in your repository. To do it, follow thes
 
 ## Configuration
 
-Most likely, you won't need other options than `args`: all other options can be helpful if you are configuring multiple Qodana Scan jobs in one workflow.
+Most likely, you won't need other options than `args`: all other options can be helpful if you are configuring multiple Qodana Scan jobs in one workflow. 
+
+Use [`with`](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswith) to define any action parameters:
+
+```yaml
+with:
+  args: --baseline,qodana.sarif.json
+```
 
 | Name                    | Description                                                                                                                                                                                  | Default Value                       |
 |-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
