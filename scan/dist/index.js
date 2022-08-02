@@ -2304,7 +2304,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
 var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
-    VERSION = "2022.1.1";
+    VERSION = "2022.2.0";
     EXECUTABLE = "qodana";
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
@@ -71507,7 +71507,7 @@ var require_utils7 = __commonJS({
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
           if (inputs.prMode && github.context.payload.pull_request) {
             const pr = github.context.payload.pull_request;
-            args.push("--changes", "--commit", `CI${pr.base.sha}`);
+            args.push("--commit", `CI${pr.base.sha}`);
           }
         }
         return (yield exec.getExecOutput(qodana_12.EXECUTABLE, args, {
