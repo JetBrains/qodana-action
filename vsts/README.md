@@ -45,7 +45,7 @@ steps:
       restoreKeys: |
         "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
         "$(Build.Repository.Name)"
-  - task: QodanaScan@1
+  - task: QodanaScan@2022
 ```
 
 Triggering this job depends on [what type of repository you are using in Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/build/triggers?view=azure-devops#classic-build-pipelines-and-yaml-pipelines).
@@ -77,6 +77,7 @@ You probably won't need other options than `args`: all other options can be help
 [jb:discussions]: https://jb.gg/qodana-discussions
 [jb:twitter]: https://twitter.com/Qodana
 [jb:docker]: https://hub.docker.com/r/jetbrains/qodana
+
 
 ## Issue Tracker
 

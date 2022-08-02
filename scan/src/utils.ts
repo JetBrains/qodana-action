@@ -46,7 +46,7 @@ export async function qodana(args: string[] = []): Promise<number> {
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
     if (inputs.prMode && github.context.payload.pull_request) {
       const pr = github.context.payload.pull_request
-      args.push('--changes', '--commit', `CI${pr.base.sha}`)
+      args.push('--commit', `CI${pr.base.sha}`)
     }
   }
   return (

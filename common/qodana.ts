@@ -1,10 +1,11 @@
 // noinspection JSUnusedGlobalSymbols
 
-export const VERSION = '2022.1.1'
+export const VERSION = '2022.2.1'
 export const EXECUTABLE = 'qodana'
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
+export const QODANA_SHORT_SARIF_NAME = 'qodana-short.sarif.json'
 
 // eslint-disable-next-line no-shadow -- shadowing is intentional here (ESLint bug)
 export enum QodanaExitCode {
