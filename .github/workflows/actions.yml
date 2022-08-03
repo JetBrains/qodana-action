@@ -1,13 +1,14 @@
 name: 'actions-build-test'
-on: # rebuild any PRs and main branch changes
+on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
       - main
       - 'releases/*'
     paths:
-      - 'scan/'
-
+      - 'scan/*'
+      - '.github/workflows/scan.yml'
 jobs:
   check-dist:
     runs-on: ubuntu-latest

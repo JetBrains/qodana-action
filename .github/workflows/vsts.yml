@@ -1,12 +1,14 @@
-name: vsts-build-test
+name: 'vsts-build-test'
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
       - main
       - releases/*
     paths:
-      - 'vsts/'
+      - 'vsts/*'
+      - '.github/workflows/vsts.yml'
 jobs:
   build:
     runs-on: '${{ matrix.os }}'
