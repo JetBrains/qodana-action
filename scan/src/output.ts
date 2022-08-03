@@ -11,8 +11,6 @@ const ANNOTATION_WARNING = 'warning'
 const ANNOTATION_NOTICE = 'notice'
 const SUMMARY_TABLE_HEADER = '| Name | Severity | Problems |'
 const SUMMARY_TABLE_SEP = '| --- | --- | --- |'
-const SEE_THE_REPORT =
-  'Find out how to view [the Qodana report](https://www.jetbrains.com/help/qodana/html-report.html)'
 const SUMMARY_MISC = `### Contact us
 
   Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
@@ -28,6 +26,15 @@ export interface Annotation {
   message: string
   level: string
   properties: AnnotationProperties
+}
+
+function getViewReportText(sarifPath: string): string {
+  const sarif: Log = JSON.parse(fs.readFileSync(sarifPath, {encoding: 'utf8'}))
+  const link = sarif.runs?.[0]?.properties?.['reportUrl']
+  if (link) {
+    return `☁️ [View the Qodana report](${link})`
+  }
+  return 'Find out how to view [the Qodana report](https://www.jetbrains.com/help/qodana/html-report.html)'
 }
 
 /**
@@ -53,10 +60,11 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
 }
 
 /**
- * Generates action summary string from annotations.
+ * Generates action summary string of annotations.
  * @param annotations The annotations to generate the summary from.
+ * @param shortSarifPath The path to the SARIF file.
  */
-function getSummary(annotations: Annotation[]): string {
+function getSummary(annotations: Annotation[], shortSarifPath: string): string {
   if (annotations.length === 0) {
     return [
       `# ${QODANA_CHECK_NAME}`,
@@ -94,7 +102,7 @@ function getSummary(annotations: Annotation[]): string {
       .filter(e => e !== '')
       .join('\n'),
     '',
-    SEE_THE_REPORT,
+    getViewReportText(shortSarifPath),
     SUMMARY_MISC
   ].join('\n')
 }
@@ -168,7 +176,7 @@ export function parseSarif(path: string): Annotation[] {
     annotations = run.results
       .filter(result => result.baselineState !== 'unchanged')
       .map(result => resultToAnnotation(result, rules))
-      .filter((a): a is Annotation => a !== null && a !== undefined)
+      .filter((a): a is Annotation => a !== null)
   }
   return annotations
 }
@@ -176,13 +184,15 @@ export function parseSarif(path: string): Annotation[] {
 /**
  * Publish SARIF to GitHub Checks.
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
- * @param path The path to the SARIF file to publish.
+ * @param sarifPath The path to the SARIF file to publish.
+ * @param shortSarifPath The path to the short SARIF file to publish.
  * @param execute whether to execute the promise or not.
  * @param useAnnotations whether to publish annotations or not.
  */
 export async function publishOutput(
   failedByThreshold: boolean,
-  path: string,
+  sarifPath: string,
+  shortSarifPath: string,
   execute: boolean,
   useAnnotations: boolean
 ): Promise<void> {
@@ -190,7 +200,7 @@ export async function publishOutput(
     return
   }
   try {
-    const problems = parseSarif(path)
+    const problems = parseSarif(sarifPath)
     if (useAnnotations) {
       for (const p of problems) {
         switch (p.level) {
@@ -205,7 +215,7 @@ export async function publishOutput(
         }
       }
     }
-    await core.summary.addRaw(getSummary(problems)).write()
+    await core.summary.addRaw(getSummary(problems, shortSarifPath)).write()
   } catch (error) {
     core.warning(`Failed to publish annotations – ${(error as Error).message}`)
   }

@@ -2239,6 +2239,7 @@ __export(qodana_exports, {
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
   QODANA_SARIF_NAME: () => QODANA_SARIF_NAME,
+  QODANA_SHORT_SARIF_NAME: () => QODANA_SHORT_SARIF_NAME,
   QodanaExitCode: () => QodanaExitCode,
   VERSION: () => VERSION,
   extractArg: () => extractArg,
@@ -2301,13 +2302,14 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
   }
   return cliArgs;
 }
-var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QodanaExitCode;
+var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     VERSION = "2022.2.0";
     EXECUTABLE = "qodana";
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
+    QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
       QodanaExitCode2[QodanaExitCode2["FailThreshold"] = 255] = "FailThreshold";
@@ -71691,12 +71693,21 @@ var require_output = __commonJS({
     var ANNOTATION_NOTICE = "notice";
     var SUMMARY_TABLE_HEADER = "| Name | Severity | Problems |";
     var SUMMARY_TABLE_SEP = "| --- | --- | --- |";
-    var SEE_THE_REPORT = "Find out how to view [the Qodana report](https://www.jetbrains.com/help/qodana/html-report.html)";
     var SUMMARY_MISC = `### Contact us
 
   Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   - Or via our issue tracker: https://jb.gg/qodana-issue
   - Or share your feedback: https://jb.gg/qodana-discussions`;
+    function getViewReportText(sarifPath) {
+      var _a, _b, _c;
+      const sarif = JSON.parse(fs.readFileSync(sarifPath, { encoding: "utf8" }));
+      const link = (_c = (_b = (_a = sarif.runs) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.properties) === null || _c === void 0 ? void 0 : _c["reportUrl"];
+      if (link) {
+        return `\u2601\uFE0F [View the Qodana report](${link})`;
+      }
+      return "Find out how to view [the Qodana report](https://www.jetbrains.com/help/qodana/html-report.html)";
+    }
+    __name(getViewReportText, "getViewReportText");
     function getRowsByLevel(annotations, level) {
       const problems = annotations.reduce((map, e) => {
         var _a, _b;
@@ -71705,7 +71716,7 @@ var require_output = __commonJS({
       return Array.from(problems.entries()).sort((a, b) => b[1] - a[1]).map(([title, count]) => `| ${title} | ${level} | ${count} |`).join("\n");
     }
     __name(getRowsByLevel, "getRowsByLevel");
-    function getSummary(annotations) {
+    function getSummary(annotations, shortSarifPath) {
       if (annotations.length === 0) {
         return [
           `# ${QODANA_CHECK_NAME}`,
@@ -71729,7 +71740,7 @@ var require_output = __commonJS({
           getRowsByLevel(annotations.filter((a) => a.level === ANNOTATION_NOTICE), "\u25FD\uFE0F Notice")
         ].filter((e) => e !== "").join("\n"),
         "",
-        SEE_THE_REPORT,
+        getViewReportText(shortSarifPath),
         SUMMARY_MISC
       ].join("\n");
     }
@@ -71783,19 +71794,19 @@ var require_output = __commonJS({
       const rules = parseRules(run.tool);
       let annotations = [];
       if ((_a = run.results) === null || _a === void 0 ? void 0 : _a.length) {
-        annotations = run.results.filter((result) => result.baselineState !== "unchanged").map((result) => resultToAnnotation(result, rules)).filter((a) => a !== null && a !== void 0);
+        annotations = run.results.filter((result) => result.baselineState !== "unchanged").map((result) => resultToAnnotation(result, rules)).filter((a) => a !== null);
       }
       return annotations;
     }
     __name(parseSarif, "parseSarif");
     exports2.parseSarif = parseSarif;
-    function publishOutput(failedByThreshold, path, execute, useAnnotations) {
+    function publishOutput(failedByThreshold, sarifPath, shortSarifPath, execute, useAnnotations) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
           return;
         }
         try {
-          const problems = parseSarif(path);
+          const problems = parseSarif(sarifPath);
           if (useAnnotations) {
             for (const p of problems) {
               switch (p.level) {
@@ -71810,7 +71821,7 @@ var require_output = __commonJS({
               }
             }
           }
-          yield core2.summary.addRaw(getSummary(problems)).write();
+          yield core2.summary.addRaw(getSummary(problems, shortSarifPath)).write();
         } catch (error) {
           core2.warning(`Failed to publish annotations \u2013 ${error.message}`);
         }
@@ -71906,7 +71917,7 @@ function main() {
       yield Promise.all([
         (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
         (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.additionalCacheHash, inputs.useCaches && (0, qodana_1.isExecutionSuccessful)(exitCode)),
-        (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, `${inputs.resultsDir}/${qodana_1.QODANA_SARIF_NAME}`, (0, qodana_1.isExecutionSuccessful)(exitCode), inputs.useAnnotations)
+        (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, `${inputs.resultsDir}/${qodana_1.QODANA_SARIF_NAME}`, `${inputs.resultsDir}/${qodana_1.QODANA_SHORT_SARIF_NAME}`, (0, qodana_1.isExecutionSuccessful)(exitCode), inputs.useAnnotations)
       ]);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`);

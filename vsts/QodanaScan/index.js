@@ -34,6 +34,7 @@ __export(qodana_exports, {
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
   QODANA_SARIF_NAME: () => QODANA_SARIF_NAME,
+  QODANA_SHORT_SARIF_NAME: () => QODANA_SHORT_SARIF_NAME,
   QodanaExitCode: () => QodanaExitCode,
   VERSION: () => VERSION,
   extractArg: () => extractArg,
@@ -96,13 +97,14 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
   }
   return cliArgs;
 }
-var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QodanaExitCode;
+var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     VERSION = "2022.2.0";
     EXECUTABLE = "qodana";
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
+    QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
       QodanaExitCode2[QodanaExitCode2["FailThreshold"] = 255] = "FailThreshold";
