@@ -100,7 +100,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
 var VERSION, EXECUTABLE, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
-    VERSION = "2022.2.1";
+    VERSION = "2022.2.2";
     EXECUTABLE = "qodana";
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
@@ -4380,7 +4380,8 @@ var require_utils2 = __commonJS({
           args.push("-e", `QODANA_ENV=${env}:${qodana_12.VERSION}`);
         }
         return tl2.exec(qodana_12.EXECUTABLE, args, {
-          ignoreReturnCode: true
+          ignoreReturnCode: true,
+          env: Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" })
         });
       });
     }

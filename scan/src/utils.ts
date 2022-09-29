@@ -51,7 +51,11 @@ export async function qodana(args: string[] = []): Promise<number> {
   }
   return (
     await exec.getExecOutput(EXECUTABLE, args, {
-      ignoreReturnCode: true
+      ignoreReturnCode: true,
+      env: {
+        ...process.env,
+        NONINTERACTIVE: '1'
+      }
     })
   ).exitCode
 }

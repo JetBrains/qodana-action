@@ -10,7 +10,7 @@
     "lint": "eslint src/**/*.ts",
     "package": "./node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
     "test": "jest",
-    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2022.2/topics/qodana-github-action.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md",
+    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2022.2/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md",
     "all": "npm install && npm run build && npm run format && npm run lint && npm run package && npm run readme"
   },
   "contributors": [
