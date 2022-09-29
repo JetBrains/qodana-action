@@ -51,7 +51,11 @@ export async function qodana(args: string[] = []): Promise<number> {
     args.push('-e', `QODANA_ENV=${env}:${VERSION}`)
   }
   return tl.exec(EXECUTABLE, args, {
-    ignoreReturnCode: true
+    ignoreReturnCode: true,
+    env: {
+      ...process.env,
+      NONINTERACTIVE: '1'
+    }
   })
 }
 
