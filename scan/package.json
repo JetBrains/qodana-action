@@ -41,7 +41,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@actions/artifact": "^0.6.1",
-    "@actions/cache": "^1.0.9",
+    "@actions/cache": "^3.0.6",
     "@actions/core": "^1.9.1",
     "@actions/exec": "^1.1.0",
     "@actions/github": "^5.0.0",
@@ -51,8 +51,8 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.21",
-    "esbuild": "^0.14.21",
     "@typescript-eslint/parser": "^5.15.0",
+    "esbuild": "^0.14.21",
     "eslint": "^8.8.0",
     "eslint-plugin-github": "^4.3.5",
     "eslint-plugin-jest": "^26.1.2",
