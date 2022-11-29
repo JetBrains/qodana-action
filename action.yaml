@@ -25,6 +25,10 @@ inputs:
     description: 'Pass additional cache hash extension'
     required: false
     default: "${{ github.sha }}"
+  cache-default-branch-only:
+    description: 'Upload cache for default branch only'
+    required: false
+    default: "false"
   upload-result:
     description: 'Upload Qodana results as an artifact to the job'
     required: false

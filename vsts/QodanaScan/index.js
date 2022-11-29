@@ -4367,6 +4367,7 @@ var require_utils2 = __commonJS({
         additionalCacheHash: "",
         useAnnotations: false,
         useCaches: false,
+        cacheDefaultBranchOnly: false,
         prMode: false
       };
     }

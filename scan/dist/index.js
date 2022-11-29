@@ -72345,7 +72345,7 @@ var require_utils7 = __commonJS({
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.isServer = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = void 0;
+    exports2.isNeedToUploadCache = exports2.isServer = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = void 0;
     var artifact = __importStar2(require_artifact_client2());
     var cache = __importStar2(require_cache());
     var core2 = __importStar2(require_core());
@@ -72361,6 +72361,7 @@ var require_utils7 = __commonJS({
         resultsDir: core2.getInput("results-dir"),
         cacheDir: core2.getInput("cache-dir"),
         additionalCacheHash: core2.getInput("additional-cache-hash"),
+        cacheDefaultBranchOnly: core2.getBooleanInput("cache-default-branch-only"),
         uploadResult: core2.getBooleanInput("upload-result"),
         artifactName: core2.getInput("artifact-name"),
         useCaches: core2.getBooleanInput("use-caches"),
@@ -72485,6 +72486,20 @@ var require_utils7 = __commonJS({
     }
     __name(isServer, "isServer");
     exports2.isServer = isServer;
+    function isNeedToUploadCache(useCaches, cacheDefaultBranchOnly) {
+      var _a;
+      if (!useCaches && cacheDefaultBranchOnly) {
+        core2.warning('Turn on "use-cache" option to use "cache-default-branch-only"');
+      }
+      if (useCaches && cacheDefaultBranchOnly) {
+        const currentBranch = github.context.payload.ref;
+        const defaultBranch = (_a = github.context.payload.repository) === null || _a === void 0 ? void 0 : _a.default_branch;
+        return currentBranch === defaultBranch;
+      }
+      return useCaches;
+    }
+    __name(isNeedToUploadCache, "isNeedToUploadCache");
+    exports2.isNeedToUploadCache = isNeedToUploadCache;
   }
 });
 
@@ -72784,9 +72799,10 @@ function main() {
         (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.additionalCacheHash, inputs.useCaches)
       ]);
       const exitCode = yield (0, utils_1.qodana)();
+      const canUploadCache = (0, utils_1.isNeedToUploadCache)(inputs.useCaches, inputs.cacheDefaultBranchOnly) && (0, qodana_1.isExecutionSuccessful)(exitCode);
       yield Promise.all([
         (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
-        (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.additionalCacheHash, inputs.useCaches && (0, qodana_1.isExecutionSuccessful)(exitCode)),
+        (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.additionalCacheHash, canUploadCache),
         (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, `${inputs.resultsDir}/${qodana_1.QODANA_SARIF_NAME}`, `${inputs.resultsDir}/${qodana_1.QODANA_SHORT_SARIF_NAME}`, (0, qodana_1.isExecutionSuccessful)(exitCode), inputs.useAnnotations)
       ]);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
