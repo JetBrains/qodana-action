@@ -53,6 +53,7 @@ function inputsDefaultFixture(): Inputs {
     resultsDir: '${{ runner.temp }}/qodana-results',
     cacheDir: '${{ runner.temp }}/qodana-caches',
     additionalCacheHash: '',
+    cacheDefaultBranchOnly: false,
     uploadResult: true,
     artifactName: 'Qodana report',
     useCaches: true,

@@ -34,6 +34,7 @@ export function getInputs(): Inputs {
     additionalCacheHash: '',
     useAnnotations: false,
     useCaches: false,
+    cacheDefaultBranchOnly: false,
     prMode: false
   }
 }

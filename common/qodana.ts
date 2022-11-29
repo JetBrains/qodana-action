@@ -30,6 +30,7 @@ export interface Inputs {
   resultsDir: string
   cacheDir: string
   additionalCacheHash: string
+  cacheDefaultBranchOnly: boolean
   uploadResult: boolean
   artifactName: string
   useCaches: boolean

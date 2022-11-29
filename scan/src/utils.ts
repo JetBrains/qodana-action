@@ -28,6 +28,7 @@ export function getInputs(): Inputs {
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
     additionalCacheHash: core.getInput('additional-cache-hash'),
+    cacheDefaultBranchOnly: core.getBooleanInput('cache-default-branch-only'),
     uploadResult: core.getBooleanInput('upload-result'),
     artifactName: core.getInput('artifact-name'),
     useCaches: core.getBooleanInput('use-caches'),
@@ -203,4 +204,27 @@ export function isServer(): boolean {
     process.env['GITHUB_SERVER_URL'] || 'https://github.com'
   )
   return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM'
+}
+
+/**
+ * Check if need to upload the cache.
+ */
+export function isNeedToUploadCache(
+  useCaches: boolean,
+  cacheDefaultBranchOnly: boolean
+): boolean {
+  if (!useCaches && cacheDefaultBranchOnly) {
+    core.warning(
+      'Turn on "use-cache" option to use "cache-default-branch-only"'
+    )
+  }
+
+  if (useCaches && cacheDefaultBranchOnly) {
+    const currentBranch = github.context.payload.ref
+    const defaultBranch = github.context.payload.repository?.default_branch
+
+    return currentBranch === defaultBranch
+  }
+
+  return useCaches
 }

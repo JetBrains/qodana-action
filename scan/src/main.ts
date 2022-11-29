@@ -9,6 +9,7 @@ import {
 } from '../../common/qodana'
 import {
   getInputs,
+  isNeedToUploadCache,
   prepareAgent,
   qodana,
   restoreCaches,
@@ -51,13 +52,13 @@ async function main(): Promise<void> {
       )
     ])
     const exitCode = await qodana()
+    const canUploadCache =
+      isNeedToUploadCache(inputs.useCaches, inputs.cacheDefaultBranchOnly) &&
+      isExecutionSuccessful(exitCode)
+
     await Promise.all([
       uploadReport(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
-      uploadCaches(
-        inputs.cacheDir,
-        inputs.additionalCacheHash,
-        inputs.useCaches && isExecutionSuccessful(exitCode)
-      ),
+      uploadCaches(inputs.cacheDir, inputs.additionalCacheHash, canUploadCache),
       publishOutput(
         exitCode === QodanaExitCode.FailThreshold,
         `${inputs.resultsDir}/${QODANA_SARIF_NAME}`,
