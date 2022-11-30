@@ -6,8 +6,9 @@ import {
   getQodanaScanArgs,
   Inputs,
   getQodanaUrl,
-  getQodanaArchiveName,
-  VERSION
+  VERSION,
+  SUPPORTED_PLATFORMS,
+  SUPPORTED_ARCHS
 } from '../../common/qodana'
 import * as fs from 'fs'
 
@@ -113,35 +114,56 @@ test('test sarif with no problems to output annotations', () => {
   expect(result).toEqual(output)
 })
 
+test('check whether action README.md has the latest version mentioned everywhere', () => {
+  const readmeMd = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'README.md'),
+    'utf8'
+  )
+  const mentions =
+    readmeMd.match(/uses: JetBrains\/qodana-action@v\d+\.\d+\.\d+/g) || []
+  expect(mentions.length > 0).toEqual(true)
+  for (const mention of mentions) {
+    expect(mention).toEqual(`uses: JetBrains/qodana-action@v${VERSION}`)
+  }
+})
+
+test('check whether Azure Pipelines task.json definitions is up to date', () => {
+  const taskJson = JSON.parse(
+    fs.readFileSync(
+      path.join(__dirname, '..', '..', 'vsts', 'QodanaScan', 'task.json'),
+      'utf8'
+    )
+  )
+  expect(
+    `${taskJson.version.Major}.${taskJson.version.Minor}.${taskJson.version.Patch}`
+  ).toEqual(VERSION)
+})
+
+test('check whether Azure Pipelines README.md has the latest major version mentioned', () => {
+  const readmeMd = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'vsts', 'README.md'),
+    'utf8'
+  )
+  const mentions = readmeMd.match(/ - task: QodanaScan@\d+/g) || []
+  expect(mentions.length > 0).toEqual(true)
+  for (const mention of mentions) {
+    expect(mention).toEqual(` - task: QodanaScan@${VERSION.split('.')[0]}`)
+  }
+})
+
 test('download all Qodana CLI archives and check their checksums', async () => {
-  for (const arch of ['x86_64', 'arm64']) {
-    for (const platform of ['win32', 'linux', 'darwin']) {
+  for (const arch of SUPPORTED_ARCHS) {
+    for (const platform of SUPPORTED_PLATFORMS) {
       const url = getQodanaUrl(arch, platform)
-      const archiveName = getQodanaArchiveName(arch, platform)
+      const archiveName = `${platform}_${arch}`
       const temp = path.join(os.tmpdir(), archiveName)
       execSync(`curl -L ${url} -o ${temp}`)
-      const expectedSha256 = getQodanaSha256(archiveName)
+      const expectedSha256 = getQodanaSha256(arch, platform)
       const actualSha256 = sha256sum(temp)
       expect(`${archiveName}: ${actualSha256}`).toEqual(
         `${archiveName}: ${expectedSha256}`
       )
       fs.rmSync(temp, {force: true})
     }
-  }
-})
-
-test('check whether Azure Pipelines task.json definitions is up to date', () => {
-  const taskJson = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '..', '..', 'vsts', 'QodanaScan', 'task.json'), 'utf8')
-  )
-  expect(`${taskJson.version.Major}.${taskJson.version.Minor}.${taskJson.version.Patch}`).toEqual(VERSION)
-})
-
-test('check whether action README.md contains the latest version mentioned everywhere', () => {
-  const readmeMd = fs.readFileSync(path.join(__dirname, '..', '..', 'README.md'), 'utf8')
-  const mentions = readmeMd.match(/uses: JetBrains\/qodana-action@v\d+\.\d+\.\d+/g) || []
-  expect(mentions.length > 0).toEqual(true)
-  for (const mention of mentions??[]) {
-    expect(mention).toEqual(`uses: JetBrains/qodana-action@v${VERSION}`)
   }
 })

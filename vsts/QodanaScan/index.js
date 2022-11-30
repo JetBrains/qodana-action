@@ -36,9 +36,12 @@ __export(qodana_exports, {
   QODANA_SARIF_NAME: () => QODANA_SARIF_NAME,
   QODANA_SHORT_SARIF_NAME: () => QODANA_SHORT_SARIF_NAME,
   QodanaExitCode: () => QodanaExitCode,
+  SUPPORTED_ARCHS: () => SUPPORTED_ARCHS,
+  SUPPORTED_PLATFORMS: () => SUPPORTED_PLATFORMS,
   VERSION: () => VERSION,
   extractArg: () => extractArg,
-  getQodanaArchiveName: () => getQodanaArchiveName,
+  getProcessArchName: () => getProcessArchName,
+  getProcessPlatformName: () => getProcessPlatformName,
   getQodanaPullArgs: () => getQodanaPullArgs,
   getQodanaScanArgs: () => getQodanaScanArgs,
   getQodanaSha256: () => getQodanaSha256,
@@ -47,8 +50,8 @@ __export(qodana_exports, {
   isExecutionSuccessful: () => isExecutionSuccessful,
   sha256sum: () => sha256sum
 });
-function getQodanaSha256(archiveName) {
-  switch (archiveName) {
+function getQodanaSha256(arch, platform) {
+  switch (`${platform}_${arch}`) {
     case "windows_x86_64":
       return "343c7a5e16263ffff12933b96cb6647af338faf3e001b5b66e90b225cd81755b";
     case "windows_arm64":
@@ -62,42 +65,27 @@ function getQodanaSha256(archiveName) {
     case "darwin_arm64":
       return "f69c832feb2c223bfa209fc38262e8559e049dca48ca7b387f7aa19b8fa6d637";
     default:
-      throw new Error(`Qodana CLI does not exist for ${archiveName}`);
+      throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`);
   }
 }
-function getQodanaSha256MismatchMessage(expected, actual) {
-  return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
+function getProcessArchName() {
+  return process.arch === "x64" ? "x86_64" : "arm64";
 }
-function getQodanaArchiveName(arch = "", platform = "") {
-  if (arch === "") {
-    arch = process.arch === "x64" ? "x86_64" : "arm64";
+function getProcessPlatformName() {
+  return process.platform === "win32" ? "windows" : process.platform;
+}
+function getQodanaUrl(arch, platform) {
+  if (!SUPPORTED_PLATFORMS.includes(platform)) {
+    throw new Error(`Unsupported platform: ${platform}`);
   }
-  if (platform === "") {
-    platform = process.platform;
+  if (!SUPPORTED_ARCHS.includes(arch)) {
+    throw new Error(`Unsupported architecture: ${arch}`);
   }
-  switch (platform) {
-    case "win32":
-      return `windows_${arch}`;
-    case "linux":
-      return `linux_${arch}`;
-    case "darwin":
-      return `darwin_${arch}`;
-    default:
-      throw new Error(`Unsupported platform: ${platform}`);
-  }
+  const archive = platform === "windows" ? "zip" : "tar.gz";
+  return `https://github.com/JetBrains/qodana-cli/releases/download/v${VERSION}/qodana_${platform}_${arch}.${archive}`;
 }
 function isExecutionSuccessful(exitCode) {
   return Object.values(QodanaExitCode).includes(exitCode);
-}
-function getQodanaUrl(arch = "", platform = "") {
-  if (arch === "") {
-    arch = process.arch === "x64" ? "x86_64" : "arm64";
-  }
-  if (platform === "") {
-    platform = process.platform;
-  }
-  const archive = platform === "win32" ? "zip" : "tar.gz";
-  return `https://github.com/JetBrains/qodana-cli/releases/download/v${VERSION}/qodana_${getQodanaArchiveName(arch, platform)}.${archive}`;
 }
 function extractArg(argShort, argLong, args) {
   let arg = "";
@@ -140,11 +128,16 @@ function sha256sum(file) {
   hash.update((0, import_fs.readFileSync)(file));
   return hash.digest("hex");
 }
-var import_crypto, import_fs, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, VERSION, EXECUTABLE, QodanaExitCode;
+function getQodanaSha256MismatchMessage(expected, actual) {
+  return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
+}
+var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, VERSION, EXECUTABLE, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     import_crypto = require("crypto");
     import_fs = require("fs");
+    SUPPORTED_PLATFORMS = ["windows", "linux", "darwin"];
+    SUPPORTED_ARCHS = ["x86_64", "arm64"];
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
     QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
@@ -4434,8 +4427,10 @@ var require_utils2 = __commonJS({
     exports2.qodana = qodana;
     function prepareAgent(args) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)());
-        const expectedChecksum = (0, qodana_12.getQodanaSha256)((0, qodana_12.getQodanaArchiveName)());
+        const arch = (0, qodana_12.getProcessArchName)();
+        const platform = (0, qodana_12.getProcessPlatformName)();
+        const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
+        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform));
         const actualChecksum = (0, qodana_12.sha256sum)(temp);
         if (expectedChecksum !== actualChecksum) {
           setFailed((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
