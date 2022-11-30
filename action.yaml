@@ -26,7 +26,7 @@ inputs:
     required: false
     default: "${{ github.sha }}"
   cache-default-branch-only:
-    description: 'Upload cache for default branch only'
+    description: 'Upload cache for the default branch only'
     required: false
     default: "false"
   upload-result:
