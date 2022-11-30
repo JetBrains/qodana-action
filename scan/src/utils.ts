@@ -13,6 +13,7 @@ import {
   getQodanaPullArgs,
   getQodanaScanArgs,
   getQodanaSha256,
+  getQodanaSha256MismatchMessage,
   getQodanaUrl,
   sha256sum
 } from '../../common/qodana'
@@ -70,8 +71,12 @@ export async function qodana(args: string[] = []): Promise<number> {
  */
 export async function prepareAgent(args: string[]): Promise<void> {
   const temp = await tc.downloadTool(getQodanaUrl())
-  if (sha256sum(temp) !== getQodanaSha256(getQodanaArchiveName())) {
-    core.setFailed('Qodana CLI binary is corrupted')
+  const expectedChecksum = getQodanaSha256(getQodanaArchiveName())
+  const actualChecksum = sha256sum(temp)
+  if (expectedChecksum !== actualChecksum) {
+    core.setFailed(
+      getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
+    )
   }
   let extractRoot
   if (process.platform === 'win32') {

@@ -24,8 +24,20 @@ export function getQodanaSha256(archiveName: string): string {
     case 'darwin_arm64':
       return 'f69c832feb2c223bfa209fc38262e8559e049dca48ca7b387f7aa19b8fa6d637'
     default:
-      throw new Error(`Unsupported platform`)
+      throw new Error(`Qodana CLI does not exist for ${archiveName}`)
   }
+}
+
+/**
+ * Returns the message when Qodana binary is corrupted.
+ * @param expected expected sha256 checksum
+ * @param actual actual sha256 checksum
+ */
+export function getQodanaSha256MismatchMessage(
+  expected: string,
+  actual: string
+): string {
+  return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`
 }
 
 export function getQodanaArchiveName(arch = '', platform = ''): string {
