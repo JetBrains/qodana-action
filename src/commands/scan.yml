@@ -46,6 +46,7 @@ steps:
       name: Qodana Scan
       command: |
         set -e
+        QODANA_SHA_256=8e087bf01fcd79a2cdcd4f2663e93a73e6a0de2a6fb1985e028f0b28384504c7
         CLI_DIRECTORY=/tmp/cache/qodana-cli/2022.2.4
         mkdir -p $CLI_DIRECTORY
         if [[ ! -x "$CLI_DIRECTORY/qodana" ]]; then
@@ -53,6 +54,7 @@ steps:
           v2022.2.4 $CLI_DIRECTORY \
           1> /dev/null
         fi
+        echo "$QODANA_SHA_256 $CLI_DIRECTORY/qodana" | sha256sum -c
         NONINTERACTIVE=1 $CLI_DIRECTORY/qodana scan \
         --cache-dir << parameters.cache-dir >> \
         -o << parameters.results-dir >> \
