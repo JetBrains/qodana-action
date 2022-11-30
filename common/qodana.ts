@@ -3,14 +3,16 @@
 import {createHash} from 'crypto'
 import {readFileSync} from 'fs'
 
+export const SUPPORTED_PLATFORMS = ['windows', 'linux', 'darwin']
+export const SUPPORTED_ARCHS = ['x86_64', 'arm64']
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
 export const QODANA_SHORT_SARIF_NAME = 'qodana-short.sarif.json'
 export const VERSION = '2022.2.4'
 export const EXECUTABLE = 'qodana'
-export function getQodanaSha256(archiveName: string): string {
-  switch (archiveName) {
+export function getQodanaSha256(arch: string, platform: string): string {
+  switch (`${platform}_${arch}`) {
     case 'windows_x86_64':
       return '343c7a5e16263ffff12933b96cb6647af338faf3e001b5b66e90b225cd81755b'
     case 'windows_arm64':
@@ -24,39 +26,36 @@ export function getQodanaSha256(archiveName: string): string {
     case 'darwin_arm64':
       return 'f69c832feb2c223bfa209fc38262e8559e049dca48ca7b387f7aa19b8fa6d637'
     default:
-      throw new Error(`Qodana CLI does not exist for ${archiveName}`)
+      throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`)
   }
 }
 
 /**
- * Returns the message when Qodana binary is corrupted.
- * @param expected expected sha256 checksum
- * @param actual actual sha256 checksum
+ * Returns the architecture name suitable for the published Qodana CLI archive name.
  */
-export function getQodanaSha256MismatchMessage(
-  expected: string,
-  actual: string
-): string {
-  return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`
+export function getProcessArchName(): string {
+  return process.arch === 'x64' ? 'x86_64' : 'arm64'
 }
 
-export function getQodanaArchiveName(arch = '', platform = ''): string {
-  if (arch === '') {
-    arch = process.arch === 'x64' ? 'x86_64' : 'arm64'
+/**
+ * Returns the platform name suitable for the published Qodana CLI archive name.
+ */
+export function getProcessPlatformName(): string {
+  return process.platform === 'win32' ? 'windows' : process.platform
+}
+
+/**
+ * Gets Qodana CLI download URL from the GitHub Releases API.
+ */
+export function getQodanaUrl(arch: string, platform: string): string {
+  if (!SUPPORTED_PLATFORMS.includes(platform)) {
+    throw new Error(`Unsupported platform: ${platform}`)
   }
-  if (platform === '') {
-    platform = process.platform
+  if (!SUPPORTED_ARCHS.includes(arch)) {
+    throw new Error(`Unsupported architecture: ${arch}`)
   }
-  switch (platform) {
-    case 'win32':
-      return `windows_${arch}`
-    case 'linux':
-      return `linux_${arch}`
-    case 'darwin':
-      return `darwin_${arch}`
-    default:
-      throw new Error(`Unsupported platform: ${platform}`)
-  }
+  const archive = platform === 'windows' ? 'zip' : 'tar.gz'
+  return `https://github.com/JetBrains/qodana-cli/releases/download/v${VERSION}/qodana_${platform}_${arch}.${archive}`
 }
 
 // eslint-disable-next-line no-shadow -- shadowing is intentional here (ESLint bug)
@@ -72,23 +71,6 @@ export enum QodanaExitCode {
  */
 export function isExecutionSuccessful(exitCode: number): boolean {
   return Object.values(QodanaExitCode).includes(exitCode)
-}
-
-/**
- * Gets Qodana CLI download URL from the GitHub Releases API.
- */
-export function getQodanaUrl(arch = '', platform = ''): string {
-  if (arch === '') {
-    arch = process.arch === 'x64' ? 'x86_64' : 'arm64'
-  }
-  if (platform === '') {
-    platform = process.platform
-  }
-  const archive = platform === 'win32' ? 'zip' : 'tar.gz'
-  return `https://github.com/JetBrains/qodana-cli/releases/download/v${VERSION}/qodana_${getQodanaArchiveName(
-    arch,
-    platform
-  )}.${archive}`
 }
 
 /**
@@ -181,4 +163,16 @@ export function sha256sum(file: string): string {
   const hash = createHash('sha256')
   hash.update(readFileSync(file))
   return hash.digest('hex')
+}
+
+/**
+ * Returns the message when Qodana binary is corrupted.
+ * @param expected expected sha256 checksum
+ * @param actual actual sha256 checksum
+ */
+export function getQodanaSha256MismatchMessage(
+  expected: string,
+  actual: string
+): string {
+  return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`
 }

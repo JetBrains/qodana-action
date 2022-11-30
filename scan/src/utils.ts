@@ -9,7 +9,8 @@ import {
   EXECUTABLE,
   Inputs,
   VERSION,
-  getQodanaArchiveName,
+  getProcessArchName,
+  getProcessPlatformName,
   getQodanaPullArgs,
   getQodanaScanArgs,
   getQodanaSha256,
@@ -70,8 +71,10 @@ export async function qodana(args: string[] = []): Promise<number> {
  * @param args qodana arguments
  */
 export async function prepareAgent(args: string[]): Promise<void> {
-  const temp = await tc.downloadTool(getQodanaUrl())
-  const expectedChecksum = getQodanaSha256(getQodanaArchiveName())
+  const arch = getProcessArchName()
+  const platform = getProcessPlatformName()
+  const expectedChecksum = getQodanaSha256(arch, platform)
+  const temp = await tc.downloadTool(getQodanaUrl(arch, platform))
   const actualChecksum = sha256sum(temp)
   if (expectedChecksum !== actualChecksum) {
     core.setFailed(
