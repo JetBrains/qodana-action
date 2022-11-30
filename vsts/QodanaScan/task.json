@@ -10,7 +10,7 @@
   "version": {
     "Major": 2022,
     "Minor": 2,
-    "Patch": 1
+    "Patch": 4
   },
   "demands": ["RemoteDockerServerOS -equals linux"],
   "instanceNameFormat": "Qodana Scan",
