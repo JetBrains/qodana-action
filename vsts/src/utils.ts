@@ -5,9 +5,12 @@ import {
   EXECUTABLE,
   Inputs,
   VERSION,
-  getQodanaCliUrl,
+  getQodanaArchiveName,
   getQodanaPullArgs,
-  getQodanaScanArgs
+  getQodanaScanArgs,
+  getQodanaSha256,
+  getQodanaUrl,
+  sha256sum
 } from '../../common/qodana'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -65,7 +68,10 @@ export async function qodana(args: string[] = []): Promise<number> {
  * @param args qodana arguments
  */
 export async function prepareAgent(args: string[]): Promise<void> {
-  const temp = await tool.downloadTool(getQodanaCliUrl())
+  const temp = await tool.downloadTool(getQodanaUrl())
+  if (sha256sum(temp) !== getQodanaSha256(getQodanaArchiveName())) {
+    setFailed('Qodana CLI binary is corrupted')
+  }
   let extractRoot
   if (process.platform === 'win32') {
     extractRoot = await tool.extractZip(temp)
