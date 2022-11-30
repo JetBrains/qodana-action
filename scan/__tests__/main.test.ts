@@ -1,6 +1,21 @@
 import {expect, test} from '@jest/globals'
 import {parseSarif, Annotation} from '../src/output'
-import {getQodanaScanArgs, Inputs} from '../../common/qodana'
+import {
+  sha256sum,
+  getQodanaSha256,
+  getQodanaScanArgs,
+  Inputs,
+  getQodanaUrl,
+  getQodanaArchiveName
+} from '../../common/qodana'
+import * as fs from 'fs'
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import path = require('path')
+
+import * as os from 'os'
+
+const {execSync} = require('child_process')
 
 function outputEmptyFixture(): Annotation[] {
   return []
@@ -95,4 +110,21 @@ test('test sarif with no problems to output annotations', () => {
   const output = outputEmptyFixture()
   const result = parseSarif('__tests__/data/empty.sarif.json')
   expect(result).toEqual(output)
+})
+
+test('download all Qodana CLI archives and check their checksums', async () => {
+  for (const arch of ['x86_64', 'arm64']) {
+    for (const platform of ['win32', 'linux', 'darwin']) {
+      const url = getQodanaUrl(arch, platform)
+      const archiveName = getQodanaArchiveName(arch, platform)
+      const temp = path.join(os.tmpdir(), archiveName)
+      execSync(`curl -L ${url} -o ${temp}`)
+      const expectedSha256 = getQodanaSha256(archiveName)
+      const actualSha256 = sha256sum(temp)
+      expect(`${archiveName}: ${actualSha256}`).toEqual(
+        `${archiveName}: ${expectedSha256}`
+      )
+      fs.rmSync(temp, {force: true})
+    }
+  }
 })

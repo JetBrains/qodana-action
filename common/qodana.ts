@@ -1,11 +1,51 @@
 // noinspection JSUnusedGlobalSymbols
 
-export const VERSION = '2022.2.3'
-export const EXECUTABLE = 'qodana'
+import {createHash} from 'crypto'
+import {readFileSync} from 'fs'
+
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
 export const QODANA_SHORT_SARIF_NAME = 'qodana-short.sarif.json'
+export const VERSION = '2022.2.4'
+export const EXECUTABLE = 'qodana'
+export function getQodanaSha256(archiveName: string): string {
+  switch (archiveName) {
+    case 'windows_x86_64':
+      return '343c7a5e16263ffff12933b96cb6647af338faf3e001b5b66e90b225cd81755b'
+    case 'windows_arm64':
+      return '77f2918fb97930384f08521bd051b103a5d1852e6b72bddf5f0244d7fa12698c'
+    case 'linux_x86_64':
+      return '7f0e89e882ffe036aea025c6e7849049bbaac41b1f8ff0f55e20b6bd68ce6164'
+    case 'linux_arm64':
+      return 'b400cf6f8c2e39fd5cad6954be695dc46bf6070ce342a96ab46101bed0a1adaa'
+    case 'darwin_x86_64':
+      return 'f18e55335270e612cf2ef9e33d854cfc86c31b76c4ccc881b8d8b5819cedbc69'
+    case 'darwin_arm64':
+      return 'f69c832feb2c223bfa209fc38262e8559e049dca48ca7b387f7aa19b8fa6d637'
+    default:
+      throw new Error(`Unsupported platform`)
+  }
+}
+
+export function getQodanaArchiveName(arch = '', platform = ''): string {
+  if (arch === '') {
+    arch = process.arch === 'x64' ? 'x86_64' : 'arm64'
+  }
+  if (platform === '') {
+    platform = process.platform
+  }
+  switch (platform) {
+    case 'win32':
+      return `windows_${arch}`
+    case 'linux':
+      return `linux_${arch}`
+    case 'darwin':
+      return `darwin_${arch}`
+    default:
+      throw new Error(`Unsupported platform: ${platform}`)
+  }
+}
 
 // eslint-disable-next-line no-shadow -- shadowing is intentional here (ESLint bug)
 export enum QodanaExitCode {
@@ -23,38 +63,20 @@ export function isExecutionSuccessful(exitCode: number): boolean {
 }
 
 /**
- * The context of the current run – described in action.yaml.
- */
-export interface Inputs {
-  args: string[]
-  resultsDir: string
-  cacheDir: string
-  additionalCacheHash: string
-  cacheDefaultBranchOnly: boolean
-  uploadResult: boolean
-  artifactName: string
-  useCaches: boolean
-  useAnnotations: boolean
-  prMode: boolean
-}
-
-/**
  * Gets Qodana CLI download URL from the GitHub Releases API.
  */
-export function getQodanaCliUrl(): string {
-  const base = `https://github.com/JetBrains/qodana-cli/releases/download/v${VERSION}`
-  const arch = process.arch === 'x64' ? 'x86_64' : 'arm64'
-  const archive = process.platform === 'win32' ? 'zip' : 'tar.gz'
-  switch (process.platform) {
-    case 'darwin':
-      return `${base}/qodana_darwin_${arch}.${archive}`
-    case 'linux':
-      return `${base}/qodana_linux_${arch}.${archive}`
-    case 'win32':
-      return `${base}/qodana_windows_${arch}.${archive}`
-    default:
-      throw new Error(`Unsupported platform: ${process.platform}`)
+export function getQodanaUrl(arch = '', platform = ''): string {
+  if (arch === '') {
+    arch = process.arch === 'x64' ? 'x86_64' : 'arm64'
   }
+  if (platform === '') {
+    platform = process.platform
+  }
+  const archive = platform === 'win32' ? 'zip' : 'tar.gz'
+  return `https://github.com/JetBrains/qodana-cli/releases/download/v${VERSION}/qodana_${getQodanaArchiveName(
+    arch,
+    platform
+  )}.${archive}`
 }
 
 /**
@@ -121,4 +143,30 @@ export function getQodanaScanArgs(
     cliArgs.push(...args)
   }
   return cliArgs
+}
+
+/**
+ * The context of the current run – described in action.yaml.
+ */
+export interface Inputs {
+  args: string[]
+  resultsDir: string
+  cacheDir: string
+  additionalCacheHash: string
+  cacheDefaultBranchOnly: boolean
+  uploadResult: boolean
+  artifactName: string
+  useCaches: boolean
+  useAnnotations: boolean
+  prMode: boolean
+}
+
+/**
+ * Get the SHA256 checksum of the given file.
+ * @param file absolute path to the file.
+ */
+export function sha256sum(file: string): string {
+  const hash = createHash('sha256')
+  hash.update(readFileSync(file))
+  return hash.digest('hex')
 }
