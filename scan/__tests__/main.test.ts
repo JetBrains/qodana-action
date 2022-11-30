@@ -6,7 +6,8 @@ import {
   getQodanaScanArgs,
   Inputs,
   getQodanaUrl,
-  getQodanaArchiveName
+  getQodanaArchiveName,
+  VERSION
 } from '../../common/qodana'
 import * as fs from 'fs'
 
@@ -126,5 +127,21 @@ test('download all Qodana CLI archives and check their checksums', async () => {
       )
       fs.rmSync(temp, {force: true})
     }
+  }
+})
+
+test('check whether Azure Pipelines task.json definitions is up to date', () => {
+  const taskJson = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', '..', 'vsts', 'QodanaScan', 'task.json'), 'utf8')
+  )
+  expect(`${taskJson.version.Major}.${taskJson.version.Minor}.${taskJson.version.Patch}`).toEqual(VERSION)
+})
+
+test('check whether action README.md contains the latest version mentioned everywhere', () => {
+  const readmeMd = fs.readFileSync(path.join(__dirname, '..', '..', 'README.md'), 'utf8')
+  const mentions = readmeMd.match(/uses: JetBrains\/qodana-action@v\d+\.\d+\.\d+/g) || []
+  expect(mentions.length > 0).toEqual(true)
+  for (const mention of mentions??[]) {
+    expect(mention).toEqual(`uses: JetBrains/qodana-action@v${VERSION}`)
   }
 })
