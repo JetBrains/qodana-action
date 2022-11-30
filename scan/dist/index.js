@@ -2785,6 +2785,7 @@ __export(qodana_exports, {
   getQodanaPullArgs: () => getQodanaPullArgs,
   getQodanaScanArgs: () => getQodanaScanArgs,
   getQodanaSha256: () => getQodanaSha256,
+  getQodanaSha256MismatchMessage: () => getQodanaSha256MismatchMessage,
   getQodanaUrl: () => getQodanaUrl,
   isExecutionSuccessful: () => isExecutionSuccessful,
   sha256sum: () => sha256sum
@@ -2804,8 +2805,11 @@ function getQodanaSha256(archiveName) {
     case "darwin_arm64":
       return "f69c832feb2c223bfa209fc38262e8559e049dca48ca7b387f7aa19b8fa6d637";
     default:
-      throw new Error(`Unsupported platform`);
+      throw new Error(`Qodana CLI does not exist for ${archiveName}`);
   }
+}
+function getQodanaSha256MismatchMessage(expected, actual) {
+  return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
 function getQodanaArchiveName(arch = "", platform = "") {
   if (arch === "") {
@@ -2890,6 +2894,7 @@ var init_qodana = __esm({
     VERSION = "2022.2.4";
     EXECUTABLE = "qodana";
     __name(getQodanaSha256, "getQodanaSha256");
+    __name(getQodanaSha256MismatchMessage, "getQodanaSha256MismatchMessage");
     __name(getQodanaArchiveName, "getQodanaArchiveName");
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
@@ -72436,8 +72441,10 @@ var require_utils7 = __commonJS({
     function prepareAgent(args) {
       return __awaiter2(this, void 0, void 0, function* () {
         const temp = yield tc.downloadTool((0, qodana_12.getQodanaUrl)());
-        if ((0, qodana_12.sha256sum)(temp) !== (0, qodana_12.getQodanaSha256)((0, qodana_12.getQodanaArchiveName)())) {
-          core2.setFailed("Qodana CLI binary is corrupted");
+        const expectedChecksum = (0, qodana_12.getQodanaSha256)((0, qodana_12.getQodanaArchiveName)());
+        const actualChecksum = (0, qodana_12.sha256sum)(temp);
+        if (expectedChecksum !== actualChecksum) {
+          core2.setFailed((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
         }
         let extractRoot;
         if (process.platform === "win32") {
