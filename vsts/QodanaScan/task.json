@@ -9,8 +9,8 @@
   "author": "JetBrains",
   "version": {
     "Major": 2022,
-    "Minor": 2,
-    "Patch": 4
+    "Minor": 3,
+    "Patch": 0
   },
   "demands": ["RemoteDockerServerOS -equals linux"],
   "instanceNameFormat": "Qodana Scan",
