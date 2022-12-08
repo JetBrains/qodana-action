@@ -153,15 +153,22 @@ test('check whether Azure Pipelines README.md has the latest major version menti
 
 test('check whether CircleCI orb definition contains the latest version', () => {
   const orb = path.join(__dirname, '..', '..', 'src', 'commands', 'scan.yml')
-  const example = path.join(__dirname, '..', '..', 'src', 'examples', 'scan.yml')
+  const example = path.join(
+    __dirname,
+    '..',
+    '..',
+    'src',
+    'examples',
+    'scan.yml'
+  )
   for (const orbFile of [orb, example]) {
-      const orbFileContent = fs.readFileSync(orbFile, 'utf8')
-      const mentions = orbFileContent.match(/\d+\.\d+\.\d+/g) || []
-      expect(mentions.length > 0).toEqual(true)
-      for (const mention of mentions) {
-        expect(mention).toEqual(VERSION)
-      }
+    const orbFileContent = fs.readFileSync(orbFile, 'utf8')
+    const mentions = orbFileContent.match(/\d+\.\d+\.\d+/g) || []
+    expect(mentions.length > 0).toEqual(true)
+    for (const mention of mentions) {
+      expect(mention).toEqual(VERSION)
     }
+  }
 })
 
 test('download all Qodana CLI archives and check their checksums', async () => {
