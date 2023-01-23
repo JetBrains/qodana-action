@@ -9,22 +9,22 @@ export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
 export const QODANA_SHORT_SARIF_NAME = 'qodana-short.sarif.json'
-export const VERSION = '2022.3.0'
+export const VERSION = '2022.3.1'
 export const EXECUTABLE = 'qodana'
 export function getQodanaSha256(arch: string, platform: string): string {
   switch (`${platform}_${arch}`) {
     case 'windows_x86_64':
-      return '29ad4104e62766bf3445ba3940a625843a19a71cfefbf3ebda1f71372d7ec937'
+      return '0d5a6c3480a2fe4cda2f4b6f080467fc8c4768fe6d04ffd99bb1f578c728a204'
     case 'windows_arm64':
-      return '44ea5d3b8853556491188e98fa31518c5e74f2a4d04c4e9dd449e829096759f5'
+      return '03e2a415bf42ae354ce778b7222f9ce110b3eb7570e3eb6fda20bf9a711b5a22'
     case 'linux_x86_64':
-      return '6e92fa152d2bd2d18689920df0fba7d7aa5a94295089cede8eec054cd78b851c'
+      return 'ea8878c89d2a101229436d16420d4469197737963fc434fd4a4a9c2efaf1245b'
     case 'linux_arm64':
-      return '558508bd593c1a6027ec17d3feff338eb12e8c44e72890072405300f47b72ee5'
+      return '416a8989d5295e8965066a118d092969ed64e1be20d058765ba9004460d0805d'
     case 'darwin_x86_64':
-      return 'ebdf550347d3c0fa84eee09d4a063237006a0034b5391340d034124bc5591cfc'
+      return '8967b711b52b2e11c322a3b24ac4c98614d527039e0c6752b6da5d5e2c396dc3'
     case 'darwin_arm64':
-      return '9c8baca0796a3cbb1a743f716bde6c90d5a38f85348f54d8eb08e62084b1b0a1'
+      return 'f10c6c5e2ca3594d7fa86f01da412f1006f8acb730b623b8b68a3271a95f8e42'
     default:
       throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`)
   }

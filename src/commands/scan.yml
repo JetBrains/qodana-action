@@ -38,8 +38,8 @@ parameters:
 steps:
   - restore_cache:
       keys:
-        - qodana-{{ .Branch }}-2022.3.0-<< parameters.additional-cache-hash >>
-        - qodana-{{ .Branch }}-2022.3.0-
+        - qodana-{{ .Branch }}-2022.3.1-<< parameters.additional-cache-hash >>
+        - qodana-{{ .Branch }}-2022.3.1-
         - qodana-{{ .Branch }}-
         - qodana-
   - run:
@@ -47,7 +47,7 @@ steps:
       command: |
         set -e
         QODANA_SHA_256=4e2128054a6c5a3206c707a7e6b30f4a96cce6d21a3b3196d7038db229a23c89
-        CLI_DIRECTORY=/tmp/cache/qodana-cli/2022.3.0
+        CLI_DIRECTORY=/tmp/cache/qodana-cli/2022.3.1
         mkdir -p $CLI_DIRECTORY
         if [[ ! -x "$CLI_DIRECTORY/qodana" ]]; then
           curl -fsSL https://jb.gg/qodana-cli/install | bash -s -- \
