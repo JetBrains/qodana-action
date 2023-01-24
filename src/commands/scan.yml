@@ -38,20 +38,20 @@ parameters:
 steps:
   - restore_cache:
       keys:
-        - qodana-{{ .Branch }}-2022.3.0-<< parameters.additional-cache-hash >>
-        - qodana-{{ .Branch }}-2022.3.0-
+        - qodana-{{ .Branch }}-2022.3.2-<< parameters.additional-cache-hash >>
+        - qodana-{{ .Branch }}-2022.3.2-
         - qodana-{{ .Branch }}-
         - qodana-
   - run:
       name: Qodana Scan
       command: |
         set -e
-        QODANA_SHA_256=4e2128054a6c5a3206c707a7e6b30f4a96cce6d21a3b3196d7038db229a23c89
-        CLI_DIRECTORY=/tmp/cache/qodana-cli/2022.3.0
+        QODANA_SHA_256=4712869f6e4883910188c66c17be0ce4cfda49c0597dc227ceefb8d03e934e0a
+        CLI_DIRECTORY=/tmp/cache/qodana-cli/2022.3.2
         mkdir -p $CLI_DIRECTORY
         if [[ ! -x "$CLI_DIRECTORY/qodana" ]]; then
           curl -fsSL https://jb.gg/qodana-cli/install | bash -s -- \
-          v2022.3.0 $CLI_DIRECTORY \
+          v2022.3.2 $CLI_DIRECTORY \
           1> /dev/null
         fi
         echo "$QODANA_SHA_256 $CLI_DIRECTORY/qodana" | sha256sum -c
@@ -63,7 +63,7 @@ steps:
       path: << parameters.results-dir >>
       destination: << parameters.artifact-name >>
   - save_cache:
-      key: qodana-{{ .Branch }}-2022.3.0-<< parameters.additional-cache-hash >>
+      key: qodana-{{ .Branch }}-2022.3.2-<< parameters.additional-cache-hash >>
       paths:
         - << parameters.cache-dir >>
         - /tmp/cache/qodana-cli/
