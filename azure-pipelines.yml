@@ -1,0 +1,21 @@
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: Cache@2  # Not required, but Qodana will open projects with cache faster.
+    inputs:
+      key: '"$(Build.Repository.Name)" | "$(Build.SourceBranchName)" | "$(Build.SourceVersion)"'
+      path: '$(Agent.TempDirectory)/qodana/cache'
+      restoreKeys: |
+        "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
+        "$(Build.Repository.Name)"
+  - task: QodanaScan@2022
+    env:
+      QODANA_TOKEN: $(QODANA_TOKEN)
