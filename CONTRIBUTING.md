@@ -4,7 +4,7 @@ By participating in this project, you agree to abide our [Code of conduct](.gith
 
 ## Set up your machine
 
-Qodana Scan GitHub Action and Qodana for Azure are written in [TypeScript](https://www.typescriptlang.org).
+Qodana Scan GitHub Action and Qodana for Azure are written in [TypeScript](https://www.typescriptlang.org). CircleCI Orb is written in YAML (but utilizes CLI under the hood similar way Qodana for Azure doe).
 
 Prerequisites:
 
@@ -89,6 +89,8 @@ Update the version – edit the following artifacts:
 - [ ] [vsts/vss-extension.json](vsts/vss-extension.json)
 - [ ] [vsts/QodanaScan/task.json](vsts/QodanaScan/task.json)
 
+If you forget to do this, repository tests will fail.
+
 Test extension packing:
 
 ```sh
@@ -116,4 +118,4 @@ If you are a core maintainer and want to release a new version, all you need is 
 git tag -a vX.X.X -m "vX.X.X" && git push origin vX.X.X
 ```
 
-And GitHub Actions will do the rest. Note that GitHub action and Azure extension are released together.
+And GitHub Actions will do the rest. Note that GitHub action, CircleCI orb and Azure extension are released together.
