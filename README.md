@@ -60,6 +60,26 @@ We recommend that you have a separate workflow file for Qodana
 because [different jobs run in parallel](https://help.github.com/en/actions/getting-started-with-github-actions/core-concepts-for-github-actions#job)
 .
 
+### Qodana Cloud
+
+To send the results to Qodana Cloud, all you need to do is to specify the `QODANA_TOKEN` environment variable in the build configuration.
+
+1. In the GitHub UI, create the `QODANA_TOKEN` [encrypted secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository) and
+   save the [project token](https://www.jetbrains.com/help/qodana/cloud-projects.html#cloud-manage-projects) as its value.
+2. In the GitHub workflow file,
+   add `QODANA_TOKEN` variable to the `env` section of the `Qodana Scan` step:
+
+```yaml
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v2022.3.2
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+```
+
+After the token is set for analysis, all Qodana job results will be uploaded to your Qodana Cloud project.
+
+![Qodana Cloud](https://user-images.githubusercontent.com/13538286/214899046-572649db-fe62-49b2-a368-b5d07737c1c1.gif)
+
 ### GitHub code scanning
 
 You can set
@@ -148,22 +168,6 @@ failThreshold: <number-of-accepted-problems>
 
 Based on this, you will be able to detect only new problems in pull requests that fall beyond the baseline. At the same
 time, pull requests with **new** problems exceeding the `fail-threshold` limit will be blocked, and the workflow will fail.
-
-### GitHub Pages
-
-If you wish to study [Qodana reports](https://www.jetbrains.com/help/qodana/html-report.html) directly on GitHub, you
-can host them on your [GitHub Pages](https://docs.github.com/en/pages) repository using this example workflow:
-
-```yaml
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ runner.temp }}/qodana/results/report
-          destination_dir: ./
-```
-
-> Hosting multiple Qodana reports in a single GitHub Pages repository is not supported.
 
 ### Get a Qodana badge
 

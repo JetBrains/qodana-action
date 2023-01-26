@@ -3,6 +3,9 @@ description: >
   It runs Qodana `scan` command and reports the results.
   Note that most options can be configured via qodana.yaml
   (https://www.jetbrains.com/help/qodana/qodana-yaml.html) file.
+  To send reports from CircleCI to Qodana Cloud, all you need to do
+  is to set `QODANA_TOKEN` environment variable in your project settings.
+  To learn more, see https://www.jetbrains.com/help/qodana/circleci.html
 parameters:
   args:
     type: string
