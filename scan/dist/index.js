@@ -2796,17 +2796,17 @@ __export(qodana_exports, {
 function getQodanaSha256(arch, platform) {
   switch (`${platform}_${arch}`) {
     case "windows_x86_64":
-      return "f9266fc91c4552ac54be8b3a1de59787b02da7d2300422ce13ffdb7a49bf3d20";
+      return "bfa0e823962263f8d51036f94152002efd25f6499c3394d26e962e94fe115780";
     case "windows_arm64":
-      return "e2f29c30c7db5a901bae22a03cbff081947bdc51e869de09f9b3641d17d5dca2";
+      return "aded1dd1765ec9aff5033d9cbd49445dbd4fec13c684d2d015523bbf10f41529";
     case "linux_x86_64":
-      return "33c2819dae7762303d7a9087deabae1823de98d2bd2316271729aded8f4212ab";
+      return "166b1f364b80c660ecd644f5c3009fb677bbeae33f58bc5e9e28a3dc6988eb6c";
     case "linux_arm64":
-      return "74870ad073d0751a4b81e5e2050589cfc9ec2e425336aa3edbfeda81aa185a25";
+      return "81422f12bccb67dfaa8ab6994a8a5e076d95b39a5ef95b0481d6a2e40c76fc53";
     case "darwin_x86_64":
-      return "a83ec03e6b60f0790d73b339fdcc867c9deae5463377b8592c48c8b237c30506";
+      return "aa6e2498803cb3c1f2def8bbe7e439e3887e1aac609ca243e0e341cd360d0c91";
     case "darwin_arm64":
-      return "8fc1fe8ef419969cfcae5b90ca30f5604041676659c2cb2f89e161c4eff355f1";
+      return "8acc312a46821cf90f94be94b22582fc1aa19a443a80952a292f1fb1c00946d1";
     default:
       throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`);
   }
@@ -2884,7 +2884,7 @@ var init_qodana = __esm({
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
     QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
-    VERSION = "2022.3.2";
+    VERSION = "2022.3.3";
     EXECUTABLE = "qodana";
     __name(getQodanaSha256, "getQodanaSha256");
     __name(getProcessArchName, "getProcessArchName");
