@@ -20,5 +20,7 @@ steps:
         "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
         "$(Build.Repository.Name)"
   - task: QodanaScan@2022
+    inputs:
+      args: --log-level,debug
     env:
       QODANA_TOKEN: $(QODANA_TOKEN)
