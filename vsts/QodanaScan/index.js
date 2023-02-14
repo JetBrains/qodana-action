@@ -28,6 +28,22 @@ var __toCommonJS = /* @__PURE__ */ ((cache) => {
   };
 })(typeof WeakMap !== "undefined" ? /* @__PURE__ */ new WeakMap() : 0);
 
+// ../common/cli.json
+var version, checksum;
+var init_cli = __esm({
+  "../common/cli.json"() {
+    version = "2022.3.4";
+    checksum = {
+      windows_x86_64: "3aaed3552cde7d48fd7b81578e24a7b033be8748e9fb86afca5d7b420a52e9ca",
+      linux_arm64: "4c03be23cfc0eaa052c1c10c626e1f9ffb9be8936c9ba73b66b91cfc8bcfe43c",
+      darwin_arm64: "7313271d198b035143e9f8001d87741dc72123bf40c1dd6f8f35181268529172",
+      darwin_x86_64: "808db0a6deef9c42033798b436d25c21a6fdb192eb4b73729d99e42c6fd8371c",
+      windows_arm64: "ad010f503663dd996feb3048ae85466169b34998a162233f918cf41113f7ccff",
+      linux_x86_64: "d22703ef05fbd6e9b286b99750cf6d90a608ad28d0b4dc3078e3c8ded4bf15d1"
+    };
+  }
+});
+
 // ../common/qodana.ts
 var qodana_exports = {};
 __export(qodana_exports, {
@@ -53,17 +69,17 @@ __export(qodana_exports, {
 function getQodanaSha256(arch, platform) {
   switch (`${platform}_${arch}`) {
     case "windows_x86_64":
-      return "bfa0e823962263f8d51036f94152002efd25f6499c3394d26e962e94fe115780";
+      return checksum["windows_x86_64"];
     case "windows_arm64":
-      return "aded1dd1765ec9aff5033d9cbd49445dbd4fec13c684d2d015523bbf10f41529";
+      return checksum["windows_arm64"];
     case "linux_x86_64":
-      return "166b1f364b80c660ecd644f5c3009fb677bbeae33f58bc5e9e28a3dc6988eb6c";
+      return checksum["linux_x86_64"];
     case "linux_arm64":
-      return "81422f12bccb67dfaa8ab6994a8a5e076d95b39a5ef95b0481d6a2e40c76fc53";
+      return checksum["linux_arm64"];
     case "darwin_x86_64":
-      return "aa6e2498803cb3c1f2def8bbe7e439e3887e1aac609ca243e0e341cd360d0c91";
+      return checksum["darwin_x86_64"];
     case "darwin_arm64":
-      return "8acc312a46821cf90f94be94b22582fc1aa19a443a80952a292f1fb1c00946d1";
+      return checksum["darwin_arm64"];
     default:
       throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`);
   }
@@ -82,7 +98,7 @@ function getQodanaUrl(arch, platform) {
     throw new Error(`Unsupported architecture: ${arch}`);
   }
   const archive = platform === "windows" ? "zip" : "tar.gz";
-  return `https://github.com/JetBrains/qodana-cli/releases/download/v${VERSION}/qodana_${platform}_${arch}.${archive}`;
+  return `https://github.com/JetBrains/qodana-cli/releases/download/v${version}/qodana_${platform}_${arch}.${archive}`;
 }
 function isExecutionSuccessful(exitCode) {
   return Object.values(QodanaExitCode).includes(exitCode);
@@ -131,9 +147,10 @@ function sha256sum(file) {
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
-var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, VERSION, EXECUTABLE, QodanaExitCode;
+var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, EXECUTABLE, VERSION, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
+    init_cli();
     import_crypto = require("crypto");
     import_fs = require("fs");
     SUPPORTED_PLATFORMS = ["windows", "linux", "darwin"];
@@ -141,8 +158,8 @@ var init_qodana = __esm({
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
     QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
-    VERSION = "2022.3.3";
     EXECUTABLE = "qodana";
+    VERSION = version;
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
       QodanaExitCode2[QodanaExitCode2["FailThreshold"] = 255] = "FailThreshold";
@@ -2943,73 +2960,73 @@ var require_semver = __commonJS({
     }
     var i;
     exports2.parse = parse;
-    function parse(version, options) {
+    function parse(version2, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version instanceof SemVer) {
-        return version;
+      if (version2 instanceof SemVer) {
+        return version2;
       }
-      if (typeof version !== "string") {
+      if (typeof version2 !== "string") {
         return null;
       }
-      if (version.length > MAX_LENGTH) {
+      if (version2.length > MAX_LENGTH) {
         return null;
       }
       var r = options.loose ? re[LOOSE] : re[FULL];
-      if (!r.test(version)) {
+      if (!r.test(version2)) {
         return null;
       }
       try {
-        return new SemVer(version, options);
+        return new SemVer(version2, options);
       } catch (er) {
         return null;
       }
     }
     exports2.valid = valid;
-    function valid(version, options) {
-      var v = parse(version, options);
+    function valid(version2, options) {
+      var v = parse(version2, options);
       return v ? v.version : null;
     }
     exports2.clean = clean;
-    function clean(version, options) {
-      var s = parse(version.trim().replace(/^[=v]+/, ""), options);
+    function clean(version2, options) {
+      var s = parse(version2.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     }
     exports2.SemVer = SemVer;
-    function SemVer(version, options) {
+    function SemVer(version2, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version instanceof SemVer) {
-        if (version.loose === options.loose) {
-          return version;
+      if (version2 instanceof SemVer) {
+        if (version2.loose === options.loose) {
+          return version2;
         } else {
-          version = version.version;
+          version2 = version2.version;
         }
-      } else if (typeof version !== "string") {
-        throw new TypeError("Invalid Version: " + version);
+      } else if (typeof version2 !== "string") {
+        throw new TypeError("Invalid Version: " + version2);
       }
-      if (version.length > MAX_LENGTH) {
+      if (version2.length > MAX_LENGTH) {
         throw new TypeError("version is longer than " + MAX_LENGTH + " characters");
       }
       if (!(this instanceof SemVer)) {
-        return new SemVer(version, options);
+        return new SemVer(version2, options);
       }
-      debug("SemVer", version, options);
+      debug("SemVer", version2, options);
       this.options = options;
       this.loose = !!options.loose;
-      var m = version.trim().match(options.loose ? re[LOOSE] : re[FULL]);
+      var m = version2.trim().match(options.loose ? re[LOOSE] : re[FULL]);
       if (!m) {
-        throw new TypeError("Invalid Version: " + version);
+        throw new TypeError("Invalid Version: " + version2);
       }
-      this.raw = version;
+      this.raw = version2;
       this.major = +m[1];
       this.minor = +m[2];
       this.patch = +m[3];
@@ -3170,13 +3187,13 @@ var require_semver = __commonJS({
       return this;
     };
     exports2.inc = inc;
-    function inc(version, release, loose, identifier) {
+    function inc(version2, release, loose, identifier) {
       if (typeof loose === "string") {
         identifier = loose;
         loose = void 0;
       }
       try {
-        return new SemVer(version, loose).inc(release, identifier).version;
+        return new SemVer(version2, loose).inc(release, identifier).version;
       } catch (er) {
         return null;
       }
@@ -3360,15 +3377,15 @@ var require_semver = __commonJS({
     Comparator.prototype.toString = function() {
       return this.value;
     };
-    Comparator.prototype.test = function(version) {
-      debug("Comparator.test", version, this.options.loose);
+    Comparator.prototype.test = function(version2) {
+      debug("Comparator.test", version2, this.options.loose);
       if (this.semver === ANY) {
         return true;
       }
-      if (typeof version === "string") {
-        version = new SemVer(version, this.options);
+      if (typeof version2 === "string") {
+        version2 = new SemVer(version2, this.options);
       }
-      return cmp(version, this.operator, this.semver, this.options);
+      return cmp(version2, this.operator, this.semver, this.options);
     };
     Comparator.prototype.intersects = function(comp, options) {
       if (!(comp instanceof Comparator)) {
@@ -3660,27 +3677,27 @@ var require_semver = __commonJS({
       }
       return (from + " " + to).trim();
     }
-    Range.prototype.test = function(version) {
-      if (!version) {
+    Range.prototype.test = function(version2) {
+      if (!version2) {
         return false;
       }
-      if (typeof version === "string") {
-        version = new SemVer(version, this.options);
+      if (typeof version2 === "string") {
+        version2 = new SemVer(version2, this.options);
       }
       for (var i2 = 0; i2 < this.set.length; i2++) {
-        if (testSet(this.set[i2], version, this.options)) {
+        if (testSet(this.set[i2], version2, this.options)) {
           return true;
         }
       }
       return false;
     };
-    function testSet(set, version, options) {
+    function testSet(set, version2, options) {
       for (var i2 = 0; i2 < set.length; i2++) {
-        if (!set[i2].test(version)) {
+        if (!set[i2].test(version2)) {
           return false;
         }
       }
-      if (version.prerelease.length && !options.includePrerelease) {
+      if (version2.prerelease.length && !options.includePrerelease) {
         for (i2 = 0; i2 < set.length; i2++) {
           debug(set[i2].semver);
           if (set[i2].semver === ANY) {
@@ -3688,7 +3705,7 @@ var require_semver = __commonJS({
           }
           if (set[i2].semver.prerelease.length > 0) {
             var allowed = set[i2].semver;
-            if (allowed.major === version.major && allowed.minor === version.minor && allowed.patch === version.patch) {
+            if (allowed.major === version2.major && allowed.minor === version2.minor && allowed.patch === version2.patch) {
               return true;
             }
           }
@@ -3698,13 +3715,13 @@ var require_semver = __commonJS({
       return true;
     }
     exports2.satisfies = satisfies;
-    function satisfies(version, range, options) {
+    function satisfies(version2, range, options) {
       try {
         range = new Range(range, options);
       } catch (er) {
         return false;
       }
-      return range.test(version);
+      return range.test(version2);
     }
     exports2.maxSatisfying = maxSatisfying;
     function maxSatisfying(versions, range, options) {
@@ -3796,16 +3813,16 @@ var require_semver = __commonJS({
       }
     }
     exports2.ltr = ltr;
-    function ltr(version, range, options) {
-      return outside(version, range, "<", options);
+    function ltr(version2, range, options) {
+      return outside(version2, range, "<", options);
     }
     exports2.gtr = gtr;
-    function gtr(version, range, options) {
-      return outside(version, range, ">", options);
+    function gtr(version2, range, options) {
+      return outside(version2, range, ">", options);
     }
     exports2.outside = outside;
-    function outside(version, range, hilo, options) {
-      version = new SemVer(version, options);
+    function outside(version2, range, hilo, options) {
+      version2 = new SemVer(version2, options);
       range = new Range(range, options);
       var gtfn, ltefn, ltfn, comp, ecomp;
       switch (hilo) {
@@ -3826,7 +3843,7 @@ var require_semver = __commonJS({
         default:
           throw new TypeError('Must provide a hilo val of "<" or ">"');
       }
-      if (satisfies(version, range, options)) {
+      if (satisfies(version2, range, options)) {
         return false;
       }
       for (var i2 = 0; i2 < range.set.length; ++i2) {
@@ -3848,17 +3865,17 @@ var require_semver = __commonJS({
         if (high.operator === comp || high.operator === ecomp) {
           return false;
         }
-        if ((!low.operator || low.operator === comp) && ltefn(version, low.semver)) {
+        if ((!low.operator || low.operator === comp) && ltefn(version2, low.semver)) {
           return false;
-        } else if (low.operator === ecomp && ltfn(version, low.semver)) {
+        } else if (low.operator === ecomp && ltfn(version2, low.semver)) {
           return false;
         }
       }
       return true;
     }
     exports2.prerelease = prerelease;
-    function prerelease(version, options) {
-      var parsed = parse(version, options);
+    function prerelease(version2, options) {
+      var parsed = parse(version2, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     }
     exports2.intersects = intersects;
@@ -3868,14 +3885,14 @@ var require_semver = __commonJS({
       return r1.intersects(r2);
     }
     exports2.coerce = coerce;
-    function coerce(version) {
-      if (version instanceof SemVer) {
-        return version;
+    function coerce(version2) {
+      if (version2 instanceof SemVer) {
+        return version2;
       }
-      if (typeof version !== "string") {
+      if (typeof version2 !== "string") {
         return null;
       }
-      var match = version.match(re[COERCE]);
+      var match = version2.match(re[COERCE]);
       if (match == null) {
         return null;
       }
@@ -4059,29 +4076,29 @@ var require_tool = __commonJS({
       return valid;
     }
     exports2.isExplicitVersion = isExplicitVersion;
-    function cleanVersion(version) {
-      tl2.debug("cleaning: " + version);
-      return semver.clean(version);
+    function cleanVersion(version2) {
+      tl2.debug("cleaning: " + version2);
+      return semver.clean(version2);
     }
     exports2.cleanVersion = cleanVersion;
     function evaluateVersions(versions, versionSpec) {
-      let version;
+      let version2;
       tl2.debug("evaluating " + versions.length + " versions");
       versions = versions.sort(cmp);
       for (let i = versions.length - 1; i >= 0; i--) {
         let potential = versions[i];
         let satisfied = semver.satisfies(potential, versionSpec);
         if (satisfied) {
-          version = potential;
+          version2 = potential;
           break;
         }
       }
-      if (version) {
-        tl2.debug("matched: " + version);
+      if (version2) {
+        tl2.debug("matched: " + version2);
       } else {
         tl2.debug("match not found");
       }
-      return version;
+      return version2;
     }
     exports2.evaluateVersions = evaluateVersions;
     function findLocalTool(toolName, versionSpec, arch) {
@@ -4183,8 +4200,8 @@ var require_tool = __commonJS({
       });
     }
     exports2.downloadTool = downloadTool;
-    function _createToolPath(tool, version, arch) {
-      let folderPath = path.join(_getCacheRoot(), tool, semver.clean(version), arch);
+    function _createToolPath(tool, version2, arch) {
+      let folderPath = path.join(_getCacheRoot(), tool, semver.clean(version2), arch);
       tl2.debug("destination " + folderPath);
       let markerPath = `${folderPath}.complete`;
       tl2.rmRF(folderPath);
@@ -4192,45 +4209,45 @@ var require_tool = __commonJS({
       tl2.mkdirP(folderPath);
       return folderPath;
     }
-    function _completeToolPath(tool, version, arch) {
-      let folderPath = path.join(_getCacheRoot(), tool, semver.clean(version), arch);
+    function _completeToolPath(tool, version2, arch) {
+      let folderPath = path.join(_getCacheRoot(), tool, semver.clean(version2), arch);
       let markerPath = `${folderPath}.complete`;
       tl2.writeFile(markerPath, "");
       tl2.debug("finished caching tool");
     }
-    function cacheDir(sourceDir, tool, version, arch) {
+    function cacheDir(sourceDir, tool, version2, arch) {
       return __awaiter2(this, void 0, void 0, function* () {
-        version = semver.clean(version);
+        version2 = semver.clean(version2);
         arch = arch || os.arch();
-        console.log(tl2.loc("TOOL_LIB_CachingTool", tool, version, arch));
+        console.log(tl2.loc("TOOL_LIB_CachingTool", tool, version2, arch));
         tl2.debug("source dir: " + sourceDir);
         if (!tl2.stats(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
-        let destPath = _createToolPath(tool, version, arch);
+        let destPath = _createToolPath(tool, version2, arch);
         for (let itemName of fs.readdirSync(sourceDir)) {
           let s = path.join(sourceDir, itemName);
           tl2.cp(s, destPath + "/", "-r");
         }
-        _completeToolPath(tool, version, arch);
+        _completeToolPath(tool, version2, arch);
         return destPath;
       });
     }
     exports2.cacheDir = cacheDir;
-    function cacheFile(sourceFile, targetFile, tool, version, arch) {
+    function cacheFile(sourceFile, targetFile, tool, version2, arch) {
       return __awaiter2(this, void 0, void 0, function* () {
-        version = semver.clean(version);
+        version2 = semver.clean(version2);
         arch = arch || os.arch();
-        console.log(tl2.loc("TOOL_LIB_CachingTool", tool, version, arch));
+        console.log(tl2.loc("TOOL_LIB_CachingTool", tool, version2, arch));
         tl2.debug("source file:" + sourceFile);
         if (!tl2.stats(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
-        let destFolder = _createToolPath(tool, version, arch);
+        let destFolder = _createToolPath(tool, version2, arch);
         let destPath = path.join(destFolder, targetFile);
         tl2.debug("destination file" + destPath);
         tl2.cp(sourceFile, destPath);
-        _completeToolPath(tool, version, arch);
+        _completeToolPath(tool, version2, arch);
         return destFolder;
       });
     }
