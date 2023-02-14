@@ -4429,11 +4429,9 @@ var require_utils2 = __commonJS({
     exports2.getInputs = getInputs;
     function qodana(args = []) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const env = isServices() ? "azure-services" : "azure-server";
         if (args.length === 0) {
           const inputs = getInputs();
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
-          args.push("-e", `QODANA_ENV=${env}:${qodana_12.VERSION}`);
         }
         return tl2.exec(qodana_12.EXECUTABLE, args, {
           ignoreReturnCode: true,
@@ -4485,9 +4483,6 @@ var require_utils2 = __commonJS({
       });
     }
     exports2.uploadReport = uploadReport;
-    function isServices() {
-      return tl2.getVariable("SYSTEM_TEAMFOUNDATIONCOLLECTIONURI") !== void 0;
-    }
   }
 });
 

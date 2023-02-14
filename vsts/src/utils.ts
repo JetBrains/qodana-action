@@ -50,11 +50,9 @@ export function getInputs(): Inputs {
  * @returns The qodana command execution output.
  */
 export async function qodana(args: string[] = []): Promise<number> {
-  const env = isServices() ? 'azure-services' : 'azure-server'
   if (args.length === 0) {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
-    args.push('-e', `QODANA_ENV=${env}:${VERSION}`)
   }
   return tl.exec(EXECUTABLE, args, {
     ignoreReturnCode: true,
@@ -116,11 +114,4 @@ export async function uploadReport(
   } catch (error) {
     tl.warning(`Failed to upload report – ${(error as Error).message}`)
   }
-}
-
-/**
- * Check if the pipeline is run on Azure DevOps Services.
- */
-function isServices(): boolean {
-  return tl.getVariable('SYSTEM_TEAMFOUNDATIONCOLLECTIONURI') !== undefined
 }
