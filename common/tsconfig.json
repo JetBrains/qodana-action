@@ -7,8 +7,10 @@
     "noImplicitAny": true,                    /* Raise error on expressions and declarations with an implied 'any' type. */
     "esModuleInterop": true,                  /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
     "declaration": true,                      /* Generates corresponding '.d.ts' file. */
-    "composite": true
+    "composite": true,
+    "resolveJsonModule": true,                /* Include modules imported with '.json' extension. */
   },
   "types": ".qodana.d.ts",
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "exclude": ["node_modules", "**/*.test.ts"],
+  "files": ["cli.json", "qodana.ts"]
 }

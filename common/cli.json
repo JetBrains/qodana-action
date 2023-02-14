@@ -1,0 +1,11 @@
+{
+  "version": "2022.3.4",
+  "checksum": {
+    "windows_x86_64": "3aaed3552cde7d48fd7b81578e24a7b033be8748e9fb86afca5d7b420a52e9ca",
+    "linux_arm64": "4c03be23cfc0eaa052c1c10c626e1f9ffb9be8936c9ba73b66b91cfc8bcfe43c",
+    "darwin_arm64": "7313271d198b035143e9f8001d87741dc72123bf40c1dd6f8f35181268529172",
+    "darwin_x86_64": "808db0a6deef9c42033798b436d25c21a6fdb192eb4b73729d99e42c6fd8371c",
+    "windows_arm64": "ad010f503663dd996feb3048ae85466169b34998a162233f918cf41113f7ccff",
+    "linux_x86_64": "d22703ef05fbd6e9b286b99750cf6d90a608ad28d0b4dc3078e3c8ded4bf15d1"
+  }
+}

@@ -1,5 +1,5 @@
 // noinspection JSUnusedGlobalSymbols
-
+import {checksum, version} from './cli.json'
 import {createHash} from 'crypto'
 import {readFileSync} from 'fs'
 
@@ -9,22 +9,22 @@ export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
 export const QODANA_SHORT_SARIF_NAME = 'qodana-short.sarif.json'
-export const VERSION = '2022.3.3'
 export const EXECUTABLE = 'qodana'
+export const VERSION = version
 export function getQodanaSha256(arch: string, platform: string): string {
   switch (`${platform}_${arch}`) {
     case 'windows_x86_64':
-      return 'bfa0e823962263f8d51036f94152002efd25f6499c3394d26e962e94fe115780'
+      return checksum['windows_x86_64']
     case 'windows_arm64':
-      return 'aded1dd1765ec9aff5033d9cbd49445dbd4fec13c684d2d015523bbf10f41529'
+      return checksum['windows_arm64']
     case 'linux_x86_64':
-      return '166b1f364b80c660ecd644f5c3009fb677bbeae33f58bc5e9e28a3dc6988eb6c'
+      return checksum['linux_x86_64']
     case 'linux_arm64':
-      return '81422f12bccb67dfaa8ab6994a8a5e076d95b39a5ef95b0481d6a2e40c76fc53'
+      return checksum['linux_arm64']
     case 'darwin_x86_64':
-      return 'aa6e2498803cb3c1f2def8bbe7e439e3887e1aac609ca243e0e341cd360d0c91'
+      return checksum['darwin_x86_64']
     case 'darwin_arm64':
-      return '8acc312a46821cf90f94be94b22582fc1aa19a443a80952a292f1fb1c00946d1'
+      return checksum['darwin_arm64']
     default:
       throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`)
   }
@@ -55,7 +55,7 @@ export function getQodanaUrl(arch: string, platform: string): string {
     throw new Error(`Unsupported architecture: ${arch}`)
   }
   const archive = platform === 'windows' ? 'zip' : 'tar.gz'
-  return `https://github.com/JetBrains/qodana-cli/releases/download/v${VERSION}/qodana_${platform}_${arch}.${archive}`
+  return `https://github.com/JetBrains/qodana-cli/releases/download/v${version}/qodana_${platform}_${arch}.${archive}`
 }
 
 // eslint-disable-next-line no-shadow -- shadowing is intentional here (ESLint bug)

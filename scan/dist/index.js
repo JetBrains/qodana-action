@@ -389,7 +389,7 @@ var require_v35 = __commonJS({
     exports2.DNS = DNS;
     var URL2 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
     exports2.URL = URL2;
-    function _default(name, version, hashfunc) {
+    function _default(name, version2, hashfunc) {
       function generateUUID(value, namespace, buf, offset) {
         if (typeof value === "string") {
           value = stringToBytes(value);
@@ -404,7 +404,7 @@ var require_v35 = __commonJS({
         bytes.set(namespace);
         bytes.set(value, namespace.length);
         bytes = hashfunc(bytes);
-        bytes[6] = bytes[6] & 15 | version;
+        bytes[6] = bytes[6] & 15 | version2;
         bytes[8] = bytes[8] & 63 | 128;
         if (buf) {
           offset = offset || 0;
@@ -582,14 +582,14 @@ var require_version = __commonJS({
       return obj && obj.__esModule ? obj : { default: obj };
     }
     __name(_interopRequireDefault, "_interopRequireDefault");
-    function version(uuid) {
+    function version2(uuid) {
       if (!(0, _validate.default)(uuid)) {
         throw TypeError("Invalid UUID");
       }
       return parseInt(uuid.substr(14, 1), 16);
     }
-    __name(version, "version");
-    var _default = version;
+    __name(version2, "version");
+    var _default = version2;
     exports2.default = _default;
   }
 });
@@ -2771,6 +2771,22 @@ var require_io = __commonJS({
   }
 });
 
+// ../common/cli.json
+var version, checksum;
+var init_cli = __esm({
+  "../common/cli.json"() {
+    version = "2022.3.4";
+    checksum = {
+      windows_x86_64: "3aaed3552cde7d48fd7b81578e24a7b033be8748e9fb86afca5d7b420a52e9ca",
+      linux_arm64: "4c03be23cfc0eaa052c1c10c626e1f9ffb9be8936c9ba73b66b91cfc8bcfe43c",
+      darwin_arm64: "7313271d198b035143e9f8001d87741dc72123bf40c1dd6f8f35181268529172",
+      darwin_x86_64: "808db0a6deef9c42033798b436d25c21a6fdb192eb4b73729d99e42c6fd8371c",
+      windows_arm64: "ad010f503663dd996feb3048ae85466169b34998a162233f918cf41113f7ccff",
+      linux_x86_64: "d22703ef05fbd6e9b286b99750cf6d90a608ad28d0b4dc3078e3c8ded4bf15d1"
+    };
+  }
+});
+
 // ../common/qodana.ts
 var qodana_exports = {};
 __export(qodana_exports, {
@@ -2796,17 +2812,17 @@ __export(qodana_exports, {
 function getQodanaSha256(arch, platform) {
   switch (`${platform}_${arch}`) {
     case "windows_x86_64":
-      return "bfa0e823962263f8d51036f94152002efd25f6499c3394d26e962e94fe115780";
+      return checksum["windows_x86_64"];
     case "windows_arm64":
-      return "aded1dd1765ec9aff5033d9cbd49445dbd4fec13c684d2d015523bbf10f41529";
+      return checksum["windows_arm64"];
     case "linux_x86_64":
-      return "166b1f364b80c660ecd644f5c3009fb677bbeae33f58bc5e9e28a3dc6988eb6c";
+      return checksum["linux_x86_64"];
     case "linux_arm64":
-      return "81422f12bccb67dfaa8ab6994a8a5e076d95b39a5ef95b0481d6a2e40c76fc53";
+      return checksum["linux_arm64"];
     case "darwin_x86_64":
-      return "aa6e2498803cb3c1f2def8bbe7e439e3887e1aac609ca243e0e341cd360d0c91";
+      return checksum["darwin_x86_64"];
     case "darwin_arm64":
-      return "8acc312a46821cf90f94be94b22582fc1aa19a443a80952a292f1fb1c00946d1";
+      return checksum["darwin_arm64"];
     default:
       throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`);
   }
@@ -2825,7 +2841,7 @@ function getQodanaUrl(arch, platform) {
     throw new Error(`Unsupported architecture: ${arch}`);
   }
   const archive = platform === "windows" ? "zip" : "tar.gz";
-  return `https://github.com/JetBrains/qodana-cli/releases/download/v${VERSION}/qodana_${platform}_${arch}.${archive}`;
+  return `https://github.com/JetBrains/qodana-cli/releases/download/v${version}/qodana_${platform}_${arch}.${archive}`;
 }
 function isExecutionSuccessful(exitCode) {
   return Object.values(QodanaExitCode).includes(exitCode);
@@ -2874,9 +2890,10 @@ function sha256sum(file) {
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
-var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, VERSION, EXECUTABLE, QodanaExitCode;
+var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, EXECUTABLE, VERSION, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
+    init_cli();
     import_crypto = require("crypto");
     import_fs = require("fs");
     SUPPORTED_PLATFORMS = ["windows", "linux", "darwin"];
@@ -2884,8 +2901,8 @@ var init_qodana = __esm({
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
     QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
-    VERSION = "2022.3.3";
     EXECUTABLE = "qodana";
+    VERSION = version;
     __name(getQodanaSha256, "getQodanaSha256");
     __name(getProcessArchName, "getProcessArchName");
     __name(getProcessPlatformName, "getProcessPlatformName");
@@ -3255,8 +3272,8 @@ var require_fs = __commonJS({
     var fs = require("fs");
     var origRealpath = fs.realpath;
     var origRealpathSync = fs.realpathSync;
-    var version = process.version;
-    var ok = /^v[0-5]\./.test(version);
+    var version2 = process.version;
+    var ok = /^v[0-5]\./.test(version2);
     var old = require_old();
     function newError(er) {
       return er && er.syscall === "realpath" && (er.code === "ELOOP" || er.code === "ENOMEM" || er.code === "ENAMETOOLONG");
@@ -9867,76 +9884,76 @@ var require_semver = __commonJS({
     }
     var i;
     exports2.parse = parse;
-    function parse(version, options) {
+    function parse(version2, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version instanceof SemVer) {
-        return version;
+      if (version2 instanceof SemVer) {
+        return version2;
       }
-      if (typeof version !== "string") {
+      if (typeof version2 !== "string") {
         return null;
       }
-      if (version.length > MAX_LENGTH) {
+      if (version2.length > MAX_LENGTH) {
         return null;
       }
       var r = options.loose ? re[t.LOOSE] : re[t.FULL];
-      if (!r.test(version)) {
+      if (!r.test(version2)) {
         return null;
       }
       try {
-        return new SemVer(version, options);
+        return new SemVer(version2, options);
       } catch (er) {
         return null;
       }
     }
     __name(parse, "parse");
     exports2.valid = valid;
-    function valid(version, options) {
-      var v = parse(version, options);
+    function valid(version2, options) {
+      var v = parse(version2, options);
       return v ? v.version : null;
     }
     __name(valid, "valid");
     exports2.clean = clean;
-    function clean(version, options) {
-      var s = parse(version.trim().replace(/^[=v]+/, ""), options);
+    function clean(version2, options) {
+      var s = parse(version2.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     }
     __name(clean, "clean");
     exports2.SemVer = SemVer;
-    function SemVer(version, options) {
+    function SemVer(version2, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version instanceof SemVer) {
-        if (version.loose === options.loose) {
-          return version;
+      if (version2 instanceof SemVer) {
+        if (version2.loose === options.loose) {
+          return version2;
         } else {
-          version = version.version;
+          version2 = version2.version;
         }
-      } else if (typeof version !== "string") {
-        throw new TypeError("Invalid Version: " + version);
+      } else if (typeof version2 !== "string") {
+        throw new TypeError("Invalid Version: " + version2);
       }
-      if (version.length > MAX_LENGTH) {
+      if (version2.length > MAX_LENGTH) {
         throw new TypeError("version is longer than " + MAX_LENGTH + " characters");
       }
       if (!(this instanceof SemVer)) {
-        return new SemVer(version, options);
+        return new SemVer(version2, options);
       }
-      debug("SemVer", version, options);
+      debug("SemVer", version2, options);
       this.options = options;
       this.loose = !!options.loose;
-      var m = version.trim().match(options.loose ? re[t.LOOSE] : re[t.FULL]);
+      var m = version2.trim().match(options.loose ? re[t.LOOSE] : re[t.FULL]);
       if (!m) {
-        throw new TypeError("Invalid Version: " + version);
+        throw new TypeError("Invalid Version: " + version2);
       }
-      this.raw = version;
+      this.raw = version2;
       this.major = +m[1];
       this.minor = +m[2];
       this.patch = +m[3];
@@ -10120,13 +10137,13 @@ var require_semver = __commonJS({
       return this;
     };
     exports2.inc = inc;
-    function inc(version, release, loose, identifier) {
+    function inc(version2, release, loose, identifier) {
       if (typeof loose === "string") {
         identifier = loose;
         loose = void 0;
       }
       try {
-        return new SemVer(version, loose).inc(release, identifier).version;
+        return new SemVer(version2, loose).inc(release, identifier).version;
       } catch (er) {
         return null;
       }
@@ -10337,19 +10354,19 @@ var require_semver = __commonJS({
     Comparator.prototype.toString = function() {
       return this.value;
     };
-    Comparator.prototype.test = function(version) {
-      debug("Comparator.test", version, this.options.loose);
-      if (this.semver === ANY || version === ANY) {
+    Comparator.prototype.test = function(version2) {
+      debug("Comparator.test", version2, this.options.loose);
+      if (this.semver === ANY || version2 === ANY) {
         return true;
       }
-      if (typeof version === "string") {
+      if (typeof version2 === "string") {
         try {
-          version = new SemVer(version, this.options);
+          version2 = new SemVer(version2, this.options);
         } catch (er) {
           return false;
         }
       }
-      return cmp(version, this.operator, this.semver, this.options);
+      return cmp(version2, this.operator, this.semver, this.options);
     };
     Comparator.prototype.intersects = function(comp, options) {
       if (!(comp instanceof Comparator)) {
@@ -10673,31 +10690,31 @@ var require_semver = __commonJS({
       return (from + " " + to).trim();
     }
     __name(hyphenReplace, "hyphenReplace");
-    Range.prototype.test = function(version) {
-      if (!version) {
+    Range.prototype.test = function(version2) {
+      if (!version2) {
         return false;
       }
-      if (typeof version === "string") {
+      if (typeof version2 === "string") {
         try {
-          version = new SemVer(version, this.options);
+          version2 = new SemVer(version2, this.options);
         } catch (er) {
           return false;
         }
       }
       for (var i2 = 0; i2 < this.set.length; i2++) {
-        if (testSet(this.set[i2], version, this.options)) {
+        if (testSet(this.set[i2], version2, this.options)) {
           return true;
         }
       }
       return false;
     };
-    function testSet(set, version, options) {
+    function testSet(set, version2, options) {
       for (var i2 = 0; i2 < set.length; i2++) {
-        if (!set[i2].test(version)) {
+        if (!set[i2].test(version2)) {
           return false;
         }
       }
-      if (version.prerelease.length && !options.includePrerelease) {
+      if (version2.prerelease.length && !options.includePrerelease) {
         for (i2 = 0; i2 < set.length; i2++) {
           debug(set[i2].semver);
           if (set[i2].semver === ANY) {
@@ -10705,7 +10722,7 @@ var require_semver = __commonJS({
           }
           if (set[i2].semver.prerelease.length > 0) {
             var allowed = set[i2].semver;
-            if (allowed.major === version.major && allowed.minor === version.minor && allowed.patch === version.patch) {
+            if (allowed.major === version2.major && allowed.minor === version2.minor && allowed.patch === version2.patch) {
               return true;
             }
           }
@@ -10716,13 +10733,13 @@ var require_semver = __commonJS({
     }
     __name(testSet, "testSet");
     exports2.satisfies = satisfies;
-    function satisfies(version, range, options) {
+    function satisfies(version2, range, options) {
       try {
         range = new Range(range, options);
       } catch (er) {
         return false;
       }
-      return range.test(version);
+      return range.test(version2);
     }
     __name(satisfies, "satisfies");
     exports2.maxSatisfying = maxSatisfying;
@@ -10819,18 +10836,18 @@ var require_semver = __commonJS({
     }
     __name(validRange, "validRange");
     exports2.ltr = ltr;
-    function ltr(version, range, options) {
-      return outside(version, range, "<", options);
+    function ltr(version2, range, options) {
+      return outside(version2, range, "<", options);
     }
     __name(ltr, "ltr");
     exports2.gtr = gtr;
-    function gtr(version, range, options) {
-      return outside(version, range, ">", options);
+    function gtr(version2, range, options) {
+      return outside(version2, range, ">", options);
     }
     __name(gtr, "gtr");
     exports2.outside = outside;
-    function outside(version, range, hilo, options) {
-      version = new SemVer(version, options);
+    function outside(version2, range, hilo, options) {
+      version2 = new SemVer(version2, options);
       range = new Range(range, options);
       var gtfn, ltefn, ltfn, comp, ecomp;
       switch (hilo) {
@@ -10851,7 +10868,7 @@ var require_semver = __commonJS({
         default:
           throw new TypeError('Must provide a hilo val of "<" or ">"');
       }
-      if (satisfies(version, range, options)) {
+      if (satisfies(version2, range, options)) {
         return false;
       }
       for (var i2 = 0; i2 < range.set.length; ++i2) {
@@ -10873,9 +10890,9 @@ var require_semver = __commonJS({
         if (high.operator === comp || high.operator === ecomp) {
           return false;
         }
-        if ((!low.operator || low.operator === comp) && ltefn(version, low.semver)) {
+        if ((!low.operator || low.operator === comp) && ltefn(version2, low.semver)) {
           return false;
-        } else if (low.operator === ecomp && ltfn(version, low.semver)) {
+        } else if (low.operator === ecomp && ltfn(version2, low.semver)) {
           return false;
         }
       }
@@ -10883,8 +10900,8 @@ var require_semver = __commonJS({
     }
     __name(outside, "outside");
     exports2.prerelease = prerelease;
-    function prerelease(version, options) {
-      var parsed = parse(version, options);
+    function prerelease(version2, options) {
+      var parsed = parse(version2, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     }
     __name(prerelease, "prerelease");
@@ -10896,23 +10913,23 @@ var require_semver = __commonJS({
     }
     __name(intersects, "intersects");
     exports2.coerce = coerce;
-    function coerce(version, options) {
-      if (version instanceof SemVer) {
-        return version;
+    function coerce(version2, options) {
+      if (version2 instanceof SemVer) {
+        return version2;
       }
-      if (typeof version === "number") {
-        version = String(version);
+      if (typeof version2 === "number") {
+        version2 = String(version2);
       }
-      if (typeof version !== "string") {
+      if (typeof version2 !== "string") {
         return null;
       }
       options = options || {};
       var match = null;
       if (!options.rtl) {
-        match = version.match(re[t.COERCE]);
+        match = version2.match(re[t.COERCE]);
       } else {
         var next;
-        while ((next = re[t.COERCERTL].exec(version)) && (!match || match.index + match[0].length !== version.length)) {
+        while ((next = re[t.COERCERTL].exec(version2)) && (!match || match.index + match[0].length !== version2.length)) {
           if (!match || next.index + next[0].length !== match.index + match[0].length) {
             match = next;
           }
@@ -11288,10 +11305,10 @@ var require_cacheUtils = __commonJS({
           return constants_1.CompressionMethod.Gzip;
         }
         const versionOutput = yield getVersion("zstd");
-        const version = semver.clean(versionOutput);
+        const version2 = semver.clean(versionOutput);
         if (!versionOutput.toLowerCase().includes("zstd command line interface")) {
           return constants_1.CompressionMethod.Gzip;
-        } else if (!version || semver.lt(version, "v1.3.2")) {
+        } else if (!version2 || semver.lt(version2, "v1.3.2")) {
           return constants_1.CompressionMethod.ZstdWithoutLong;
         } else {
           return constants_1.CompressionMethod.Zstd;
@@ -12290,7 +12307,7 @@ var require_v352 = __commonJS({
     exports2.DNS = DNS;
     var URL2 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
     exports2.URL = URL2;
-    function _default(name, version, hashfunc) {
+    function _default(name, version2, hashfunc) {
       function generateUUID(value, namespace, buf, offset) {
         if (typeof value === "string") {
           value = stringToBytes(value);
@@ -12305,7 +12322,7 @@ var require_v352 = __commonJS({
         bytes.set(namespace);
         bytes.set(value, namespace.length);
         bytes = hashfunc(bytes);
-        bytes[6] = bytes[6] & 15 | version;
+        bytes[6] = bytes[6] & 15 | version2;
         bytes[8] = bytes[8] & 63 | 128;
         if (buf) {
           offset = offset || 0;
@@ -12483,14 +12500,14 @@ var require_version2 = __commonJS({
       return obj && obj.__esModule ? obj : { default: obj };
     }
     __name(_interopRequireDefault, "_interopRequireDefault");
-    function version(uuid) {
+    function version2(uuid) {
       if (!(0, _validate.default)(uuid)) {
         throw TypeError("Invalid UUID");
       }
       return parseInt(uuid.substr(14, 1), 16);
     }
-    __name(version, "version");
-    var _default = version;
+    __name(version2, "version");
+    var _default = version2;
     exports2.default = _default;
   }
 });
@@ -13176,7 +13193,7 @@ var require_XMLDOMImplementation = __commonJS({
         function XMLDOMImplementation2() {
         }
         __name(XMLDOMImplementation2, "XMLDOMImplementation");
-        XMLDOMImplementation2.prototype.hasFeature = function(feature, version) {
+        XMLDOMImplementation2.prototype.hasFeature = function(feature, version2) {
           return true;
         };
         XMLDOMImplementation2.prototype.createDocumentType = function(qualifiedName, publicId, systemId) {
@@ -13188,7 +13205,7 @@ var require_XMLDOMImplementation = __commonJS({
         XMLDOMImplementation2.prototype.createHTMLDocument = function(title) {
           throw new Error("This DOM method is not implemented.");
         };
-        XMLDOMImplementation2.prototype.getFeature = function(feature, version) {
+        XMLDOMImplementation2.prototype.getFeature = function(feature, version2) {
           throw new Error("This DOM method is not implemented.");
         };
         return XMLDOMImplementation2;
@@ -13940,17 +13957,17 @@ var require_XMLDeclaration = __commonJS({
       NodeType = require_NodeType();
       module2.exports = XMLDeclaration = function(superClass) {
         extend(XMLDeclaration2, superClass);
-        function XMLDeclaration2(parent, version, encoding, standalone) {
+        function XMLDeclaration2(parent, version2, encoding, standalone) {
           var ref;
           XMLDeclaration2.__super__.constructor.call(this, parent);
-          if (isObject(version)) {
-            ref = version, version = ref.version, encoding = ref.encoding, standalone = ref.standalone;
+          if (isObject(version2)) {
+            ref = version2, version2 = ref.version, encoding = ref.encoding, standalone = ref.standalone;
           }
-          if (!version) {
-            version = "1.0";
+          if (!version2) {
+            version2 = "1.0";
           }
           this.type = NodeType.Declaration;
-          this.version = this.stringify.xmlVersion(version);
+          this.version = this.stringify.xmlVersion(version2);
           if (encoding != null) {
             this.encoding = this.stringify.xmlEncoding(encoding);
           }
@@ -15037,10 +15054,10 @@ var require_XMLNode = __commonJS({
           Array.prototype.push.apply(this.parent.children, removed);
           return this;
         };
-        XMLNode2.prototype.declaration = function(version, encoding, standalone) {
+        XMLNode2.prototype.declaration = function(version2, encoding, standalone) {
           var doc, xmldec;
           doc = this.document();
-          xmldec = new XMLDeclaration(doc, version, encoding, standalone);
+          xmldec = new XMLDeclaration(doc, version2, encoding, standalone);
           if (doc.children.length === 0) {
             doc.children.unshift(xmldec);
           } else if (doc.children[0].type === NodeType.Declaration) {
@@ -15164,8 +15181,8 @@ var require_XMLNode = __commonJS({
         XMLNode2.prototype.doc = function() {
           return this.document();
         };
-        XMLNode2.prototype.dec = function(version, encoding, standalone) {
-          return this.declaration(version, encoding, standalone);
+        XMLNode2.prototype.dec = function(version2, encoding, standalone) {
+          return this.declaration(version2, encoding, standalone);
         };
         XMLNode2.prototype.e = function(name, attributes, text) {
           return this.element(name, attributes, text);
@@ -15212,7 +15229,7 @@ var require_XMLNode = __commonJS({
         XMLNode2.prototype.normalize = function() {
           throw new Error("This DOM method is not implemented." + this.debugInfo());
         };
-        XMLNode2.prototype.isSupported = function(feature, version) {
+        XMLNode2.prototype.isSupported = function(feature, version2) {
           return true;
         };
         XMLNode2.prototype.hasAttributes = function() {
@@ -15268,7 +15285,7 @@ var require_XMLNode = __commonJS({
           }
           return true;
         };
-        XMLNode2.prototype.getFeature = function(feature, version) {
+        XMLNode2.prototype.getFeature = function(feature, version2) {
           throw new Error("This DOM method is not implemented." + this.debugInfo());
         };
         XMLNode2.prototype.setUserData = function(key, data, handler) {
@@ -16480,13 +16497,13 @@ var require_XMLDocumentCB = __commonJS({
           }
           return this;
         };
-        XMLDocumentCB2.prototype.declaration = function(version, encoding, standalone) {
+        XMLDocumentCB2.prototype.declaration = function(version2, encoding, standalone) {
           var node;
           this.openCurrent();
           if (this.documentStarted) {
             throw new Error("declaration() must be the first node.");
           }
-          node = new XMLDeclaration(this, version, encoding, standalone);
+          node = new XMLDeclaration(this, version2, encoding, standalone);
           this.onData(this.writer.declaration(node, this.writerOptions, this.currentLevel + 1), this.currentLevel + 1);
           return this;
         };
@@ -16658,8 +16675,8 @@ var require_XMLDocumentCB = __commonJS({
         XMLDocumentCB2.prototype.ins = function(target, value) {
           return this.instruction(target, value);
         };
-        XMLDocumentCB2.prototype.dec = function(version, encoding, standalone) {
-          return this.declaration(version, encoding, standalone);
+        XMLDocumentCB2.prototype.dec = function(version2, encoding, standalone) {
+          return this.declaration(version2, encoding, standalone);
         };
         XMLDocumentCB2.prototype.dtd = function(root, pubID, sysID) {
           return this.doctype(root, pubID, sysID);
@@ -43047,10 +43064,10 @@ var require_ProxyTracer = __commonJS({
     var NoopTracer_1 = require_NoopTracer();
     var NOOP_TRACER = new NoopTracer_1.NoopTracer();
     var ProxyTracer = function() {
-      function ProxyTracer2(_provider, name, version) {
+      function ProxyTracer2(_provider, name, version2) {
         this._provider = _provider;
         this.name = name;
-        this.version = version;
+        this.version = version2;
       }
       __name(ProxyTracer2, "ProxyTracer");
       ProxyTracer2.prototype.startSpan = function(name, options, context) {
@@ -43110,9 +43127,9 @@ var require_ProxyTracerProvider = __commonJS({
       function ProxyTracerProvider2() {
       }
       __name(ProxyTracerProvider2, "ProxyTracerProvider");
-      ProxyTracerProvider2.prototype.getTracer = function(name, version) {
+      ProxyTracerProvider2.prototype.getTracer = function(name, version2) {
         var _a;
-        return (_a = this.getDelegateTracer(name, version)) !== null && _a !== void 0 ? _a : new ProxyTracer_1.ProxyTracer(this, name, version);
+        return (_a = this.getDelegateTracer(name, version2)) !== null && _a !== void 0 ? _a : new ProxyTracer_1.ProxyTracer(this, name, version2);
       };
       ProxyTracerProvider2.prototype.getDelegate = function() {
         var _a;
@@ -43121,9 +43138,9 @@ var require_ProxyTracerProvider = __commonJS({
       ProxyTracerProvider2.prototype.setDelegate = function(delegate) {
         this._delegate = delegate;
       };
-      ProxyTracerProvider2.prototype.getDelegateTracer = function(name, version) {
+      ProxyTracerProvider2.prototype.getDelegateTracer = function(name, version2) {
         var _a;
-        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version);
+        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version2);
       };
       return ProxyTracerProvider2;
     }();
@@ -43282,8 +43299,8 @@ var require_trace = __commonJS({
       TraceAPI2.prototype.getTracerProvider = function() {
         return global_utils_1.getGlobal(API_NAME) || this._proxyTracerProvider;
       };
-      TraceAPI2.prototype.getTracer = function(name, version) {
-        return this.getTracerProvider().getTracer(name, version);
+      TraceAPI2.prototype.getTracer = function(name, version2) {
+        return this.getTracerProvider().getTracer(name, version2);
       };
       TraceAPI2.prototype.disable = function() {
         global_utils_1.unregisterGlobal(API_NAME, diag_1.DiagAPI.instance());
@@ -43521,8 +43538,8 @@ var require_dist6 = __commonJS({
       return api.trace.isSpanContextValid(context2);
     }
     __name(isSpanContextValid, "isSpanContextValid");
-    function getTracer(name, version) {
-      return api.trace.getTracer(name || "azure/core-tracing", version);
+    function getTracer(name, version2) {
+      return api.trace.getTracer(name || "azure/core-tracing", version2);
     }
     __name(getTracer, "getTracer");
     var context = api.context;
@@ -43577,8 +43594,8 @@ var require_dist6 = __commonJS({
       if (parts.length !== 4) {
         return;
       }
-      const [version, traceId, spanId, traceOptions] = parts;
-      if (version !== VERSION2) {
+      const [version2, traceId, spanId, traceOptions] = parts;
+      if (version2 !== VERSION2) {
         return;
       }
       const traceFlags = parseInt(traceOptions, 16);
@@ -57436,7 +57453,7 @@ var require_dist11 = __commonJS({
         }
       }
     };
-    var version = {
+    var version2 = {
       parameterPath: "version",
       mapper: {
         defaultValue: "2020-10-02",
@@ -59033,7 +59050,7 @@ var require_dist11 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId
       ],
       isXML: true,
@@ -59061,7 +59078,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -59088,7 +59105,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -59118,7 +59135,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -59148,7 +59165,7 @@ var require_dist11 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId
       ],
       isXML: true,
@@ -59170,7 +59187,7 @@ var require_dist11 = __commonJS({
       },
       queryParameters: [comp, restype1],
       urlParameters: [url],
-      headerParameters: [version, accept1],
+      headerParameters: [version2, accept1],
       isXML: true,
       serializer: xmlSerializer
     };
@@ -59196,7 +59213,7 @@ var require_dist11 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         contentLength,
         multipartContentType
@@ -59228,7 +59245,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -59368,7 +59385,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, restype2],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -59394,7 +59411,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, restype2],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId
@@ -59417,7 +59434,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, restype2],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -59446,7 +59463,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -59487,7 +59504,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId
@@ -59517,7 +59534,7 @@ var require_dist11 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         access,
         leaseId,
@@ -59548,7 +59565,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         deletedContainerName,
@@ -59576,7 +59593,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         sourceContainerName,
@@ -59611,7 +59628,7 @@ var require_dist11 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         contentLength,
         multipartContentType
@@ -59640,7 +59657,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -59671,7 +59688,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -59701,7 +59718,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -59731,7 +59748,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -59761,7 +59778,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -59797,7 +59814,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -59829,7 +59846,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -59850,7 +59867,7 @@ var require_dist11 = __commonJS({
       },
       queryParameters: [comp, restype1],
       urlParameters: [url],
-      headerParameters: [version, accept1],
+      headerParameters: [version2, accept1],
       isXML: true,
       serializer: xmlSerializer$1
     };
@@ -60045,7 +60062,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -60083,7 +60100,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -60119,7 +60136,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -60148,7 +60165,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp8],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -60170,7 +60187,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp11],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         expiryOptions,
@@ -60194,7 +60211,7 @@ var require_dist11 = __commonJS({
       queryParameters: [comp, timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -60228,7 +60245,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp12],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifUnmodifiedSince,
@@ -60253,7 +60270,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp12],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1
       ],
@@ -60275,7 +60292,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp13],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         legalHold
@@ -60298,7 +60315,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp6],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -60331,7 +60348,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -60361,7 +60378,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -60390,7 +60407,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -60419,7 +60436,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -60449,7 +60466,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -60478,7 +60495,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp14],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -60511,7 +60528,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -60553,7 +60570,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         metadata,
@@ -60599,7 +60616,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -60631,7 +60648,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -60656,7 +60673,7 @@ var require_dist11 = __commonJS({
       },
       queryParameters: [comp, restype1],
       urlParameters: [url],
-      headerParameters: [version, accept1],
+      headerParameters: [version2, accept1],
       isXML: true,
       serializer: xmlSerializer$2
     };
@@ -60693,7 +60710,7 @@ var require_dist11 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         leaseId,
         ifModifiedSince,
@@ -60731,7 +60748,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -60762,7 +60779,7 @@ var require_dist11 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         leaseId,
         ifTags,
@@ -60863,7 +60880,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -60912,7 +60929,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp19],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         contentLength,
         leaseId,
@@ -60953,7 +60970,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp19],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -60991,7 +61008,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp19],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -61043,7 +61060,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -61078,7 +61095,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -61108,7 +61125,7 @@ var require_dist11 = __commonJS({
       queryParameters: [comp, timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -61141,7 +61158,7 @@ var require_dist11 = __commonJS({
       queryParameters: [comp, timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -61171,7 +61188,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp21],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         ifModifiedSince,
@@ -61236,7 +61253,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -61282,7 +61299,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp22],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         contentLength,
         leaseId,
@@ -61320,7 +61337,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp22],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -61365,7 +61382,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds, comp23],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -61450,7 +61467,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         contentLength,
         metadata,
@@ -61498,7 +61515,7 @@ var require_dist11 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -61556,7 +61573,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         contentLength,
         leaseId,
@@ -61591,7 +61608,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         contentLength,
@@ -61631,7 +61648,7 @@ var require_dist11 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version,
+        version2,
         requestId,
         metadata,
         leaseId,
@@ -61684,7 +61701,7 @@ var require_dist11 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version,
+        version2,
         requestId,
         accept1,
         leaseId,
@@ -62964,8 +62981,8 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
       SASProtocol["HttpsAndHttp"] = "https,http";
     })(exports2.SASProtocol || (exports2.SASProtocol = {}));
     var SASQueryParameters = class {
-      constructor(version2, signature, permissionsOrOptions, services, resourceTypes, protocol, startsOn, expiresOn2, ipRange, identifier, resource, cacheControl, contentDisposition, contentEncoding, contentLanguage, contentType2, userDelegationKey, preauthorizedAgentObjectId, correlationId) {
-        this.version = version2;
+      constructor(version3, signature, permissionsOrOptions, services, resourceTypes, protocol, startsOn, expiresOn2, ipRange, identifier, resource, cacheControl, contentDisposition, contentEncoding, contentLanguage, contentType2, userDelegationKey, preauthorizedAgentObjectId, correlationId) {
+        this.version = version3;
         this.signature = signature;
         if (permissionsOrOptions !== void 0 && typeof permissionsOrOptions !== "string") {
           this.permissions = permissionsOrOptions.permissions;
@@ -63147,7 +63164,7 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
     };
     __name(SASQueryParameters, "SASQueryParameters");
     function generateBlobSASQueryParameters(blobSASSignatureValues, sharedKeyCredentialOrUserDelegationKey, accountName) {
-      const version2 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
+      const version3 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
       const sharedKeyCredential = sharedKeyCredentialOrUserDelegationKey instanceof StorageSharedKeyCredential ? sharedKeyCredentialOrUserDelegationKey : void 0;
       let userDelegationKeyCredential;
       if (sharedKeyCredential === void 0 && accountName !== void 0) {
@@ -63156,18 +63173,18 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
       if (sharedKeyCredential === void 0 && userDelegationKeyCredential === void 0) {
         throw TypeError("Invalid sharedKeyCredential, userDelegationKey or accountName.");
       }
-      if (version2 >= "2018-11-09") {
+      if (version3 >= "2018-11-09") {
         if (sharedKeyCredential !== void 0) {
           return generateBlobSASQueryParameters20181109(blobSASSignatureValues, sharedKeyCredential);
         } else {
-          if (version2 >= "2020-02-10") {
+          if (version3 >= "2020-02-10") {
             return generateBlobSASQueryParametersUDK20200210(blobSASSignatureValues, userDelegationKeyCredential);
           } else {
             return generateBlobSASQueryParametersUDK20181109(blobSASSignatureValues, userDelegationKeyCredential);
           }
         }
       }
-      if (version2 >= "2015-04-05") {
+      if (version3 >= "2015-04-05") {
         if (sharedKeyCredential !== void 0) {
           return generateBlobSASQueryParameters20150405(blobSASSignatureValues, sharedKeyCredential);
         } else {
@@ -63370,35 +63387,35 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
     }
     __name(getCanonicalName, "getCanonicalName");
     function SASSignatureValuesSanityCheckAndAutofill(blobSASSignatureValues) {
-      const version2 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
-      if (blobSASSignatureValues.snapshotTime && version2 < "2018-11-09") {
+      const version3 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
+      if (blobSASSignatureValues.snapshotTime && version3 < "2018-11-09") {
         throw RangeError("'version' must be >= '2018-11-09' when providing 'snapshotTime'.");
       }
       if (blobSASSignatureValues.blobName === void 0 && blobSASSignatureValues.snapshotTime) {
         throw RangeError("Must provide 'blobName' when providing 'snapshotTime'.");
       }
-      if (blobSASSignatureValues.versionId && version2 < "2019-10-10") {
+      if (blobSASSignatureValues.versionId && version3 < "2019-10-10") {
         throw RangeError("'version' must be >= '2019-10-10' when providing 'versionId'.");
       }
       if (blobSASSignatureValues.blobName === void 0 && blobSASSignatureValues.versionId) {
         throw RangeError("Must provide 'blobName' when providing 'versionId'.");
       }
-      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.setImmutabilityPolicy && version2 < "2020-08-04") {
+      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.setImmutabilityPolicy && version3 < "2020-08-04") {
         throw RangeError("'version' must be >= '2020-08-04' when provided 'i' permission.");
       }
-      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.deleteVersion && version2 < "2019-10-10") {
+      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.deleteVersion && version3 < "2019-10-10") {
         throw RangeError("'version' must be >= '2019-10-10' when providing 'x' permission.");
       }
-      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.tag && version2 < "2019-12-12") {
+      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.tag && version3 < "2019-12-12") {
         throw RangeError("'version' must be >= '2019-12-12' when providing 't' permission.");
       }
-      if (version2 < "2020-02-10" && blobSASSignatureValues.permissions && (blobSASSignatureValues.permissions.move || blobSASSignatureValues.permissions.execute)) {
+      if (version3 < "2020-02-10" && blobSASSignatureValues.permissions && (blobSASSignatureValues.permissions.move || blobSASSignatureValues.permissions.execute)) {
         throw RangeError("'version' must be >= '2020-02-10' when providing the 'm' or 'e' permission.");
       }
-      if (version2 < "2020-02-10" && (blobSASSignatureValues.preauthorizedAgentObjectId || blobSASSignatureValues.correlationId)) {
+      if (version3 < "2020-02-10" && (blobSASSignatureValues.preauthorizedAgentObjectId || blobSASSignatureValues.correlationId)) {
         throw RangeError("'version' must be >= '2020-02-10' when providing 'preauthorizedAgentObjectId' or 'correlationId'.");
       }
-      blobSASSignatureValues.version = version2;
+      blobSASSignatureValues.version = version3;
       return blobSASSignatureValues;
     }
     __name(SASSignatureValuesSanityCheckAndAutofill, "SASSignatureValuesSanityCheckAndAutofill");
@@ -67525,17 +67542,17 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
     };
     __name(AccountSASServices, "AccountSASServices");
     function generateAccountSASQueryParameters(accountSASSignatureValues, sharedKeyCredential) {
-      const version2 = accountSASSignatureValues.version ? accountSASSignatureValues.version : SERVICE_VERSION;
-      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.setImmutabilityPolicy && version2 < "2020-08-04") {
+      const version3 = accountSASSignatureValues.version ? accountSASSignatureValues.version : SERVICE_VERSION;
+      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.setImmutabilityPolicy && version3 < "2020-08-04") {
         throw RangeError("'version' must be >= '2020-08-04' when provided 'i' permission.");
       }
-      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.deleteVersion && version2 < "2019-10-10") {
+      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.deleteVersion && version3 < "2019-10-10") {
         throw RangeError("'version' must be >= '2019-10-10' when provided 'x' permission.");
       }
-      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.tag && version2 < "2019-12-12") {
+      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.tag && version3 < "2019-12-12") {
         throw RangeError("'version' must be >= '2019-12-12' when provided 't' permission.");
       }
-      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.filter && version2 < "2019-12-12") {
+      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.filter && version3 < "2019-12-12") {
         throw RangeError("'version' must be >= '2019-12-12' when provided 'f' permission.");
       }
       const parsedPermissions = AccountSASPermissions.parse(accountSASSignatureValues.permissions.toString());
@@ -67550,11 +67567,11 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
         truncatedISO8061Date(accountSASSignatureValues.expiresOn, false),
         accountSASSignatureValues.ipRange ? ipRangeToString(accountSASSignatureValues.ipRange) : "",
         accountSASSignatureValues.protocol ? accountSASSignatureValues.protocol : "",
-        version2,
+        version3,
         ""
       ].join("\n");
       const signature = sharedKeyCredential.computeHMACSHA256(stringToSign);
-      return new SASQueryParameters(version2, signature, parsedPermissions.toString(), parsedServices, parsedResourceTypes, accountSASSignatureValues.protocol, accountSASSignatureValues.startsOn, accountSASSignatureValues.expiresOn, accountSASSignatureValues.ipRange);
+      return new SASQueryParameters(version3, signature, parsedPermissions.toString(), parsedServices, parsedResourceTypes, accountSASSignatureValues.protocol, accountSASSignatureValues.startsOn, accountSASSignatureValues.expiresOn, accountSASSignatureValues.ipRange);
     }
     __name(generateAccountSASQueryParameters, "generateAccountSASQueryParameters");
     var BlobServiceClient = class extends StorageClient {
@@ -68526,8 +68543,8 @@ var require_cacheHttpClient = __commonJS({
     function getCacheEntry(keys, paths, options) {
       return __awaiter2(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
-        const resource = `cache?keys=${encodeURIComponent(keys.join(","))}&version=${version}`;
+        const version2 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
+        const resource = `cache?keys=${encodeURIComponent(keys.join(","))}&version=${version2}`;
         const response = yield requestUtils_1.retryTypedResponse("getCacheEntry", () => __awaiter2(this, void 0, void 0, function* () {
           return httpClient.getJson(getCacheApiUrl(resource));
         }));
@@ -68566,10 +68583,10 @@ var require_cacheHttpClient = __commonJS({
     function reserveCache(key, paths, options) {
       return __awaiter2(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
+        const version2 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
         const reserveCacheRequest = {
           key,
-          version,
+          version: version2,
           cacheSize: options === null || options === void 0 ? void 0 : options.cacheSize
         };
         const response = yield requestUtils_1.retryTypedResponse("reserveCache", () => __awaiter2(this, void 0, void 0, function* () {
@@ -71563,9 +71580,9 @@ var require_manifest = __commonJS({
         let match;
         let file;
         for (const candidate of candidates) {
-          const version = candidate.version;
-          core_1.debug(`check ${version} satisfies ${versionSpec}`);
-          if (semver.satisfies(version, versionSpec) && (!stable || candidate.stable === stable)) {
+          const version2 = candidate.version;
+          core_1.debug(`check ${version2} satisfies ${versionSpec}`);
+          if (semver.satisfies(version2, versionSpec) && (!stable || candidate.stable === stable)) {
             file = candidate.files.find((item) => {
               core_1.debug(`${item.arch}===${archFilter} && ${item.platform}===${platFilter}`);
               let chk = item.arch === archFilter && item.platform === platFilter;
@@ -71597,9 +71614,9 @@ var require_manifest = __commonJS({
     exports2._findMatch = _findMatch;
     function _getOsVersion() {
       const plat = os.platform();
-      let version = "";
+      let version2 = "";
       if (plat === "darwin") {
-        version = cp.execSync("sw_vers -productVersion").toString();
+        version2 = cp.execSync("sw_vers -productVersion").toString();
       } else if (plat === "linux") {
         const lsbContents = module2.exports._readLinuxVersionFile();
         if (lsbContents) {
@@ -71607,13 +71624,13 @@ var require_manifest = __commonJS({
           for (const line of lines) {
             const parts = line.split("=");
             if (parts.length === 2 && (parts[0].trim() === "VERSION_ID" || parts[0].trim() === "DISTRIB_RELEASE")) {
-              version = parts[1].trim().replace(/^"/, "").replace(/"$/, "");
+              version2 = parts[1].trim().replace(/^"/, "").replace(/"$/, "");
               break;
             }
           }
         }
       }
-      return version;
+      return version2;
     }
     __name(_getOsVersion, "_getOsVersion");
     exports2._getOsVersion = _getOsVersion;
@@ -72102,40 +72119,40 @@ var require_tool_cache = __commonJS({
       });
     }
     __name(extractZipNix, "extractZipNix");
-    function cacheDir(sourceDir, tool, version, arch) {
+    function cacheDir(sourceDir, tool, version2, arch) {
       return __awaiter2(this, void 0, void 0, function* () {
-        version = semver.clean(version) || version;
+        version2 = semver.clean(version2) || version2;
         arch = arch || os.arch();
-        core2.debug(`Caching tool ${tool} ${version} ${arch}`);
+        core2.debug(`Caching tool ${tool} ${version2} ${arch}`);
         core2.debug(`source dir: ${sourceDir}`);
         if (!fs.statSync(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
-        const destPath = yield _createToolPath(tool, version, arch);
+        const destPath = yield _createToolPath(tool, version2, arch);
         for (const itemName of fs.readdirSync(sourceDir)) {
           const s = path.join(sourceDir, itemName);
           yield io2.cp(s, destPath, { recursive: true });
         }
-        _completeToolPath(tool, version, arch);
+        _completeToolPath(tool, version2, arch);
         return destPath;
       });
     }
     __name(cacheDir, "cacheDir");
     exports2.cacheDir = cacheDir;
-    function cacheFile(sourceFile, targetFile, tool, version, arch) {
+    function cacheFile(sourceFile, targetFile, tool, version2, arch) {
       return __awaiter2(this, void 0, void 0, function* () {
-        version = semver.clean(version) || version;
+        version2 = semver.clean(version2) || version2;
         arch = arch || os.arch();
-        core2.debug(`Caching tool ${tool} ${version} ${arch}`);
+        core2.debug(`Caching tool ${tool} ${version2} ${arch}`);
         core2.debug(`source file: ${sourceFile}`);
         if (!fs.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
-        const destFolder = yield _createToolPath(tool, version, arch);
+        const destFolder = yield _createToolPath(tool, version2, arch);
         const destPath = path.join(destFolder, targetFile);
         core2.debug(`destination file ${destPath}`);
         yield io2.cp(sourceFile, destPath);
-        _completeToolPath(tool, version, arch);
+        _completeToolPath(tool, version2, arch);
         return destFolder;
       });
     }
@@ -72243,9 +72260,9 @@ var require_tool_cache = __commonJS({
       });
     }
     __name(_createExtractFolder, "_createExtractFolder");
-    function _createToolPath(tool, version, arch) {
+    function _createToolPath(tool, version2, arch) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version) || version, arch || "");
+        const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version2) || version2, arch || "");
         core2.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
         yield io2.rmRF(folderPath);
@@ -72255,8 +72272,8 @@ var require_tool_cache = __commonJS({
       });
     }
     __name(_createToolPath, "_createToolPath");
-    function _completeToolPath(tool, version, arch) {
-      const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version) || version, arch || "");
+    function _completeToolPath(tool, version2, arch) {
+      const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version2) || version2, arch || "");
       const markerPath = `${folderPath}.complete`;
       fs.writeFileSync(markerPath, "");
       core2.debug("finished caching tool");
@@ -72272,7 +72289,7 @@ var require_tool_cache = __commonJS({
     __name(isExplicitVersion, "isExplicitVersion");
     exports2.isExplicitVersion = isExplicitVersion;
     function evaluateVersions(versions, versionSpec) {
-      let version = "";
+      let version2 = "";
       core2.debug(`evaluating ${versions.length} versions`);
       versions = versions.sort((a, b) => {
         if (semver.gt(a, b)) {
@@ -72284,16 +72301,16 @@ var require_tool_cache = __commonJS({
         const potential = versions[i];
         const satisfied = semver.satisfies(potential, versionSpec);
         if (satisfied) {
-          version = potential;
+          version2 = potential;
           break;
         }
       }
-      if (version) {
-        core2.debug(`matched: ${version}`);
+      if (version2) {
+        core2.debug(`matched: ${version2}`);
       } else {
         core2.debug("match not found");
       }
-      return version;
+      return version2;
     }
     __name(evaluateVersions, "evaluateVersions");
     exports2.evaluateVersions = evaluateVersions;
