@@ -72644,15 +72644,20 @@ var require_output = __commonJS({
     var ANNOTATION_NOTICE = "notice";
     var SUMMARY_TABLE_HEADER = "| Name | Severity | Problems |";
     var SUMMARY_TABLE_SEP = "| --- | --- | --- |";
-    var SUMMARY_MISC = `### Contact us
-
-  Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
+    var SUMMARY_MISC = `Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   - Or via our issue tracker: https://jb.gg/qodana-issue
   - Or share your feedback: https://jb.gg/qodana-discussions`;
-    function getViewReportText(sarifPath) {
-      var _a, _b, _c, _d;
-      const sarif = JSON.parse(fs.readFileSync(sarifPath, { encoding: "utf8" }));
-      const link = (_d = (_c = (_b = (_a = sarif.runs) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.properties) === null || _c === void 0 ? void 0 : _c["reportUrl"]) !== null && _d !== void 0 ? _d : "";
+    function wrapToToggleBlock(header, body) {
+      return `<details>
+<summary>${header}</summary>
+
+${body}
+</details>`;
+    }
+    __name(wrapToToggleBlock, "wrapToToggleBlock");
+    function getViewReportText() {
+      var _a;
+      const link = (_a = process.env["QODANA_REPORT_URL"]) !== null && _a !== void 0 ? _a : "";
       if (link !== "") {
         return `\u2601\uFE0F [View the Qodana report](${link})`;
       }
@@ -72667,7 +72672,8 @@ var require_output = __commonJS({
       return Array.from(problems.entries()).sort((a, b) => b[1] - a[1]).map(([title, count]) => `| ${title} | ${level} | ${count} |`).join("\n");
     }
     __name(getRowsByLevel, "getRowsByLevel");
-    function getSummary(annotations, shortSarifPath) {
+    function getSummary(annotations) {
+      const contactBlock = wrapToToggleBlock("Contact Qodana team", SUMMARY_MISC);
       if (annotations.length === 0) {
         return [
           `# ${QODANA_CHECK_NAME}`,
@@ -72675,8 +72681,8 @@ var require_output = __commonJS({
           "**It seems all right \u{1F44C}**",
           "",
           "No problems found according to the checks applied",
-          getViewReportText(shortSarifPath),
-          SUMMARY_MISC
+          getViewReportText(),
+          contactBlock
         ].join("\n");
       }
       return [
@@ -72692,8 +72698,8 @@ var require_output = __commonJS({
           getRowsByLevel(annotations.filter((a) => a.level === ANNOTATION_NOTICE), "\u25FD\uFE0F Notice")
         ].filter((e) => e !== "").join("\n"),
         "",
-        getViewReportText(shortSarifPath),
-        SUMMARY_MISC
+        getViewReportText(),
+        contactBlock
       ].join("\n");
     }
     __name(getSummary, "getSummary");
@@ -72773,7 +72779,7 @@ var require_output = __commonJS({
               }
             }
           }
-          yield core2.summary.addRaw(getSummary(problems, shortSarifPath)).write();
+          yield core2.summary.addRaw(getSummary(problems)).write();
         } catch (error) {
           core2.warning(`Failed to publish annotations \u2013 ${error.message}`);
         }
