@@ -32,14 +32,14 @@ var __toCommonJS = /* @__PURE__ */ ((cache) => {
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2022.3.4";
+    version = "2023.1.0";
     checksum = {
-      windows_x86_64: "3aaed3552cde7d48fd7b81578e24a7b033be8748e9fb86afca5d7b420a52e9ca",
-      linux_arm64: "4c03be23cfc0eaa052c1c10c626e1f9ffb9be8936c9ba73b66b91cfc8bcfe43c",
-      darwin_arm64: "7313271d198b035143e9f8001d87741dc72123bf40c1dd6f8f35181268529172",
-      darwin_x86_64: "808db0a6deef9c42033798b436d25c21a6fdb192eb4b73729d99e42c6fd8371c",
-      windows_arm64: "ad010f503663dd996feb3048ae85466169b34998a162233f918cf41113f7ccff",
-      linux_x86_64: "d22703ef05fbd6e9b286b99750cf6d90a608ad28d0b4dc3078e3c8ded4bf15d1"
+      windows_x86_64: "f096db938a80fe3dd065a63716dca79f2156a6743c47a22e66ce83e0b4f81e5f",
+      linux_arm64: "a38e90e1e26271588714109253efdc60a5b7f0a410e509753483192ee0e1853f",
+      darwin_arm64: "2dfa918cc6041284e20c47e11c2d40eb39c87c7c220d9ccaba3a0e7896ad4321",
+      darwin_x86_64: "6aa6a77a4e5b12dbda79ad36922fbd05d7511d92f9dd83a1f4ad3321e4bfa223",
+      windows_arm64: "13411462aa6590aa25f4ceec591af9e468f21f40b77dab15d32bf6df8238cb12",
+      linux_x86_64: "93796612b616b1bc521c08be5785312ef7ad885606d091d0298a8a6608a07962"
     };
   }
 });
@@ -49,8 +49,8 @@ var qodana_exports = {};
 __export(qodana_exports, {
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
+  QODANA_REPORT_URL_NAME: () => QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME: () => QODANA_SARIF_NAME,
-  QODANA_SHORT_SARIF_NAME: () => QODANA_SHORT_SARIF_NAME,
   QodanaExitCode: () => QodanaExitCode,
   SUPPORTED_ARCHS: () => SUPPORTED_ARCHS,
   SUPPORTED_PLATFORMS: () => SUPPORTED_PLATFORMS,
@@ -147,7 +147,7 @@ function sha256sum(file) {
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
-var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, EXECUTABLE, VERSION, QodanaExitCode;
+var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_REPORT_URL_NAME, EXECUTABLE, VERSION, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     init_cli();
@@ -157,7 +157,7 @@ var init_qodana = __esm({
     SUPPORTED_ARCHS = ["x86_64", "arm64"];
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
-    QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
+    QODANA_REPORT_URL_NAME = "qodana.cloud";
     EXECUTABLE = "qodana";
     VERSION = version;
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
