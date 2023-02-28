@@ -2,8 +2,6 @@ import * as core from '@actions/core'
 import * as io from '@actions/io'
 import {
   FAIL_THRESHOLD_OUTPUT,
-  QODANA_SARIF_NAME,
-  QODANA_SHORT_SARIF_NAME,
   QodanaExitCode,
   isExecutionSuccessful
 } from '../../common/qodana'
@@ -61,8 +59,7 @@ async function main(): Promise<void> {
       uploadCaches(inputs.cacheDir, inputs.additionalCacheHash, canUploadCache),
       publishOutput(
         exitCode === QodanaExitCode.FailThreshold,
-        `${inputs.resultsDir}/${QODANA_SARIF_NAME}`,
-        `${inputs.resultsDir}/${QODANA_SHORT_SARIF_NAME}`,
+        inputs.resultsDir,
         isExecutionSuccessful(exitCode),
         inputs.useAnnotations
       )

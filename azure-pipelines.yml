@@ -19,7 +19,7 @@ steps:
       restoreKeys: |
         "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
         "$(Build.Repository.Name)"
-  - task: QodanaScan@2022
+  - task: QodanaScan@2023
     inputs:
       args: --log-level,debug
     env:

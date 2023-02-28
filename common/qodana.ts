@@ -8,7 +8,7 @@ export const SUPPORTED_ARCHS = ['x86_64', 'arm64']
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
-export const QODANA_SHORT_SARIF_NAME = 'qodana-short.sarif.json'
+export const QODANA_REPORT_URL_NAME = 'qodana.cloud'
 export const EXECUTABLE = 'qodana'
 export const VERSION = version
 export function getQodanaSha256(arch: string, platform: string): string {
