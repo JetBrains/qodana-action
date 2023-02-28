@@ -11,9 +11,7 @@ const ANNOTATION_WARNING = 'warning'
 const ANNOTATION_NOTICE = 'notice'
 const SUMMARY_TABLE_HEADER = '| Name | Severity | Problems |'
 const SUMMARY_TABLE_SEP = '| --- | --- | --- |'
-const SUMMARY_MISC = `### Contact us
-
-  Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
+const SUMMARY_MISC = `Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   - Or via our issue tracker: https://jb.gg/qodana-issue
   - Or share your feedback: https://jb.gg/qodana-discussions`
 
@@ -28,9 +26,16 @@ export interface Annotation {
   properties: AnnotationProperties
 }
 
-function getViewReportText(sarifPath: string): string {
-  const sarif: Log = JSON.parse(fs.readFileSync(sarifPath, {encoding: 'utf8'}))
-  const link: string = sarif.runs?.[0]?.properties?.['reportUrl'] ?? ''
+function wrapToToggleBlock(header: string, body: string): string {
+  return `<details>
+<summary>${header}</summary>
+
+${body}
+</details>`
+}
+
+function getViewReportText(): string {
+  const link: string = process.env['QODANA_REPORT_URL'] ?? ''
   if (link !== '') {
     return `☁️ [View the Qodana report](${link})`
   }
@@ -64,7 +69,9 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
  * @param annotations The annotations to generate the summary from.
  * @param shortSarifPath The path to the SARIF file.
  */
-function getSummary(annotations: Annotation[], shortSarifPath: string): string {
+function getSummary(annotations: Annotation[]): string {
+  const contactBlock = wrapToToggleBlock('Contact Qodana team', SUMMARY_MISC)
+
   if (annotations.length === 0) {
     return [
       `# ${QODANA_CHECK_NAME}`,
@@ -72,8 +79,8 @@ function getSummary(annotations: Annotation[], shortSarifPath: string): string {
       '**It seems all right 👌**',
       '',
       'No problems found according to the checks applied',
-      getViewReportText(shortSarifPath),
-      SUMMARY_MISC
+      getViewReportText(),
+      contactBlock
     ].join('\n')
   }
 
@@ -103,8 +110,8 @@ function getSummary(annotations: Annotation[], shortSarifPath: string): string {
       .filter(e => e !== '')
       .join('\n'),
     '',
-    getViewReportText(shortSarifPath),
-    SUMMARY_MISC
+    getViewReportText(),
+    contactBlock
   ].join('\n')
 }
 
@@ -216,7 +223,7 @@ export async function publishOutput(
         }
       }
     }
-    await core.summary.addRaw(getSummary(problems, shortSarifPath)).write()
+    await core.summary.addRaw(getSummary(problems)).write()
   } catch (error) {
     core.warning(`Failed to publish annotations – ${(error as Error).message}`)
   }
