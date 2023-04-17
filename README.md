@@ -4,7 +4,7 @@
 [![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.jetbrains.qodana?color=green&label=Gradle%20Plugin%20Portal&logo=gradle)][gradle-plugin-page]
 [![Build](https://github.com/JetBrains/gradle-grammar-kit-plugin/workflows/Build/badge.svg)][gh:build]
 [![GitHub Discussions](https://img.shields.io/github/discussions/jetbrains/qodana)][jb:discussions]
-[![Twitter Follow](https://img.shields.io/twitter/follow/QodanaEvolves?style=social&logo=twitter)][jb:twitter]
+[![Twitter Follow](https://img.shields.io/badge/follow-%40QodanaEvolves-1DA1F2?logo=twitter)][jb:twitter]
 
 Gradle interface to run code inspections from IntelliJ IDEA.
 
