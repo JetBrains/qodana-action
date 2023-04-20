@@ -9,6 +9,9 @@ export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
 export const QODANA_REPORT_URL_NAME = 'qodana.cloud'
+
+export const QODANA_LICENSES_MD = 'thirdPartySoftwareList.md'
+export const QODANA_LICENSES_JSON = 'thirdPartySoftwareList.json'
 export const EXECUTABLE = 'qodana'
 export const VERSION = version
 export function getQodanaSha256(arch: string, platform: string): string {

@@ -49,6 +49,8 @@ var qodana_exports = {};
 __export(qodana_exports, {
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
+  QODANA_LICENSES_JSON: () => QODANA_LICENSES_JSON,
+  QODANA_LICENSES_MD: () => QODANA_LICENSES_MD,
   QODANA_REPORT_URL_NAME: () => QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME: () => QODANA_SARIF_NAME,
   QodanaExitCode: () => QodanaExitCode,
@@ -147,7 +149,7 @@ function sha256sum(file) {
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
-var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_REPORT_URL_NAME, EXECUTABLE, VERSION, QodanaExitCode;
+var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     init_cli();
@@ -158,6 +160,8 @@ var init_qodana = __esm({
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
     QODANA_REPORT_URL_NAME = "qodana.cloud";
+    QODANA_LICENSES_MD = "thirdPartySoftwareList.md";
+    QODANA_LICENSES_JSON = "thirdPartySoftwareList.json";
     EXECUTABLE = "qodana";
     VERSION = version;
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
