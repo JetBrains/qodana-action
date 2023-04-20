@@ -63097,7 +63097,8 @@ var require_utils7 = __commonJS({
         args: core2.getInput("args").split(",").map((arg) => arg.trim()),
         resultsDir: core2.getInput("results-dir"),
         cacheDir: core2.getInput("cache-dir"),
-        additionalCacheHash: core2.getInput("additional-cache-hash"),
+        primaryCacheKey: core2.getInput("primary-cache-key"),
+        additionalCacheKey: core2.getInput("additional-cache-key") || core2.getInput("additional-cache-hash"),
         cacheDefaultBranchOnly: core2.getBooleanInput("cache-default-branch-only"),
         uploadResult: core2.getBooleanInput("upload-result"),
         artifactName: core2.getInput("artifact-name"),
@@ -63171,7 +63172,7 @@ var require_utils7 = __commonJS({
     }
     __name(uploadReport, "uploadReport");
     exports2.uploadReport = uploadReport;
-    function uploadCaches(cacheDir, additionalCacheHash, execute) {
+    function uploadCaches(cacheDir, primaryKey, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
           return;
@@ -63181,7 +63182,6 @@ var require_utils7 = __commonJS({
             core2.warning("Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details");
             return;
           }
-          const primaryKey = `qodana-${process.env["GITHUB_REF"]}-${additionalCacheHash}`;
           try {
             yield cache.saveCache([cacheDir], primaryKey);
             core2.info(`Cache saved with key ${primaryKey}`);
@@ -63195,7 +63195,7 @@ var require_utils7 = __commonJS({
     }
     __name(uploadCaches, "uploadCaches");
     exports2.uploadCaches = uploadCaches;
-    function restoreCaches(cacheDir, additionalCacheHash, execute) {
+    function restoreCaches(cacheDir, primaryKey, additionalCacheKey, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
           return;
@@ -63205,8 +63205,7 @@ var require_utils7 = __commonJS({
             core2.warning("Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details");
             return;
           }
-          const primaryKey = `qodana-${process.env["GITHUB_REF"]}-${additionalCacheHash}`;
-          const restoreKeys = [`qodana-${process.env["GITHUB_REF"]}-`, `qodana-`];
+          const restoreKeys = [additionalCacheKey];
           try {
             const cacheKey = yield cache.restoreCache([cacheDir], primaryKey, restoreKeys);
             if (!cacheKey) {
@@ -63546,13 +63545,13 @@ function main() {
       yield io.mkdirP(inputs.cacheDir);
       yield Promise.all([
         (0, utils_1.prepareAgent)(inputs.args),
-        (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.additionalCacheHash, inputs.useCaches)
+        (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.primaryCacheKey, inputs.additionalCacheKey, inputs.useCaches)
       ]);
       const exitCode = yield (0, utils_1.qodana)();
       const canUploadCache = (0, utils_1.isNeedToUploadCache)(inputs.useCaches, inputs.cacheDefaultBranchOnly) && (0, qodana_1.isExecutionSuccessful)(exitCode);
       yield Promise.all([
         (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
-        (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.additionalCacheHash, canUploadCache),
+        (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.primaryCacheKey, canUploadCache),
         (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, inputs.resultsDir, (0, qodana_1.isExecutionSuccessful)(exitCode), inputs.useAnnotations)
       ]);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {

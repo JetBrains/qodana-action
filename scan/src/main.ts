@@ -45,7 +45,8 @@ async function main(): Promise<void> {
       prepareAgent(inputs.args),
       restoreCaches(
         inputs.cacheDir,
-        inputs.additionalCacheHash,
+        inputs.primaryCacheKey,
+        inputs.additionalCacheKey,
         inputs.useCaches
       )
     ])
@@ -56,7 +57,7 @@ async function main(): Promise<void> {
 
     await Promise.all([
       uploadReport(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
-      uploadCaches(inputs.cacheDir, inputs.additionalCacheHash, canUploadCache),
+      uploadCaches(inputs.cacheDir, inputs.primaryCacheKey, canUploadCache),
       publishOutput(
         exitCode === QodanaExitCode.FailThreshold,
         inputs.resultsDir,

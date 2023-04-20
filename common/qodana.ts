@@ -146,7 +146,8 @@ export interface Inputs {
   args: string[]
   resultsDir: string
   cacheDir: string
-  additionalCacheHash: string
+  primaryCacheKey: string
+  additionalCacheKey: string
   cacheDefaultBranchOnly: boolean
   uploadResult: boolean
   artifactName: string

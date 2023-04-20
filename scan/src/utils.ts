@@ -32,7 +32,10 @@ export function getInputs(): Inputs {
       .map(arg => arg.trim()),
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
-    additionalCacheHash: core.getInput('additional-cache-hash'),
+    primaryCacheKey: core.getInput('primary-cache-key'),
+    additionalCacheKey:
+      core.getInput('additional-cache-key') ||
+      core.getInput('additional-cache-hash'),
     cacheDefaultBranchOnly: core.getBooleanInput('cache-default-branch-only'),
     uploadResult: core.getBooleanInput('upload-result'),
     artifactName: core.getInput('artifact-name'),
@@ -126,12 +129,12 @@ export async function uploadReport(
 /**
  * Uploads the cache to GitHub Actions cache from the given path.
  * @param cacheDir The path to upload the cache from.
- * @param additionalCacheHash Addition to the generated cache hash
+ * @param primaryKey Addition to the generated cache hash
  * @param execute whether to execute promise or not.
  */
 export async function uploadCaches(
   cacheDir: string,
-  additionalCacheHash: string,
+  primaryKey: string,
   execute: boolean
 ): Promise<void> {
   if (!execute) {
@@ -144,7 +147,6 @@ export async function uploadCaches(
       )
       return
     }
-    const primaryKey = `qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`
     try {
       await cache.saveCache([cacheDir], primaryKey)
       core.info(`Cache saved with key ${primaryKey}`)
@@ -163,12 +165,14 @@ export async function uploadCaches(
 /**
  * Restores the cache from GitHub Actions cache to the given path.
  * @param cacheDir The path to restore the cache to.
- * @param additionalCacheHash Addition to the generated cache hash.
+ * @param primaryKey The primary cache key.
+ * @param additionalCacheKey The additional cache key.
  * @param execute whether to execute promise or not.
  */
 export async function restoreCaches(
   cacheDir: string,
-  additionalCacheHash: string,
+  primaryKey: string,
+  additionalCacheKey: string,
   execute: boolean
 ): Promise<void> {
   if (!execute) {
@@ -181,8 +185,7 @@ export async function restoreCaches(
       )
       return
     }
-    const primaryKey = `qodana-${process.env['GITHUB_REF']}-${additionalCacheHash}`
-    const restoreKeys = [`qodana-${process.env['GITHUB_REF']}-`, `qodana-`]
+    const restoreKeys = [additionalCacheKey]
     try {
       const cacheKey = await cache.restoreCache(
         [cacheDir],

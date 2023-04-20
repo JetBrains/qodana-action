@@ -32,19 +32,23 @@ parameters:
     description: >
       Directory to store Qodana caches.
       Optional.
-  additional-cache-hash:
+  primary-cache-key:
     type: string
-    default: << pipeline.git.revision >>
+    default: qodana-2023.1-<< pipeline.git.branch >>-<< pipeline.git.revision >>
     description: >
-      Allows customizing the generated cache hash.
+      Allows customizing the primary cache hash.
+      Optional.
+  additional-cache-key:
+    type: string
+    default: qodana-2023.1-<< pipeline.git.branch >>
+    description: >
+      Allows customizing the additional cache hash.
       Optional.
 steps:
   - restore_cache:
       keys:
-        - qodana-{{ .Branch }}-2023.1.0-<< parameters.additional-cache-hash >>
-        - qodana-{{ .Branch }}-2023.1.0-
-        - qodana-{{ .Branch }}-
-        - qodana-
+        - << parameters.primary-cache-key >>
+        - << parameters.additional-cache-key >>
   - run:
       name: Qodana Scan
       command: |
@@ -66,7 +70,7 @@ steps:
       path: << parameters.results-dir >>
       destination: << parameters.artifact-name >>
   - save_cache:
-      key: qodana-{{ .Branch }}-2023.1.0-<< parameters.additional-cache-hash >>
+      key: < parameters.primary-cache-key >>
       paths:
         - << parameters.cache-dir >>
         - /tmp/cache/qodana-cli/
