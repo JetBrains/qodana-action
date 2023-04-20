@@ -2,7 +2,12 @@
 import * as core from '@actions/core'
 import * as fs from 'fs'
 import type {Log, Result, Tool} from 'sarif'
-import {QODANA_REPORT_URL_NAME, QODANA_SARIF_NAME} from '../../common/qodana'
+import {
+  QODANA_LICENSES_JSON,
+  QODANA_LICENSES_MD,
+  QODANA_REPORT_URL_NAME,
+  QODANA_SARIF_NAME
+} from '../../common/qodana'
 import {AnnotationProperties} from '@actions/core'
 
 const QODANA_CHECK_NAME = 'Qodana'
@@ -67,11 +72,19 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
 /**
  * Generates action summary string of annotations.
  * @param annotations The annotations to generate the summary from.
+ * @param licensesInfo The licenses Markdown text to generate the summary from.
  * @param reportUrl The URL to the Qodana report.
  */
-function getSummary(annotations: Annotation[], reportUrl: string): string {
+function getSummary(
+  annotations: Annotation[],
+  licensesInfo: string,
+  reportUrl: string
+): string {
   const contactBlock = wrapToToggleBlock('Contact Qodana team', SUMMARY_MISC)
-
+  let licensesBlock = ''
+  if (licensesInfo !== '') {
+    licensesBlock = wrapToToggleBlock('Dependencies licenses', licensesInfo)
+  }
   if (annotations.length === 0) {
     return [
       `# ${QODANA_CHECK_NAME}`,
@@ -80,6 +93,7 @@ function getSummary(annotations: Annotation[], reportUrl: string): string {
       '',
       'No problems found according to the checks applied',
       getViewReportText(reportUrl),
+      licensesBlock,
       contactBlock
     ].join('\n')
   }
@@ -111,6 +125,7 @@ function getSummary(annotations: Annotation[], reportUrl: string): string {
       .join('\n'),
     '',
     getViewReportText(reportUrl),
+    licensesBlock,
     contactBlock
   ].join('\n')
 }
@@ -221,11 +236,32 @@ export async function publishOutput(
         }
       }
     }
-    const reportUrl = fs.readFileSync(
-      `${resultsDir}/${QODANA_REPORT_URL_NAME}`,
-      {encoding: 'utf8'}
-    )
-    await core.summary.addRaw(getSummary(problems, reportUrl)).write()
+
+    let reportUrl = ''
+    const reportUrlFile = `${resultsDir}/${QODANA_REPORT_URL_NAME}`
+    if (fs.existsSync(reportUrlFile)) {
+      reportUrl = fs.readFileSync(`${resultsDir}/${QODANA_REPORT_URL_NAME}`, {
+        encoding: 'utf8'
+      })
+    }
+
+    let licensesInfo = ''
+    const licensesJson = `${resultsDir}/projectStructure/${QODANA_LICENSES_JSON}`
+    if (fs.existsSync(licensesJson)) {
+      const licenses = JSON.parse(
+        fs.readFileSync(licensesJson, {encoding: 'utf8'})
+      )
+      if (licenses.length > 0) {
+        licensesInfo = fs.readFileSync(
+          `${resultsDir}/projectStructure/${QODANA_LICENSES_MD}`,
+          {encoding: 'utf8'}
+        )
+      }
+    }
+
+    await core.summary
+      .addRaw(getSummary(problems, licensesInfo, reportUrl))
+      .write()
   } catch (error) {
     core.warning(`Failed to publish annotations – ${(error as Error).message}`)
   }

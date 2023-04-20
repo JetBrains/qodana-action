@@ -1,5 +1,8 @@
 version: "1.0"
+linter: jetbrains/qodana-js:latest
 bootstrap: cd common && npm install && cd ../scan && npm install && cd ../vsts && npm install
+plugins:
+  - id: com.intellij.grazie.pro
 profile:
   name: qodana.recommended
 exclude:

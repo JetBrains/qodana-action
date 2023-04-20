@@ -2792,6 +2792,8 @@ var qodana_exports = {};
 __export(qodana_exports, {
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
+  QODANA_LICENSES_JSON: () => QODANA_LICENSES_JSON,
+  QODANA_LICENSES_MD: () => QODANA_LICENSES_MD,
   QODANA_REPORT_URL_NAME: () => QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME: () => QODANA_SARIF_NAME,
   QodanaExitCode: () => QodanaExitCode,
@@ -2890,7 +2892,7 @@ function sha256sum(file) {
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
-var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_REPORT_URL_NAME, EXECUTABLE, VERSION, QodanaExitCode;
+var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     init_cli();
@@ -2901,6 +2903,8 @@ var init_qodana = __esm({
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
     QODANA_REPORT_URL_NAME = "qodana.cloud";
+    QODANA_LICENSES_MD = "thirdPartySoftwareList.md";
+    QODANA_LICENSES_JSON = "thirdPartySoftwareList.json";
     EXECUTABLE = "qodana";
     VERSION = version;
     __name(getQodanaSha256, "getQodanaSha256");
@@ -63347,8 +63351,12 @@ ${body}
       return Array.from(problems.entries()).sort((a, b) => b[1] - a[1]).map(([title, count]) => `| ${title} | ${level} | ${count} |`).join("\n");
     }
     __name(getRowsByLevel, "getRowsByLevel");
-    function getSummary(annotations, reportUrl) {
+    function getSummary(annotations, licensesInfo, reportUrl) {
       const contactBlock = wrapToToggleBlock("Contact Qodana team", SUMMARY_MISC);
+      let licensesBlock = "";
+      if (licensesInfo !== "") {
+        licensesBlock = wrapToToggleBlock("Dependencies licenses", licensesInfo);
+      }
       if (annotations.length === 0) {
         return [
           `# ${QODANA_CHECK_NAME}`,
@@ -63357,6 +63365,7 @@ ${body}
           "",
           "No problems found according to the checks applied",
           getViewReportText(reportUrl),
+          licensesBlock,
           contactBlock
         ].join("\n");
       }
@@ -63374,6 +63383,7 @@ ${body}
         ].filter((e) => e !== "").join("\n"),
         "",
         getViewReportText(reportUrl),
+        licensesBlock,
         contactBlock
       ].join("\n");
     }
@@ -63454,8 +63464,22 @@ ${body}
               }
             }
           }
-          const reportUrl = fs.readFileSync(`${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`, { encoding: "utf8" });
-          yield core2.summary.addRaw(getSummary(problems, reportUrl)).write();
+          let reportUrl = "";
+          const reportUrlFile = `${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`;
+          if (fs.existsSync(reportUrlFile)) {
+            reportUrl = fs.readFileSync(`${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`, {
+              encoding: "utf8"
+            });
+          }
+          let licensesInfo = "";
+          const licensesJson = `${resultsDir}/projectStructure/${qodana_12.QODANA_LICENSES_JSON}`;
+          if (fs.existsSync(licensesJson)) {
+            const licenses = JSON.parse(fs.readFileSync(licensesJson, { encoding: "utf8" }));
+            if (licenses.length > 0) {
+              licensesInfo = fs.readFileSync(`${resultsDir}/projectStructure/${qodana_12.QODANA_LICENSES_MD}`, { encoding: "utf8" });
+            }
+          }
+          yield core2.summary.addRaw(getSummary(problems, licensesInfo, reportUrl)).write();
         } catch (error) {
           core2.warning(`Failed to publish annotations \u2013 ${error.message}`);
         }
