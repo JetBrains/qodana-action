@@ -21,10 +21,19 @@ inputs:
     description: 'Automatically restore and save Qodana caches using GitHub caches'
     required: false
     default: "true"
+  primary-cache-key:
+    description: 'Set the primary cache key'
+    required: false
+    default: "qodana-2023.1-${{ github.ref }}-${{ github.sha }}"
+  additional-cache-key:
+    description: 'Set the additional cache key'
+    required: false
+    default: "qodana-2023.1-${{ github.ref }}"
   additional-cache-hash:
     description: 'Pass additional cache hash extension'
     required: false
     default: "${{ github.sha }}"
+    deprecationMessage: 'Use `primary-cache-key` and `additional-cache-key` to configure cache keys'
   cache-default-branch-only:
     description: 'Upload cache for the default branch only'
     required: false

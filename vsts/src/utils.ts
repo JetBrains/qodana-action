@@ -36,7 +36,8 @@ export function getInputs(): Inputs {
     uploadResult: tl.getBoolInput('uploadResult', false) || true,
     artifactName: tl.getInput('artifactName', false) || 'qodana-report',
     // Not used by the task
-    additionalCacheHash: '',
+    additionalCacheKey: '',
+    primaryCacheKey: '',
     useAnnotations: false,
     useCaches: false,
     cacheDefaultBranchOnly: false,
