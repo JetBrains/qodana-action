@@ -47,13 +47,17 @@ export function getInputs(): Inputs {
 /**
  * Runs the qodana command with the given arguments.
  * @param args docker command arguments.
+ * @param prMode whether the command is run in the PR mode.
  * @returns The qodana command execution output.
  */
-export async function qodana(args: string[] = []): Promise<number> {
+export async function qodana(
+  prMode: boolean,
+  args: string[] = []
+): Promise<number> {
   if (args.length === 0) {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
-    if (inputs.prMode && github.context.payload.pull_request) {
+    if (prMode && github.context.payload.pull_request !== undefined) {
       const pr = github.context.payload.pull_request
       args.push('--commit', `CI${pr.base.sha}`)
     }
@@ -91,7 +95,7 @@ export async function prepareAgent(args: string[]): Promise<void> {
     extractRoot = await tc.extractTar(temp)
   }
   core.addPath(await tc.cacheDir(extractRoot, EXECUTABLE, VERSION))
-  const exitCode = await qodana(getQodanaPullArgs(args))
+  const exitCode = await qodana(false, getQodanaPullArgs(args))
   if (exitCode !== 0) {
     core.setFailed(`qodana pull failed with exit code ${exitCode}`)
     return

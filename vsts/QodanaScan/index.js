@@ -3,7 +3,6 @@ var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
 var __esm = (fn, res) => function __init() {
   return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
 };
@@ -14,32 +13,28 @@ var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
-var __reExport = (target, module2, copyDefault, desc) => {
-  if (module2 && typeof module2 === "object" || typeof module2 === "function") {
-    for (let key of __getOwnPropNames(module2))
-      if (!__hasOwnProp.call(target, key) && (copyDefault || key !== "default"))
-        __defProp(target, key, { get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable });
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
   }
-  return target;
+  return to;
 };
-var __toCommonJS = /* @__PURE__ */ ((cache) => {
-  return (module2, temp) => {
-    return cache && cache.get(module2) || (temp = __reExport(__markAsModule({}), module2, 1), cache && cache.set(module2, temp), temp);
-  };
-})(typeof WeakMap !== "undefined" ? /* @__PURE__ */ new WeakMap() : 0);
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // ../common/cli.json
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2023.1.0";
+    version = "2023.1.1";
     checksum = {
-      windows_x86_64: "f096db938a80fe3dd065a63716dca79f2156a6743c47a22e66ce83e0b4f81e5f",
-      linux_arm64: "a38e90e1e26271588714109253efdc60a5b7f0a410e509753483192ee0e1853f",
-      darwin_arm64: "2dfa918cc6041284e20c47e11c2d40eb39c87c7c220d9ccaba3a0e7896ad4321",
-      darwin_x86_64: "6aa6a77a4e5b12dbda79ad36922fbd05d7511d92f9dd83a1f4ad3321e4bfa223",
-      windows_arm64: "13411462aa6590aa25f4ceec591af9e468f21f40b77dab15d32bf6df8238cb12",
-      linux_x86_64: "93796612b616b1bc521c08be5785312ef7ad885606d091d0298a8a6608a07962"
+      windows_x86_64: "809b7ab997839b6c37c8ed94084b53d8f54794e0a0f326f0eda43ad70034dfb3",
+      linux_arm64: "2a0fa2da40d9ea84dc61d13caf7131a75477f88f4c5e504e1cafa82af443872e",
+      darwin_arm64: "1cc8e899a5cb40c0c32b23be0230081d0069386a5e1dd51b109933972c984384",
+      darwin_x86_64: "ef247c53db4019a219385cdd7e46d7683fa8a10b2f1a2ab877629f88f19c34a1",
+      windows_arm64: "fcb568b523bf28ca274efcf08cc8f2aa593cd1712fbd3b78c5585738601e473f",
+      linux_x86_64: "3a56c9d348feaf115e0b174564ea8e82974178881b0725950eed956b30dafc65"
     };
   }
 });
@@ -152,6 +147,7 @@ function getQodanaSha256MismatchMessage(expected, actual) {
 var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
+    "use strict";
     init_cli();
     import_crypto = require("crypto");
     import_fs = require("fs");
@@ -378,13 +374,19 @@ var require_implementation = __commonJS({
       var bound;
       var binder = function() {
         if (this instanceof bound) {
-          var result = target.apply(this, args.concat(slice.call(arguments)));
+          var result = target.apply(
+            this,
+            args.concat(slice.call(arguments))
+          );
           if (Object(result) === result) {
             return result;
           }
           return this;
         } else {
-          return target.apply(that, args.concat(slice.call(arguments)));
+          return target.apply(
+            that,
+            args.concat(slice.call(arguments))
+          );
         }
       };
       var boundLength = Math.max(0, target.length - args.length);
@@ -737,7 +739,11 @@ var require_call_bind = __commonJS({
       if ($gOPD && $defineProperty) {
         var desc = $gOPD(func, "length");
         if (desc.configurable) {
-          $defineProperty(func, "length", { value: 1 + $max(0, originalFunction.length - (arguments.length - 1)) });
+          $defineProperty(
+            func,
+            "length",
+            { value: 1 + $max(0, originalFunction.length - (arguments.length - 1)) }
+          );
         }
       }
       return func;
@@ -1741,7 +1747,23 @@ var require_stringify = __commonJS({
         sideChannel.set(object, step);
         var valueSideChannel = getSideChannel();
         valueSideChannel.set(sentinel, sideChannel);
-        pushToArray(values, stringify2(value, keyPrefix, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, valueSideChannel));
+        pushToArray(values, stringify2(
+          value,
+          keyPrefix,
+          generateArrayPrefix,
+          strictNullHandling,
+          skipNulls,
+          encoder,
+          filter,
+          sort,
+          allowDots,
+          serializeDate,
+          format,
+          formatter,
+          encodeValuesOnly,
+          charset,
+          valueSideChannel
+        ));
       }
       return values;
     };
@@ -1823,7 +1845,23 @@ var require_stringify = __commonJS({
         if (options.skipNulls && obj[key] === null) {
           continue;
         }
-        pushToArray(keys, stringify(obj[key], key, generateArrayPrefix, options.strictNullHandling, options.skipNulls, options.encode ? options.encoder : null, options.filter, options.sort, options.allowDots, options.serializeDate, options.format, options.formatter, options.encodeValuesOnly, options.charset, sideChannel));
+        pushToArray(keys, stringify(
+          obj[key],
+          key,
+          generateArrayPrefix,
+          options.strictNullHandling,
+          options.skipNulls,
+          options.encode ? options.encoder : null,
+          options.filter,
+          options.sort,
+          options.allowDots,
+          options.serializeDate,
+          options.format,
+          options.formatter,
+          options.encodeValuesOnly,
+          options.charset,
+          sideChannel
+        ));
       }
       var joined = keys.join(options.delimiter);
       var prefix = options.addQueryPrefix === true ? "?" : "";
@@ -1911,9 +1949,12 @@ var require_parse = __commonJS({
           val = options.strictNullHandling ? null : "";
         } else {
           key = options.decoder(part.slice(0, pos), defaults.decoder, charset, "key");
-          val = utils.maybeMap(parseArrayValue(part.slice(pos + 1), options), function(encodedVal) {
-            return options.decoder(encodedVal, defaults.decoder, charset, "value");
-          });
+          val = utils.maybeMap(
+            parseArrayValue(part.slice(pos + 1), options),
+            function(encodedVal) {
+              return options.decoder(encodedVal, defaults.decoder, charset, "value");
+            }
+          );
         }
         if (val && options.interpretNumericEntities && charset === "iso-8859-1") {
           val = interpretNumericEntities(val);
@@ -2280,7 +2321,10 @@ var require_tunnel = __commonJS({
         connectReq.removeAllListeners();
         socket.removeAllListeners();
         if (res.statusCode !== 200) {
-          debug("tunneling socket could not be established, statusCode=%d", res.statusCode);
+          debug(
+            "tunneling socket could not be established, statusCode=%d",
+            res.statusCode
+          );
           socket.destroy();
           var error = new Error("tunneling socket could not be established, statusCode=" + res.statusCode);
           error.code = "ECONNRESET";
@@ -2303,7 +2347,11 @@ var require_tunnel = __commonJS({
       }
       function onError(cause) {
         connectReq.removeAllListeners();
-        debug("tunneling socket could not be established, cause=%s\n", cause.message, cause.stack);
+        debug(
+          "tunneling socket could not be established, cause=%s\n",
+          cause.message,
+          cause.stack
+        );
         var error = new Error("tunneling socket could not be established, cause=" + cause.message);
         error.code = "ECONNRESET";
         options.request.emit("error", error);

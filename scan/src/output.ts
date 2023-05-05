@@ -1,14 +1,15 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion,github/array-foreach */
+/* eslint-disable @typescript-eslint/no-non-null-assertion,github/array-foreach,sort-imports */
 import * as core from '@actions/core'
 import * as fs from 'fs'
+import * as github from '@actions/github'
 import type {Log, Result, Tool} from 'sarif'
+import {AnnotationProperties} from '@actions/core'
 import {
   QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD,
   QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME
 } from '../../common/qodana'
-import {AnnotationProperties} from '@actions/core'
 
 const QODANA_CHECK_NAME = 'Qodana'
 const UNKNOWN_RULE_ID = 'Unknown'
@@ -208,14 +209,16 @@ export function parseSarif(path: string): Annotation[] {
  * Publish SARIF to GitHub Checks.
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param resultsDir The path to the results.
+ * @param postComment
  * @param execute whether to execute the promise or not.
  * @param useAnnotations whether to publish annotations or not.
  */
 export async function publishOutput(
   failedByThreshold: boolean,
   resultsDir: string,
-  execute: boolean,
-  useAnnotations: boolean
+  useAnnotations: boolean,
+  postComment: boolean,
+  execute: boolean
 ): Promise<void> {
   if (!execute) {
     return
@@ -259,10 +262,33 @@ export async function publishOutput(
       }
     }
 
-    await core.summary
-      .addRaw(getSummary(problems, licensesInfo, reportUrl))
-      .write()
+    const summary = getSummary(problems, licensesInfo, reportUrl)
+
+    await core.summary.addRaw(summary).write()
+
+    if (postComment) {
+      await postCommentToPullRequest(summary)
+    }
   } catch (error) {
     core.warning(`Failed to publish annotations – ${(error as Error).message}`)
   }
+}
+
+/**
+ * Post a new comment to the pull request.
+ * @param comment The comment to post.
+ */
+async function postCommentToPullRequest(comment: string): Promise<void> {
+  const pr = github.context.payload.pull_request
+  if (!pr) {
+    core.warning('Could not get pull request number from context, exiting')
+    return
+  }
+  const client = github.getOctokit(process.env.GITHUB_TOKEN as string)
+  await client.rest.issues.createComment({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    issue_number: github.context.issue.number,
+    body: comment
+  })
 }
