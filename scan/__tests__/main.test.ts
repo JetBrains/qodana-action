@@ -1,5 +1,4 @@
 import {expect, test} from '@jest/globals'
-import {parseSarif, Annotation} from '../src/output'
 import {
   sha256sum,
   getQodanaSha256,
@@ -16,6 +15,7 @@ import * as fs from 'fs'
 import path = require('path')
 
 import * as os from 'os'
+import {Annotation, parseSarif} from '../src/annotations'
 
 const {execSync} = require('child_process')
 
@@ -23,43 +23,37 @@ function outputEmptyFixture(): Annotation[] {
   return []
 }
 
-function outputDefaultFixture(): Annotation[] {
+function annotationsDefaultFixture(): Annotation[] {
   return [
     {
-      level: 'warning',
+      annotation_level: 'warning',
       message: "'while' has empty body",
-      properties: {
-        startLine: 271,
-        endLine: 271,
-        file: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
-        title: 'Control flow with empty body',
-        startColumn: undefined,
-        endColumn: undefined
-      }
+      start_line: 271,
+      end_line: 271,
+      path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+      title: 'Control flow with empty body',
+      start_column: undefined,
+      end_column: undefined
     },
     {
-      level: 'notice',
+      annotation_level: 'notice',
       message: "Condition is always 'true'",
-      properties: {
-        startLine: 268,
-        endLine: 268,
-        file: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
-        title: "Condition of 'if' expression is constant",
-        startColumn: undefined,
-        endColumn: undefined
-      }
+      start_line: 268,
+      end_line: 268,
+      path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+      title: "Condition of 'if' expression is constant",
+      start_column: undefined,
+      end_column: undefined
     },
     {
-      level: 'notice',
+      annotation_level: 'notice',
       message: "Might be 'const'",
-      properties: {
-        endLine: 283,
-        file: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
-        startLine: 283,
-        title: "Might be 'const'",
-        startColumn: undefined,
-        endColumn: undefined
-      }
+      end_line: 283,
+      path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+      start_line: 283,
+      title: "Might be 'const'",
+      start_column: undefined,
+      end_column: undefined
     }
   ]
 }
@@ -106,15 +100,15 @@ test('qodana scan command args', () => {
 })
 
 test('test sarif with problems to output annotations', () => {
-  const output = outputDefaultFixture()
+  const output = annotationsDefaultFixture()
   const result = parseSarif('__tests__/data/some.sarif.json')
-  expect(result).toEqual(output)
+  expect(result.annotations).toEqual(output)
 })
 
 test('test sarif with no problems to output annotations', () => {
   const output = outputEmptyFixture()
   const result = parseSarif('__tests__/data/empty.sarif.json')
-  expect(result).toEqual(output)
+  expect(result.annotations).toEqual(output)
 })
 
 test('check whether action README.md has the latest version mentioned everywhere', () => {

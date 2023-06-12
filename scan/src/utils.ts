@@ -49,7 +49,6 @@ export function getInputs(): Inputs {
 /**
  * Runs the qodana command with the given arguments.
  * @param args docker command arguments.
- * @param prMode whether the command is run in the PR mode.
  * @returns The qodana command execution output.
  */
 export async function qodana(args: string[] = []): Promise<number> {
@@ -251,4 +250,22 @@ export function isNeedToUploadCache(
   }
 
   return useCaches
+}
+
+export function getProblemPlural(count: number): string {
+  return `new problem${count !== 1 ? 's' : ''}`
+}
+
+/**
+ * Returns the URL to the current workflow run.
+ */
+export function getWorkflowRunUrl(): string {
+  if (!process.env['GITHUB_REPOSITORY']) {
+    return ''
+  }
+
+  const runId = github.context.runId
+  const repo = github.context.repo
+  const serverUrl = process.env['GITHUB_SERVER_URL'] || 'https://github.com'
+  return `${serverUrl}/${repo.owner}/${repo.repo}/actions/runs/${runId}`
 }
