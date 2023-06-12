@@ -33,9 +33,10 @@ export function getInputs(): Inputs {
     args: (tl.getInput('args', false) || '').split(',').map(arg => arg.trim()),
     resultsDir: tl.getInput('resultsDir', false) || path.join(home, 'results'),
     cacheDir: tl.getInput('cacheDir', false) || path.join(home, 'cache'),
-    uploadResult: tl.getBoolInput('uploadResult', false) || true,
+    uploadResult: tl.getBoolInput('uploadResult', false) || false,
+    uploadSarif: tl.getBoolInput('uploadSarif', false) || true,
     artifactName: tl.getInput('artifactName', false) || 'qodana-report',
-    // Not used by the task
+    // Not used by the Azure task
     additionalCacheKey: '',
     primaryCacheKey: '',
     useAnnotations: false,
@@ -110,10 +111,29 @@ export async function uploadReport(
     const archivePath = path.join(parentDir, `${artifactName}.zip`)
     compress.createArchive(resultsDir, 'zip', archivePath)
     tl.uploadArtifact('Qodana', archivePath, artifactName)
+  } catch (error) {
+    tl.warning(`Failed to upload report – ${(error as Error).message}`)
+  }
+}
+
+/**
+ * Uploads the qodana.sarif.json from temp directory to Azure DevOps Pipelines job qodana.sarif artifact.
+ * @param resultsDir The path to upload a report from.
+ * @param execute whether to execute promise or not.
+ */
+export async function uploadSarif(
+  resultsDir: string,
+  execute: boolean
+): Promise<void> {
+  if (!execute) {
+    return
+  }
+  try {
+    const parentDir = path.dirname(resultsDir)
     const qodanaSarif = path.join(parentDir, 'qodana.sarif')
     tl.cp(path.join(resultsDir, 'qodana.sarif.json'), qodanaSarif)
     tl.uploadArtifact('CodeAnalysisLogs', qodanaSarif, 'CodeAnalysisLogs')
   } catch (error) {
-    tl.warning(`Failed to upload report – ${(error as Error).message}`)
+    tl.warning(`Failed to upload SARIF – ${(error as Error).message}`)
   }
 }

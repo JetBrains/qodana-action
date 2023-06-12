@@ -85,7 +85,8 @@ You probably won't need other options than `args`: all other options can be help
 |----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
 | `args`         | Additional [Qodana CLI `scan` command](https://github.com/jetbrains/qodana-cli#scan) arguments, split the arguments with commas (`,`), for example `-i,frontend`. Optional. | -                                       |
 | `resultsDir`   | Directory to store the analysis results. Optional.                                                                                                                          | `$(Agent.TempDirectory)/qodana/results` |
-| `uploadResult` | Upload Qodana results as an artifact to the job. Optional.                                                                                                                  | `true`                                  |
+| `uploadResult` | Upload Qodana results as an artifact to the job. Optional.                                                                                                                  | `false`                                 |
+| `uploadSarif`  | Upload qodana.sarif.json as an qodana.sarif artifact to the job. Optional.                                                                                                  | `true`                                  |
 | `artifactName` | Specify Qodana results artifact name, used for results uploading. Optional.                                                                                                 | `qodana-report`                         |
 | `cacheDir`     | Directory to store Qodana caches. Optional.                                                                                                                                 | `$(Agent.TempDirectory)/qodana/cache`   |
 
