@@ -63,11 +63,10 @@ jobs:
       - uses: ./
         with:
           args: --print-problems,--log-level,debug,-l,jetbrains/qodana-js:latest
-          upload-result: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
-  qodana-no-pr: # pr mode disabled
+  qodana-no-pr: # pr mode disabled and no cloud token
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -75,8 +74,6 @@ jobs:
         with:
           args: --print-problems,--log-level,debug
           pr-mode: false
-        env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
 #   Not possible at the moment for GitHub-hosted Windows agents: https://github.com/JetBrains/qodana-action/pull/31#issue-812728409
 #   test-windows:

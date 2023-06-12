@@ -63143,7 +63143,7 @@ var require_utils7 = __commonJS({
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.isNeedToUploadCache = exports2.isPRMode = exports2.isServer = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = void 0;
+    exports2.getWorkflowRunUrl = exports2.getProblemPlural = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.isServer = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = void 0;
     var artifact = __importStar2(require_artifact_client2());
     var cache = __importStar2(require_cache());
     var core2 = __importStar2(require_core());
@@ -63311,6 +63311,247 @@ var require_utils7 = __commonJS({
     }
     __name(isNeedToUploadCache, "isNeedToUploadCache");
     exports2.isNeedToUploadCache = isNeedToUploadCache;
+    function getProblemPlural(count) {
+      return `new problem${count !== 1 ? "s" : ""}`;
+    }
+    __name(getProblemPlural, "getProblemPlural");
+    exports2.getProblemPlural = getProblemPlural;
+    function getWorkflowRunUrl() {
+      if (!process.env["GITHUB_REPOSITORY"]) {
+        return "";
+      }
+      const runId = github.context.runId;
+      const repo = github.context.repo;
+      const serverUrl = process.env["GITHUB_SERVER_URL"] || "https://github.com";
+      return `${serverUrl}/${repo.owner}/${repo.repo}/actions/runs/${runId}`;
+    }
+    __name(getWorkflowRunUrl, "getWorkflowRunUrl");
+    exports2.getWorkflowRunUrl = getWorkflowRunUrl;
+  }
+});
+
+// lib/annotations.js
+var require_annotations = __commonJS({
+  "lib/annotations.js"(exports2) {
+    "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      Object.defineProperty(o, k2, { enumerable: true, get: function() {
+        return m[k];
+      } });
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
+      }
+      __setModuleDefault2(result, mod);
+      return result;
+    };
+    var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+      function adopt(value) {
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
+        });
+      }
+      __name(adopt, "adopt");
+      return new (P || (P = Promise))(function(resolve, reject) {
+        function fulfilled(value) {
+          try {
+            step(generator.next(value));
+          } catch (e) {
+            reject(e);
+          }
+        }
+        __name(fulfilled, "fulfilled");
+        function rejected(value) {
+          try {
+            step(generator["throw"](value));
+          } catch (e) {
+            reject(e);
+          }
+        }
+        __name(rejected, "rejected");
+        function step(result) {
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+        }
+        __name(step, "step");
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+      });
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.publishAnnotations = exports2.parseSarif = exports2.ANNOTATION_NOTICE = exports2.ANNOTATION_WARNING = exports2.ANNOTATION_FAILURE = void 0;
+    var core2 = __importStar2(require_core());
+    var fs = __importStar2(require("fs"));
+    var github_1 = require_github();
+    var utils_12 = require_utils7();
+    function getQodanaHelpString() {
+      return `This result was published with [Qodana GitHub Action](${(0, utils_12.getWorkflowRunUrl)()})`;
+    }
+    __name(getQodanaHelpString, "getQodanaHelpString");
+    exports2.ANNOTATION_FAILURE = "failure";
+    exports2.ANNOTATION_WARNING = "warning";
+    exports2.ANNOTATION_NOTICE = "notice";
+    var FAILURE_STATUS = "failure";
+    var NEUTRAL_STATUS = "neutral";
+    var SUCCESS_STATUS = "success";
+    var MAX_ANNOTATIONS = 50;
+    function parseResult(result, rules) {
+      var _a;
+      const location = result.locations[0].physicalLocation;
+      const region = location.region;
+      return {
+        message: result.message.markdown,
+        title: (_a = rules.get(result.ruleId)) === null || _a === void 0 ? void 0 : _a.shortDescription,
+        path: location.artifactLocation.uri,
+        start_line: region.startLine,
+        end_line: region.endLine || region.startLine,
+        start_column: region.startLine === region.endColumn ? region.startColumn : void 0,
+        end_column: region.startLine === region.endColumn ? region.endColumn : void 0,
+        annotation_level: (() => {
+          switch (result.level) {
+            case "error":
+              return exports2.ANNOTATION_FAILURE;
+            case "warning":
+              return exports2.ANNOTATION_WARNING;
+            default:
+              return exports2.ANNOTATION_NOTICE;
+          }
+        })()
+      };
+    }
+    __name(parseResult, "parseResult");
+    function parseRules(tool) {
+      var _a;
+      const rules = /* @__PURE__ */ new Map();
+      (_a = tool === null || tool === void 0 ? void 0 : tool.extensions) === null || _a === void 0 ? void 0 : _a.forEach((ext) => {
+        var _a2;
+        (_a2 = ext === null || ext === void 0 ? void 0 : ext.rules) === null || _a2 === void 0 ? void 0 : _a2.forEach((rule) => {
+          rules.set(rule.id, {
+            shortDescription: rule.shortDescription.text,
+            fullDescription: rule.fullDescription.markdown
+          });
+        });
+      });
+      return rules;
+    }
+    __name(parseRules, "parseRules");
+    function parseSarif(path) {
+      var _a;
+      const sarif = JSON.parse(fs.readFileSync(path, { encoding: "utf8" }));
+      const run = sarif.runs[0];
+      const rules = parseRules(run.tool);
+      let title = "No new problems found by ";
+      let annotations = [];
+      if ((_a = run.results) === null || _a === void 0 ? void 0 : _a.length) {
+        title = `${run.results.length} ${(0, utils_12.getProblemPlural)(run.results.length)} found by `;
+        annotations = run.results.filter((result) => result.baselineState !== "unchanged").map((result) => parseResult(result, rules)).filter((a) => a !== null && a !== void 0);
+      }
+      const name = run.tool.driver.fullName || "Qodana";
+      title += name;
+      return {
+        title,
+        text: getQodanaHelpString(),
+        summary: title,
+        annotations
+      };
+    }
+    __name(parseSarif, "parseSarif");
+    exports2.parseSarif = parseSarif;
+    function createCheck(octokit, conclusion, head_sha, name, output) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        yield octokit.rest.checks.create(Object.assign(Object.assign({}, github_1.context.repo), {
+          accept: "application/vnd.github.v3+json",
+          status: "completed",
+          head_sha,
+          conclusion,
+          name,
+          output
+        }));
+      });
+    }
+    __name(createCheck, "createCheck");
+    function updateCheck(octokit, conclusion, check_run_id, output) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        yield octokit.rest.checks.update(Object.assign(Object.assign({}, github_1.context.repo), {
+          accept: "application/vnd.github.v3+json",
+          status: "completed",
+          conclusion,
+          check_run_id,
+          output
+        }));
+      });
+    }
+    __name(updateCheck, "updateCheck");
+    function getConclusion(annotations, failedByThreshold) {
+      if (failedByThreshold) {
+        return FAILURE_STATUS;
+      }
+      const s = new Set(annotations.map((a) => a.annotation_level));
+      if (s.has(exports2.ANNOTATION_FAILURE) || s.has(exports2.ANNOTATION_NOTICE) || s.has(exports2.ANNOTATION_WARNING)) {
+        return NEUTRAL_STATUS;
+      }
+      return SUCCESS_STATUS;
+    }
+    __name(getConclusion, "getConclusion");
+    function publishGitHubCheck(failedByThreshold, name, token, output) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const conclusion = getConclusion(output.annotations, failedByThreshold);
+        let sha = github_1.context.sha;
+        if (github_1.context.payload.pull_request) {
+          sha = github_1.context.payload.pull_request.head.sha;
+        }
+        const octokit = (0, github_1.getOctokit)(token);
+        const result = yield octokit.rest.checks.listForRef(Object.assign(Object.assign({}, github_1.context.repo), { ref: sha }));
+        const checkExists = result.data.check_runs.find((check) => check.name === name);
+        if (checkExists) {
+          yield updateCheck(octokit, conclusion, checkExists.id, output);
+        } else {
+          yield createCheck(octokit, conclusion, sha, name, output);
+        }
+      });
+    }
+    __name(publishGitHubCheck, "publishGitHubCheck");
+    function publishAnnotations(name, problems, failedByThreshold, token, execute) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        if (!execute) {
+          return;
+        }
+        try {
+          problems.summary = problems.summary.replace(`# Qodana`, "");
+          if (problems.annotations.length >= MAX_ANNOTATIONS) {
+            for (let i = 0; i < problems.annotations.length; i += MAX_ANNOTATIONS) {
+              yield publishGitHubCheck(failedByThreshold, name, token, {
+                title: problems.title,
+                text: getQodanaHelpString(),
+                summary: problems.summary,
+                annotations: problems.annotations.slice(i, i + MAX_ANNOTATIONS)
+              });
+            }
+          } else {
+            yield publishGitHubCheck(failedByThreshold, name, token, problems);
+          }
+        } catch (error) {
+          core2.warning(`Failed to publish annotations \u2013 ${error.message}`);
+        }
+      });
+    }
+    __name(publishAnnotations, "publishAnnotations");
+    exports2.publishAnnotations = publishAnnotations;
   }
 });
 
@@ -63378,23 +63619,27 @@ var require_output = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.publishOutput = exports2.parseSarif = void 0;
+    exports2.publishOutput = void 0;
     var core2 = __importStar2(require_core());
     var fs = __importStar2(require("fs"));
     var github = __importStar2(require_github());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var utils_12 = require_utils7();
+    var annotations_1 = require_annotations();
     var QODANA_CHECK_NAME = "Qodana";
     var UNKNOWN_RULE_ID = "Unknown";
-    var ANNOTATION_FAILURE = "failure";
-    var ANNOTATION_WARNING = "warning";
-    var ANNOTATION_NOTICE = "notice";
     var SUMMARY_TABLE_HEADER = "| Name | Severity | Problems |";
     var SUMMARY_TABLE_SEP = "| --- | --- | --- |";
     var SUMMARY_MISC = `Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   - Or via our issue tracker: https://jb.gg/qodana-issue
   - Or share your feedback: https://jb.gg/qodana-discussions`;
-    var SUMMARY_PR_MODE = `\u{1F4A1} Qodana analysis was run in the pull request mode: only the changed files were analyzed.`;
+    var VIEW_REPORT_OPTIONS = `To be able to view the detailed Qodana report, you can either:
+  1. Register at [Qodana Cloud](https://qodana.cloud/) and [configure the action](https://github.com/jetbrains/qodana-action#qodana-cloud)
+  2. Use [GitHub Code Scanning with Qodana](https://github.com/jetbrains/qodana-action#github-code-scanning)
+  3. Host [Qodana report at GitHub Pages](https://github.com/JetBrains/qodana-action/blob/3a8e25f5caad8d8b01c1435f1ef7b19fe8b039a0/README.md#github-pages)
+  4. Inspect and use \`qodana.sarif.json\` (see [the Qodana SARIF format](https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Report+structure) for details)
+`;
+    var SUMMARY_PR_MODE = `\u{1F4A1} Qodana analysis was run in the pull request mode: only the changed files were checked`;
     function wrapToToggleBlock(header, body) {
       return `<details>
 <summary>${header}</summary>
@@ -63405,15 +63650,15 @@ ${body}
     __name(wrapToToggleBlock, "wrapToToggleBlock");
     function getViewReportText(reportUrl) {
       if (reportUrl !== "") {
-        return `\u2601\uFE0F [View the Qodana report](${reportUrl})`;
+        return `\u2601\uFE0F [View the detailed Qodana report](${reportUrl})`;
       }
-      return "\u{1F440} Find out how to view [the Qodana report](https://www.jetbrains.com/help/qodana/html-report.html)";
+      return wrapToToggleBlock("View the detailed Qodana report", VIEW_REPORT_OPTIONS);
     }
     __name(getViewReportText, "getViewReportText");
     function getRowsByLevel(annotations, level) {
       const problems = annotations.reduce((map, e) => {
         var _a, _b;
-        return map.set((_a = e.properties.title) !== null && _a !== void 0 ? _a : UNKNOWN_RULE_ID, map.get((_b = e.properties.title) !== null && _b !== void 0 ? _b : UNKNOWN_RULE_ID) !== void 0 ? map.get(e.properties.title) + 1 : 1);
+        return map.set((_a = e.title) !== null && _a !== void 0 ? _a : UNKNOWN_RULE_ID, map.get((_b = e.title) !== null && _b !== void 0 ? _b : UNKNOWN_RULE_ID) !== void 0 ? map.get(e.title) + 1 : 1);
       }, /* @__PURE__ */ new Map());
       return Array.from(problems.entries()).sort((a, b) => b[1] - a[1]).map(([title, count]) => `| ${title} | ${level} | ${count} |`).join("\n");
     }
@@ -63434,7 +63679,7 @@ ${body}
           "",
           "**It seems all right \u{1F44C}**",
           "",
-          "No problems found according to the checks applied",
+          "No new problems found according to the checks applied",
           prModeBlock,
           getViewReportText(reportUrl),
           licensesBlock,
@@ -63444,14 +63689,14 @@ ${body}
       return [
         `# ${QODANA_CHECK_NAME}`,
         "",
-        `**${annotations.length} problem${annotations.length !== 1 ? "s" : ""}** found`,
+        `**${annotations.length} ${(0, utils_12.getProblemPlural)(annotations.length)}** found`,
         "",
         SUMMARY_TABLE_HEADER,
         SUMMARY_TABLE_SEP,
         [
-          getRowsByLevel(annotations.filter((a) => a.level === ANNOTATION_FAILURE), "\u{1F534} Failure"),
-          getRowsByLevel(annotations.filter((a) => a.level === ANNOTATION_WARNING), "\u{1F536} Warning"),
-          getRowsByLevel(annotations.filter((a) => a.level === ANNOTATION_NOTICE), "\u25FD\uFE0F Notice")
+          getRowsByLevel(annotations.filter((a) => a.annotation_level === annotations_1.ANNOTATION_FAILURE), "\u{1F534} Failure"),
+          getRowsByLevel(annotations.filter((a) => a.annotation_level === annotations_1.ANNOTATION_WARNING), "\u{1F536} Warning"),
+          getRowsByLevel(annotations.filter((a) => a.annotation_level === annotations_1.ANNOTATION_NOTICE), "\u25FD\uFE0F Notice")
         ].filter((e) => e !== "").join("\n"),
         "",
         prModeBlock,
@@ -63461,82 +63706,14 @@ ${body}
       ].join("\n");
     }
     __name(getSummary, "getSummary");
-    function resultToAnnotation(result, rules) {
-      var _a;
-      const location = result.locations[0].physicalLocation;
-      const region = location.region;
-      return {
-        message: result.message.markdown,
-        level: (() => {
-          switch (result.level) {
-            case "error":
-              return ANNOTATION_FAILURE;
-            case "warning":
-              return ANNOTATION_WARNING;
-            default:
-              return ANNOTATION_NOTICE;
-          }
-        })(),
-        properties: {
-          title: (_a = rules.get(result.ruleId)) === null || _a === void 0 ? void 0 : _a.shortDescription,
-          file: location.artifactLocation.uri,
-          startLine: region.startLine,
-          endLine: region.endLine || region.startLine,
-          startColumn: region.startLine === region.endColumn ? region.startColumn : void 0,
-          endColumn: region.startLine === region.endColumn ? region.endColumn : void 0
-        }
-      };
-    }
-    __name(resultToAnnotation, "resultToAnnotation");
-    function parseRules(tool) {
-      var _a;
-      const rules = /* @__PURE__ */ new Map();
-      (_a = tool === null || tool === void 0 ? void 0 : tool.extensions) === null || _a === void 0 ? void 0 : _a.forEach((ext) => {
-        var _a2;
-        (_a2 = ext === null || ext === void 0 ? void 0 : ext.rules) === null || _a2 === void 0 ? void 0 : _a2.forEach((rule) => {
-          rules.set(rule.id, {
-            shortDescription: rule.shortDescription.text,
-            fullDescription: rule.fullDescription.markdown
-          });
-        });
-      });
-      return rules;
-    }
-    __name(parseRules, "parseRules");
-    function parseSarif(path) {
-      var _a;
-      const sarif = JSON.parse(fs.readFileSync(path, { encoding: "utf8" }));
-      const run = sarif.runs[0];
-      const rules = parseRules(run.tool);
-      let annotations = [];
-      if ((_a = run.results) === null || _a === void 0 ? void 0 : _a.length) {
-        annotations = run.results.filter((result) => result.baselineState !== "unchanged").map((result) => resultToAnnotation(result, rules)).filter((a) => a !== null);
-      }
-      return annotations;
-    }
-    __name(parseSarif, "parseSarif");
-    exports2.parseSarif = parseSarif;
     function publishOutput(failedByThreshold, resultsDir, useAnnotations, execute) {
+      var _a, _b;
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
           return;
         }
         try {
-          const problems = parseSarif(`${resultsDir}/${qodana_12.QODANA_SARIF_NAME}`);
-          if (useAnnotations) {
-            for (const p of problems) {
-              switch (p.level) {
-                case ANNOTATION_FAILURE:
-                  core2.error(p.message, p.properties);
-                  break;
-                case ANNOTATION_WARNING:
-                  core2.warning(p.message, p.properties);
-                  break;
-                default:
-                  core2.notice(p.message, p.properties);
-              }
-            }
-          }
+          const problems = (0, annotations_1.parseSarif)(`${resultsDir}/${qodana_12.QODANA_SARIF_NAME}`);
           let reportUrl = "";
           const reportUrlFile = `${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`;
           if (fs.existsSync(reportUrlFile)) {
@@ -63552,9 +63729,15 @@ ${body}
               licensesInfo = fs.readFileSync(`${resultsDir}/projectStructure/${qodana_12.QODANA_LICENSES_MD}`, { encoding: "utf8" });
             }
           }
-          const summary = getSummary(problems, licensesInfo, reportUrl);
-          yield core2.summary.addRaw(summary).write();
-          yield postCommentToPullRequest(summary);
+          const annotations = (_a = problems.annotations) !== null && _a !== void 0 ? _a : [];
+          const summary = getSummary(annotations, licensesInfo, reportUrl);
+          const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : QODANA_CHECK_NAME;
+          problems.summary = summary;
+          yield Promise.all([
+            (0, annotations_1.publishAnnotations)(toolName, problems, failedByThreshold, (0, utils_12.getInputs)().githubToken, useAnnotations),
+            core2.summary.addRaw(summary).write(),
+            postCommentToPullRequest(summary)
+          ]);
         } catch (error) {
           core2.warning(`Failed to publish annotations \u2013 ${error.message}`);
         }
