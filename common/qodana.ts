@@ -153,6 +153,7 @@ export interface Inputs {
   additionalCacheKey: string
   cacheDefaultBranchOnly: boolean
   uploadResult: boolean
+  uploadSarif: boolean
   artifactName: string
   useCaches: boolean
   useAnnotations: boolean

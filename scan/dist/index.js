@@ -63162,6 +63162,7 @@ var require_utils7 = __commonJS({
         additionalCacheKey: core2.getInput("additional-cache-key") || core2.getInput("additional-cache-hash"),
         cacheDefaultBranchOnly: core2.getBooleanInput("cache-default-branch-only"),
         uploadResult: core2.getBooleanInput("upload-result"),
+        uploadSarif: core2.getBooleanInput("upload-sarif"),
         artifactName: core2.getInput("artifact-name"),
         useCaches: core2.getBooleanInput("use-caches"),
         useAnnotations: core2.getBooleanInput("use-annotations"),

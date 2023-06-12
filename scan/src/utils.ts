@@ -38,6 +38,7 @@ export function getInputs(): Inputs {
       core.getInput('additional-cache-hash'),
     cacheDefaultBranchOnly: core.getBooleanInput('cache-default-branch-only'),
     uploadResult: core.getBooleanInput('upload-result'),
+    uploadSarif: core.getBooleanInput('upload-sarif'),
     artifactName: core.getInput('artifact-name'),
     useCaches: core.getBooleanInput('use-caches'),
     useAnnotations: core.getBooleanInput('use-annotations'),

@@ -35,9 +35,17 @@
       "name": "uploadResult",
       "type": "boolean",
       "label": "Upload Result",
-      "defaultValue": true,
+      "defaultValue": false,
       "required": false,
       "helpMarkDown": "Upload Qodana results as an artifact to the job"
+    },
+    {
+        "name": "uploadSarif",
+        "type": "string",
+        "label": "Upload SARIF",
+        "defaultValue": "true",
+        "required": false,
+        "helpMarkDown": "Upload qodana.sarif.json as an qodana.sarif artifact to the job"
     },
     {
       "name": "artifactName",

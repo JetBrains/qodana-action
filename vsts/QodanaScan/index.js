@@ -4453,7 +4453,7 @@ var require_utils2 = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.setFailed = void 0;
+    exports2.uploadSarif = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.setFailed = void 0;
     var compress = require_compressutility();
     var tl2 = require("azure-pipelines-task-lib/task");
     var tool = require_tool();
@@ -4469,7 +4469,8 @@ var require_utils2 = __commonJS({
         args: (tl2.getInput("args", false) || "").split(",").map((arg) => arg.trim()),
         resultsDir: tl2.getInput("resultsDir", false) || path.join(home, "results"),
         cacheDir: tl2.getInput("cacheDir", false) || path.join(home, "cache"),
-        uploadResult: tl2.getBoolInput("uploadResult", false) || true,
+        uploadResult: tl2.getBoolInput("uploadResult", false) || false,
+        uploadSarif: tl2.getBoolInput("uploadSarif", false) || true,
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
         additionalCacheKey: "",
         primaryCacheKey: "",
@@ -4528,15 +4529,28 @@ var require_utils2 = __commonJS({
           const archivePath = path.join(parentDir, `${artifactName}.zip`);
           compress.createArchive(resultsDir, "zip", archivePath);
           tl2.uploadArtifact("Qodana", archivePath, artifactName);
-          const qodanaSarif = path.join(parentDir, "qodana.sarif");
-          tl2.cp(path.join(resultsDir, "qodana.sarif.json"), qodanaSarif);
-          tl2.uploadArtifact("CodeAnalysisLogs", qodanaSarif, "CodeAnalysisLogs");
         } catch (error) {
           tl2.warning(`Failed to upload report \u2013 ${error.message}`);
         }
       });
     }
     exports2.uploadReport = uploadReport;
+    function uploadSarif(resultsDir, execute) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        if (!execute) {
+          return;
+        }
+        try {
+          const parentDir = path.dirname(resultsDir);
+          const qodanaSarif = path.join(parentDir, "qodana.sarif");
+          tl2.cp(path.join(resultsDir, "qodana.sarif.json"), qodanaSarif);
+          tl2.uploadArtifact("CodeAnalysisLogs", qodanaSarif, "CodeAnalysisLogs");
+        } catch (error) {
+          tl2.warning(`Failed to upload SARIF \u2013 ${error.message}`);
+        }
+      });
+    }
+    exports2.uploadSarif = uploadSarif;
   }
 });
 
@@ -4582,6 +4596,7 @@ function main() {
       yield (0, utils_1.prepareAgent)(inputs.args);
       const exitCode = yield (0, utils_1.qodana)();
       yield (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult);
+      yield (0, utils_1.uploadSarif)(inputs.resultsDir, inputs.uploadSarif);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         (0, utils_1.setFailed)(`qodana scan failed with exit code ${exitCode}`);
       } else if (exitCode === qodana_1.QodanaExitCode.FailThreshold) {

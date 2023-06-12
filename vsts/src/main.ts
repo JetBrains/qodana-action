@@ -4,7 +4,14 @@ import {
   QodanaExitCode,
   isExecutionSuccessful
 } from '../../common/qodana'
-import {getInputs, prepareAgent, qodana, setFailed, uploadReport} from './utils'
+import {
+  getInputs,
+  prepareAgent,
+  qodana,
+  setFailed,
+  uploadReport,
+  uploadSarif
+} from './utils'
 
 // Catch and log any unhandled exceptions. These exceptions can leak out in
 // azure-pipelines-task-lib when a failed upload closes the file descriptor causing any in-process reads to
@@ -23,6 +30,7 @@ async function main(): Promise<void> {
       inputs.artifactName,
       inputs.uploadResult
     )
+    await uploadSarif(inputs.resultsDir, inputs.uploadSarif)
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)
     } else if (exitCode === QodanaExitCode.FailThreshold) {

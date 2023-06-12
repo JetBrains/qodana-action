@@ -39,9 +39,9 @@ inputs:
     required: false
     default: "false"
   upload-result:
-    description: 'Upload Qodana results as an artifact to the job'
+    description: 'Upload Qodana results (SARIF, other artifacts, logs) as an artifact to the job'
     required: false
-    default: "true"
+    default: "false"
   artifact-name:
     description: 'Specify Qodana results artifact name, used for results uploading'
     required: false
@@ -51,7 +51,7 @@ inputs:
     required: false
     default: "true"
   pr-mode:
-    description: 'Analyze only changed files in a pull request'
+    description: 'Analyze ONLY changed files in a pull request'
     required: false
     default: "true"
   github-token:
