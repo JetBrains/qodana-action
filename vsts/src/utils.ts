@@ -41,7 +41,8 @@ export function getInputs(): Inputs {
     useAnnotations: false,
     useCaches: false,
     cacheDefaultBranchOnly: false,
-    prMode: false
+    prMode: false,
+    githubToken: ''
   }
 }
 

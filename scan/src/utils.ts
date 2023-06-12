@@ -41,7 +41,8 @@ export function getInputs(): Inputs {
     artifactName: core.getInput('artifact-name'),
     useCaches: core.getBooleanInput('use-caches'),
     useAnnotations: core.getBooleanInput('use-annotations'),
-    prMode: core.getBooleanInput('pr-mode')
+    prMode: core.getBooleanInput('pr-mode'),
+    githubToken: core.getInput('github-token')
   }
 }
 /**

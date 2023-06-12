@@ -63165,7 +63165,8 @@ var require_utils7 = __commonJS({
         artifactName: core2.getInput("artifact-name"),
         useCaches: core2.getBooleanInput("use-caches"),
         useAnnotations: core2.getBooleanInput("use-annotations"),
-        prMode: core2.getBooleanInput("pr-mode")
+        prMode: core2.getBooleanInput("pr-mode"),
+        githubToken: core2.getInput("github-token")
       };
     }
     __name(getInputs, "getInputs");
@@ -63376,6 +63377,7 @@ var require_output = __commonJS({
     var fs = __importStar2(require("fs"));
     var github2 = __importStar2(require_github());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
+    var utils_12 = require_utils7();
     var QODANA_CHECK_NAME = "Qodana";
     var UNKNOWN_RULE_ID = "Unknown";
     var ANNOTATION_FAILURE = "failure";
@@ -63556,7 +63558,7 @@ ${body}
           core2.warning("Could not get pull request number from context, exiting");
           return;
         }
-        const client = github2.getOctokit(process.env.GITHUB_TOKEN);
+        const client = github2.getOctokit((0, utils_12.getInputs)().githubToken);
         yield client.rest.issues.createComment({
           owner: github2.context.repo.owner,
           repo: github2.context.repo.repo,

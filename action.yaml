@@ -54,7 +54,10 @@ inputs:
     description: 'Analyze only changed files in a pull request'
     required: false
     default: "true"
-
+  github-token:
+    description: 'GitHub token to access the repository: post annotations, comments'
+    required: false
+    default: "${{ github.token }}"
 runs:
   using: 'node16'
   main: 'scan/dist/index.js'
