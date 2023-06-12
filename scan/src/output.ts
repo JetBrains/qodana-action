@@ -10,7 +10,7 @@ import {
   QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME
 } from '../../common/qodana'
-import {getInputs} from './utils'
+import {getInputs, isPRMode} from './utils'
 
 const QODANA_CHECK_NAME = 'Qodana'
 const UNKNOWN_RULE_ID = 'Unknown'
@@ -22,6 +22,7 @@ const SUMMARY_TABLE_SEP = '| --- | --- | --- |'
 const SUMMARY_MISC = `Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   - Or via our issue tracker: https://jb.gg/qodana-issue
   - Or share your feedback: https://jb.gg/qodana-discussions`
+const SUMMARY_PR_MODE = `💡 Qodana analysis was run in the pull request mode: only the changed files were analyzed.`
 
 export interface Rule {
   shortDescription: string
@@ -87,6 +88,10 @@ function getSummary(
   if (licensesInfo !== '') {
     licensesBlock = wrapToToggleBlock('Dependencies licenses', licensesInfo)
   }
+  let prModeBlock = ''
+  if (isPRMode()) {
+    prModeBlock = SUMMARY_PR_MODE
+  }
   if (annotations.length === 0) {
     return [
       `# ${QODANA_CHECK_NAME}`,
@@ -94,6 +99,7 @@ function getSummary(
       '**It seems all right 👌**',
       '',
       'No problems found according to the checks applied',
+      prModeBlock,
       getViewReportText(reportUrl),
       licensesBlock,
       contactBlock
@@ -126,6 +132,7 @@ function getSummary(
       .filter(e => e !== '')
       .join('\n'),
     '',
+    prModeBlock,
     getViewReportText(reportUrl),
     licensesBlock,
     contactBlock
@@ -218,7 +225,6 @@ export async function publishOutput(
   failedByThreshold: boolean,
   resultsDir: string,
   useAnnotations: boolean,
-  postComment: boolean,
   execute: boolean
 ): Promise<void> {
   if (!execute) {
@@ -266,10 +272,7 @@ export async function publishOutput(
     const summary = getSummary(problems, licensesInfo, reportUrl)
 
     await core.summary.addRaw(summary).write()
-
-    if (postComment) {
-      await postCommentToPullRequest(summary)
-    }
+    await postCommentToPullRequest(summary)
   } catch (error) {
     core.warning(`Failed to publish annotations – ${(error as Error).message}`)
   }
@@ -280,9 +283,8 @@ export async function publishOutput(
  * @param comment The comment to post.
  */
 async function postCommentToPullRequest(comment: string): Promise<void> {
-  const pr = github.context.payload.pull_request
+  const pr = github.context.payload.pull_request ?? ''
   if (!pr) {
-    core.warning('Could not get pull request number from context, exiting')
     return
   }
   const client = github.getOctokit(getInputs().githubToken)

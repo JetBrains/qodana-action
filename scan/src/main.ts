@@ -1,5 +1,4 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 import * as io from '@actions/io'
 import {
   FAIL_THRESHOLD_OUTPUT,
@@ -51,9 +50,7 @@ async function main(): Promise<void> {
         inputs.useCaches
       )
     ])
-    const pr =
-      github.context.payload.pull_request !== undefined && inputs.prMode
-    const exitCode = await qodana(pr)
+    const exitCode = await qodana()
     const canUploadCache =
       isNeedToUploadCache(inputs.useCaches, inputs.cacheDefaultBranchOnly) &&
       isExecutionSuccessful(exitCode)
@@ -65,7 +62,6 @@ async function main(): Promise<void> {
         exitCode === QodanaExitCode.FailThreshold,
         inputs.resultsDir,
         inputs.useAnnotations,
-        pr,
         isExecutionSuccessful(exitCode)
       )
     ])

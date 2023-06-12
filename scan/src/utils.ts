@@ -38,7 +38,7 @@ export function getInputs(): Inputs {
       core.getInput('additional-cache-hash'),
     cacheDefaultBranchOnly: core.getBooleanInput('cache-default-branch-only'),
     uploadResult: core.getBooleanInput('upload-result'),
-    uploadSarif: core.getBooleanInput('upload-sarif'),
+    uploadSarif: false,
     artifactName: core.getInput('artifact-name'),
     useCaches: core.getBooleanInput('use-caches'),
     useAnnotations: core.getBooleanInput('use-annotations'),
@@ -52,14 +52,11 @@ export function getInputs(): Inputs {
  * @param prMode whether the command is run in the PR mode.
  * @returns The qodana command execution output.
  */
-export async function qodana(
-  prMode: boolean,
-  args: string[] = []
-): Promise<number> {
+export async function qodana(args: string[] = []): Promise<number> {
   if (args.length === 0) {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
-    if (prMode && github.context.payload.pull_request !== undefined) {
+    if (isPRMode() && github.context.payload.pull_request !== undefined) {
       const pr = github.context.payload.pull_request
       args.push('--commit', `CI${pr.base.sha}`)
     }
@@ -97,7 +94,7 @@ export async function prepareAgent(args: string[]): Promise<void> {
     extractRoot = await tc.extractTar(temp)
   }
   core.addPath(await tc.cacheDir(extractRoot, EXECUTABLE, VERSION))
-  const exitCode = await qodana(false, getQodanaPullArgs(args))
+  const exitCode = await qodana(getQodanaPullArgs(args))
   if (exitCode !== 0) {
     core.setFailed(`qodana pull failed with exit code ${exitCode}`)
     return
@@ -227,6 +224,10 @@ export function isServer(): boolean {
     process.env['GITHUB_SERVER_URL'] || 'https://github.com'
   )
   return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM'
+}
+
+export function isPRMode(): boolean {
+  return github.context.payload.pull_request !== undefined && getInputs().prMode
 }
 
 /**
