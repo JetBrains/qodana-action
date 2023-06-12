@@ -10,6 +10,7 @@ import {
   QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME
 } from '../../common/qodana'
+import {getInputs} from './utils'
 
 const QODANA_CHECK_NAME = 'Qodana'
 const UNKNOWN_RULE_ID = 'Unknown'
@@ -284,7 +285,7 @@ async function postCommentToPullRequest(comment: string): Promise<void> {
     core.warning('Could not get pull request number from context, exiting')
     return
   }
-  const client = github.getOctokit(process.env.GITHUB_TOKEN as string)
+  const client = github.getOctokit(getInputs().githubToken)
   await client.rest.issues.createComment({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,

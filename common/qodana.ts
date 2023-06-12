@@ -157,6 +157,7 @@ export interface Inputs {
   useCaches: boolean
   useAnnotations: boolean
   prMode: boolean
+  githubToken: string
 }
 
 /**

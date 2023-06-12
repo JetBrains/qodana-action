@@ -76,7 +76,8 @@ function inputsDefaultFixture(): Inputs {
     artifactName: 'Qodana report',
     useCaches: true,
     useAnnotations: true,
-    prMode: true
+    prMode: true,
+    githubToken: ''
   }
 }
 
