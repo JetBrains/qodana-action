@@ -54,7 +54,8 @@ jobs:
 Using this workflow, Qodana will run on the main branch, release branches, and on the pull requests coming to your
 repository.
 
-Note: `fetch-depth: 0` is required for checkout in case Qodana works in pull request mode (reports issues that appeared only in that pull request).
+Note: `fetch-depth: 0` is required for checkout in case Qodana works in pull request mode
+(reports issues that appeared only in that pull request).
 
 We recommend that you have a separate workflow file for Qodana
 because [different jobs run in parallel](https://help.github.com/en/actions/getting-started-with-github-actions/core-concepts-for-github-actions#job)
@@ -62,9 +63,12 @@ because [different jobs run in parallel](https://help.github.com/en/actions/gett
 
 ### Qodana Cloud
 
-To send the results to Qodana Cloud, all you need to do is to specify the `QODANA_TOKEN` environment variable in the build configuration.
+To send the results to Qodana Cloud,
+all you need to do is to specify the `QODANA_TOKEN` environment variable in the build configuration.
 
-1. In the GitHub UI, create the `QODANA_TOKEN` [encrypted secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository) and
+1. In the GitHub UI,
+   create the `QODANA_TOKEN` [encrypted secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)
+   and
    save the [project token](https://www.jetbrains.com/help/qodana/cloud-projects.html#cloud-manage-projects) as its value.
 2. In the GitHub workflow file,
    add `QODANA_TOKEN` variable to the `env` section of the `Qodana Scan` step:
@@ -93,10 +97,10 @@ for your project using Qodana. To do it, add these lines to the `code_quality.ym
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
 ```
 
-This sample invokes `codeql-action` for uploading a SARIF-formatted Qodana report to GitHub and specifies the report
+This sample invokes `codeql-action` for uploading a SARIF-formatted Qodana report to GitHub, and specifies the report
 file using the `sarif_file` key.
 
-> GitHub code scanning does not export inspection results to third-party tools, which means you cannot use this data for further processing by Qodana. In this case, you must set up baseline and quality gate processing on the Qodana side before submitting inspection results to GitHub code scanning. See the
+> GitHub code scanning does not export inspection results to third-party tools, which means that you cannot use this data for further processing by Qodana. In this case, you have to set up baseline and quality gate processing on the Qodana side prior to submitting inspection results to GitHub code scanning, see the
 [Quality gate and baseline](#quality-gate-and-baseline) section for details.
 
 ### Pull request quality gate
@@ -130,8 +134,8 @@ Instead of `main`, you can specify your branch here.
 
 ### Quality gate and baseline
 
-You can combine the [quality gate](https://www.jetbrains.com/help/qodana/quality-gate.html), and [baseline](https://www.jetbrains.com/help/qodana/qodana-baseline.html) features to manage your
-technical debt, report only new problems, and block pull requests that contain too many issues.
+You can combine the [quality gate](https://www.jetbrains.com/help/qodana/quality-gate.html) and [baseline](https://www.jetbrains.com/help/qodana/qodana-baseline.html) features to manage your
+technical debt, report only new problems, and block pull requests that contain too many problems.
 
 Follow these steps to establish a baseline for your project:
 
@@ -156,14 +160,15 @@ qodana scan --show-report
     args: --baseline,qodana.sarif.json
 ```
 
-If you want to update the baseline, you must repeat these steps.
+If you want to update the baseline, you need to repeat these steps once again.
 
-After that, the Qodana Scan GitHub action will generate alerts only for the problems that were not added to the baseline as new.
+Starting from this, GitHub will generate alters only for the problems that were not added to the baseline as new.
 
-To establish a quality gate additionally to the baseline, add this line to `qodana.yaml` in the root of your repository:
+To establish a quality gate additionally to the baseline, add this line to `code_quality.yml` right after the
+`baseline-path` line:
 
 ```yaml
-failThreshold: <number-of-accepted-problems>
+fail-threshold: <number-of-accepted-problems>
 ```
 
 Based on this, you will be able to detect only new problems in pull requests that fall beyond the baseline. At the same
@@ -171,7 +176,7 @@ time, pull requests with **new** problems exceeding the `fail-threshold` limit w
 
 ### Get a Qodana badge
 
-You can set up a Qodana workflow badge in your repository. To do it, follow these steps:
+You can set up a Qodana workflow badge in your repository, to do it, follow these steps:
 
 1. Navigate to the workflow run that you previously configured.
 2. On the workflow page, select **Create status badge**.
@@ -181,7 +186,7 @@ You can set up a Qodana workflow badge in your repository. To do it, follow thes
 
 ## Configuration
 
-Most likely, you won't need other options than `args`: all other options can be helpful if you are configuring multiple Qodana Scan jobs in one workflow. 
+Most likely, you won't need other options than `args`: all other options can be helpful if you are configuring multiple Qodana Scan jobs in one workflow.
 
 Use [`with`](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswith) to define any action parameters:
 

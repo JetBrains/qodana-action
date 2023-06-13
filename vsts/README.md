@@ -18,7 +18,9 @@ duplications, and imperfections.
 
 # Qodana Scan
 
-Qodana Scan is an Azure Pipelines task packed inside [Qodana Azure Pipelines extension](https://marketplace.visualstudio.com/items?itemName=JetBrains.qodana) to scan your code with Qodana.
+Qodana Scan is an Azure Pipelines task
+packed inside the [Qodana Azure Pipelines extension](https://marketplace.visualstudio.com/items?itemName=JetBrains.qodana)
+to scan your code with Qodana.
 
 ## Usage
 
@@ -50,7 +52,8 @@ steps:
 
 Triggering this job depends on [what type of repository you are using in Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/build/triggers?view=azure-devops#classic-build-pipelines-and-yaml-pipelines).
 
-The task can be run on any OS and x86_64/arm64 CPUs, but it requires the agent to have Docker installed. And since most of Qodana Docker images are Linux-based, the docker daemon must be able to run Linux containers.
+The task can be run on any OS and x86_64/arm64 CPUs, but it requires the agent to have Docker installed.
+And since most of the Qodana Docker images are Linux-based, the docker daemon must be able to run Linux containers.
 
 ### Qodana Cloud
 
