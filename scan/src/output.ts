@@ -142,6 +142,7 @@ function getSummary(
  * Publish SARIF to GitHub Checks.
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param resultsDir The path to the results.
+ * @param postComment whether to post a PR comment or not.
  * @param execute whether to execute the promise or not.
  * @param useAnnotations whether to publish annotations or not.
  */
@@ -149,6 +150,7 @@ export async function publishOutput(
   failedByThreshold: boolean,
   resultsDir: string,
   useAnnotations: boolean,
+  postComment: boolean,
   execute: boolean
 ): Promise<void> {
   if (!execute) {
@@ -191,7 +193,7 @@ export async function publishOutput(
         useAnnotations
       ),
       core.summary.addRaw(summary).write(),
-      postCommentToPullRequest(summary)
+      postCommentToPullRequest(summary, postComment)
     ])
   } catch (error) {
     core.warning(`Failed to publish annotations – ${(error as Error).message}`)
@@ -201,10 +203,14 @@ export async function publishOutput(
 /**
  * Post a new comment to the pull request.
  * @param comment The comment to post.
+ * @param postComment Whether to post a comment or not.
  */
-async function postCommentToPullRequest(comment: string): Promise<void> {
+async function postCommentToPullRequest(
+  comment: string,
+  postComment: boolean
+): Promise<void> {
   const pr = github.context.payload.pull_request ?? ''
-  if (!pr) {
+  if (!postComment || !pr) {
     return
   }
   const client = github.getOctokit(getInputs().githubToken)

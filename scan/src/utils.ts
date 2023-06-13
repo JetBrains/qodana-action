@@ -38,11 +38,12 @@ export function getInputs(): Inputs {
       core.getInput('additional-cache-hash'),
     cacheDefaultBranchOnly: core.getBooleanInput('cache-default-branch-only'),
     uploadResult: core.getBooleanInput('upload-result'),
-    uploadSarif: false,
+    uploadSarif: false, // not used by the action
     artifactName: core.getInput('artifact-name'),
     useCaches: core.getBooleanInput('use-caches'),
     useAnnotations: core.getBooleanInput('use-annotations'),
     prMode: core.getBooleanInput('pr-mode'),
+    postComment: core.getBooleanInput('post-pr-comment'),
     githubToken: core.getInput('github-token')
   }
 }

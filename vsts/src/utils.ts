@@ -37,6 +37,7 @@ export function getInputs(): Inputs {
     uploadSarif: tl.getBoolInput('uploadSarif', false) || true,
     artifactName: tl.getInput('artifactName', false) || 'qodana-report',
     // Not used by the Azure task
+    postComment: false,
     additionalCacheKey: '',
     primaryCacheKey: '',
     useAnnotations: false,

@@ -63167,6 +63167,7 @@ var require_utils7 = __commonJS({
         useCaches: core2.getBooleanInput("use-caches"),
         useAnnotations: core2.getBooleanInput("use-annotations"),
         prMode: core2.getBooleanInput("pr-mode"),
+        postComment: core2.getBooleanInput("post-pr-comment"),
         githubToken: core2.getInput("github-token")
       };
     }
@@ -63706,7 +63707,7 @@ ${body}
       ].join("\n");
     }
     __name(getSummary, "getSummary");
-    function publishOutput(failedByThreshold, resultsDir, useAnnotations, execute) {
+    function publishOutput(failedByThreshold, resultsDir, useAnnotations, postComment, execute) {
       var _a, _b;
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
@@ -63736,7 +63737,7 @@ ${body}
           yield Promise.all([
             (0, annotations_1.publishAnnotations)(toolName, problems, failedByThreshold, (0, utils_12.getInputs)().githubToken, useAnnotations),
             core2.summary.addRaw(summary).write(),
-            postCommentToPullRequest(summary)
+            postCommentToPullRequest(summary, postComment)
           ]);
         } catch (error) {
           core2.warning(`Failed to publish annotations \u2013 ${error.message}`);
@@ -63745,11 +63746,11 @@ ${body}
     }
     __name(publishOutput, "publishOutput");
     exports2.publishOutput = publishOutput;
-    function postCommentToPullRequest(comment) {
+    function postCommentToPullRequest(comment, postComment) {
       var _a;
       return __awaiter2(this, void 0, void 0, function* () {
         const pr = (_a = github.context.payload.pull_request) !== null && _a !== void 0 ? _a : "";
-        if (!pr) {
+        if (!postComment || !pr) {
           return;
         }
         const client = github.getOctokit((0, utils_12.getInputs)().githubToken);
@@ -63851,7 +63852,7 @@ function main() {
       yield Promise.all([
         (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
         (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.primaryCacheKey, canUploadCache),
-        (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, inputs.resultsDir, inputs.useAnnotations, (0, qodana_1.isExecutionSuccessful)(exitCode))
+        (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, inputs.resultsDir, inputs.useAnnotations, inputs.postComment, (0, qodana_1.isExecutionSuccessful)(exitCode))
       ]);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`);

@@ -54,6 +54,10 @@ inputs:
     description: 'Analyze ONLY changed files in a pull request'
     required: false
     default: "true"
+  post-pr-comment:
+    description: 'Post a comment with the Qodana results summary to the pull request'
+    required: false
+    default: "true"
   github-token:
     description: 'GitHub token to access the repository: post annotations, comments'
     required: false

@@ -72,6 +72,7 @@ function inputsDefaultFixture(): Inputs {
     useCaches: true,
     useAnnotations: true,
     prMode: true,
+    postComment: true,
     githubToken: ''
   }
 }

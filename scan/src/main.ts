@@ -62,6 +62,7 @@ async function main(): Promise<void> {
         exitCode === QodanaExitCode.FailThreshold,
         inputs.resultsDir,
         inputs.useAnnotations,
+        inputs.postComment,
         isExecutionSuccessful(exitCode)
       )
     ])

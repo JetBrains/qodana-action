@@ -4472,6 +4472,7 @@ var require_utils2 = __commonJS({
         uploadResult: tl2.getBoolInput("uploadResult", false) || false,
         uploadSarif: tl2.getBoolInput("uploadSarif", false) || true,
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
+        postComment: false,
         additionalCacheKey: "",
         primaryCacheKey: "",
         useAnnotations: false,
