@@ -5,6 +5,7 @@ import type {Log, Result, Tool} from 'sarif'
 import {context, getOctokit} from '@actions/github'
 import {getProblemPlural, getWorkflowRunUrl} from './utils'
 import {GitHub} from '@actions/github/lib/utils'
+import {AnnotationProperties} from '@actions/core'
 
 function getQodanaHelpString(): string {
   return `This result was published with [Qodana GitHub Action](${getWorkflowRunUrl()})`
@@ -260,6 +261,33 @@ export async function publishAnnotations(
       await publishGitHubCheck(failedByThreshold, name, token, problems)
     }
   } catch (error) {
-    core.debug(`Failed to publish annotations – ${(error as Error).message}`)
+    core.info(`Not able to publish annotations with Checks API – ${
+      (error as Error).message
+    }, 
+    using limited (10 problems per level) output instead. Check job permissions (checks: write, pull-requests: write needed)`)
+    for (const p of problems.annotations) {
+      const properties = toAnnotationProperties(p)
+      switch (p.annotation_level) {
+        case ANNOTATION_FAILURE:
+          core.error(p.message, properties)
+          break
+        case ANNOTATION_WARNING:
+          core.warning(p.message, properties)
+          break
+        default:
+          core.notice(p.message, properties)
+      }
+    }
+  }
+}
+
+function toAnnotationProperties(a: Annotation): AnnotationProperties {
+  return {
+    title: a.title,
+    file: a.path,
+    startLine: a.start_line,
+    endLine: a.end_line,
+    startColumn: a.start_column,
+    endColumn: a.end_column
   }
 }
