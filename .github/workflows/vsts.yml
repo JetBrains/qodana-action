@@ -20,15 +20,11 @@ jobs:
           - windows-latest
     steps:
       - uses: actions/checkout@v3
-      - run: cd common && npm ci && cd ../vsts && npm install && npm run build
+      - run: cd common && npm ci && cd ../vsts && npm ci && npm run build
   check-dist:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set Node.js 12.x
-        uses: actions/setup-node@v3.6.0
-        with:
-          node-version: 12.x
       - name: Install dependencies
         run: cd vsts && npm ci && cd ../common && npm ci
       - name: Rebuild the QodanaScan/ directory
