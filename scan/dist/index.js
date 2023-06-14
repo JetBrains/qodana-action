@@ -64429,12 +64429,37 @@ var require_annotations = __commonJS({
             yield publishGitHubCheck(failedByThreshold, name, token, problems);
           }
         } catch (error) {
-          core2.debug(`Failed to publish annotations \u2013 ${error.message}`);
+          core2.info(`Not able to publish annotations with Checks API \u2013 ${error.message}, 
+    using limited (10 problems per level) output instead. Check job permissions (checks: write, pull-requests: write needed)`);
+          for (const p of problems.annotations) {
+            const properties = toAnnotationProperties(p);
+            switch (p.annotation_level) {
+              case exports2.ANNOTATION_FAILURE:
+                core2.error(p.message, properties);
+                break;
+              case exports2.ANNOTATION_WARNING:
+                core2.warning(p.message, properties);
+                break;
+              default:
+                core2.notice(p.message, properties);
+            }
+          }
         }
       });
     }
     __name(publishAnnotations, "publishAnnotations");
     exports2.publishAnnotations = publishAnnotations;
+    function toAnnotationProperties(a) {
+      return {
+        title: a.title,
+        file: a.path,
+        startLine: a.start_line,
+        endLine: a.end_line,
+        startColumn: a.start_column,
+        endColumn: a.end_column
+      };
+    }
+    __name(toAnnotationProperties, "toAnnotationProperties");
   }
 });
 
