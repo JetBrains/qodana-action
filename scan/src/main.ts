@@ -6,9 +6,13 @@ import {
   isExecutionSuccessful
 } from '../../common/qodana'
 import {
+  ANALYSIS_FINISHED_REACTION,
+  ANALYSIS_STARTED_REACTION,
+  getFirstCommentId,
   getInputs,
   isNeedToUploadCache,
   prepareAgent,
+  putReaction,
   qodana,
   restoreCaches,
   uploadCaches,
@@ -42,6 +46,11 @@ async function main(): Promise<void> {
     await io.mkdirP(inputs.resultsDir)
     await io.mkdirP(inputs.cacheDir)
     await Promise.all([
+      putReaction(
+        await getFirstCommentId(),
+        ANALYSIS_STARTED_REACTION,
+        ANALYSIS_FINISHED_REACTION
+      ),
       prepareAgent(inputs.args),
       restoreCaches(
         inputs.cacheDir,

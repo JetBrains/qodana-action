@@ -63941,7 +63941,7 @@ var require_utils8 = __commonJS({
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.getWorkflowRunUrl = exports2.getProblemPlural = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.isServer = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = void 0;
+    exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.getFirstCommentId = exports2.getWorkflowRunUrl = exports2.getProblemPlural = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.isServer = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
     var artifact = __importStar2(require_artifact_client2());
     var cache = __importStar2(require_cache());
     var core2 = __importStar2(require_core());
@@ -63951,6 +63951,8 @@ var require_utils8 = __commonJS({
     var tc = __importStar2(require_tool_cache());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var path_1 = __importDefault(require("path"));
+    exports2.ANALYSIS_FINISHED_REACTION = "+1";
+    exports2.ANALYSIS_STARTED_REACTION = "eyes";
     function getInputs() {
       return {
         args: core2.getInput("args").split(",").map((arg) => arg.trim()),
@@ -64104,6 +64106,7 @@ var require_utils8 = __commonJS({
       if (useCaches && cacheDefaultBranchOnly) {
         const currentBranch = github.context.payload.ref;
         const defaultBranch = (_a = github.context.payload.repository) === null || _a === void 0 ? void 0 : _a.default_branch;
+        core2.debug(`Current branch: ${currentBranch} | Default branch: ${defaultBranch}`);
         return currentBranch === defaultBranch;
       }
       return useCaches;
@@ -64126,6 +64129,95 @@ var require_utils8 = __commonJS({
     }
     __name(getWorkflowRunUrl, "getWorkflowRunUrl");
     exports2.getWorkflowRunUrl = getWorkflowRunUrl;
+    function getFirstCommentId() {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const client = github.getOctokit(getInputs().githubToken);
+        try {
+          const { data: comments } = yield client.rest.issues.listComments(Object.assign(Object.assign({}, github.context.repo), { issue_number: github.context.issue.number }));
+          return comments[0].id;
+        } catch (error) {
+          core2.debug(`Failed to get first comment id \u2013 ${error.message}`);
+          return -1;
+        }
+      });
+    }
+    __name(getFirstCommentId, "getFirstCommentId");
+    exports2.getFirstCommentId = getFirstCommentId;
+    function findCommentByTag(tag) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const client = github.getOctokit(getInputs().githubToken);
+        try {
+          const { data: comments } = yield client.rest.issues.listComments(Object.assign(Object.assign({}, github.context.repo), { issue_number: github.context.issue.number }));
+          const comment = comments.find((c) => {
+            var _a;
+            return (_a = c === null || c === void 0 ? void 0 : c.body) === null || _a === void 0 ? void 0 : _a.includes(tag);
+          });
+          return comment ? comment.id : -1;
+        } catch (error) {
+          core2.debug(`Failed to find comment by tag \u2013 ${error.message}`);
+          return -1;
+        }
+      });
+    }
+    __name(findCommentByTag, "findCommentByTag");
+    exports2.findCommentByTag = findCommentByTag;
+    function createComment(body) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const client = github.getOctokit(getInputs().githubToken);
+        try {
+          yield client.rest.issues.createComment({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            issue_number: github.context.issue.number,
+            body
+          });
+        } catch (error) {
+          core2.debug(`Failed to post comment \u2013 ${error.message}`);
+        }
+      });
+    }
+    __name(createComment, "createComment");
+    exports2.createComment = createComment;
+    function updateComment(comment_id, body) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const client = github.getOctokit(getInputs().githubToken);
+        try {
+          yield client.rest.issues.updateComment({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            comment_id,
+            body
+          });
+        } catch (error) {
+          core2.debug(`Failed to update comment \u2013 ${error.message}`);
+        }
+      });
+    }
+    __name(updateComment, "updateComment");
+    exports2.updateComment = updateComment;
+    function putReaction(comment_id, newReaction, oldReaction) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const client = github.getOctokit(getInputs().githubToken);
+        if (oldReaction !== "") {
+          try {
+            const { data: reactions } = yield client.rest.reactions.listForPullRequestReviewComment(Object.assign(Object.assign({}, github.context.repo), { comment_id }));
+            const previousReaction = reactions.find((r) => r.content === oldReaction);
+            if (previousReaction) {
+              yield client.rest.reactions.deleteForPullRequestComment(Object.assign(Object.assign({}, github.context.repo), { comment_id, reaction_id: previousReaction.id }));
+            }
+          } catch (error) {
+            core2.debug(`Failed to delete previous reaction \u2013 ${error.message}`);
+          }
+        }
+        try {
+          yield client.rest.reactions.createForPullRequestReviewComment(Object.assign(Object.assign({}, github.context.repo), { comment_id, content: newReaction }));
+        } catch (error) {
+          core2.debug(`Failed to put reaction \u2013 ${error.message}`);
+        }
+      });
+    }
+    __name(putReaction, "putReaction");
+    exports2.putReaction = putReaction;
   }
 });
 
@@ -64425,28 +64517,6 @@ var require_output = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __asyncValues = exports2 && exports2.__asyncValues || function(o) {
-      if (!Symbol.asyncIterator)
-        throw new TypeError("Symbol.asyncIterator is not defined.");
-      var m = o[Symbol.asyncIterator], i;
-      return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-        return this;
-      }, i);
-      function verb(n) {
-        i[n] = o[n] && function(v) {
-          return new Promise(function(resolve, reject) {
-            v = o[n](v), settle(resolve, reject, v.done, v.value);
-          });
-        };
-      }
-      __name(verb, "verb");
-      function settle(resolve, reject, d, v) {
-        Promise.resolve(v).then(function(v2) {
-          resolve({ value: v2, done: d });
-        }, reject);
-      }
-      __name(settle, "settle");
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.publishOutput = void 0;
     var core2 = __importStar2(require_core());
@@ -64562,6 +64632,7 @@ ${body}
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : QODANA_CHECK_NAME;
           problems.summary = getSummary(annotations, licensesInfo, reportUrl);
           yield Promise.all([
+            (0, utils_12.putReaction)(yield (0, utils_12.getFirstCommentId)(), utils_12.ANALYSIS_FINISHED_REACTION, utils_12.ANALYSIS_STARTED_REACTION),
             postResultsToPRComments(problems.summary, postComment),
             core2.summary.addRaw(problems.summary).write(),
             (0, annotations_1.publishAnnotations)(toolName, problems, failedByThreshold, (0, utils_12.getInputs)().githubToken, useAnnotations)
@@ -64574,60 +64645,20 @@ ${body}
     __name(publishOutput, "publishOutput");
     exports2.publishOutput = publishOutput;
     function postResultsToPRComments(content, postComment) {
-      var _a, e_1, _b, _c;
-      var _d, _e;
+      var _a;
       return __awaiter2(this, void 0, void 0, function* () {
-        const context = github.context;
-        const pr = (_d = context.payload.pull_request) !== null && _d !== void 0 ? _d : "";
+        const pr = (_a = github.context.payload.pull_request) !== null && _a !== void 0 ? _a : "";
         if (!postComment || !pr) {
           return;
         }
-        const issue_number = (_e = pr === null || pr === void 0 ? void 0 : pr.number) !== null && _e !== void 0 ? _e : 0;
-        if (issue_number === 0) {
-          core2.warning("Could not find pull request to post comment to in the current context");
-          return;
-        }
-        const client = github.getOctokit((0, utils_12.getInputs)().githubToken);
         const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${qodana_12.VERSION} -->`;
         const body = comment_tag_pattern ? `${content}
 ${comment_tag_pattern}` : content;
-        let comment;
-        try {
-          for (var _f = true, _g = __asyncValues(client.paginate.iterator(client.rest.issues.listComments, Object.assign(Object.assign({}, context.repo), { issue_number }))), _h; _h = yield _g.next(), _a = _h.done, !_a; ) {
-            _c = _h.value;
-            _f = false;
-            try {
-              const { data: comments } = _c;
-              comment = comments.find((c) => {
-                var _a2;
-                return (_a2 = c === null || c === void 0 ? void 0 : c.body) === null || _a2 === void 0 ? void 0 : _a2.includes(comment_tag_pattern);
-              });
-              if (comment)
-                break;
-            } finally {
-              _f = true;
-            }
-          }
-        } catch (e_1_1) {
-          e_1 = { error: e_1_1 };
-        } finally {
-          try {
-            if (!_f && !_a && (_b = _g.return))
-              yield _b.call(_g);
-          } finally {
-            if (e_1)
-              throw e_1.error;
-          }
-        }
-        if (comment) {
-          yield client.rest.issues.updateComment(Object.assign(Object.assign({}, context.repo), { comment_id: comment.id, body }));
+        const comment_id = yield (0, utils_12.findCommentByTag)(comment_tag_pattern);
+        if (comment_id !== -1) {
+          yield (0, utils_12.updateComment)(comment_id, body);
         } else {
-          yield client.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body
-          });
+          yield (0, utils_12.createComment)(body);
         }
       });
     }
@@ -64717,6 +64748,7 @@ function main() {
       yield io.mkdirP(inputs.resultsDir);
       yield io.mkdirP(inputs.cacheDir);
       yield Promise.all([
+        (0, utils_1.putReaction)(yield (0, utils_1.getFirstCommentId)(), utils_1.ANALYSIS_STARTED_REACTION, utils_1.ANALYSIS_FINISHED_REACTION),
         (0, utils_1.prepareAgent)(inputs.args),
         (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.primaryCacheKey, inputs.additionalCacheKey, inputs.useCaches)
       ]);
