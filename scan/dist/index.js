@@ -764,6 +764,10 @@ var require_proxy = __commonJS({
       if (!reqUrl.hostname) {
         return false;
       }
+      const reqHost = reqUrl.hostname;
+      if (isLoopbackAddress(reqHost)) {
+        return true;
+      }
       const noProxy = process.env["no_proxy"] || process.env["NO_PROXY"] || "";
       if (!noProxy) {
         return false;
@@ -781,7 +785,7 @@ var require_proxy = __commonJS({
         upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
       }
       for (const upperNoProxyItem of noProxy.split(",").map((x) => x.trim().toUpperCase()).filter((x) => x)) {
-        if (upperReqHosts.some((x) => x === upperNoProxyItem)) {
+        if (upperNoProxyItem === "*" || upperReqHosts.some((x) => x === upperNoProxyItem || x.endsWith(`.${upperNoProxyItem}`) || upperNoProxyItem.startsWith(".") && x.endsWith(`${upperNoProxyItem}`))) {
           return true;
         }
       }
@@ -789,6 +793,11 @@ var require_proxy = __commonJS({
     }
     __name(checkBypass, "checkBypass");
     exports2.checkBypass = checkBypass;
+    function isLoopbackAddress(host) {
+      const hostLower = host.toLowerCase();
+      return hostLower === "localhost" || hostLower.startsWith("127.") || hostLower.startsWith("[::1]") || hostLower.startsWith("[0:0:0:0:0:0:0:1]");
+    }
+    __name(isLoopbackAddress, "isLoopbackAddress");
   }
 });
 
@@ -2356,11 +2365,13 @@ var require_io_util = __commonJS({
     };
     var _a;
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.getCmdPath = exports2.tryGetExecutablePath = exports2.isRooted = exports2.isDirectory = exports2.exists = exports2.IS_WINDOWS = exports2.unlink = exports2.symlink = exports2.stat = exports2.rmdir = exports2.rename = exports2.readlink = exports2.readdir = exports2.mkdir = exports2.lstat = exports2.copyFile = exports2.chmod = void 0;
+    exports2.getCmdPath = exports2.tryGetExecutablePath = exports2.isRooted = exports2.isDirectory = exports2.exists = exports2.READONLY = exports2.UV_FS_O_EXLOCK = exports2.IS_WINDOWS = exports2.unlink = exports2.symlink = exports2.stat = exports2.rmdir = exports2.rm = exports2.rename = exports2.readlink = exports2.readdir = exports2.open = exports2.mkdir = exports2.lstat = exports2.copyFile = exports2.chmod = void 0;
     var fs = __importStar2(require("fs"));
     var path = __importStar2(require("path"));
-    _a = fs.promises, exports2.chmod = _a.chmod, exports2.copyFile = _a.copyFile, exports2.lstat = _a.lstat, exports2.mkdir = _a.mkdir, exports2.readdir = _a.readdir, exports2.readlink = _a.readlink, exports2.rename = _a.rename, exports2.rmdir = _a.rmdir, exports2.stat = _a.stat, exports2.symlink = _a.symlink, exports2.unlink = _a.unlink;
+    _a = fs.promises, exports2.chmod = _a.chmod, exports2.copyFile = _a.copyFile, exports2.lstat = _a.lstat, exports2.mkdir = _a.mkdir, exports2.open = _a.open, exports2.readdir = _a.readdir, exports2.readlink = _a.readlink, exports2.rename = _a.rename, exports2.rm = _a.rm, exports2.rmdir = _a.rmdir, exports2.stat = _a.stat, exports2.symlink = _a.symlink, exports2.unlink = _a.unlink;
     exports2.IS_WINDOWS = process.platform === "win32";
+    exports2.UV_FS_O_EXLOCK = 268435456;
+    exports2.READONLY = fs.constants.O_RDONLY;
     function exists(fsPath) {
       return __awaiter2(this, void 0, void 0, function* () {
         try {
@@ -2544,12 +2555,8 @@ var require_io = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.findInPath = exports2.which = exports2.mkdirP = exports2.rmRF = exports2.mv = exports2.cp = void 0;
     var assert_1 = require("assert");
-    var childProcess = __importStar2(require("child_process"));
     var path = __importStar2(require("path"));
-    var util_1 = require("util");
     var ioUtil = __importStar2(require_io_util());
-    var exec = util_1.promisify(childProcess.exec);
-    var execFile = util_1.promisify(childProcess.execFile);
     function cp(source, dest, options = {}) {
       return __awaiter2(this, void 0, void 0, function* () {
         const { force, recursive, copySourceDirectory } = readCopyOptions(options);
@@ -2606,41 +2613,16 @@ var require_io = __commonJS({
           if (/[*"<>|]/.test(inputPath)) {
             throw new Error('File path must not contain `*`, `"`, `<`, `>` or `|` on Windows');
           }
-          try {
-            const cmdPath = ioUtil.getCmdPath();
-            if (yield ioUtil.isDirectory(inputPath, true)) {
-              yield exec(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
-                env: { inputPath }
-              });
-            } else {
-              yield exec(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
-                env: { inputPath }
-              });
-            }
-          } catch (err) {
-            if (err.code !== "ENOENT")
-              throw err;
-          }
-          try {
-            yield ioUtil.unlink(inputPath);
-          } catch (err) {
-            if (err.code !== "ENOENT")
-              throw err;
-          }
-        } else {
-          let isDir = false;
-          try {
-            isDir = yield ioUtil.isDirectory(inputPath);
-          } catch (err) {
-            if (err.code !== "ENOENT")
-              throw err;
-            return;
-          }
-          if (isDir) {
-            yield execFile(`rm`, [`-rf`, `${inputPath}`]);
-          } else {
-            yield ioUtil.unlink(inputPath);
-          }
+        }
+        try {
+          yield ioUtil.rm(inputPath, {
+            force: true,
+            maxRetries: 3,
+            recursive: true,
+            retryDelay: 300
+          });
+        } catch (err) {
+          throw new Error(`File was unable to be removed ${err}`);
         }
       });
     }
@@ -3574,12 +3556,12 @@ var require_minimatch = __commonJS({
   "node_modules/minimatch/minimatch.js"(exports2, module2) {
     module2.exports = minimatch;
     minimatch.Minimatch = Minimatch;
-    var path = (() => {
+    var path = function() {
       try {
         return require("path");
       } catch (e) {
       }
-    })() || {
+    }() || {
       sep: "/"
     };
     minimatch.sep = path.sep;
@@ -3614,9 +3596,8 @@ var require_minimatch = __commonJS({
     }
     __name(filter, "filter");
     function ext(a, b) {
-      a = a || {};
       b = b || {};
-      const t = {};
+      var t = {};
       Object.keys(a).forEach(function(k) {
         t[k] = a[k];
       });
@@ -3630,16 +3611,16 @@ var require_minimatch = __commonJS({
       if (!def || typeof def !== "object" || !Object.keys(def).length) {
         return minimatch;
       }
-      const orig = minimatch;
-      const m = /* @__PURE__ */ __name(function minimatch2(p, pattern, options) {
+      var orig = minimatch;
+      var m = /* @__PURE__ */ __name(function minimatch2(p, pattern, options) {
         return orig(p, pattern, ext(def, options));
       }, "minimatch");
       m.Minimatch = /* @__PURE__ */ __name(function Minimatch2(pattern, options) {
         return new orig.Minimatch(pattern, ext(def, options));
       }, "Minimatch");
-      m.Minimatch.defaults = (options) => {
+      m.Minimatch.defaults = /* @__PURE__ */ __name(function defaults(options) {
         return orig.defaults(ext(def, options)).Minimatch;
-      };
+      }, "defaults");
       m.filter = /* @__PURE__ */ __name(function filter2(pattern, options) {
         return orig.filter(pattern, ext(def, options));
       }, "filter");
@@ -3667,8 +3648,6 @@ var require_minimatch = __commonJS({
       if (!options.nocomment && pattern.charAt(0) === "#") {
         return false;
       }
-      if (pattern.trim() === "")
-        return p === "";
       return new Minimatch(pattern, options).match(p);
     }
     __name(minimatch, "minimatch");
@@ -3680,7 +3659,7 @@ var require_minimatch = __commonJS({
       if (!options)
         options = {};
       pattern = pattern.trim();
-      if (path.sep !== "/") {
+      if (!options.allowWindowsEscape && path.sep !== "/") {
         pattern = pattern.split(path.sep).join("/");
       }
       this.options = options;
@@ -3690,6 +3669,7 @@ var require_minimatch = __commonJS({
       this.negate = false;
       this.comment = false;
       this.empty = false;
+      this.partial = !!options.partial;
       this.make();
     }
     __name(Minimatch, "Minimatch");
@@ -3697,8 +3677,6 @@ var require_minimatch = __commonJS({
     };
     Minimatch.prototype.make = make;
     function make() {
-      if (this._made)
-        return;
       var pattern = this.pattern;
       var options = this.options;
       if (!options.nocomment && pattern.charAt(0) === "#") {
@@ -3712,7 +3690,9 @@ var require_minimatch = __commonJS({
       this.parseNegate();
       var set = this.globSet = this.braceExpand();
       if (options.debug)
-        this.debug = console.error;
+        this.debug = /* @__PURE__ */ __name(function debug() {
+          console.error.apply(console, arguments);
+        }, "debug");
       this.debug(this.pattern, set);
       set = this.globParts = set.map(function(s) {
         return s.split(slashSplit);
@@ -3767,7 +3747,7 @@ var require_minimatch = __commonJS({
     }
     __name(braceExpand, "braceExpand");
     var MAX_PATTERN_LENGTH = 1024 * 64;
-    var assertValidPattern = /* @__PURE__ */ __name((pattern) => {
+    var assertValidPattern = /* @__PURE__ */ __name(function(pattern) {
       if (typeof pattern !== "string") {
         throw new TypeError("invalid pattern");
       }
@@ -3780,12 +3760,16 @@ var require_minimatch = __commonJS({
     function parse(pattern, isSub) {
       assertValidPattern(pattern);
       var options = this.options;
-      if (!options.noglobstar && pattern === "**")
-        return GLOBSTAR;
+      if (pattern === "**") {
+        if (!options.noglobstar)
+          return GLOBSTAR;
+        else
+          pattern = "*";
+      }
       if (pattern === "")
         return "";
       var re = "";
-      var hasMagic = false;
+      var hasMagic = !!options.nocase;
       var escaping = false;
       var patternListStack = [];
       var negativeLists = [];
@@ -3909,17 +3893,15 @@ var require_minimatch = __commonJS({
               escaping = false;
               continue;
             }
-            if (inClass) {
-              var cs = pattern.substring(classStart + 1, i);
-              try {
-                RegExp("[" + cs + "]");
-              } catch (er) {
-                var sp = this.parse(cs, SUBPARSE);
-                re = re.substr(0, reClassStart) + "\\[" + sp[0] + "\\]";
-                hasMagic = hasMagic || sp[1];
-                inClass = false;
-                continue;
-              }
+            var cs = pattern.substring(classStart + 1, i);
+            try {
+              RegExp("[" + cs + "]");
+            } catch (er) {
+              var sp = this.parse(cs, SUBPARSE);
+              re = re.substr(0, reClassStart) + "\\[" + sp[0] + "\\]";
+              hasMagic = hasMagic || sp[1];
+              inClass = false;
+              continue;
             }
             hasMagic = true;
             inClass = false;
@@ -3961,8 +3943,8 @@ var require_minimatch = __commonJS({
       }
       var addPatternStart = false;
       switch (re.charAt(0)) {
-        case ".":
         case "[":
+        case ".":
         case "(":
           addPatternStart = true;
       }
@@ -4042,7 +4024,7 @@ var require_minimatch = __commonJS({
     __name(makeRe, "makeRe");
     minimatch.match = function(list, pattern, options) {
       options = options || {};
-      const mm = new Minimatch(pattern, options);
+      var mm = new Minimatch(pattern, options);
       list = list.filter(function(f) {
         return mm.match(f);
       });
@@ -4051,8 +4033,9 @@ var require_minimatch = __commonJS({
       }
       return list;
     };
-    Minimatch.prototype.match = match;
-    function match(f, partial) {
+    Minimatch.prototype.match = /* @__PURE__ */ __name(function match(f, partial) {
+      if (typeof partial === "undefined")
+        partial = this.partial;
       this.debug("match", f, this.pattern);
       if (this.comment)
         return false;
@@ -4091,8 +4074,7 @@ var require_minimatch = __commonJS({
       if (options.flipNegate)
         return false;
       return this.negate;
-    }
-    __name(match, "match");
+    }, "match");
     Minimatch.prototype.matchOne = function(file, pattern, partial) {
       var options = this.options;
       this.debug(
@@ -4143,11 +4125,7 @@ var require_minimatch = __commonJS({
         }
         var hit;
         if (typeof p === "string") {
-          if (options.nocase) {
-            hit = f.toLowerCase() === p.toLowerCase();
-          } else {
-            hit = f === p;
-          }
+          hit = f === p;
           this.debug("string match", p, f, hit);
         } else {
           hit = f.match(p);
@@ -4341,6 +4319,7 @@ var require_common = __commonJS({
       self2.nomount = !!options.nomount;
       options.nonegate = true;
       options.nocomment = true;
+      options.allowWindowsEscape = false;
       self2.minimatch = new Minimatch(pattern, options);
       self2.options = self2.minimatch.options;
     }
@@ -4491,7 +4470,7 @@ var require_sync = __commonJS({
     }
     __name(GlobSync, "GlobSync");
     GlobSync.prototype._finish = function() {
-      assert(this instanceof GlobSync);
+      assert.ok(this instanceof GlobSync);
       if (this.realpath) {
         var self2 = this;
         this.matches.forEach(function(matchset, index) {
@@ -4513,7 +4492,7 @@ var require_sync = __commonJS({
       common.finish(this);
     };
     GlobSync.prototype._process = function(pattern, index, inGlobStar) {
-      assert(this instanceof GlobSync);
+      assert.ok(this instanceof GlobSync);
       var n = 0;
       while (typeof pattern[n] === "string") {
         n++;
@@ -4534,7 +4513,9 @@ var require_sync = __commonJS({
       var read;
       if (prefix === null)
         read = ".";
-      else if (isAbsolute(prefix) || isAbsolute(pattern.join("/"))) {
+      else if (isAbsolute(prefix) || isAbsolute(pattern.map(function(p) {
+        return typeof p === "string" ? p : "[*]";
+      }).join("/"))) {
         if (!prefix || !isAbsolute(prefix))
           prefix = "/" + prefix;
         read = prefix;
@@ -5168,7 +5149,9 @@ var require_glob = __commonJS({
       var read;
       if (prefix === null)
         read = ".";
-      else if (isAbsolute(prefix) || isAbsolute(pattern.join("/"))) {
+      else if (isAbsolute(prefix) || isAbsolute(pattern.map(function(p) {
+        return typeof p === "string" ? p : "[*]";
+      }).join("/"))) {
         if (!prefix || !isAbsolute(prefix))
           prefix = "/" + prefix;
         read = prefix;
@@ -11130,6 +11113,7 @@ var require_constants = __commonJS({
   "node_modules/@actions/cache/lib/internal/constants.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ManifestFilename = exports2.TarFilename = exports2.SystemTarPathOnWindows = exports2.GnuTarPathOnWindows = exports2.SocketTimeout = exports2.DefaultRetryDelay = exports2.DefaultRetryAttempts = exports2.ArchiveToolType = exports2.CompressionMethod = exports2.CacheFilename = void 0;
     var CacheFilename;
     (function(CacheFilename2) {
       CacheFilename2["Gzip"] = "cache.tgz";
@@ -11141,9 +11125,18 @@ var require_constants = __commonJS({
       CompressionMethod2["ZstdWithoutLong"] = "zstd-without-long";
       CompressionMethod2["Zstd"] = "zstd";
     })(CompressionMethod = exports2.CompressionMethod || (exports2.CompressionMethod = {}));
+    var ArchiveToolType;
+    (function(ArchiveToolType2) {
+      ArchiveToolType2["GNU"] = "gnu";
+      ArchiveToolType2["BSD"] = "bsd";
+    })(ArchiveToolType = exports2.ArchiveToolType || (exports2.ArchiveToolType = {}));
     exports2.DefaultRetryAttempts = 2;
     exports2.DefaultRetryDelay = 5e3;
     exports2.SocketTimeout = 5e3;
+    exports2.GnuTarPathOnWindows = `${process.env["PROGRAMFILES"]}\\Git\\usr\\bin\\tar.exe`;
+    exports2.SystemTarPathOnWindows = `${process.env["SYSTEMDRIVE"]}\\Windows\\System32\\tar.exe`;
+    exports2.TarFilename = "cache.tar";
+    exports2.ManifestFilename = "manifest.txt";
   }
 });
 
@@ -11151,6 +11144,38 @@ var require_constants = __commonJS({
 var require_cacheUtils = __commonJS({
   "node_modules/@actions/cache/lib/internal/cacheUtils.js"(exports2) {
     "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
+      }
+      __setModuleDefault2(result, mod);
+      return result;
+    };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -11204,19 +11229,8 @@ var require_cacheUtils = __commonJS({
       }
       __name(settle, "settle");
     };
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (Object.hasOwnProperty.call(mod, k))
-            result[k] = mod[k];
-      }
-      result["default"] = mod;
-      return result;
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.isGhes = exports2.assertDefined = exports2.getGnuTarPathOnWindows = exports2.getCacheFileName = exports2.getCompressionMethod = exports2.unlinkFile = exports2.resolvePaths = exports2.getArchiveFileSizeInBytes = exports2.createTempDirectory = void 0;
     var core2 = __importStar2(require_core());
     var exec = __importStar2(require_exec());
     var glob = __importStar2(require_glob2());
@@ -11244,7 +11258,7 @@ var require_cacheUtils = __commonJS({
           }
           tempDirectory = path.join(baseLocation, "actions", "temp");
         }
-        const dest = path.join(tempDirectory, uuid_1.v4());
+        const dest = path.join(tempDirectory, (0, uuid_1.v4)());
         yield io2.mkdirP(dest);
         return dest;
       });
@@ -11299,12 +11313,13 @@ var require_cacheUtils = __commonJS({
     }
     __name(unlinkFile, "unlinkFile");
     exports2.unlinkFile = unlinkFile;
-    function getVersion(app) {
+    function getVersion(app, additionalArgs = []) {
       return __awaiter2(this, void 0, void 0, function* () {
-        core2.debug(`Checking ${app} --version`);
         let versionOutput = "";
+        additionalArgs.push("--version");
+        core2.debug(`Checking ${app} ${additionalArgs.join(" ")}`);
         try {
-          yield exec.exec(`${app} --version`, [], {
+          yield exec.exec(`${app}`, additionalArgs, {
             ignoreReturnCode: true,
             silent: true,
             listeners: {
@@ -11323,17 +11338,13 @@ var require_cacheUtils = __commonJS({
     __name(getVersion, "getVersion");
     function getCompressionMethod() {
       return __awaiter2(this, void 0, void 0, function* () {
-        if (process.platform === "win32" && !(yield isGnuTarInstalled())) {
-          return constants_1.CompressionMethod.Gzip;
-        }
-        const versionOutput = yield getVersion("zstd");
+        const versionOutput = yield getVersion("zstd", ["--quiet"]);
         const version2 = semver.clean(versionOutput);
-        if (!versionOutput.toLowerCase().includes("zstd command line interface")) {
+        core2.debug(`zstd version: ${version2}`);
+        if (versionOutput === "") {
           return constants_1.CompressionMethod.Gzip;
-        } else if (!version2 || semver.lt(version2, "v1.3.2")) {
-          return constants_1.CompressionMethod.ZstdWithoutLong;
         } else {
-          return constants_1.CompressionMethod.Zstd;
+          return constants_1.CompressionMethod.ZstdWithoutLong;
         }
       });
     }
@@ -11344,14 +11355,17 @@ var require_cacheUtils = __commonJS({
     }
     __name(getCacheFileName, "getCacheFileName");
     exports2.getCacheFileName = getCacheFileName;
-    function isGnuTarInstalled() {
+    function getGnuTarPathOnWindows() {
       return __awaiter2(this, void 0, void 0, function* () {
+        if (fs.existsSync(constants_1.GnuTarPathOnWindows)) {
+          return constants_1.GnuTarPathOnWindows;
+        }
         const versionOutput = yield getVersion("tar");
-        return versionOutput.toLowerCase().includes("gnu tar");
+        return versionOutput.toLowerCase().includes("gnu tar") ? io2.which("tar") : "";
       });
     }
-    __name(isGnuTarInstalled, "isGnuTarInstalled");
-    exports2.isGnuTarInstalled = isGnuTarInstalled;
+    __name(getGnuTarPathOnWindows, "getGnuTarPathOnWindows");
+    exports2.getGnuTarPathOnWindows = getGnuTarPathOnWindows;
     function assertDefined(name, value) {
       if (value === void 0) {
         throw Error(`Expected ${name} but value was undefiend`);
@@ -11399,6 +11413,10 @@ var require_proxy3 = __commonJS({
       if (!reqUrl.hostname) {
         return false;
       }
+      const reqHost = reqUrl.hostname;
+      if (isLoopbackAddress(reqHost)) {
+        return true;
+      }
       const noProxy = process.env["no_proxy"] || process.env["NO_PROXY"] || "";
       if (!noProxy) {
         return false;
@@ -11416,7 +11434,7 @@ var require_proxy3 = __commonJS({
         upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
       }
       for (const upperNoProxyItem of noProxy.split(",").map((x) => x.trim().toUpperCase()).filter((x) => x)) {
-        if (upperReqHosts.some((x) => x === upperNoProxyItem)) {
+        if (upperNoProxyItem === "*" || upperReqHosts.some((x) => x === upperNoProxyItem || x.endsWith(`.${upperNoProxyItem}`) || upperNoProxyItem.startsWith(".") && x.endsWith(`${upperNoProxyItem}`))) {
           return true;
         }
       }
@@ -11424,6 +11442,11 @@ var require_proxy3 = __commonJS({
     }
     __name(checkBypass, "checkBypass");
     exports2.checkBypass = checkBypass;
+    function isLoopbackAddress(host) {
+      const hostLower = host.toLowerCase();
+      return hostLower === "localhost" || hostLower.startsWith("127.") || hostLower.startsWith("[::1]") || hostLower.startsWith("[0:0:0:0:0:0:0:1]");
+    }
+    __name(isLoopbackAddress, "isLoopbackAddress");
   }
 });
 
@@ -12611,9 +12634,9 @@ var require_dist2 = __commonJS({
   }
 });
 
-// node_modules/@azure/core-http/node_modules/tslib/tslib.js
+// node_modules/tslib/tslib.js
 var require_tslib = __commonJS({
-  "node_modules/@azure/core-http/node_modules/tslib/tslib.js"(exports2, module2) {
+  "node_modules/tslib/tslib.js"(exports2, module2) {
     var __extends;
     var __assign;
     var __rest;
@@ -12754,10 +12777,10 @@ var require_tslib = __commonJS({
             if (_ = accept(result.set))
               descriptor.set = _;
             if (_ = accept(result.init))
-              initializers.push(_);
+              initializers.unshift(_);
           } else if (_ = accept(result)) {
             if (kind === "field")
-              initializers.push(_);
+              initializers.unshift(_);
             else
               descriptor[key] = _;
           }
@@ -19324,8 +19347,29 @@ var require_dist4 = __commonJS({
       return isDefined(thing) && typeof thing === "object" && property in thing;
     }
     __name(objectHasProperty, "objectHasProperty");
+    function generateUUID() {
+      let uuid = "";
+      for (let i = 0; i < 32; i++) {
+        const randomNumber = Math.floor(Math.random() * 16);
+        if (i === 12) {
+          uuid += "4";
+        } else if (i === 16) {
+          uuid += randomNumber & 3 | 8;
+        } else {
+          uuid += randomNumber.toString(16);
+        }
+        if (i === 7 || i === 11 || i === 15 || i === 19) {
+          uuid += "-";
+        }
+      }
+      return uuid;
+    }
+    __name(generateUUID, "generateUUID");
     var _a;
     var uuidFunction = typeof ((_a = globalThis === null || globalThis === void 0 ? void 0 : globalThis.crypto) === null || _a === void 0 ? void 0 : _a.randomUUID) === "function" ? globalThis.crypto.randomUUID.bind(globalThis.crypto) : crypto.randomUUID;
+    if (!uuidFunction) {
+      uuidFunction = generateUUID;
+    }
     function randomUUID() {
       return uuidFunction();
     }
@@ -19351,14 +19395,15 @@ var require_dist5 = __commonJS({
   "node_modules/@azure/logger/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    function _interopDefault(ex) {
-      return ex && typeof ex === "object" && "default" in ex ? ex["default"] : ex;
-    }
-    __name(_interopDefault, "_interopDefault");
-    var util = _interopDefault(require("util"));
     var os = require("os");
+    var util = require("util");
+    function _interopDefaultLegacy(e) {
+      return e && typeof e === "object" && "default" in e ? e : { "default": e };
+    }
+    __name(_interopDefaultLegacy, "_interopDefaultLegacy");
+    var util__default = /* @__PURE__ */ _interopDefaultLegacy(util);
     function log(message, ...args) {
-      process.stderr.write(`${util.format(message, ...args)}${os.EOL}`);
+      process.stderr.write(`${util__default["default"].format(message, ...args)}${os.EOL}`);
     }
     __name(log, "log");
     var debugEnvVariable = typeof process !== "undefined" && process.env && process.env.DEBUG || void 0;
@@ -19419,14 +19464,14 @@ var require_dist5 = __commonJS({
     }
     __name(disable, "disable");
     function createDebugger(namespace) {
-      const newDebugger = Object.assign(debug, {
+      const newDebugger = Object.assign(debug2, {
         enabled: enabled(namespace),
         destroy,
         log: debugObj.log,
         namespace,
         extend
       });
-      function debug(...args) {
+      function debug2(...args) {
         if (!newDebugger.enabled) {
           return;
         }
@@ -19435,7 +19480,7 @@ var require_dist5 = __commonJS({
         }
         newDebugger.log(...args);
       }
-      __name(debug, "debug");
+      __name(debug2, "debug");
       debuggers.push(newDebugger);
       return newDebugger;
     }
@@ -19455,12 +19500,13 @@ var require_dist5 = __commonJS({
       return newDebugger;
     }
     __name(extend, "extend");
+    var debug = debugObj;
     var registeredLoggers = /* @__PURE__ */ new Set();
     var logLevelFromEnv = typeof process !== "undefined" && process.env && process.env.AZURE_LOG_LEVEL || void 0;
     var azureLogLevel;
-    var AzureLogger = debugObj("azure");
+    var AzureLogger = debug("azure");
     AzureLogger.log = (...args) => {
-      debugObj.log(...args);
+      debug.log(...args);
     };
     var AZURE_LOG_LEVELS = ["verbose", "info", "warning", "error"];
     if (logLevelFromEnv) {
@@ -19481,7 +19527,7 @@ var require_dist5 = __commonJS({
           enabledNamespaces2.push(logger.namespace);
         }
       }
-      debugObj.enable(enabledNamespaces2.join(","));
+      debug.enable(enabledNamespaces2.join(","));
     }
     __name(setLogLevel, "setLogLevel");
     function getLogLevel() {
@@ -19517,19 +19563,15 @@ var require_dist5 = __commonJS({
       });
       patchLogMethod(parent, logger);
       if (shouldEnable(logger)) {
-        const enabledNamespaces2 = debugObj.disable();
-        debugObj.enable(enabledNamespaces2 + "," + logger.namespace);
+        const enabledNamespaces2 = debug.disable();
+        debug.enable(enabledNamespaces2 + "," + logger.namespace);
       }
       registeredLoggers.add(logger);
       return logger;
     }
     __name(createLogger, "createLogger");
     function shouldEnable(logger) {
-      if (azureLogLevel && levelMap[logger.level] <= levelMap[azureLogLevel]) {
-        return true;
-      } else {
-        return false;
-      }
+      return Boolean(azureLogLevel && levelMap[logger.level] <= levelMap[azureLogLevel]);
     }
     __name(shouldEnable, "shouldEnable");
     function isAzureLogLevel(logLevel) {
@@ -20165,6 +20207,10 @@ var require_db = __commonJS({
       "application/cfw": {
         source: "iana"
       },
+      "application/city+json": {
+        source: "iana",
+        compressible: true
+      },
       "application/clr": {
         source: "iana"
       },
@@ -20208,7 +20254,8 @@ var require_db = __commonJS({
       },
       "application/cpl+xml": {
         source: "iana",
-        compressible: true
+        compressible: true,
+        extensions: ["cpl"]
       },
       "application/csrattrs": {
         source: "iana"
@@ -20242,6 +20289,11 @@ var require_db = __commonJS({
         source: "iana",
         compressible: true,
         extensions: ["mpd"]
+      },
+      "application/dash-patch+xml": {
+        source: "iana",
+        compressible: true,
+        extensions: ["mpp"]
       },
       "application/dashdelta": {
         source: "iana"
@@ -20783,7 +20835,8 @@ var require_db = __commonJS({
       },
       "application/media-policy-dataset+xml": {
         source: "iana",
-        compressible: true
+        compressible: true,
+        extensions: ["mpf"]
       },
       "application/media_control+xml": {
         source: "iana",
@@ -20939,6 +20992,9 @@ var require_db = __commonJS({
       "application/oauth-authz-req+jwt": {
         source: "iana"
       },
+      "application/oblivious-dns-message": {
+        source: "iana"
+      },
       "application/ocsp-request": {
         source: "iana"
       },
@@ -21031,7 +21087,8 @@ var require_db = __commonJS({
         extensions: ["pgp"]
       },
       "application/pgp-keys": {
-        source: "iana"
+        source: "iana",
+        extensions: ["asc"]
       },
       "application/pgp-signature": {
         source: "iana",
@@ -22562,6 +22619,10 @@ var require_db = __commonJS({
       "application/vnd.ecip.rlp": {
         source: "iana"
       },
+      "application/vnd.eclipse.ditto+json": {
+        source: "iana",
+        compressible: true
+      },
       "application/vnd.ecowin.chart": {
         source: "iana",
         extensions: ["mag"]
@@ -22719,6 +22780,10 @@ var require_db = __commonJS({
       "application/vnd.etsi.tsl.der": {
         source: "iana"
       },
+      "application/vnd.eu.kasparian.car+json": {
+        source: "iana",
+        compressible: true
+      },
       "application/vnd.eudora.data": {
         source: "iana"
       },
@@ -22748,6 +22813,10 @@ var require_db = __commonJS({
       },
       "application/vnd.f-secure.mobile": {
         source: "iana"
+      },
+      "application/vnd.familysearch.gedcom+zip": {
+        source: "iana",
+        compressible: false
       },
       "application/vnd.fastcopy-disk-image": {
         source: "iana"
@@ -23038,6 +23107,16 @@ var require_db = __commonJS({
       "application/vnd.hhe.lesson-player": {
         source: "iana",
         extensions: ["les"]
+      },
+      "application/vnd.hl7cda+xml": {
+        source: "iana",
+        charset: "UTF-8",
+        compressible: true
+      },
+      "application/vnd.hl7v2+xml": {
+        source: "iana",
+        charset: "UTF-8",
+        compressible: true
       },
       "application/vnd.hp-hpgl": {
         source: "iana",
@@ -23451,6 +23530,10 @@ var require_db = __commonJS({
       "application/vnd.mason+json": {
         source: "iana",
         compressible: true
+      },
+      "application/vnd.maxar.archive.3tz+zip": {
+        source: "iana",
+        compressible: false
       },
       "application/vnd.maxmind.maxmind-db": {
         source: "iana"
@@ -25072,6 +25155,10 @@ var require_db = __commonJS({
         source: "iana",
         compressible: true
       },
+      "application/vnd.syft+json": {
+        source: "iana",
+        compressible: true
+      },
       "application/vnd.symbian.install": {
         source: "apache",
         extensions: ["sis", "sisx"]
@@ -25462,7 +25549,8 @@ var require_db = __commonJS({
       },
       "application/watcherinfo+xml": {
         source: "iana",
-        compressible: true
+        compressible: true,
+        extensions: ["wif"]
       },
       "application/webpush-options+json": {
         source: "iana",
@@ -26882,10 +26970,12 @@ var require_db = __commonJS({
         extensions: ["apng"]
       },
       "image/avci": {
-        source: "iana"
+        source: "iana",
+        extensions: ["avci"]
       },
       "image/avcs": {
-        source: "iana"
+        source: "iana",
+        extensions: ["avcs"]
       },
       "image/avif": {
         source: "iana",
@@ -31773,6 +31863,11 @@ var require_lib5 = __commonJS({
       const dest = new URL$1(destination).hostname;
       return orig === dest || orig[orig.length - dest.length - 1] === "." && orig.endsWith(dest);
     }, "isDomainOrSubdomain");
+    var isSameProtocol = /* @__PURE__ */ __name(function isSameProtocol2(destination, original) {
+      const orig = new URL$1(original).protocol;
+      const dest = new URL$1(destination).protocol;
+      return orig === dest;
+    }, "isSameProtocol");
     function fetch(url, opts) {
       if (!fetch.Promise) {
         throw new Error("native promise missing, set fetch.Promise to your favorite alternative");
@@ -31788,7 +31883,7 @@ var require_lib5 = __commonJS({
           let error = new AbortError("The user aborted a request.");
           reject(error);
           if (request.body && request.body instanceof Stream.Readable) {
-            request.body.destroy(error);
+            destroyStream(request.body, error);
           }
           if (!response || !response.body)
             return;
@@ -31824,8 +31919,31 @@ var require_lib5 = __commonJS({
         }
         req.on("error", function(err) {
           reject(new FetchError(`request to ${request.url} failed, reason: ${err.message}`, "system", err));
+          if (response && response.body) {
+            destroyStream(response.body, err);
+          }
           finalize();
         });
+        fixResponseChunkedTransferBadEnding(req, function(err) {
+          if (signal && signal.aborted) {
+            return;
+          }
+          if (response && response.body) {
+            destroyStream(response.body, err);
+          }
+        });
+        if (parseInt(process.version.substring(1)) < 14) {
+          req.on("socket", function(s) {
+            s.addListener("close", function(hadError) {
+              const hasDataListener = s.listenerCount("data") > 0;
+              if (response && hasDataListener && !hadError && !(signal && signal.aborted)) {
+                const err = new Error("Premature close");
+                err.code = "ERR_STREAM_PREMATURE_CLOSE";
+                response.body.emit("error", err);
+              }
+            });
+          });
+        }
         req.on("response", function(res) {
           clearTimeout(reqTimeout);
           const headers = createHeadersLenient(res.headers);
@@ -31876,7 +31994,7 @@ var require_lib5 = __commonJS({
                   timeout: request.timeout,
                   size: request.size
                 };
-                if (!isDomainOrSubdomain(request.url, locationURL)) {
+                if (!isDomainOrSubdomain(request.url, locationURL) || !isSameProtocol(request.url, locationURL)) {
                   for (const name of ["authorization", "www-authenticate", "cookie", "cookie2"]) {
                     requestOpts.headers.delete(name);
                   }
@@ -31937,6 +32055,12 @@ var require_lib5 = __commonJS({
               response = new Response(body, response_options);
               resolve(response);
             });
+            raw.on("end", function() {
+              if (!response) {
+                response = new Response(body, response_options);
+                resolve(response);
+              }
+            });
             return;
           }
           if (codings == "br" && typeof zlib.createBrotliDecompress === "function") {
@@ -31952,6 +32076,35 @@ var require_lib5 = __commonJS({
       });
     }
     __name(fetch, "fetch");
+    function fixResponseChunkedTransferBadEnding(request, errorCallback) {
+      let socket;
+      request.on("socket", function(s) {
+        socket = s;
+      });
+      request.on("response", function(response) {
+        const headers = response.headers;
+        if (headers["transfer-encoding"] === "chunked" && !headers["content-length"]) {
+          response.once("close", function(hadError) {
+            const hasDataListener = socket.listenerCount("data") > 0;
+            if (hasDataListener && !hadError) {
+              const err = new Error("Premature close");
+              err.code = "ERR_STREAM_PREMATURE_CLOSE";
+              errorCallback(err);
+            }
+          });
+        }
+      });
+    }
+    __name(fixResponseChunkedTransferBadEnding, "fixResponseChunkedTransferBadEnding");
+    function destroyStream(stream, err) {
+      if (stream.destroy) {
+        stream.destroy(err);
+      } else {
+        stream.emit("error", err);
+        stream.end();
+      }
+    }
+    __name(destroyStream, "destroyStream");
     fetch.isRedirect = function(code) {
       return code === 301 || code === 302 || code === 303 || code === 307 || code === 308;
     };
@@ -31963,14 +32116,6 @@ var require_lib5 = __commonJS({
     exports2.Request = Request;
     exports2.Response = Response;
     exports2.FetchError = FetchError;
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/baggage/types.js
-var require_types = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/baggage/types.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
   }
 });
 
@@ -32040,7 +32185,7 @@ var require_version3 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.VERSION = void 0;
-    exports2.VERSION = "1.0.4";
+    exports2.VERSION = "1.4.1";
   }
 });
 
@@ -32053,15 +32198,13 @@ var require_semver2 = __commonJS({
     var version_1 = require_version3();
     var re = /^(\d+)\.(\d+)\.(\d+)(-(.+))?$/;
     function _makeCompatibilityCheck(ownVersion) {
-      var acceptedVersions = /* @__PURE__ */ new Set([ownVersion]);
-      var rejectedVersions = /* @__PURE__ */ new Set();
-      var myVersionMatch = ownVersion.match(re);
+      const acceptedVersions = /* @__PURE__ */ new Set([ownVersion]);
+      const rejectedVersions = /* @__PURE__ */ new Set();
+      const myVersionMatch = ownVersion.match(re);
       if (!myVersionMatch) {
-        return function() {
-          return false;
-        };
+        return () => false;
       }
-      var ownVersionParsed = {
+      const ownVersionParsed = {
         major: +myVersionMatch[1],
         minor: +myVersionMatch[2],
         patch: +myVersionMatch[3],
@@ -32089,11 +32232,11 @@ var require_semver2 = __commonJS({
         if (rejectedVersions.has(globalVersion)) {
           return false;
         }
-        var globalVersionMatch = globalVersion.match(re);
+        const globalVersionMatch = globalVersion.match(re);
         if (!globalVersionMatch) {
           return _reject(globalVersion);
         }
-        var globalVersionParsed = {
+        const globalVersionParsed = {
           major: +globalVersionMatch[1],
           minor: +globalVersionMatch[2],
           patch: +globalVersionMatch[3],
@@ -32133,36 +32276,33 @@ var require_global_utils = __commonJS({
     var version_1 = require_version3();
     var semver_1 = require_semver2();
     var major = version_1.VERSION.split(".")[0];
-    var GLOBAL_OPENTELEMETRY_API_KEY = Symbol.for("opentelemetry.js.api." + major);
+    var GLOBAL_OPENTELEMETRY_API_KEY = Symbol.for(`opentelemetry.js.api.${major}`);
     var _global = platform_1._globalThis;
-    function registerGlobal(type, instance, diag, allowOverride) {
+    function registerGlobal(type, instance, diag, allowOverride = false) {
       var _a;
-      if (allowOverride === void 0) {
-        allowOverride = false;
-      }
-      var api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a !== void 0 ? _a : {
+      const api = _global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a !== void 0 ? _a : {
         version: version_1.VERSION
       };
       if (!allowOverride && api[type]) {
-        var err = new Error("@opentelemetry/api: Attempted duplicate registration of API: " + type);
+        const err = new Error(`@opentelemetry/api: Attempted duplicate registration of API: ${type}`);
         diag.error(err.stack || err.message);
         return false;
       }
       if (api.version !== version_1.VERSION) {
-        var err = new Error("@opentelemetry/api: All API registration versions must match");
+        const err = new Error(`@opentelemetry/api: Registration of version v${api.version} for ${type} does not match previously registered API v${version_1.VERSION}`);
         diag.error(err.stack || err.message);
         return false;
       }
       api[type] = instance;
-      diag.debug("@opentelemetry/api: Registered a global for " + type + " v" + version_1.VERSION + ".");
+      diag.debug(`@opentelemetry/api: Registered a global for ${type} v${version_1.VERSION}.`);
       return true;
     }
     __name(registerGlobal, "registerGlobal");
     exports2.registerGlobal = registerGlobal;
     function getGlobal(type) {
       var _a, _b;
-      var globalVersion = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a === void 0 ? void 0 : _a.version;
-      if (!globalVersion || !semver_1.isCompatible(globalVersion)) {
+      const globalVersion = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _a === void 0 ? void 0 : _a.version;
+      if (!globalVersion || !(0, semver_1.isCompatible)(globalVersion)) {
         return;
       }
       return (_b = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _b === void 0 ? void 0 : _b[type];
@@ -32170,8 +32310,8 @@ var require_global_utils = __commonJS({
     __name(getGlobal, "getGlobal");
     exports2.getGlobal = getGlobal;
     function unregisterGlobal(type, diag) {
-      diag.debug("@opentelemetry/api: Unregistering a global for " + type + " v" + version_1.VERSION + ".");
-      var api = _global[GLOBAL_OPENTELEMETRY_API_KEY];
+      diag.debug(`@opentelemetry/api: Unregistering a global for ${type} v${version_1.VERSION}.`);
+      const api = _global[GLOBAL_OPENTELEMETRY_API_KEY];
       if (api) {
         delete api[type];
       }
@@ -32188,63 +32328,42 @@ var require_ComponentLogger = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DiagComponentLogger = void 0;
     var global_utils_1 = require_global_utils();
-    var DiagComponentLogger = function() {
-      function DiagComponentLogger2(props) {
+    var DiagComponentLogger = class {
+      constructor(props) {
         this._namespace = props.namespace || "DiagComponentLogger";
       }
-      __name(DiagComponentLogger2, "DiagComponentLogger");
-      DiagComponentLogger2.prototype.debug = function() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
-        }
+      debug(...args) {
         return logProxy("debug", this._namespace, args);
-      };
-      DiagComponentLogger2.prototype.error = function() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
-        }
+      }
+      error(...args) {
         return logProxy("error", this._namespace, args);
-      };
-      DiagComponentLogger2.prototype.info = function() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
-        }
+      }
+      info(...args) {
         return logProxy("info", this._namespace, args);
-      };
-      DiagComponentLogger2.prototype.warn = function() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
-        }
+      }
+      warn(...args) {
         return logProxy("warn", this._namespace, args);
-      };
-      DiagComponentLogger2.prototype.verbose = function() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
-        }
+      }
+      verbose(...args) {
         return logProxy("verbose", this._namespace, args);
-      };
-      return DiagComponentLogger2;
-    }();
+      }
+    };
+    __name(DiagComponentLogger, "DiagComponentLogger");
     exports2.DiagComponentLogger = DiagComponentLogger;
     function logProxy(funcName, namespace, args) {
-      var logger = global_utils_1.getGlobal("diag");
+      const logger = (0, global_utils_1.getGlobal)("diag");
       if (!logger) {
         return;
       }
       args.unshift(namespace);
-      return logger[funcName].apply(logger, args);
+      return logger[funcName](...args);
     }
     __name(logProxy, "logProxy");
   }
 });
 
 // node_modules/@opentelemetry/api/build/src/diag/types.js
-var require_types2 = __commonJS({
+var require_types = __commonJS({
   "node_modules/@opentelemetry/api/build/src/diag/types.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -32268,7 +32387,7 @@ var require_logLevelLogger = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createLogLevelDiagLogger = void 0;
-    var types_1 = require_types2();
+    var types_1 = require_types();
     function createLogLevelDiagLogger(maxLevel, logger) {
       if (maxLevel < types_1.DiagLogLevel.NONE) {
         maxLevel = types_1.DiagLogLevel.NONE;
@@ -32277,7 +32396,7 @@ var require_logLevelLogger = __commonJS({
       }
       logger = logger || {};
       function _filterFunc(funcName, theLevel) {
-        var theFunc = logger[funcName];
+        const theFunc = logger[funcName];
         if (typeof theFunc === "function" && maxLevel >= theLevel) {
           return theFunc.bind(logger);
         }
@@ -32306,48 +32425,47 @@ var require_diag = __commonJS({
     exports2.DiagAPI = void 0;
     var ComponentLogger_1 = require_ComponentLogger();
     var logLevelLogger_1 = require_logLevelLogger();
-    var types_1 = require_types2();
+    var types_1 = require_types();
     var global_utils_1 = require_global_utils();
     var API_NAME = "diag";
-    var DiagAPI = function() {
-      function DiagAPI2() {
+    var DiagAPI = class {
+      constructor() {
         function _logProxy(funcName) {
-          return function() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-              args[_i] = arguments[_i];
-            }
-            var logger = global_utils_1.getGlobal("diag");
+          return function(...args) {
+            const logger = (0, global_utils_1.getGlobal)("diag");
             if (!logger)
               return;
-            return logger[funcName].apply(logger, args);
+            return logger[funcName](...args);
           };
         }
         __name(_logProxy, "_logProxy");
-        var self2 = this;
-        self2.setLogger = function(logger, logLevel) {
-          var _a, _b;
-          if (logLevel === void 0) {
-            logLevel = types_1.DiagLogLevel.INFO;
-          }
+        const self2 = this;
+        const setLogger = /* @__PURE__ */ __name((logger, optionsOrLogLevel = { logLevel: types_1.DiagLogLevel.INFO }) => {
+          var _a, _b, _c;
           if (logger === self2) {
-            var err = new Error("Cannot use diag as the logger for itself. Please use a DiagLogger implementation like ConsoleDiagLogger or a custom implementation");
+            const err = new Error("Cannot use diag as the logger for itself. Please use a DiagLogger implementation like ConsoleDiagLogger or a custom implementation");
             self2.error((_a = err.stack) !== null && _a !== void 0 ? _a : err.message);
             return false;
           }
-          var oldLogger = global_utils_1.getGlobal("diag");
-          var newLogger = logLevelLogger_1.createLogLevelDiagLogger(logLevel, logger);
-          if (oldLogger) {
-            var stack = (_b = new Error().stack) !== null && _b !== void 0 ? _b : "<failed to generate stacktrace>";
-            oldLogger.warn("Current logger will be overwritten from " + stack);
-            newLogger.warn("Current logger will overwrite one already registered from " + stack);
+          if (typeof optionsOrLogLevel === "number") {
+            optionsOrLogLevel = {
+              logLevel: optionsOrLogLevel
+            };
           }
-          return global_utils_1.registerGlobal("diag", newLogger, self2, true);
+          const oldLogger = (0, global_utils_1.getGlobal)("diag");
+          const newLogger = (0, logLevelLogger_1.createLogLevelDiagLogger)((_b = optionsOrLogLevel.logLevel) !== null && _b !== void 0 ? _b : types_1.DiagLogLevel.INFO, logger);
+          if (oldLogger && !optionsOrLogLevel.suppressOverrideMessage) {
+            const stack = (_c = new Error().stack) !== null && _c !== void 0 ? _c : "<failed to generate stacktrace>";
+            oldLogger.warn(`Current logger will be overwritten from ${stack}`);
+            newLogger.warn(`Current logger will overwrite one already registered from ${stack}`);
+          }
+          return (0, global_utils_1.registerGlobal)("diag", newLogger, self2, true);
+        }, "setLogger");
+        self2.setLogger = setLogger;
+        self2.disable = () => {
+          (0, global_utils_1.unregisterGlobal)(API_NAME, self2);
         };
-        self2.disable = function() {
-          global_utils_1.unregisterGlobal(API_NAME, self2);
-        };
-        self2.createComponentLogger = function(options) {
+        self2.createComponentLogger = (options) => {
           return new ComponentLogger_1.DiagComponentLogger(options);
         };
         self2.verbose = _logProxy("verbose");
@@ -32356,15 +32474,14 @@ var require_diag = __commonJS({
         self2.warn = _logProxy("warn");
         self2.error = _logProxy("error");
       }
-      __name(DiagAPI2, "DiagAPI");
-      DiagAPI2.instance = function() {
+      static instance() {
         if (!this._instance) {
-          this._instance = new DiagAPI2();
+          this._instance = new DiagAPI();
         }
         return this._instance;
-      };
-      return DiagAPI2;
-    }();
+      }
+    };
+    __name(DiagAPI, "DiagAPI");
     exports2.DiagAPI = DiagAPI;
   }
 });
@@ -32375,51 +32492,42 @@ var require_baggage_impl = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.BaggageImpl = void 0;
-    var BaggageImpl = function() {
-      function BaggageImpl2(entries) {
+    var BaggageImpl = class {
+      constructor(entries) {
         this._entries = entries ? new Map(entries) : /* @__PURE__ */ new Map();
       }
-      __name(BaggageImpl2, "BaggageImpl");
-      BaggageImpl2.prototype.getEntry = function(key) {
-        var entry = this._entries.get(key);
+      getEntry(key) {
+        const entry = this._entries.get(key);
         if (!entry) {
           return void 0;
         }
         return Object.assign({}, entry);
-      };
-      BaggageImpl2.prototype.getAllEntries = function() {
-        return Array.from(this._entries.entries()).map(function(_a) {
-          var k = _a[0], v = _a[1];
-          return [k, v];
-        });
-      };
-      BaggageImpl2.prototype.setEntry = function(key, entry) {
-        var newBaggage = new BaggageImpl2(this._entries);
+      }
+      getAllEntries() {
+        return Array.from(this._entries.entries()).map(([k, v]) => [k, v]);
+      }
+      setEntry(key, entry) {
+        const newBaggage = new BaggageImpl(this._entries);
         newBaggage._entries.set(key, entry);
         return newBaggage;
-      };
-      BaggageImpl2.prototype.removeEntry = function(key) {
-        var newBaggage = new BaggageImpl2(this._entries);
+      }
+      removeEntry(key) {
+        const newBaggage = new BaggageImpl(this._entries);
         newBaggage._entries.delete(key);
         return newBaggage;
-      };
-      BaggageImpl2.prototype.removeEntries = function() {
-        var keys = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          keys[_i] = arguments[_i];
-        }
-        var newBaggage = new BaggageImpl2(this._entries);
-        for (var _a = 0, keys_1 = keys; _a < keys_1.length; _a++) {
-          var key = keys_1[_a];
+      }
+      removeEntries(...keys) {
+        const newBaggage = new BaggageImpl(this._entries);
+        for (const key of keys) {
           newBaggage._entries.delete(key);
         }
         return newBaggage;
-      };
-      BaggageImpl2.prototype.clear = function() {
-        return new BaggageImpl2();
-      };
-      return BaggageImpl2;
-    }();
+      }
+      clear() {
+        return new BaggageImpl();
+      }
+    };
+    __name(BaggageImpl, "BaggageImpl");
     exports2.BaggageImpl = BaggageImpl;
   }
 });
@@ -32444,22 +32552,19 @@ var require_utils4 = __commonJS({
     var baggage_impl_1 = require_baggage_impl();
     var symbol_1 = require_symbol();
     var diag = diag_1.DiagAPI.instance();
-    function createBaggage(entries) {
-      if (entries === void 0) {
-        entries = {};
-      }
+    function createBaggage(entries = {}) {
       return new baggage_impl_1.BaggageImpl(new Map(Object.entries(entries)));
     }
     __name(createBaggage, "createBaggage");
     exports2.createBaggage = createBaggage;
     function baggageEntryMetadataFromString(str) {
       if (typeof str !== "string") {
-        diag.error("Cannot create baggage metadata from unknown type: " + typeof str);
+        diag.error(`Cannot create baggage metadata from unknown type: ${typeof str}`);
         str = "";
       }
       return {
         __TYPE__: symbol_1.baggageEntryMetadataSymbol,
-        toString: function() {
+        toString() {
           return str;
         }
       };
@@ -32469,19 +32574,36 @@ var require_utils4 = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/common/Exception.js
-var require_Exception = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/common/Exception.js"(exports2) {
+// node_modules/@opentelemetry/api/build/src/context/context.js
+var require_context = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/context/context.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/common/Time.js
-var require_Time = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/common/Time.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ROOT_CONTEXT = exports2.createContextKey = void 0;
+    function createContextKey(description) {
+      return Symbol.for(description);
+    }
+    __name(createContextKey, "createContextKey");
+    exports2.createContextKey = createContextKey;
+    var BaseContext = class {
+      constructor(parentContext) {
+        const self2 = this;
+        self2._currentContext = parentContext ? new Map(parentContext) : /* @__PURE__ */ new Map();
+        self2.getValue = (key) => self2._currentContext.get(key);
+        self2.setValue = (key, value) => {
+          const context = new BaseContext(self2._currentContext);
+          context._currentContext.set(key, value);
+          return context;
+        };
+        self2.deleteValue = (key) => {
+          const context = new BaseContext(self2._currentContext);
+          context._currentContext.delete(key);
+          return context;
+        };
+      }
+    };
+    __name(BaseContext, "BaseContext");
+    exports2.ROOT_CONTEXT = new BaseContext();
   }
 });
 
@@ -32498,16 +32620,12 @@ var require_consoleLogger = __commonJS({
       { n: "debug", c: "debug" },
       { n: "verbose", c: "trace" }
     ];
-    var DiagConsoleLogger = function() {
-      function DiagConsoleLogger2() {
+    var DiagConsoleLogger = class {
+      constructor() {
         function _consoleFunc(funcName) {
-          return function() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-              args[_i] = arguments[_i];
-            }
+          return function(...args) {
             if (console) {
-              var theFunc = console[funcName];
+              let theFunc = console[funcName];
               if (typeof theFunc !== "function") {
                 theFunc = console.log;
               }
@@ -32518,40 +32636,118 @@ var require_consoleLogger = __commonJS({
           };
         }
         __name(_consoleFunc, "_consoleFunc");
-        for (var i = 0; i < consoleMap.length; i++) {
+        for (let i = 0; i < consoleMap.length; i++) {
           this[consoleMap[i].n] = _consoleFunc(consoleMap[i].c);
         }
       }
-      __name(DiagConsoleLogger2, "DiagConsoleLogger");
-      return DiagConsoleLogger2;
-    }();
+    };
+    __name(DiagConsoleLogger, "DiagConsoleLogger");
     exports2.DiagConsoleLogger = DiagConsoleLogger;
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/diag/index.js
-var require_diag2 = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/diag/index.js"(exports2) {
+// node_modules/@opentelemetry/api/build/src/metrics/NoopMeter.js
+var require_NoopMeter = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/metrics/NoopMeter.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __exportStar = exports2 && exports2.__exportStar || function(m, exports3) {
-      for (var p in m)
-        if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports3, p))
-          __createBinding2(exports3, m, p);
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    __exportStar(require_consoleLogger(), exports2);
-    __exportStar(require_types2(), exports2);
+    exports2.createNoopMeter = exports2.NOOP_OBSERVABLE_UP_DOWN_COUNTER_METRIC = exports2.NOOP_OBSERVABLE_GAUGE_METRIC = exports2.NOOP_OBSERVABLE_COUNTER_METRIC = exports2.NOOP_UP_DOWN_COUNTER_METRIC = exports2.NOOP_HISTOGRAM_METRIC = exports2.NOOP_COUNTER_METRIC = exports2.NOOP_METER = exports2.NoopObservableUpDownCounterMetric = exports2.NoopObservableGaugeMetric = exports2.NoopObservableCounterMetric = exports2.NoopObservableMetric = exports2.NoopHistogramMetric = exports2.NoopUpDownCounterMetric = exports2.NoopCounterMetric = exports2.NoopMetric = exports2.NoopMeter = void 0;
+    var NoopMeter = class {
+      constructor() {
+      }
+      createHistogram(_name, _options) {
+        return exports2.NOOP_HISTOGRAM_METRIC;
+      }
+      createCounter(_name, _options) {
+        return exports2.NOOP_COUNTER_METRIC;
+      }
+      createUpDownCounter(_name, _options) {
+        return exports2.NOOP_UP_DOWN_COUNTER_METRIC;
+      }
+      createObservableGauge(_name, _options) {
+        return exports2.NOOP_OBSERVABLE_GAUGE_METRIC;
+      }
+      createObservableCounter(_name, _options) {
+        return exports2.NOOP_OBSERVABLE_COUNTER_METRIC;
+      }
+      createObservableUpDownCounter(_name, _options) {
+        return exports2.NOOP_OBSERVABLE_UP_DOWN_COUNTER_METRIC;
+      }
+      addBatchObservableCallback(_callback, _observables) {
+      }
+      removeBatchObservableCallback(_callback) {
+      }
+    };
+    __name(NoopMeter, "NoopMeter");
+    exports2.NoopMeter = NoopMeter;
+    var NoopMetric = class {
+    };
+    __name(NoopMetric, "NoopMetric");
+    exports2.NoopMetric = NoopMetric;
+    var NoopCounterMetric = class extends NoopMetric {
+      add(_value, _attributes) {
+      }
+    };
+    __name(NoopCounterMetric, "NoopCounterMetric");
+    exports2.NoopCounterMetric = NoopCounterMetric;
+    var NoopUpDownCounterMetric = class extends NoopMetric {
+      add(_value, _attributes) {
+      }
+    };
+    __name(NoopUpDownCounterMetric, "NoopUpDownCounterMetric");
+    exports2.NoopUpDownCounterMetric = NoopUpDownCounterMetric;
+    var NoopHistogramMetric = class extends NoopMetric {
+      record(_value, _attributes) {
+      }
+    };
+    __name(NoopHistogramMetric, "NoopHistogramMetric");
+    exports2.NoopHistogramMetric = NoopHistogramMetric;
+    var NoopObservableMetric = class {
+      addCallback(_callback) {
+      }
+      removeCallback(_callback) {
+      }
+    };
+    __name(NoopObservableMetric, "NoopObservableMetric");
+    exports2.NoopObservableMetric = NoopObservableMetric;
+    var NoopObservableCounterMetric = class extends NoopObservableMetric {
+    };
+    __name(NoopObservableCounterMetric, "NoopObservableCounterMetric");
+    exports2.NoopObservableCounterMetric = NoopObservableCounterMetric;
+    var NoopObservableGaugeMetric = class extends NoopObservableMetric {
+    };
+    __name(NoopObservableGaugeMetric, "NoopObservableGaugeMetric");
+    exports2.NoopObservableGaugeMetric = NoopObservableGaugeMetric;
+    var NoopObservableUpDownCounterMetric = class extends NoopObservableMetric {
+    };
+    __name(NoopObservableUpDownCounterMetric, "NoopObservableUpDownCounterMetric");
+    exports2.NoopObservableUpDownCounterMetric = NoopObservableUpDownCounterMetric;
+    exports2.NOOP_METER = new NoopMeter();
+    exports2.NOOP_COUNTER_METRIC = new NoopCounterMetric();
+    exports2.NOOP_HISTOGRAM_METRIC = new NoopHistogramMetric();
+    exports2.NOOP_UP_DOWN_COUNTER_METRIC = new NoopUpDownCounterMetric();
+    exports2.NOOP_OBSERVABLE_COUNTER_METRIC = new NoopObservableCounterMetric();
+    exports2.NOOP_OBSERVABLE_GAUGE_METRIC = new NoopObservableGaugeMetric();
+    exports2.NOOP_OBSERVABLE_UP_DOWN_COUNTER_METRIC = new NoopObservableUpDownCounterMetric();
+    function createNoopMeter() {
+      return exports2.NOOP_METER;
+    }
+    __name(createNoopMeter, "createNoopMeter");
+    exports2.createNoopMeter = createNoopMeter;
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/metrics/Metric.js
+var require_Metric = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/metrics/Metric.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ValueType = void 0;
+    var ValueType;
+    (function(ValueType2) {
+      ValueType2[ValueType2["INT"] = 0] = "INT";
+      ValueType2[ValueType2["DOUBLE"] = 1] = "DOUBLE";
+    })(ValueType = exports2.ValueType || (exports2.ValueType = {}));
   }
 });
 
@@ -32562,13 +32758,13 @@ var require_TextMapPropagator = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.defaultTextMapSetter = exports2.defaultTextMapGetter = void 0;
     exports2.defaultTextMapGetter = {
-      get: function(carrier, key) {
+      get(carrier, key) {
         if (carrier == null) {
           return void 0;
         }
         return carrier[key];
       },
-      keys: function(carrier) {
+      keys(carrier) {
         if (carrier == null) {
           return [];
         }
@@ -32576,7 +32772,7 @@ var require_TextMapPropagator = __commonJS({
       }
     };
     exports2.defaultTextMapSetter = {
-      set: function(carrier, key, value) {
+      set(carrier, key, value) {
         if (carrier == null) {
           return;
         }
@@ -32586,95 +32782,31 @@ var require_TextMapPropagator = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/attributes.js
-var require_attributes = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/attributes.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/trace/link.js
-var require_link = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/link.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/context/context.js
-var require_context = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/context/context.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.ROOT_CONTEXT = exports2.createContextKey = void 0;
-    function createContextKey(description) {
-      return Symbol.for(description);
-    }
-    __name(createContextKey, "createContextKey");
-    exports2.createContextKey = createContextKey;
-    var BaseContext = function() {
-      function BaseContext2(parentContext) {
-        var self2 = this;
-        self2._currentContext = parentContext ? new Map(parentContext) : /* @__PURE__ */ new Map();
-        self2.getValue = function(key) {
-          return self2._currentContext.get(key);
-        };
-        self2.setValue = function(key, value) {
-          var context = new BaseContext2(self2._currentContext);
-          context._currentContext.set(key, value);
-          return context;
-        };
-        self2.deleteValue = function(key) {
-          var context = new BaseContext2(self2._currentContext);
-          context._currentContext.delete(key);
-          return context;
-        };
-      }
-      __name(BaseContext2, "BaseContext");
-      return BaseContext2;
-    }();
-    exports2.ROOT_CONTEXT = new BaseContext();
-  }
-});
-
 // node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js
 var require_NoopContextManager = __commonJS({
   "node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js"(exports2) {
     "use strict";
-    var __spreadArray = exports2 && exports2.__spreadArray || function(to, from) {
-      for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-      return to;
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NoopContextManager = void 0;
     var context_1 = require_context();
-    var NoopContextManager = function() {
-      function NoopContextManager2() {
-      }
-      __name(NoopContextManager2, "NoopContextManager");
-      NoopContextManager2.prototype.active = function() {
+    var NoopContextManager = class {
+      active() {
         return context_1.ROOT_CONTEXT;
-      };
-      NoopContextManager2.prototype.with = function(_context, fn, thisArg) {
-        var args = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-          args[_i - 3] = arguments[_i];
-        }
-        return fn.call.apply(fn, __spreadArray([thisArg], args));
-      };
-      NoopContextManager2.prototype.bind = function(_context, target) {
+      }
+      with(_context, fn, thisArg, ...args) {
+        return fn.call(thisArg, ...args);
+      }
+      bind(_context, target) {
         return target;
-      };
-      NoopContextManager2.prototype.enable = function() {
+      }
+      enable() {
         return this;
-      };
-      NoopContextManager2.prototype.disable = function() {
+      }
+      disable() {
         return this;
-      };
-      return NoopContextManager2;
-    }();
+      }
+    };
+    __name(NoopContextManager, "NoopContextManager");
     exports2.NoopContextManager = NoopContextManager;
   }
 });
@@ -32683,11 +32815,6 @@ var require_NoopContextManager = __commonJS({
 var require_context2 = __commonJS({
   "node_modules/@opentelemetry/api/build/src/api/context.js"(exports2) {
     "use strict";
-    var __spreadArray = exports2 && exports2.__spreadArray || function(to, from) {
-      for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-      return to;
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ContextAPI = void 0;
     var NoopContextManager_1 = require_NoopContextManager();
@@ -32695,42 +32822,36 @@ var require_context2 = __commonJS({
     var diag_1 = require_diag();
     var API_NAME = "context";
     var NOOP_CONTEXT_MANAGER = new NoopContextManager_1.NoopContextManager();
-    var ContextAPI = function() {
-      function ContextAPI2() {
+    var ContextAPI = class {
+      constructor() {
       }
-      __name(ContextAPI2, "ContextAPI");
-      ContextAPI2.getInstance = function() {
+      static getInstance() {
         if (!this._instance) {
-          this._instance = new ContextAPI2();
+          this._instance = new ContextAPI();
         }
         return this._instance;
-      };
-      ContextAPI2.prototype.setGlobalContextManager = function(contextManager) {
-        return global_utils_1.registerGlobal(API_NAME, contextManager, diag_1.DiagAPI.instance());
-      };
-      ContextAPI2.prototype.active = function() {
+      }
+      setGlobalContextManager(contextManager) {
+        return (0, global_utils_1.registerGlobal)(API_NAME, contextManager, diag_1.DiagAPI.instance());
+      }
+      active() {
         return this._getContextManager().active();
-      };
-      ContextAPI2.prototype.with = function(context, fn, thisArg) {
-        var _a;
-        var args = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-          args[_i - 3] = arguments[_i];
-        }
-        return (_a = this._getContextManager()).with.apply(_a, __spreadArray([context, fn, thisArg], args));
-      };
-      ContextAPI2.prototype.bind = function(context, target) {
+      }
+      with(context, fn, thisArg, ...args) {
+        return this._getContextManager().with(context, fn, thisArg, ...args);
+      }
+      bind(context, target) {
         return this._getContextManager().bind(context, target);
-      };
-      ContextAPI2.prototype._getContextManager = function() {
-        return global_utils_1.getGlobal(API_NAME) || NOOP_CONTEXT_MANAGER;
-      };
-      ContextAPI2.prototype.disable = function() {
+      }
+      _getContextManager() {
+        return (0, global_utils_1.getGlobal)(API_NAME) || NOOP_CONTEXT_MANAGER;
+      }
+      disable() {
         this._getContextManager().disable();
-        global_utils_1.unregisterGlobal(API_NAME, diag_1.DiagAPI.instance());
-      };
-      return ContextAPI2;
-    }();
+        (0, global_utils_1.unregisterGlobal)(API_NAME, diag_1.DiagAPI.instance());
+      }
+    };
+    __name(ContextAPI, "ContextAPI");
     exports2.ContextAPI = ContextAPI;
   }
 });
@@ -32773,41 +32894,37 @@ var require_NonRecordingSpan = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NonRecordingSpan = void 0;
     var invalid_span_constants_1 = require_invalid_span_constants();
-    var NonRecordingSpan = function() {
-      function NonRecordingSpan2(_spanContext) {
-        if (_spanContext === void 0) {
-          _spanContext = invalid_span_constants_1.INVALID_SPAN_CONTEXT;
-        }
+    var NonRecordingSpan = class {
+      constructor(_spanContext = invalid_span_constants_1.INVALID_SPAN_CONTEXT) {
         this._spanContext = _spanContext;
       }
-      __name(NonRecordingSpan2, "NonRecordingSpan");
-      NonRecordingSpan2.prototype.spanContext = function() {
+      spanContext() {
         return this._spanContext;
-      };
-      NonRecordingSpan2.prototype.setAttribute = function(_key, _value) {
+      }
+      setAttribute(_key, _value) {
         return this;
-      };
-      NonRecordingSpan2.prototype.setAttributes = function(_attributes) {
+      }
+      setAttributes(_attributes) {
         return this;
-      };
-      NonRecordingSpan2.prototype.addEvent = function(_name, _attributes) {
+      }
+      addEvent(_name, _attributes) {
         return this;
-      };
-      NonRecordingSpan2.prototype.setStatus = function(_status) {
+      }
+      setStatus(_status) {
         return this;
-      };
-      NonRecordingSpan2.prototype.updateName = function(_name) {
+      }
+      updateName(_name) {
         return this;
-      };
-      NonRecordingSpan2.prototype.end = function(_endTime) {
-      };
-      NonRecordingSpan2.prototype.isRecording = function() {
+      }
+      end(_endTime) {
+      }
+      isRecording() {
         return false;
-      };
-      NonRecordingSpan2.prototype.recordException = function(_exception, _time) {
-      };
-      return NonRecordingSpan2;
-    }();
+      }
+      recordException(_exception, _time) {
+      }
+    };
+    __name(NonRecordingSpan, "NonRecordingSpan");
     exports2.NonRecordingSpan = NonRecordingSpan;
   }
 });
@@ -32817,15 +32934,21 @@ var require_context_utils = __commonJS({
   "node_modules/@opentelemetry/api/build/src/trace/context-utils.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.getSpanContext = exports2.setSpanContext = exports2.deleteSpan = exports2.setSpan = exports2.getSpan = void 0;
+    exports2.getSpanContext = exports2.setSpanContext = exports2.deleteSpan = exports2.setSpan = exports2.getActiveSpan = exports2.getSpan = void 0;
     var context_1 = require_context();
     var NonRecordingSpan_1 = require_NonRecordingSpan();
-    var SPAN_KEY = context_1.createContextKey("OpenTelemetry Context Key SPAN");
+    var context_2 = require_context2();
+    var SPAN_KEY = (0, context_1.createContextKey)("OpenTelemetry Context Key SPAN");
     function getSpan(context) {
       return context.getValue(SPAN_KEY) || void 0;
     }
     __name(getSpan, "getSpan");
     exports2.getSpan = getSpan;
+    function getActiveSpan() {
+      return getSpan(context_2.ContextAPI.getInstance().active());
+    }
+    __name(getActiveSpan, "getActiveSpan");
+    exports2.getActiveSpan = getActiveSpan;
     function setSpan(context, span) {
       return context.setValue(SPAN_KEY, span);
     }
@@ -32893,27 +33016,24 @@ var require_NoopTracer = __commonJS({
     var context_utils_1 = require_context_utils();
     var NonRecordingSpan_1 = require_NonRecordingSpan();
     var spancontext_utils_1 = require_spancontext_utils();
-    var context = context_1.ContextAPI.getInstance();
-    var NoopTracer = function() {
-      function NoopTracer2() {
-      }
-      __name(NoopTracer2, "NoopTracer");
-      NoopTracer2.prototype.startSpan = function(name, options, context2) {
-        var root = Boolean(options === null || options === void 0 ? void 0 : options.root);
+    var contextApi = context_1.ContextAPI.getInstance();
+    var NoopTracer = class {
+      startSpan(name, options, context = contextApi.active()) {
+        const root = Boolean(options === null || options === void 0 ? void 0 : options.root);
         if (root) {
           return new NonRecordingSpan_1.NonRecordingSpan();
         }
-        var parentFromContext = context2 && context_utils_1.getSpanContext(context2);
-        if (isSpanContext(parentFromContext) && spancontext_utils_1.isSpanContextValid(parentFromContext)) {
+        const parentFromContext = context && (0, context_utils_1.getSpanContext)(context);
+        if (isSpanContext(parentFromContext) && (0, spancontext_utils_1.isSpanContextValid)(parentFromContext)) {
           return new NonRecordingSpan_1.NonRecordingSpan(parentFromContext);
         } else {
           return new NonRecordingSpan_1.NonRecordingSpan();
         }
-      };
-      NoopTracer2.prototype.startActiveSpan = function(name, arg2, arg3, arg4) {
-        var opts;
-        var ctx;
-        var fn;
+      }
+      startActiveSpan(name, arg2, arg3, arg4) {
+        let opts;
+        let ctx;
+        let fn;
         if (arguments.length < 2) {
           return;
         } else if (arguments.length === 2) {
@@ -32926,13 +33046,13 @@ var require_NoopTracer = __commonJS({
           ctx = arg3;
           fn = arg4;
         }
-        var parentContext = ctx !== null && ctx !== void 0 ? ctx : context.active();
-        var span = this.startSpan(name, opts, parentContext);
-        var contextWithSpanSet = context_utils_1.setSpan(parentContext, span);
-        return context.with(contextWithSpanSet, fn, void 0, span);
-      };
-      return NoopTracer2;
-    }();
+        const parentContext = ctx !== null && ctx !== void 0 ? ctx : contextApi.active();
+        const span = this.startSpan(name, opts, parentContext);
+        const contextWithSpanSet = (0, context_utils_1.setSpan)(parentContext, span);
+        return contextApi.with(contextWithSpanSet, fn, void 0, span);
+      }
+    };
+    __name(NoopTracer, "NoopTracer");
     exports2.NoopTracer = NoopTracer;
     function isSpanContext(spanContext) {
       return typeof spanContext === "object" && typeof spanContext["spanId"] === "string" && typeof spanContext["traceId"] === "string" && typeof spanContext["traceFlags"] === "number";
@@ -32949,33 +33069,33 @@ var require_ProxyTracer = __commonJS({
     exports2.ProxyTracer = void 0;
     var NoopTracer_1 = require_NoopTracer();
     var NOOP_TRACER = new NoopTracer_1.NoopTracer();
-    var ProxyTracer = function() {
-      function ProxyTracer2(_provider, name, version2) {
+    var ProxyTracer = class {
+      constructor(_provider, name, version2, options) {
         this._provider = _provider;
         this.name = name;
         this.version = version2;
+        this.options = options;
       }
-      __name(ProxyTracer2, "ProxyTracer");
-      ProxyTracer2.prototype.startSpan = function(name, options, context) {
+      startSpan(name, options, context) {
         return this._getTracer().startSpan(name, options, context);
-      };
-      ProxyTracer2.prototype.startActiveSpan = function(_name, _options, _context, _fn) {
-        var tracer = this._getTracer();
+      }
+      startActiveSpan(_name, _options, _context, _fn) {
+        const tracer = this._getTracer();
         return Reflect.apply(tracer.startActiveSpan, tracer, arguments);
-      };
-      ProxyTracer2.prototype._getTracer = function() {
+      }
+      _getTracer() {
         if (this._delegate) {
           return this._delegate;
         }
-        var tracer = this._provider.getDelegateTracer(this.name, this.version);
+        const tracer = this._provider.getDelegateTracer(this.name, this.version, this.options);
         if (!tracer) {
           return NOOP_TRACER;
         }
         this._delegate = tracer;
         return this._delegate;
-      };
-      return ProxyTracer2;
-    }();
+      }
+    };
+    __name(ProxyTracer, "ProxyTracer");
     exports2.ProxyTracer = ProxyTracer;
   }
 });
@@ -32987,15 +33107,12 @@ var require_NoopTracerProvider = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NoopTracerProvider = void 0;
     var NoopTracer_1 = require_NoopTracer();
-    var NoopTracerProvider = function() {
-      function NoopTracerProvider2() {
-      }
-      __name(NoopTracerProvider2, "NoopTracerProvider");
-      NoopTracerProvider2.prototype.getTracer = function(_name, _version) {
+    var NoopTracerProvider = class {
+      getTracer(_name, _version, _options) {
         return new NoopTracer_1.NoopTracer();
-      };
-      return NoopTracerProvider2;
-    }();
+      }
+    };
+    __name(NoopTracerProvider, "NoopTracerProvider");
     exports2.NoopTracerProvider = NoopTracerProvider;
   }
 });
@@ -33009,36 +33126,25 @@ var require_ProxyTracerProvider = __commonJS({
     var ProxyTracer_1 = require_ProxyTracer();
     var NoopTracerProvider_1 = require_NoopTracerProvider();
     var NOOP_TRACER_PROVIDER = new NoopTracerProvider_1.NoopTracerProvider();
-    var ProxyTracerProvider = function() {
-      function ProxyTracerProvider2() {
-      }
-      __name(ProxyTracerProvider2, "ProxyTracerProvider");
-      ProxyTracerProvider2.prototype.getTracer = function(name, version2) {
+    var ProxyTracerProvider = class {
+      getTracer(name, version2, options) {
         var _a;
-        return (_a = this.getDelegateTracer(name, version2)) !== null && _a !== void 0 ? _a : new ProxyTracer_1.ProxyTracer(this, name, version2);
-      };
-      ProxyTracerProvider2.prototype.getDelegate = function() {
+        return (_a = this.getDelegateTracer(name, version2, options)) !== null && _a !== void 0 ? _a : new ProxyTracer_1.ProxyTracer(this, name, version2, options);
+      }
+      getDelegate() {
         var _a;
         return (_a = this._delegate) !== null && _a !== void 0 ? _a : NOOP_TRACER_PROVIDER;
-      };
-      ProxyTracerProvider2.prototype.setDelegate = function(delegate) {
+      }
+      setDelegate(delegate) {
         this._delegate = delegate;
-      };
-      ProxyTracerProvider2.prototype.getDelegateTracer = function(name, version2) {
+      }
+      getDelegateTracer(name, version2, options) {
         var _a;
-        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version2);
-      };
-      return ProxyTracerProvider2;
-    }();
+        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version2, options);
+      }
+    };
+    __name(ProxyTracerProvider, "ProxyTracerProvider");
     exports2.ProxyTracerProvider = ProxyTracerProvider;
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/trace/Sampler.js
-var require_Sampler = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/Sampler.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
   }
 });
 
@@ -33054,14 +33160,6 @@ var require_SamplingResult = __commonJS({
       SamplingDecision2[SamplingDecision2["RECORD"] = 1] = "RECORD";
       SamplingDecision2[SamplingDecision2["RECORD_AND_SAMPLED"] = 2] = "RECORD_AND_SAMPLED";
     })(SamplingDecision = exports2.SamplingDecision || (exports2.SamplingDecision = {}));
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/trace/span_context.js
-var require_span_context = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/span_context.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
   }
 });
 
@@ -33082,22 +33180,6 @@ var require_span_kind = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/span.js
-var require_span = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/span.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/trace/SpanOptions.js
-var require_SpanOptions = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/SpanOptions.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-  }
-});
-
 // node_modules/@opentelemetry/api/build/src/trace/status.js
 var require_status = __commonJS({
   "node_modules/@opentelemetry/api/build/src/trace/status.js"(exports2) {
@@ -33113,88 +33195,204 @@ var require_status = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/trace_state.js
-var require_trace_state = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/trace_state.js"(exports2) {
+// node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-validators.js
+var require_tracestate_validators = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-validators.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.validateValue = exports2.validateKey = void 0;
+    var VALID_KEY_CHAR_RANGE = "[_0-9a-z-*/]";
+    var VALID_KEY = `[a-z]${VALID_KEY_CHAR_RANGE}{0,255}`;
+    var VALID_VENDOR_KEY = `[a-z0-9]${VALID_KEY_CHAR_RANGE}{0,240}@[a-z]${VALID_KEY_CHAR_RANGE}{0,13}`;
+    var VALID_KEY_REGEX = new RegExp(`^(?:${VALID_KEY}|${VALID_VENDOR_KEY})$`);
+    var VALID_VALUE_BASE_REGEX = /^[ -~]{0,255}[!-~]$/;
+    var INVALID_VALUE_COMMA_EQUAL_REGEX = /,|=/;
+    function validateKey(key) {
+      return VALID_KEY_REGEX.test(key);
+    }
+    __name(validateKey, "validateKey");
+    exports2.validateKey = validateKey;
+    function validateValue(value) {
+      return VALID_VALUE_BASE_REGEX.test(value) && !INVALID_VALUE_COMMA_EQUAL_REGEX.test(value);
+    }
+    __name(validateValue, "validateValue");
+    exports2.validateValue = validateValue;
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/tracer_provider.js
-var require_tracer_provider = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/tracer_provider.js"(exports2) {
+// node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-impl.js
+var require_tracestate_impl = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-impl.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/trace/tracer.js
-var require_tracer = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/tracer.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/context/types.js
-var require_types3 = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/context/types.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-  }
-});
-
-// node_modules/@opentelemetry/api/build/src/api/trace.js
-var require_trace = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/api/trace.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.TraceAPI = void 0;
-    var global_utils_1 = require_global_utils();
-    var ProxyTracerProvider_1 = require_ProxyTracerProvider();
-    var spancontext_utils_1 = require_spancontext_utils();
-    var context_utils_1 = require_context_utils();
-    var diag_1 = require_diag();
-    var API_NAME = "trace";
-    var TraceAPI = function() {
-      function TraceAPI2() {
-        this._proxyTracerProvider = new ProxyTracerProvider_1.ProxyTracerProvider();
-        this.wrapSpanContext = spancontext_utils_1.wrapSpanContext;
-        this.isSpanContextValid = spancontext_utils_1.isSpanContextValid;
-        this.deleteSpan = context_utils_1.deleteSpan;
-        this.getSpan = context_utils_1.getSpan;
-        this.getSpanContext = context_utils_1.getSpanContext;
-        this.setSpan = context_utils_1.setSpan;
-        this.setSpanContext = context_utils_1.setSpanContext;
+    exports2.TraceStateImpl = void 0;
+    var tracestate_validators_1 = require_tracestate_validators();
+    var MAX_TRACE_STATE_ITEMS = 32;
+    var MAX_TRACE_STATE_LEN = 512;
+    var LIST_MEMBERS_SEPARATOR = ",";
+    var LIST_MEMBER_KEY_VALUE_SPLITTER = "=";
+    var TraceStateImpl = class {
+      constructor(rawTraceState) {
+        this._internalState = /* @__PURE__ */ new Map();
+        if (rawTraceState)
+          this._parse(rawTraceState);
       }
-      __name(TraceAPI2, "TraceAPI");
-      TraceAPI2.getInstance = function() {
+      set(key, value) {
+        const traceState = this._clone();
+        if (traceState._internalState.has(key)) {
+          traceState._internalState.delete(key);
+        }
+        traceState._internalState.set(key, value);
+        return traceState;
+      }
+      unset(key) {
+        const traceState = this._clone();
+        traceState._internalState.delete(key);
+        return traceState;
+      }
+      get(key) {
+        return this._internalState.get(key);
+      }
+      serialize() {
+        return this._keys().reduce((agg, key) => {
+          agg.push(key + LIST_MEMBER_KEY_VALUE_SPLITTER + this.get(key));
+          return agg;
+        }, []).join(LIST_MEMBERS_SEPARATOR);
+      }
+      _parse(rawTraceState) {
+        if (rawTraceState.length > MAX_TRACE_STATE_LEN)
+          return;
+        this._internalState = rawTraceState.split(LIST_MEMBERS_SEPARATOR).reverse().reduce((agg, part) => {
+          const listMember = part.trim();
+          const i = listMember.indexOf(LIST_MEMBER_KEY_VALUE_SPLITTER);
+          if (i !== -1) {
+            const key = listMember.slice(0, i);
+            const value = listMember.slice(i + 1, part.length);
+            if ((0, tracestate_validators_1.validateKey)(key) && (0, tracestate_validators_1.validateValue)(value)) {
+              agg.set(key, value);
+            } else {
+            }
+          }
+          return agg;
+        }, /* @__PURE__ */ new Map());
+        if (this._internalState.size > MAX_TRACE_STATE_ITEMS) {
+          this._internalState = new Map(Array.from(this._internalState.entries()).reverse().slice(0, MAX_TRACE_STATE_ITEMS));
+        }
+      }
+      _keys() {
+        return Array.from(this._internalState.keys()).reverse();
+      }
+      _clone() {
+        const traceState = new TraceStateImpl();
+        traceState._internalState = new Map(this._internalState);
+        return traceState;
+      }
+    };
+    __name(TraceStateImpl, "TraceStateImpl");
+    exports2.TraceStateImpl = TraceStateImpl;
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/trace/internal/utils.js
+var require_utils5 = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/trace/internal/utils.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.createTraceState = void 0;
+    var tracestate_impl_1 = require_tracestate_impl();
+    function createTraceState(rawTraceState) {
+      return new tracestate_impl_1.TraceStateImpl(rawTraceState);
+    }
+    __name(createTraceState, "createTraceState");
+    exports2.createTraceState = createTraceState;
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/context-api.js
+var require_context_api = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/context-api.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.context = void 0;
+    var context_1 = require_context2();
+    exports2.context = context_1.ContextAPI.getInstance();
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/diag-api.js
+var require_diag_api = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/diag-api.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.diag = void 0;
+    var diag_1 = require_diag();
+    exports2.diag = diag_1.DiagAPI.instance();
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/metrics/NoopMeterProvider.js
+var require_NoopMeterProvider = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/metrics/NoopMeterProvider.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.NOOP_METER_PROVIDER = exports2.NoopMeterProvider = void 0;
+    var NoopMeter_1 = require_NoopMeter();
+    var NoopMeterProvider = class {
+      getMeter(_name, _version, _options) {
+        return NoopMeter_1.NOOP_METER;
+      }
+    };
+    __name(NoopMeterProvider, "NoopMeterProvider");
+    exports2.NoopMeterProvider = NoopMeterProvider;
+    exports2.NOOP_METER_PROVIDER = new NoopMeterProvider();
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/api/metrics.js
+var require_metrics = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/api/metrics.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.MetricsAPI = void 0;
+    var NoopMeterProvider_1 = require_NoopMeterProvider();
+    var global_utils_1 = require_global_utils();
+    var diag_1 = require_diag();
+    var API_NAME = "metrics";
+    var MetricsAPI = class {
+      constructor() {
+      }
+      static getInstance() {
         if (!this._instance) {
-          this._instance = new TraceAPI2();
+          this._instance = new MetricsAPI();
         }
         return this._instance;
-      };
-      TraceAPI2.prototype.setGlobalTracerProvider = function(provider) {
-        var success = global_utils_1.registerGlobal(API_NAME, this._proxyTracerProvider, diag_1.DiagAPI.instance());
-        if (success) {
-          this._proxyTracerProvider.setDelegate(provider);
-        }
-        return success;
-      };
-      TraceAPI2.prototype.getTracerProvider = function() {
-        return global_utils_1.getGlobal(API_NAME) || this._proxyTracerProvider;
-      };
-      TraceAPI2.prototype.getTracer = function(name, version2) {
-        return this.getTracerProvider().getTracer(name, version2);
-      };
-      TraceAPI2.prototype.disable = function() {
-        global_utils_1.unregisterGlobal(API_NAME, diag_1.DiagAPI.instance());
-        this._proxyTracerProvider = new ProxyTracerProvider_1.ProxyTracerProvider();
-      };
-      return TraceAPI2;
-    }();
-    exports2.TraceAPI = TraceAPI;
+      }
+      setGlobalMeterProvider(provider) {
+        return (0, global_utils_1.registerGlobal)(API_NAME, provider, diag_1.DiagAPI.instance());
+      }
+      getMeterProvider() {
+        return (0, global_utils_1.getGlobal)(API_NAME) || NoopMeterProvider_1.NOOP_METER_PROVIDER;
+      }
+      getMeter(name, version2, options) {
+        return this.getMeterProvider().getMeter(name, version2, options);
+      }
+      disable() {
+        (0, global_utils_1.unregisterGlobal)(API_NAME, diag_1.DiagAPI.instance());
+      }
+    };
+    __name(MetricsAPI, "MetricsAPI");
+    exports2.MetricsAPI = MetricsAPI;
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/metrics-api.js
+var require_metrics_api = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/metrics-api.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.metrics = void 0;
+    var metrics_1 = require_metrics();
+    exports2.metrics = metrics_1.MetricsAPI.getInstance();
   }
 });
 
@@ -33204,20 +33402,17 @@ var require_NoopTextMapPropagator = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NoopTextMapPropagator = void 0;
-    var NoopTextMapPropagator = function() {
-      function NoopTextMapPropagator2() {
+    var NoopTextMapPropagator = class {
+      inject(_context, _carrier) {
       }
-      __name(NoopTextMapPropagator2, "NoopTextMapPropagator");
-      NoopTextMapPropagator2.prototype.inject = function(_context, _carrier) {
-      };
-      NoopTextMapPropagator2.prototype.extract = function(context, _carrier) {
+      extract(context, _carrier) {
         return context;
-      };
-      NoopTextMapPropagator2.prototype.fields = function() {
+      }
+      fields() {
         return [];
-      };
-      return NoopTextMapPropagator2;
-    }();
+      }
+    };
+    __name(NoopTextMapPropagator, "NoopTextMapPropagator");
     exports2.NoopTextMapPropagator = NoopTextMapPropagator;
   }
 });
@@ -33227,14 +33422,20 @@ var require_context_helpers = __commonJS({
   "node_modules/@opentelemetry/api/build/src/baggage/context-helpers.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.deleteBaggage = exports2.setBaggage = exports2.getBaggage = void 0;
-    var context_1 = require_context();
-    var BAGGAGE_KEY = context_1.createContextKey("OpenTelemetry Baggage Key");
+    exports2.deleteBaggage = exports2.setBaggage = exports2.getActiveBaggage = exports2.getBaggage = void 0;
+    var context_1 = require_context2();
+    var context_2 = require_context();
+    var BAGGAGE_KEY = (0, context_2.createContextKey)("OpenTelemetry Baggage Key");
     function getBaggage(context) {
       return context.getValue(BAGGAGE_KEY) || void 0;
     }
     __name(getBaggage, "getBaggage");
     exports2.getBaggage = getBaggage;
+    function getActiveBaggage() {
+      return getBaggage(context_1.ContextAPI.getInstance().active());
+    }
+    __name(getActiveBaggage, "getActiveBaggage");
+    exports2.getActiveBaggage = getActiveBaggage;
     function setBaggage(context, baggage) {
       return context.setValue(BAGGAGE_KEY, baggage);
     }
@@ -33262,47 +33463,116 @@ var require_propagation = __commonJS({
     var diag_1 = require_diag();
     var API_NAME = "propagation";
     var NOOP_TEXT_MAP_PROPAGATOR = new NoopTextMapPropagator_1.NoopTextMapPropagator();
-    var PropagationAPI = function() {
-      function PropagationAPI2() {
+    var PropagationAPI = class {
+      constructor() {
         this.createBaggage = utils_12.createBaggage;
         this.getBaggage = context_helpers_1.getBaggage;
+        this.getActiveBaggage = context_helpers_1.getActiveBaggage;
         this.setBaggage = context_helpers_1.setBaggage;
         this.deleteBaggage = context_helpers_1.deleteBaggage;
       }
-      __name(PropagationAPI2, "PropagationAPI");
-      PropagationAPI2.getInstance = function() {
+      static getInstance() {
         if (!this._instance) {
-          this._instance = new PropagationAPI2();
+          this._instance = new PropagationAPI();
         }
         return this._instance;
-      };
-      PropagationAPI2.prototype.setGlobalPropagator = function(propagator) {
-        return global_utils_1.registerGlobal(API_NAME, propagator, diag_1.DiagAPI.instance());
-      };
-      PropagationAPI2.prototype.inject = function(context, carrier, setter) {
-        if (setter === void 0) {
-          setter = TextMapPropagator_1.defaultTextMapSetter;
-        }
+      }
+      setGlobalPropagator(propagator) {
+        return (0, global_utils_1.registerGlobal)(API_NAME, propagator, diag_1.DiagAPI.instance());
+      }
+      inject(context, carrier, setter = TextMapPropagator_1.defaultTextMapSetter) {
         return this._getGlobalPropagator().inject(context, carrier, setter);
-      };
-      PropagationAPI2.prototype.extract = function(context, carrier, getter) {
-        if (getter === void 0) {
-          getter = TextMapPropagator_1.defaultTextMapGetter;
-        }
+      }
+      extract(context, carrier, getter = TextMapPropagator_1.defaultTextMapGetter) {
         return this._getGlobalPropagator().extract(context, carrier, getter);
-      };
-      PropagationAPI2.prototype.fields = function() {
+      }
+      fields() {
         return this._getGlobalPropagator().fields();
-      };
-      PropagationAPI2.prototype.disable = function() {
-        global_utils_1.unregisterGlobal(API_NAME, diag_1.DiagAPI.instance());
-      };
-      PropagationAPI2.prototype._getGlobalPropagator = function() {
-        return global_utils_1.getGlobal(API_NAME) || NOOP_TEXT_MAP_PROPAGATOR;
-      };
-      return PropagationAPI2;
-    }();
+      }
+      disable() {
+        (0, global_utils_1.unregisterGlobal)(API_NAME, diag_1.DiagAPI.instance());
+      }
+      _getGlobalPropagator() {
+        return (0, global_utils_1.getGlobal)(API_NAME) || NOOP_TEXT_MAP_PROPAGATOR;
+      }
+    };
+    __name(PropagationAPI, "PropagationAPI");
     exports2.PropagationAPI = PropagationAPI;
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/propagation-api.js
+var require_propagation_api = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/propagation-api.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.propagation = void 0;
+    var propagation_1 = require_propagation();
+    exports2.propagation = propagation_1.PropagationAPI.getInstance();
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/api/trace.js
+var require_trace = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/api/trace.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TraceAPI = void 0;
+    var global_utils_1 = require_global_utils();
+    var ProxyTracerProvider_1 = require_ProxyTracerProvider();
+    var spancontext_utils_1 = require_spancontext_utils();
+    var context_utils_1 = require_context_utils();
+    var diag_1 = require_diag();
+    var API_NAME = "trace";
+    var TraceAPI = class {
+      constructor() {
+        this._proxyTracerProvider = new ProxyTracerProvider_1.ProxyTracerProvider();
+        this.wrapSpanContext = spancontext_utils_1.wrapSpanContext;
+        this.isSpanContextValid = spancontext_utils_1.isSpanContextValid;
+        this.deleteSpan = context_utils_1.deleteSpan;
+        this.getSpan = context_utils_1.getSpan;
+        this.getActiveSpan = context_utils_1.getActiveSpan;
+        this.getSpanContext = context_utils_1.getSpanContext;
+        this.setSpan = context_utils_1.setSpan;
+        this.setSpanContext = context_utils_1.setSpanContext;
+      }
+      static getInstance() {
+        if (!this._instance) {
+          this._instance = new TraceAPI();
+        }
+        return this._instance;
+      }
+      setGlobalTracerProvider(provider) {
+        const success = (0, global_utils_1.registerGlobal)(API_NAME, this._proxyTracerProvider, diag_1.DiagAPI.instance());
+        if (success) {
+          this._proxyTracerProvider.setDelegate(provider);
+        }
+        return success;
+      }
+      getTracerProvider() {
+        return (0, global_utils_1.getGlobal)(API_NAME) || this._proxyTracerProvider;
+      }
+      getTracer(name, version2) {
+        return this.getTracerProvider().getTracer(name, version2);
+      }
+      disable() {
+        (0, global_utils_1.unregisterGlobal)(API_NAME, diag_1.DiagAPI.instance());
+        this._proxyTracerProvider = new ProxyTracerProvider_1.ProxyTracerProvider();
+      }
+    };
+    __name(TraceAPI, "TraceAPI");
+    exports2.TraceAPI = TraceAPI;
+  }
+});
+
+// node_modules/@opentelemetry/api/build/src/trace-api.js
+var require_trace_api = __commonJS({
+  "node_modules/@opentelemetry/api/build/src/trace-api.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.trace = void 0;
+    var trace_1 = require_trace();
+    exports2.trace = trace_1.TraceAPI.getInstance();
   }
 });
 
@@ -33310,48 +33580,70 @@ var require_propagation = __commonJS({
 var require_src = __commonJS({
   "node_modules/@opentelemetry/api/build/src/index.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __exportStar = exports2 && exports2.__exportStar || function(m, exports3) {
-      for (var p in m)
-        if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports3, p))
-          __createBinding2(exports3, m, p);
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.diag = exports2.propagation = exports2.trace = exports2.context = exports2.INVALID_SPAN_CONTEXT = exports2.INVALID_TRACEID = exports2.INVALID_SPANID = exports2.isValidSpanId = exports2.isValidTraceId = exports2.isSpanContextValid = exports2.baggageEntryMetadataFromString = void 0;
-    __exportStar(require_types(), exports2);
+    exports2.trace = exports2.propagation = exports2.metrics = exports2.diag = exports2.context = exports2.INVALID_SPAN_CONTEXT = exports2.INVALID_TRACEID = exports2.INVALID_SPANID = exports2.isValidSpanId = exports2.isValidTraceId = exports2.isSpanContextValid = exports2.createTraceState = exports2.TraceFlags = exports2.SpanStatusCode = exports2.SpanKind = exports2.SamplingDecision = exports2.ProxyTracerProvider = exports2.ProxyTracer = exports2.defaultTextMapSetter = exports2.defaultTextMapGetter = exports2.ValueType = exports2.createNoopMeter = exports2.DiagLogLevel = exports2.DiagConsoleLogger = exports2.ROOT_CONTEXT = exports2.createContextKey = exports2.baggageEntryMetadataFromString = void 0;
     var utils_12 = require_utils4();
     Object.defineProperty(exports2, "baggageEntryMetadataFromString", { enumerable: true, get: function() {
       return utils_12.baggageEntryMetadataFromString;
     } });
-    __exportStar(require_Exception(), exports2);
-    __exportStar(require_Time(), exports2);
-    __exportStar(require_diag2(), exports2);
-    __exportStar(require_TextMapPropagator(), exports2);
-    __exportStar(require_attributes(), exports2);
-    __exportStar(require_link(), exports2);
-    __exportStar(require_ProxyTracer(), exports2);
-    __exportStar(require_ProxyTracerProvider(), exports2);
-    __exportStar(require_Sampler(), exports2);
-    __exportStar(require_SamplingResult(), exports2);
-    __exportStar(require_span_context(), exports2);
-    __exportStar(require_span_kind(), exports2);
-    __exportStar(require_span(), exports2);
-    __exportStar(require_SpanOptions(), exports2);
-    __exportStar(require_status(), exports2);
-    __exportStar(require_trace_flags(), exports2);
-    __exportStar(require_trace_state(), exports2);
-    __exportStar(require_tracer_provider(), exports2);
-    __exportStar(require_tracer(), exports2);
+    var context_1 = require_context();
+    Object.defineProperty(exports2, "createContextKey", { enumerable: true, get: function() {
+      return context_1.createContextKey;
+    } });
+    Object.defineProperty(exports2, "ROOT_CONTEXT", { enumerable: true, get: function() {
+      return context_1.ROOT_CONTEXT;
+    } });
+    var consoleLogger_1 = require_consoleLogger();
+    Object.defineProperty(exports2, "DiagConsoleLogger", { enumerable: true, get: function() {
+      return consoleLogger_1.DiagConsoleLogger;
+    } });
+    var types_1 = require_types();
+    Object.defineProperty(exports2, "DiagLogLevel", { enumerable: true, get: function() {
+      return types_1.DiagLogLevel;
+    } });
+    var NoopMeter_1 = require_NoopMeter();
+    Object.defineProperty(exports2, "createNoopMeter", { enumerable: true, get: function() {
+      return NoopMeter_1.createNoopMeter;
+    } });
+    var Metric_1 = require_Metric();
+    Object.defineProperty(exports2, "ValueType", { enumerable: true, get: function() {
+      return Metric_1.ValueType;
+    } });
+    var TextMapPropagator_1 = require_TextMapPropagator();
+    Object.defineProperty(exports2, "defaultTextMapGetter", { enumerable: true, get: function() {
+      return TextMapPropagator_1.defaultTextMapGetter;
+    } });
+    Object.defineProperty(exports2, "defaultTextMapSetter", { enumerable: true, get: function() {
+      return TextMapPropagator_1.defaultTextMapSetter;
+    } });
+    var ProxyTracer_1 = require_ProxyTracer();
+    Object.defineProperty(exports2, "ProxyTracer", { enumerable: true, get: function() {
+      return ProxyTracer_1.ProxyTracer;
+    } });
+    var ProxyTracerProvider_1 = require_ProxyTracerProvider();
+    Object.defineProperty(exports2, "ProxyTracerProvider", { enumerable: true, get: function() {
+      return ProxyTracerProvider_1.ProxyTracerProvider;
+    } });
+    var SamplingResult_1 = require_SamplingResult();
+    Object.defineProperty(exports2, "SamplingDecision", { enumerable: true, get: function() {
+      return SamplingResult_1.SamplingDecision;
+    } });
+    var span_kind_1 = require_span_kind();
+    Object.defineProperty(exports2, "SpanKind", { enumerable: true, get: function() {
+      return span_kind_1.SpanKind;
+    } });
+    var status_1 = require_status();
+    Object.defineProperty(exports2, "SpanStatusCode", { enumerable: true, get: function() {
+      return status_1.SpanStatusCode;
+    } });
+    var trace_flags_1 = require_trace_flags();
+    Object.defineProperty(exports2, "TraceFlags", { enumerable: true, get: function() {
+      return trace_flags_1.TraceFlags;
+    } });
+    var utils_2 = require_utils5();
+    Object.defineProperty(exports2, "createTraceState", { enumerable: true, get: function() {
+      return utils_2.createTraceState;
+    } });
     var spancontext_utils_1 = require_spancontext_utils();
     Object.defineProperty(exports2, "isSpanContextValid", { enumerable: true, get: function() {
       return spancontext_utils_1.isSpanContextValid;
@@ -33372,21 +33664,32 @@ var require_src = __commonJS({
     Object.defineProperty(exports2, "INVALID_SPAN_CONTEXT", { enumerable: true, get: function() {
       return invalid_span_constants_1.INVALID_SPAN_CONTEXT;
     } });
-    __exportStar(require_context(), exports2);
-    __exportStar(require_types3(), exports2);
-    var context_1 = require_context2();
-    exports2.context = context_1.ContextAPI.getInstance();
-    var trace_1 = require_trace();
-    exports2.trace = trace_1.TraceAPI.getInstance();
-    var propagation_1 = require_propagation();
-    exports2.propagation = propagation_1.PropagationAPI.getInstance();
-    var diag_1 = require_diag();
-    exports2.diag = diag_1.DiagAPI.instance();
+    var context_api_1 = require_context_api();
+    Object.defineProperty(exports2, "context", { enumerable: true, get: function() {
+      return context_api_1.context;
+    } });
+    var diag_api_1 = require_diag_api();
+    Object.defineProperty(exports2, "diag", { enumerable: true, get: function() {
+      return diag_api_1.diag;
+    } });
+    var metrics_api_1 = require_metrics_api();
+    Object.defineProperty(exports2, "metrics", { enumerable: true, get: function() {
+      return metrics_api_1.metrics;
+    } });
+    var propagation_api_1 = require_propagation_api();
+    Object.defineProperty(exports2, "propagation", { enumerable: true, get: function() {
+      return propagation_api_1.propagation;
+    } });
+    var trace_api_1 = require_trace_api();
+    Object.defineProperty(exports2, "trace", { enumerable: true, get: function() {
+      return trace_api_1.trace;
+    } });
     exports2.default = {
-      trace: exports2.trace,
-      context: exports2.context,
-      propagation: exports2.propagation,
-      diag: exports2.diag
+      context: context_api_1.context,
+      diag: diag_api_1.diag,
+      metrics: metrics_api_1.metrics,
+      propagation: propagation_api_1.propagation,
+      trace: trace_api_1.trace
     };
   }
 });
@@ -33685,7 +33988,7 @@ var require_dist8 = __commonJS({
     }
     __name(decodeString, "decodeString");
     var Constants = {
-      coreHttpVersion: "3.0.1",
+      coreHttpVersion: "3.0.2",
       HTTP: "http:",
       HTTPS: "https:",
       HTTP_PROXY: "HTTP_PROXY",
@@ -33717,7 +34020,6 @@ var require_dist8 = __commonJS({
     var XML_ATTRKEY = "$";
     var XML_CHARKEY = "_";
     var validUuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/i;
-    var isNode = typeof process !== "undefined" && !!process.version && !!process.versions && !!process.versions.node;
     function encodeUri(uri) {
       return encodeURIComponent(uri).replace(/!/g, "%21").replace(/"/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A");
     }
@@ -37188,7 +37490,7 @@ var require_dist8 = __commonJS({
         factories.push(throttlingRetryPolicy());
       }
       factories.push(deserializationPolicy(options.deserializationContentTypes));
-      if (isNode) {
+      if (coreUtil.isNode) {
         factories.push(proxyPolicy(options.proxySettings));
       }
       factories.push(logPolicy({ logger: logger.info }));
@@ -37213,7 +37515,7 @@ var require_dist8 = __commonJS({
       const keepAliveOptions = Object.assign(Object.assign({}, DefaultKeepAliveOptions), pipelineOptions.keepAliveOptions);
       const retryOptions = Object.assign(Object.assign({}, DefaultRetryOptions), pipelineOptions.retryOptions);
       const redirectOptions = Object.assign(Object.assign({}, DefaultRedirectOptions), pipelineOptions.redirectOptions);
-      if (isNode) {
+      if (coreUtil.isNode) {
         requestPolicyFactories.push(proxyPolicy(pipelineOptions.proxyOptions));
       }
       const deserializationOptions = Object.assign(Object.assign({}, DefaultDeserializationOptions), pipelineOptions.deserializationOptions);
@@ -37226,7 +37528,7 @@ var require_dist8 = __commonJS({
         requestPolicyFactories.push(authPolicyFactory);
       }
       requestPolicyFactories.push(logPolicy(loggingOptions));
-      if (isNode && pipelineOptions.decompressResponse === false) {
+      if (coreUtil.isNode && pipelineOptions.decompressResponse === false) {
         requestPolicyFactories.push(disableResponseDecompressionPolicy());
       }
       return {
@@ -37345,8 +37647,7 @@ var require_dist8 = __commonJS({
     __name(flattenResponse, "flattenResponse");
     function getCredentialScopes(options, baseUri) {
       if (options === null || options === void 0 ? void 0 : options.credentialScopes) {
-        const scopes = options.credentialScopes;
-        return Array.isArray(scopes) ? scopes.map((scope) => new URL(scope).toString()) : new URL(scopes).toString();
+        return options.credentialScopes;
       }
       if (baseUri) {
         return `${baseUri}/.default`;
@@ -37482,6 +37783,12 @@ var require_dist8 = __commonJS({
         return coreUtil.delay;
       }
     });
+    Object.defineProperty(exports2, "isNode", {
+      enumerable: true,
+      get: function() {
+        return coreUtil.isNode;
+      }
+    });
     Object.defineProperty(exports2, "isTokenCredential", {
       enumerable: true,
       get: function() {
@@ -37523,7 +37830,6 @@ var require_dist8 = __commonJS({
     exports2.getDefaultProxySettings = getDefaultProxySettings;
     exports2.getDefaultUserAgentValue = getDefaultUserAgentValue;
     exports2.isDuration = isDuration;
-    exports2.isNode = isNode;
     exports2.isValidUuid = isValidUuid;
     exports2.keepAlivePolicy = keepAlivePolicy;
     exports2.logPolicy = logPolicy;
@@ -37545,915 +37851,12 @@ var require_dist8 = __commonJS({
   }
 });
 
-// node_modules/@azure/storage-blob/node_modules/tslib/tslib.js
-var require_tslib2 = __commonJS({
-  "node_modules/@azure/storage-blob/node_modules/tslib/tslib.js"(exports2, module2) {
-    var __extends;
-    var __assign;
-    var __rest;
-    var __decorate;
-    var __param;
-    var __metadata;
-    var __awaiter2;
-    var __generator;
-    var __exportStar;
-    var __values2;
-    var __read;
-    var __spread;
-    var __spreadArrays;
-    var __spreadArray;
-    var __await;
-    var __asyncGenerator;
-    var __asyncDelegator;
-    var __asyncValues;
-    var __makeTemplateObject;
-    var __importStar2;
-    var __importDefault;
-    var __classPrivateFieldGet;
-    var __classPrivateFieldSet;
-    var __createBinding2;
-    (function(factory) {
-      var root = typeof global === "object" ? global : typeof self === "object" ? self : typeof this === "object" ? this : {};
-      if (typeof define === "function" && define.amd) {
-        define("tslib", ["exports"], function(exports3) {
-          factory(createExporter(root, createExporter(exports3)));
-        });
-      } else if (typeof module2 === "object" && typeof module2.exports === "object") {
-        factory(createExporter(root, createExporter(module2.exports)));
-      } else {
-        factory(createExporter(root));
-      }
-      function createExporter(exports3, previous) {
-        if (exports3 !== root) {
-          if (typeof Object.create === "function") {
-            Object.defineProperty(exports3, "__esModule", { value: true });
-          } else {
-            exports3.__esModule = true;
-          }
-        }
-        return function(id, v) {
-          return exports3[id] = previous ? previous(id, v) : v;
-        };
-      }
-      __name(createExporter, "createExporter");
-    })(function(exporter) {
-      var extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d, b) {
-        d.__proto__ = b;
-      } || function(d, b) {
-        for (var p in b)
-          if (Object.prototype.hasOwnProperty.call(b, p))
-            d[p] = b[p];
-      };
-      __extends = /* @__PURE__ */ __name(function(d, b) {
-        if (typeof b !== "function" && b !== null)
-          throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() {
-          this.constructor = d;
-        }
-        __name(__, "__");
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-      }, "__extends");
-      __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-          s = arguments[i];
-          for (var p in s)
-            if (Object.prototype.hasOwnProperty.call(s, p))
-              t[p] = s[p];
-        }
-        return t;
-      };
-      __rest = /* @__PURE__ */ __name(function(s, e) {
-        var t = {};
-        for (var p in s)
-          if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-            t[p] = s[p];
-        if (s != null && typeof Object.getOwnPropertySymbols === "function")
-          for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-              t[p[i]] = s[p[i]];
-          }
-        return t;
-      }, "__rest");
-      __decorate = /* @__PURE__ */ __name(function(decorators, target, key, desc) {
-        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-        if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-          r = Reflect.decorate(decorators, target, key, desc);
-        else
-          for (var i = decorators.length - 1; i >= 0; i--)
-            if (d = decorators[i])
-              r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-        return c > 3 && r && Object.defineProperty(target, key, r), r;
-      }, "__decorate");
-      __param = /* @__PURE__ */ __name(function(paramIndex, decorator) {
-        return function(target, key) {
-          decorator(target, key, paramIndex);
-        };
-      }, "__param");
-      __metadata = /* @__PURE__ */ __name(function(metadataKey, metadataValue) {
-        if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
-          return Reflect.metadata(metadataKey, metadataValue);
-      }, "__metadata");
-      __awaiter2 = /* @__PURE__ */ __name(function(thisArg, _arguments, P, generator) {
-        function adopt(value) {
-          return value instanceof P ? value : new P(function(resolve) {
-            resolve(value);
-          });
-        }
-        __name(adopt, "adopt");
-        return new (P || (P = Promise))(function(resolve, reject) {
-          function fulfilled(value) {
-            try {
-              step(generator.next(value));
-            } catch (e) {
-              reject(e);
-            }
-          }
-          __name(fulfilled, "fulfilled");
-          function rejected(value) {
-            try {
-              step(generator["throw"](value));
-            } catch (e) {
-              reject(e);
-            }
-          }
-          __name(rejected, "rejected");
-          function step(result) {
-            result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-          }
-          __name(step, "step");
-          step((generator = generator.apply(thisArg, _arguments || [])).next());
-        });
-      }, "__awaiter");
-      __generator = /* @__PURE__ */ __name(function(thisArg, body) {
-        var _ = { label: 0, sent: function() {
-          if (t[0] & 1)
-            throw t[1];
-          return t[1];
-        }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() {
-          return this;
-        }), g;
-        function verb(n) {
-          return function(v) {
-            return step([n, v]);
-          };
-        }
-        __name(verb, "verb");
-        function step(op) {
-          if (f)
-            throw new TypeError("Generator is already executing.");
-          while (_)
-            try {
-              if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)
-                return t;
-              if (y = 0, t)
-                op = [op[0] & 2, t.value];
-              switch (op[0]) {
-                case 0:
-                case 1:
-                  t = op;
-                  break;
-                case 4:
-                  _.label++;
-                  return { value: op[1], done: false };
-                case 5:
-                  _.label++;
-                  y = op[1];
-                  op = [0];
-                  continue;
-                case 7:
-                  op = _.ops.pop();
-                  _.trys.pop();
-                  continue;
-                default:
-                  if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
-                    _ = 0;
-                    continue;
-                  }
-                  if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
-                    _.label = op[1];
-                    break;
-                  }
-                  if (op[0] === 6 && _.label < t[1]) {
-                    _.label = t[1];
-                    t = op;
-                    break;
-                  }
-                  if (t && _.label < t[2]) {
-                    _.label = t[2];
-                    _.ops.push(op);
-                    break;
-                  }
-                  if (t[2])
-                    _.ops.pop();
-                  _.trys.pop();
-                  continue;
-              }
-              op = body.call(thisArg, _);
-            } catch (e) {
-              op = [6, e];
-              y = 0;
-            } finally {
-              f = t = 0;
-            }
-          if (op[0] & 5)
-            throw op[1];
-          return { value: op[0] ? op[1] : void 0, done: true };
-        }
-        __name(step, "step");
-      }, "__generator");
-      __exportStar = /* @__PURE__ */ __name(function(m, o) {
-        for (var p in m)
-          if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p))
-            __createBinding2(o, m, p);
-      }, "__exportStar");
-      __createBinding2 = Object.create ? function(o, m, k, k2) {
-        if (k2 === void 0)
-          k2 = k;
-        Object.defineProperty(o, k2, { enumerable: true, get: function() {
-          return m[k];
-        } });
-      } : function(o, m, k, k2) {
-        if (k2 === void 0)
-          k2 = k;
-        o[k2] = m[k];
-      };
-      __values2 = /* @__PURE__ */ __name(function(o) {
-        var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-        if (m)
-          return m.call(o);
-        if (o && typeof o.length === "number")
-          return {
-            next: function() {
-              if (o && i >= o.length)
-                o = void 0;
-              return { value: o && o[i++], done: !o };
-            }
-          };
-        throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-      }, "__values");
-      __read = /* @__PURE__ */ __name(function(o, n) {
-        var m = typeof Symbol === "function" && o[Symbol.iterator];
-        if (!m)
-          return o;
-        var i = m.call(o), r, ar = [], e;
-        try {
-          while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
-            ar.push(r.value);
-        } catch (error) {
-          e = { error };
-        } finally {
-          try {
-            if (r && !r.done && (m = i["return"]))
-              m.call(i);
-          } finally {
-            if (e)
-              throw e.error;
-          }
-        }
-        return ar;
-      }, "__read");
-      __spread = /* @__PURE__ */ __name(function() {
-        for (var ar = [], i = 0; i < arguments.length; i++)
-          ar = ar.concat(__read(arguments[i]));
-        return ar;
-      }, "__spread");
-      __spreadArrays = /* @__PURE__ */ __name(function() {
-        for (var s = 0, i = 0, il = arguments.length; i < il; i++)
-          s += arguments[i].length;
-        for (var r = Array(s), k = 0, i = 0; i < il; i++)
-          for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-        return r;
-      }, "__spreadArrays");
-      __spreadArray = /* @__PURE__ */ __name(function(to, from, pack) {
-        if (pack || arguments.length === 2)
-          for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-              if (!ar)
-                ar = Array.prototype.slice.call(from, 0, i);
-              ar[i] = from[i];
-            }
-          }
-        return to.concat(ar || Array.prototype.slice.call(from));
-      }, "__spreadArray");
-      __await = /* @__PURE__ */ __name(function(v) {
-        return this instanceof __await ? (this.v = v, this) : new __await(v);
-      }, "__await");
-      __asyncGenerator = /* @__PURE__ */ __name(function(thisArg, _arguments, generator) {
-        if (!Symbol.asyncIterator)
-          throw new TypeError("Symbol.asyncIterator is not defined.");
-        var g = generator.apply(thisArg, _arguments || []), i, q = [];
-        return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-          return this;
-        }, i;
-        function verb(n) {
-          if (g[n])
-            i[n] = function(v) {
-              return new Promise(function(a, b) {
-                q.push([n, v, a, b]) > 1 || resume(n, v);
-              });
-            };
-        }
-        __name(verb, "verb");
-        function resume(n, v) {
-          try {
-            step(g[n](v));
-          } catch (e) {
-            settle(q[0][3], e);
-          }
-        }
-        __name(resume, "resume");
-        function step(r) {
-          r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
-        }
-        __name(step, "step");
-        function fulfill(value) {
-          resume("next", value);
-        }
-        __name(fulfill, "fulfill");
-        function reject(value) {
-          resume("throw", value);
-        }
-        __name(reject, "reject");
-        function settle(f, v) {
-          if (f(v), q.shift(), q.length)
-            resume(q[0][0], q[0][1]);
-        }
-        __name(settle, "settle");
-      }, "__asyncGenerator");
-      __asyncDelegator = /* @__PURE__ */ __name(function(o) {
-        var i, p;
-        return i = {}, verb("next"), verb("throw", function(e) {
-          throw e;
-        }), verb("return"), i[Symbol.iterator] = function() {
-          return this;
-        }, i;
-        function verb(n, f) {
-          i[n] = o[n] ? function(v) {
-            return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v;
-          } : f;
-        }
-        __name(verb, "verb");
-      }, "__asyncDelegator");
-      __asyncValues = /* @__PURE__ */ __name(function(o) {
-        if (!Symbol.asyncIterator)
-          throw new TypeError("Symbol.asyncIterator is not defined.");
-        var m = o[Symbol.asyncIterator], i;
-        return m ? m.call(o) : (o = typeof __values2 === "function" ? __values2(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-          return this;
-        }, i);
-        function verb(n) {
-          i[n] = o[n] && function(v) {
-            return new Promise(function(resolve, reject) {
-              v = o[n](v), settle(resolve, reject, v.done, v.value);
-            });
-          };
-        }
-        __name(verb, "verb");
-        function settle(resolve, reject, d, v) {
-          Promise.resolve(v).then(function(v2) {
-            resolve({ value: v2, done: d });
-          }, reject);
-        }
-        __name(settle, "settle");
-      }, "__asyncValues");
-      __makeTemplateObject = /* @__PURE__ */ __name(function(cooked, raw) {
-        if (Object.defineProperty) {
-          Object.defineProperty(cooked, "raw", { value: raw });
-        } else {
-          cooked.raw = raw;
-        }
-        return cooked;
-      }, "__makeTemplateObject");
-      var __setModuleDefault2 = Object.create ? function(o, v) {
-        Object.defineProperty(o, "default", { enumerable: true, value: v });
-      } : function(o, v) {
-        o["default"] = v;
-      };
-      __importStar2 = /* @__PURE__ */ __name(function(mod) {
-        if (mod && mod.__esModule)
-          return mod;
-        var result = {};
-        if (mod != null) {
-          for (var k in mod)
-            if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-              __createBinding2(result, mod, k);
-        }
-        __setModuleDefault2(result, mod);
-        return result;
-      }, "__importStar");
-      __importDefault = /* @__PURE__ */ __name(function(mod) {
-        return mod && mod.__esModule ? mod : { "default": mod };
-      }, "__importDefault");
-      __classPrivateFieldGet = /* @__PURE__ */ __name(function(receiver, state, kind, f) {
-        if (kind === "a" && !f)
-          throw new TypeError("Private accessor was defined without a getter");
-        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-          throw new TypeError("Cannot read private member from an object whose class did not declare it");
-        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-      }, "__classPrivateFieldGet");
-      __classPrivateFieldSet = /* @__PURE__ */ __name(function(receiver, state, value, kind, f) {
-        if (kind === "m")
-          throw new TypeError("Private method is not writable");
-        if (kind === "a" && !f)
-          throw new TypeError("Private accessor was defined without a setter");
-        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-          throw new TypeError("Cannot write private member to an object whose class did not declare it");
-        return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
-      }, "__classPrivateFieldSet");
-      exporter("__extends", __extends);
-      exporter("__assign", __assign);
-      exporter("__rest", __rest);
-      exporter("__decorate", __decorate);
-      exporter("__param", __param);
-      exporter("__metadata", __metadata);
-      exporter("__awaiter", __awaiter2);
-      exporter("__generator", __generator);
-      exporter("__exportStar", __exportStar);
-      exporter("__createBinding", __createBinding2);
-      exporter("__values", __values2);
-      exporter("__read", __read);
-      exporter("__spread", __spread);
-      exporter("__spreadArrays", __spreadArrays);
-      exporter("__spreadArray", __spreadArray);
-      exporter("__await", __await);
-      exporter("__asyncGenerator", __asyncGenerator);
-      exporter("__asyncDelegator", __asyncDelegator);
-      exporter("__asyncValues", __asyncValues);
-      exporter("__makeTemplateObject", __makeTemplateObject);
-      exporter("__importStar", __importStar2);
-      exporter("__importDefault", __importDefault);
-      exporter("__classPrivateFieldGet", __classPrivateFieldGet);
-      exporter("__classPrivateFieldSet", __classPrivateFieldSet);
-    });
-  }
-});
-
-// node_modules/@azure/core-asynciterator-polyfill/dist/index.js
-var require_dist9 = __commonJS({
-  "node_modules/@azure/core-asynciterator-polyfill/dist/index.js"() {
-    "use strict";
-    if (typeof Symbol === void 0 || !Symbol.asyncIterator) {
-      Symbol.asyncIterator = Symbol.for("Symbol.asyncIterator");
-    }
-  }
-});
-
-// node_modules/@azure/core-paging/node_modules/tslib/tslib.js
-var require_tslib3 = __commonJS({
-  "node_modules/@azure/core-paging/node_modules/tslib/tslib.js"(exports2, module2) {
-    var __extends;
-    var __assign;
-    var __rest;
-    var __decorate;
-    var __param;
-    var __metadata;
-    var __awaiter2;
-    var __generator;
-    var __exportStar;
-    var __values2;
-    var __read;
-    var __spread;
-    var __spreadArrays;
-    var __spreadArray;
-    var __await;
-    var __asyncGenerator;
-    var __asyncDelegator;
-    var __asyncValues;
-    var __makeTemplateObject;
-    var __importStar2;
-    var __importDefault;
-    var __classPrivateFieldGet;
-    var __classPrivateFieldSet;
-    var __createBinding2;
-    (function(factory) {
-      var root = typeof global === "object" ? global : typeof self === "object" ? self : typeof this === "object" ? this : {};
-      if (typeof define === "function" && define.amd) {
-        define("tslib", ["exports"], function(exports3) {
-          factory(createExporter(root, createExporter(exports3)));
-        });
-      } else if (typeof module2 === "object" && typeof module2.exports === "object") {
-        factory(createExporter(root, createExporter(module2.exports)));
-      } else {
-        factory(createExporter(root));
-      }
-      function createExporter(exports3, previous) {
-        if (exports3 !== root) {
-          if (typeof Object.create === "function") {
-            Object.defineProperty(exports3, "__esModule", { value: true });
-          } else {
-            exports3.__esModule = true;
-          }
-        }
-        return function(id, v) {
-          return exports3[id] = previous ? previous(id, v) : v;
-        };
-      }
-      __name(createExporter, "createExporter");
-    })(function(exporter) {
-      var extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d, b) {
-        d.__proto__ = b;
-      } || function(d, b) {
-        for (var p in b)
-          if (Object.prototype.hasOwnProperty.call(b, p))
-            d[p] = b[p];
-      };
-      __extends = /* @__PURE__ */ __name(function(d, b) {
-        if (typeof b !== "function" && b !== null)
-          throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() {
-          this.constructor = d;
-        }
-        __name(__, "__");
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-      }, "__extends");
-      __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-          s = arguments[i];
-          for (var p in s)
-            if (Object.prototype.hasOwnProperty.call(s, p))
-              t[p] = s[p];
-        }
-        return t;
-      };
-      __rest = /* @__PURE__ */ __name(function(s, e) {
-        var t = {};
-        for (var p in s)
-          if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-            t[p] = s[p];
-        if (s != null && typeof Object.getOwnPropertySymbols === "function")
-          for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-              t[p[i]] = s[p[i]];
-          }
-        return t;
-      }, "__rest");
-      __decorate = /* @__PURE__ */ __name(function(decorators, target, key, desc) {
-        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-        if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-          r = Reflect.decorate(decorators, target, key, desc);
-        else
-          for (var i = decorators.length - 1; i >= 0; i--)
-            if (d = decorators[i])
-              r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-        return c > 3 && r && Object.defineProperty(target, key, r), r;
-      }, "__decorate");
-      __param = /* @__PURE__ */ __name(function(paramIndex, decorator) {
-        return function(target, key) {
-          decorator(target, key, paramIndex);
-        };
-      }, "__param");
-      __metadata = /* @__PURE__ */ __name(function(metadataKey, metadataValue) {
-        if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
-          return Reflect.metadata(metadataKey, metadataValue);
-      }, "__metadata");
-      __awaiter2 = /* @__PURE__ */ __name(function(thisArg, _arguments, P, generator) {
-        function adopt(value) {
-          return value instanceof P ? value : new P(function(resolve) {
-            resolve(value);
-          });
-        }
-        __name(adopt, "adopt");
-        return new (P || (P = Promise))(function(resolve, reject) {
-          function fulfilled(value) {
-            try {
-              step(generator.next(value));
-            } catch (e) {
-              reject(e);
-            }
-          }
-          __name(fulfilled, "fulfilled");
-          function rejected(value) {
-            try {
-              step(generator["throw"](value));
-            } catch (e) {
-              reject(e);
-            }
-          }
-          __name(rejected, "rejected");
-          function step(result) {
-            result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-          }
-          __name(step, "step");
-          step((generator = generator.apply(thisArg, _arguments || [])).next());
-        });
-      }, "__awaiter");
-      __generator = /* @__PURE__ */ __name(function(thisArg, body) {
-        var _ = { label: 0, sent: function() {
-          if (t[0] & 1)
-            throw t[1];
-          return t[1];
-        }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() {
-          return this;
-        }), g;
-        function verb(n) {
-          return function(v) {
-            return step([n, v]);
-          };
-        }
-        __name(verb, "verb");
-        function step(op) {
-          if (f)
-            throw new TypeError("Generator is already executing.");
-          while (_)
-            try {
-              if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)
-                return t;
-              if (y = 0, t)
-                op = [op[0] & 2, t.value];
-              switch (op[0]) {
-                case 0:
-                case 1:
-                  t = op;
-                  break;
-                case 4:
-                  _.label++;
-                  return { value: op[1], done: false };
-                case 5:
-                  _.label++;
-                  y = op[1];
-                  op = [0];
-                  continue;
-                case 7:
-                  op = _.ops.pop();
-                  _.trys.pop();
-                  continue;
-                default:
-                  if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
-                    _ = 0;
-                    continue;
-                  }
-                  if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
-                    _.label = op[1];
-                    break;
-                  }
-                  if (op[0] === 6 && _.label < t[1]) {
-                    _.label = t[1];
-                    t = op;
-                    break;
-                  }
-                  if (t && _.label < t[2]) {
-                    _.label = t[2];
-                    _.ops.push(op);
-                    break;
-                  }
-                  if (t[2])
-                    _.ops.pop();
-                  _.trys.pop();
-                  continue;
-              }
-              op = body.call(thisArg, _);
-            } catch (e) {
-              op = [6, e];
-              y = 0;
-            } finally {
-              f = t = 0;
-            }
-          if (op[0] & 5)
-            throw op[1];
-          return { value: op[0] ? op[1] : void 0, done: true };
-        }
-        __name(step, "step");
-      }, "__generator");
-      __exportStar = /* @__PURE__ */ __name(function(m, o) {
-        for (var p in m)
-          if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p))
-            __createBinding2(o, m, p);
-      }, "__exportStar");
-      __createBinding2 = Object.create ? function(o, m, k, k2) {
-        if (k2 === void 0)
-          k2 = k;
-        Object.defineProperty(o, k2, { enumerable: true, get: function() {
-          return m[k];
-        } });
-      } : function(o, m, k, k2) {
-        if (k2 === void 0)
-          k2 = k;
-        o[k2] = m[k];
-      };
-      __values2 = /* @__PURE__ */ __name(function(o) {
-        var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-        if (m)
-          return m.call(o);
-        if (o && typeof o.length === "number")
-          return {
-            next: function() {
-              if (o && i >= o.length)
-                o = void 0;
-              return { value: o && o[i++], done: !o };
-            }
-          };
-        throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-      }, "__values");
-      __read = /* @__PURE__ */ __name(function(o, n) {
-        var m = typeof Symbol === "function" && o[Symbol.iterator];
-        if (!m)
-          return o;
-        var i = m.call(o), r, ar = [], e;
-        try {
-          while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
-            ar.push(r.value);
-        } catch (error) {
-          e = { error };
-        } finally {
-          try {
-            if (r && !r.done && (m = i["return"]))
-              m.call(i);
-          } finally {
-            if (e)
-              throw e.error;
-          }
-        }
-        return ar;
-      }, "__read");
-      __spread = /* @__PURE__ */ __name(function() {
-        for (var ar = [], i = 0; i < arguments.length; i++)
-          ar = ar.concat(__read(arguments[i]));
-        return ar;
-      }, "__spread");
-      __spreadArrays = /* @__PURE__ */ __name(function() {
-        for (var s = 0, i = 0, il = arguments.length; i < il; i++)
-          s += arguments[i].length;
-        for (var r = Array(s), k = 0, i = 0; i < il; i++)
-          for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-        return r;
-      }, "__spreadArrays");
-      __spreadArray = /* @__PURE__ */ __name(function(to, from, pack) {
-        if (pack || arguments.length === 2)
-          for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-              if (!ar)
-                ar = Array.prototype.slice.call(from, 0, i);
-              ar[i] = from[i];
-            }
-          }
-        return to.concat(ar || Array.prototype.slice.call(from));
-      }, "__spreadArray");
-      __await = /* @__PURE__ */ __name(function(v) {
-        return this instanceof __await ? (this.v = v, this) : new __await(v);
-      }, "__await");
-      __asyncGenerator = /* @__PURE__ */ __name(function(thisArg, _arguments, generator) {
-        if (!Symbol.asyncIterator)
-          throw new TypeError("Symbol.asyncIterator is not defined.");
-        var g = generator.apply(thisArg, _arguments || []), i, q = [];
-        return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-          return this;
-        }, i;
-        function verb(n) {
-          if (g[n])
-            i[n] = function(v) {
-              return new Promise(function(a, b) {
-                q.push([n, v, a, b]) > 1 || resume(n, v);
-              });
-            };
-        }
-        __name(verb, "verb");
-        function resume(n, v) {
-          try {
-            step(g[n](v));
-          } catch (e) {
-            settle(q[0][3], e);
-          }
-        }
-        __name(resume, "resume");
-        function step(r) {
-          r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
-        }
-        __name(step, "step");
-        function fulfill(value) {
-          resume("next", value);
-        }
-        __name(fulfill, "fulfill");
-        function reject(value) {
-          resume("throw", value);
-        }
-        __name(reject, "reject");
-        function settle(f, v) {
-          if (f(v), q.shift(), q.length)
-            resume(q[0][0], q[0][1]);
-        }
-        __name(settle, "settle");
-      }, "__asyncGenerator");
-      __asyncDelegator = /* @__PURE__ */ __name(function(o) {
-        var i, p;
-        return i = {}, verb("next"), verb("throw", function(e) {
-          throw e;
-        }), verb("return"), i[Symbol.iterator] = function() {
-          return this;
-        }, i;
-        function verb(n, f) {
-          i[n] = o[n] ? function(v) {
-            return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v;
-          } : f;
-        }
-        __name(verb, "verb");
-      }, "__asyncDelegator");
-      __asyncValues = /* @__PURE__ */ __name(function(o) {
-        if (!Symbol.asyncIterator)
-          throw new TypeError("Symbol.asyncIterator is not defined.");
-        var m = o[Symbol.asyncIterator], i;
-        return m ? m.call(o) : (o = typeof __values2 === "function" ? __values2(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
-          return this;
-        }, i);
-        function verb(n) {
-          i[n] = o[n] && function(v) {
-            return new Promise(function(resolve, reject) {
-              v = o[n](v), settle(resolve, reject, v.done, v.value);
-            });
-          };
-        }
-        __name(verb, "verb");
-        function settle(resolve, reject, d, v) {
-          Promise.resolve(v).then(function(v2) {
-            resolve({ value: v2, done: d });
-          }, reject);
-        }
-        __name(settle, "settle");
-      }, "__asyncValues");
-      __makeTemplateObject = /* @__PURE__ */ __name(function(cooked, raw) {
-        if (Object.defineProperty) {
-          Object.defineProperty(cooked, "raw", { value: raw });
-        } else {
-          cooked.raw = raw;
-        }
-        return cooked;
-      }, "__makeTemplateObject");
-      var __setModuleDefault2 = Object.create ? function(o, v) {
-        Object.defineProperty(o, "default", { enumerable: true, value: v });
-      } : function(o, v) {
-        o["default"] = v;
-      };
-      __importStar2 = /* @__PURE__ */ __name(function(mod) {
-        if (mod && mod.__esModule)
-          return mod;
-        var result = {};
-        if (mod != null) {
-          for (var k in mod)
-            if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-              __createBinding2(result, mod, k);
-        }
-        __setModuleDefault2(result, mod);
-        return result;
-      }, "__importStar");
-      __importDefault = /* @__PURE__ */ __name(function(mod) {
-        return mod && mod.__esModule ? mod : { "default": mod };
-      }, "__importDefault");
-      __classPrivateFieldGet = /* @__PURE__ */ __name(function(receiver, state, kind, f) {
-        if (kind === "a" && !f)
-          throw new TypeError("Private accessor was defined without a getter");
-        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-          throw new TypeError("Cannot read private member from an object whose class did not declare it");
-        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-      }, "__classPrivateFieldGet");
-      __classPrivateFieldSet = /* @__PURE__ */ __name(function(receiver, state, value, kind, f) {
-        if (kind === "m")
-          throw new TypeError("Private method is not writable");
-        if (kind === "a" && !f)
-          throw new TypeError("Private accessor was defined without a setter");
-        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-          throw new TypeError("Cannot write private member to an object whose class did not declare it");
-        return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
-      }, "__classPrivateFieldSet");
-      exporter("__extends", __extends);
-      exporter("__assign", __assign);
-      exporter("__rest", __rest);
-      exporter("__decorate", __decorate);
-      exporter("__param", __param);
-      exporter("__metadata", __metadata);
-      exporter("__awaiter", __awaiter2);
-      exporter("__generator", __generator);
-      exporter("__exportStar", __exportStar);
-      exporter("__createBinding", __createBinding2);
-      exporter("__values", __values2);
-      exporter("__read", __read);
-      exporter("__spread", __spread);
-      exporter("__spreadArrays", __spreadArrays);
-      exporter("__spreadArray", __spreadArray);
-      exporter("__await", __await);
-      exporter("__asyncGenerator", __asyncGenerator);
-      exporter("__asyncDelegator", __asyncDelegator);
-      exporter("__asyncValues", __asyncValues);
-      exporter("__makeTemplateObject", __makeTemplateObject);
-      exporter("__importStar", __importStar2);
-      exporter("__importDefault", __importDefault);
-      exporter("__classPrivateFieldGet", __classPrivateFieldGet);
-      exporter("__classPrivateFieldSet", __classPrivateFieldSet);
-    });
-  }
-});
-
 // node_modules/@azure/core-paging/dist/index.js
-var require_dist10 = __commonJS({
+var require_dist9 = __commonJS({
   "node_modules/@azure/core-paging/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    require_dist9();
-    var tslib = require_tslib3();
+    var tslib = require_tslib();
     function getPagedAsyncIterator(pagedResult) {
       var _a;
       const iter = getItemAsyncIterator(pagedResult);
@@ -38465,47 +37868,79 @@ var require_dist10 = __commonJS({
           return this;
         },
         byPage: (_a = pagedResult === null || pagedResult === void 0 ? void 0 : pagedResult.byPage) !== null && _a !== void 0 ? _a : (settings) => {
-          return getPageAsyncIterator(pagedResult, settings === null || settings === void 0 ? void 0 : settings.maxPageSize);
+          const { continuationToken, maxPageSize } = settings !== null && settings !== void 0 ? settings : {};
+          return getPageAsyncIterator(pagedResult, {
+            pageLink: continuationToken,
+            maxPageSize
+          });
         }
       };
     }
     __name(getPagedAsyncIterator, "getPagedAsyncIterator");
-    function getItemAsyncIterator(pagedResult, maxPageSize) {
+    function getItemAsyncIterator(pagedResult) {
       return tslib.__asyncGenerator(this, arguments, /* @__PURE__ */ __name(function* getItemAsyncIterator_1() {
-        var e_1, _a;
-        const pages = getPageAsyncIterator(pagedResult, maxPageSize);
+        var e_1, _a, e_2, _b;
+        const pages = getPageAsyncIterator(pagedResult);
         const firstVal = yield tslib.__await(pages.next());
         if (!Array.isArray(firstVal.value)) {
-          yield yield tslib.__await(firstVal.value);
-          yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(pages)));
+          const { toElements } = pagedResult;
+          if (toElements) {
+            yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(toElements(firstVal.value))));
+            try {
+              for (var pages_1 = tslib.__asyncValues(pages), pages_1_1; pages_1_1 = yield tslib.__await(pages_1.next()), !pages_1_1.done; ) {
+                const page = pages_1_1.value;
+                yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(toElements(page))));
+              }
+            } catch (e_1_1) {
+              e_1 = { error: e_1_1 };
+            } finally {
+              try {
+                if (pages_1_1 && !pages_1_1.done && (_a = pages_1.return))
+                  yield tslib.__await(_a.call(pages_1));
+              } finally {
+                if (e_1)
+                  throw e_1.error;
+              }
+            }
+          } else {
+            yield yield tslib.__await(firstVal.value);
+            yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(pages)));
+          }
         } else {
           yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(firstVal.value)));
           try {
-            for (var pages_1 = tslib.__asyncValues(pages), pages_1_1; pages_1_1 = yield tslib.__await(pages_1.next()), !pages_1_1.done; ) {
-              const page = pages_1_1.value;
+            for (var pages_2 = tslib.__asyncValues(pages), pages_2_1; pages_2_1 = yield tslib.__await(pages_2.next()), !pages_2_1.done; ) {
+              const page = pages_2_1.value;
               yield tslib.__await(yield* tslib.__asyncDelegator(tslib.__asyncValues(page)));
             }
-          } catch (e_1_1) {
-            e_1 = { error: e_1_1 };
+          } catch (e_2_1) {
+            e_2 = { error: e_2_1 };
           } finally {
             try {
-              if (pages_1_1 && !pages_1_1.done && (_a = pages_1.return))
-                yield tslib.__await(_a.call(pages_1));
+              if (pages_2_1 && !pages_2_1.done && (_b = pages_2.return))
+                yield tslib.__await(_b.call(pages_2));
             } finally {
-              if (e_1)
-                throw e_1.error;
+              if (e_2)
+                throw e_2.error;
             }
           }
         }
       }, "getItemAsyncIterator_1"));
     }
     __name(getItemAsyncIterator, "getItemAsyncIterator");
-    function getPageAsyncIterator(pagedResult, maxPageSize) {
+    function getPageAsyncIterator(pagedResult, options = {}) {
       return tslib.__asyncGenerator(this, arguments, /* @__PURE__ */ __name(function* getPageAsyncIterator_1() {
-        let response = yield tslib.__await(pagedResult.getPage(pagedResult.firstPageLink, maxPageSize));
+        const { pageLink, maxPageSize } = options;
+        let response = yield tslib.__await(pagedResult.getPage(pageLink !== null && pageLink !== void 0 ? pageLink : pagedResult.firstPageLink, maxPageSize));
+        if (!response) {
+          return yield tslib.__await(void 0);
+        }
         yield yield tslib.__await(response.page);
         while (response.nextPageLink) {
           response = yield tslib.__await(pagedResult.getPage(response.nextPageLink, maxPageSize));
+          if (!response) {
+            return yield tslib.__await(void 0);
+          }
           yield yield tslib.__await(response.page);
         }
       }, "getPageAsyncIterator_1"));
@@ -38516,11 +37951,687 @@ var require_dist10 = __commonJS({
 });
 
 // node_modules/@azure/core-lro/dist/index.js
-var require_dist11 = __commonJS({
+var require_dist10 = __commonJS({
   "node_modules/@azure/core-lro/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var logger$1 = require_dist5();
+    var abortController = require_dist3();
+    var coreUtil = require_dist4();
+    var logger = logger$1.createClientLogger("core-lro");
+    var POLL_INTERVAL_IN_MS = 2e3;
+    var terminalStates = ["succeeded", "canceled", "failed"];
+    function deserializeState(serializedState) {
+      try {
+        return JSON.parse(serializedState).state;
+      } catch (e) {
+        throw new Error(`Unable to deserialize input state: ${serializedState}`);
+      }
+    }
+    __name(deserializeState, "deserializeState");
+    function setStateError(inputs) {
+      const { state, stateProxy, isOperationError: isOperationError2 } = inputs;
+      return (error) => {
+        if (isOperationError2(error)) {
+          stateProxy.setError(state, error);
+          stateProxy.setFailed(state);
+        }
+        throw error;
+      };
+    }
+    __name(setStateError, "setStateError");
+    function appendReadableErrorMessage(currentMessage, innerMessage) {
+      let message = currentMessage;
+      if (message.slice(-1) !== ".") {
+        message = message + ".";
+      }
+      return message + " " + innerMessage;
+    }
+    __name(appendReadableErrorMessage, "appendReadableErrorMessage");
+    function simplifyError(err) {
+      let message = err.message;
+      let code = err.code;
+      let curErr = err;
+      while (curErr.innererror) {
+        curErr = curErr.innererror;
+        code = curErr.code;
+        message = appendReadableErrorMessage(message, curErr.message);
+      }
+      return {
+        code,
+        message
+      };
+    }
+    __name(simplifyError, "simplifyError");
+    function processOperationStatus(result) {
+      const { state, stateProxy, status, isDone, processResult, getError, response, setErrorAsResult } = result;
+      switch (status) {
+        case "succeeded": {
+          stateProxy.setSucceeded(state);
+          break;
+        }
+        case "failed": {
+          const err = getError === null || getError === void 0 ? void 0 : getError(response);
+          let postfix = "";
+          if (err) {
+            const { code, message } = simplifyError(err);
+            postfix = `. ${code}. ${message}`;
+          }
+          const errStr = `The long-running operation has failed${postfix}`;
+          stateProxy.setError(state, new Error(errStr));
+          stateProxy.setFailed(state);
+          logger.warning(errStr);
+          break;
+        }
+        case "canceled": {
+          stateProxy.setCanceled(state);
+          break;
+        }
+      }
+      if ((isDone === null || isDone === void 0 ? void 0 : isDone(response, state)) || isDone === void 0 && ["succeeded", "canceled"].concat(setErrorAsResult ? [] : ["failed"]).includes(status)) {
+        stateProxy.setResult(state, buildResult({
+          response,
+          state,
+          processResult
+        }));
+      }
+    }
+    __name(processOperationStatus, "processOperationStatus");
+    function buildResult(inputs) {
+      const { processResult, response, state } = inputs;
+      return processResult ? processResult(response, state) : response;
+    }
+    __name(buildResult, "buildResult");
+    async function initOperation(inputs) {
+      const { init, stateProxy, processResult, getOperationStatus: getOperationStatus2, withOperationLocation, setErrorAsResult } = inputs;
+      const { operationLocation, resourceLocation, metadata, response } = await init();
+      if (operationLocation)
+        withOperationLocation === null || withOperationLocation === void 0 ? void 0 : withOperationLocation(operationLocation, false);
+      const config = {
+        metadata,
+        operationLocation,
+        resourceLocation
+      };
+      logger.verbose(`LRO: Operation description:`, config);
+      const state = stateProxy.initState(config);
+      const status = getOperationStatus2({ response, state, operationLocation });
+      processOperationStatus({ state, status, stateProxy, response, setErrorAsResult, processResult });
+      return state;
+    }
+    __name(initOperation, "initOperation");
+    async function pollOperationHelper(inputs) {
+      const { poll, state, stateProxy, operationLocation, getOperationStatus: getOperationStatus2, getResourceLocation: getResourceLocation2, isOperationError: isOperationError2, options } = inputs;
+      const response = await poll(operationLocation, options).catch(setStateError({
+        state,
+        stateProxy,
+        isOperationError: isOperationError2
+      }));
+      const status = getOperationStatus2(response, state);
+      logger.verbose(`LRO: Status:
+	Polling from: ${state.config.operationLocation}
+	Operation status: ${status}
+	Polling status: ${terminalStates.includes(status) ? "Stopped" : "Running"}`);
+      if (status === "succeeded") {
+        const resourceLocation = getResourceLocation2(response, state);
+        if (resourceLocation !== void 0) {
+          return {
+            response: await poll(resourceLocation).catch(setStateError({ state, stateProxy, isOperationError: isOperationError2 })),
+            status
+          };
+        }
+      }
+      return { response, status };
+    }
+    __name(pollOperationHelper, "pollOperationHelper");
+    async function pollOperation(inputs) {
+      const { poll, state, stateProxy, options, getOperationStatus: getOperationStatus2, getResourceLocation: getResourceLocation2, getOperationLocation: getOperationLocation2, isOperationError: isOperationError2, withOperationLocation, getPollingInterval, processResult, getError, updateState, setDelay, isDone, setErrorAsResult } = inputs;
+      const { operationLocation } = state.config;
+      if (operationLocation !== void 0) {
+        const { response, status } = await pollOperationHelper({
+          poll,
+          getOperationStatus: getOperationStatus2,
+          state,
+          stateProxy,
+          operationLocation,
+          getResourceLocation: getResourceLocation2,
+          isOperationError: isOperationError2,
+          options
+        });
+        processOperationStatus({
+          status,
+          response,
+          state,
+          stateProxy,
+          isDone,
+          processResult,
+          getError,
+          setErrorAsResult
+        });
+        if (!terminalStates.includes(status)) {
+          const intervalInMs = getPollingInterval === null || getPollingInterval === void 0 ? void 0 : getPollingInterval(response);
+          if (intervalInMs)
+            setDelay(intervalInMs);
+          const location = getOperationLocation2 === null || getOperationLocation2 === void 0 ? void 0 : getOperationLocation2(response, state);
+          if (location !== void 0) {
+            const isUpdated = operationLocation !== location;
+            state.config.operationLocation = location;
+            withOperationLocation === null || withOperationLocation === void 0 ? void 0 : withOperationLocation(location, isUpdated);
+          } else
+            withOperationLocation === null || withOperationLocation === void 0 ? void 0 : withOperationLocation(operationLocation, false);
+        }
+        updateState === null || updateState === void 0 ? void 0 : updateState(state, response);
+      }
+    }
+    __name(pollOperation, "pollOperation");
+    function getOperationLocationPollingUrl(inputs) {
+      const { azureAsyncOperation, operationLocation } = inputs;
+      return operationLocation !== null && operationLocation !== void 0 ? operationLocation : azureAsyncOperation;
+    }
+    __name(getOperationLocationPollingUrl, "getOperationLocationPollingUrl");
+    function getLocationHeader(rawResponse) {
+      return rawResponse.headers["location"];
+    }
+    __name(getLocationHeader, "getLocationHeader");
+    function getOperationLocationHeader(rawResponse) {
+      return rawResponse.headers["operation-location"];
+    }
+    __name(getOperationLocationHeader, "getOperationLocationHeader");
+    function getAzureAsyncOperationHeader(rawResponse) {
+      return rawResponse.headers["azure-asyncoperation"];
+    }
+    __name(getAzureAsyncOperationHeader, "getAzureAsyncOperationHeader");
+    function findResourceLocation(inputs) {
+      const { location, requestMethod, requestPath, resourceLocationConfig } = inputs;
+      switch (requestMethod) {
+        case "PUT": {
+          return requestPath;
+        }
+        case "DELETE": {
+          return void 0;
+        }
+        default: {
+          switch (resourceLocationConfig) {
+            case "azure-async-operation": {
+              return void 0;
+            }
+            case "original-uri": {
+              return requestPath;
+            }
+            case "location":
+            default: {
+              return location;
+            }
+          }
+        }
+      }
+    }
+    __name(findResourceLocation, "findResourceLocation");
+    function inferLroMode(inputs) {
+      const { rawResponse, requestMethod, requestPath, resourceLocationConfig } = inputs;
+      const operationLocation = getOperationLocationHeader(rawResponse);
+      const azureAsyncOperation = getAzureAsyncOperationHeader(rawResponse);
+      const pollingUrl = getOperationLocationPollingUrl({ operationLocation, azureAsyncOperation });
+      const location = getLocationHeader(rawResponse);
+      const normalizedRequestMethod = requestMethod === null || requestMethod === void 0 ? void 0 : requestMethod.toLocaleUpperCase();
+      if (pollingUrl !== void 0) {
+        return {
+          mode: "OperationLocation",
+          operationLocation: pollingUrl,
+          resourceLocation: findResourceLocation({
+            requestMethod: normalizedRequestMethod,
+            location,
+            requestPath,
+            resourceLocationConfig
+          })
+        };
+      } else if (location !== void 0) {
+        return {
+          mode: "ResourceLocation",
+          operationLocation: location
+        };
+      } else if (normalizedRequestMethod === "PUT" && requestPath) {
+        return {
+          mode: "Body",
+          operationLocation: requestPath
+        };
+      } else {
+        return void 0;
+      }
+    }
+    __name(inferLroMode, "inferLroMode");
+    function transformStatus(inputs) {
+      const { status, statusCode } = inputs;
+      if (typeof status !== "string" && status !== void 0) {
+        throw new Error(`Polling was unsuccessful. Expected status to have a string value or no value but it has instead: ${status}. This doesn't necessarily indicate the operation has failed. Check your Azure subscription or resource status for more information.`);
+      }
+      switch (status === null || status === void 0 ? void 0 : status.toLocaleLowerCase()) {
+        case void 0:
+          return toOperationStatus(statusCode);
+        case "succeeded":
+          return "succeeded";
+        case "failed":
+          return "failed";
+        case "running":
+        case "accepted":
+        case "started":
+        case "canceling":
+        case "cancelling":
+          return "running";
+        case "canceled":
+        case "cancelled":
+          return "canceled";
+        default: {
+          logger.verbose(`LRO: unrecognized operation status: ${status}`);
+          return status;
+        }
+      }
+    }
+    __name(transformStatus, "transformStatus");
+    function getStatus(rawResponse) {
+      var _a;
+      const { status } = (_a = rawResponse.body) !== null && _a !== void 0 ? _a : {};
+      return transformStatus({ status, statusCode: rawResponse.statusCode });
+    }
+    __name(getStatus, "getStatus");
+    function getProvisioningState(rawResponse) {
+      var _a, _b;
+      const { properties, provisioningState } = (_a = rawResponse.body) !== null && _a !== void 0 ? _a : {};
+      const status = (_b = properties === null || properties === void 0 ? void 0 : properties.provisioningState) !== null && _b !== void 0 ? _b : provisioningState;
+      return transformStatus({ status, statusCode: rawResponse.statusCode });
+    }
+    __name(getProvisioningState, "getProvisioningState");
+    function toOperationStatus(statusCode) {
+      if (statusCode === 202) {
+        return "running";
+      } else if (statusCode < 300) {
+        return "succeeded";
+      } else {
+        return "failed";
+      }
+    }
+    __name(toOperationStatus, "toOperationStatus");
+    function parseRetryAfter({ rawResponse }) {
+      const retryAfter = rawResponse.headers["retry-after"];
+      if (retryAfter !== void 0) {
+        const retryAfterInSeconds = parseInt(retryAfter);
+        return isNaN(retryAfterInSeconds) ? calculatePollingIntervalFromDate(new Date(retryAfter)) : retryAfterInSeconds * 1e3;
+      }
+      return void 0;
+    }
+    __name(parseRetryAfter, "parseRetryAfter");
+    function getErrorFromResponse(response) {
+      const error = response.flatResponse.error;
+      if (!error) {
+        logger.warning(`The long-running operation failed but there is no error property in the response's body`);
+        return;
+      }
+      if (!error.code || !error.message) {
+        logger.warning(`The long-running operation failed but the error property in the response's body doesn't contain code or message`);
+        return;
+      }
+      return error;
+    }
+    __name(getErrorFromResponse, "getErrorFromResponse");
+    function calculatePollingIntervalFromDate(retryAfterDate) {
+      const timeNow = Math.floor(new Date().getTime());
+      const retryAfterTime = retryAfterDate.getTime();
+      if (timeNow < retryAfterTime) {
+        return retryAfterTime - timeNow;
+      }
+      return void 0;
+    }
+    __name(calculatePollingIntervalFromDate, "calculatePollingIntervalFromDate");
+    function getStatusFromInitialResponse(inputs) {
+      const { response, state, operationLocation } = inputs;
+      function helper() {
+        var _a;
+        const mode = (_a = state.config.metadata) === null || _a === void 0 ? void 0 : _a["mode"];
+        switch (mode) {
+          case void 0:
+            return toOperationStatus(response.rawResponse.statusCode);
+          case "Body":
+            return getOperationStatus(response, state);
+          default:
+            return "running";
+        }
+      }
+      __name(helper, "helper");
+      const status = helper();
+      return status === "running" && operationLocation === void 0 ? "succeeded" : status;
+    }
+    __name(getStatusFromInitialResponse, "getStatusFromInitialResponse");
+    async function initHttpOperation(inputs) {
+      const { stateProxy, resourceLocationConfig, processResult, lro, setErrorAsResult } = inputs;
+      return initOperation({
+        init: async () => {
+          const response = await lro.sendInitialRequest();
+          const config = inferLroMode({
+            rawResponse: response.rawResponse,
+            requestPath: lro.requestPath,
+            requestMethod: lro.requestMethod,
+            resourceLocationConfig
+          });
+          return Object.assign({ response, operationLocation: config === null || config === void 0 ? void 0 : config.operationLocation, resourceLocation: config === null || config === void 0 ? void 0 : config.resourceLocation }, (config === null || config === void 0 ? void 0 : config.mode) ? { metadata: { mode: config.mode } } : {});
+        },
+        stateProxy,
+        processResult: processResult ? ({ flatResponse }, state) => processResult(flatResponse, state) : ({ flatResponse }) => flatResponse,
+        getOperationStatus: getStatusFromInitialResponse,
+        setErrorAsResult
+      });
+    }
+    __name(initHttpOperation, "initHttpOperation");
+    function getOperationLocation({ rawResponse }, state) {
+      var _a;
+      const mode = (_a = state.config.metadata) === null || _a === void 0 ? void 0 : _a["mode"];
+      switch (mode) {
+        case "OperationLocation": {
+          return getOperationLocationPollingUrl({
+            operationLocation: getOperationLocationHeader(rawResponse),
+            azureAsyncOperation: getAzureAsyncOperationHeader(rawResponse)
+          });
+        }
+        case "ResourceLocation": {
+          return getLocationHeader(rawResponse);
+        }
+        case "Body":
+        default: {
+          return void 0;
+        }
+      }
+    }
+    __name(getOperationLocation, "getOperationLocation");
+    function getOperationStatus({ rawResponse }, state) {
+      var _a;
+      const mode = (_a = state.config.metadata) === null || _a === void 0 ? void 0 : _a["mode"];
+      switch (mode) {
+        case "OperationLocation": {
+          return getStatus(rawResponse);
+        }
+        case "ResourceLocation": {
+          return toOperationStatus(rawResponse.statusCode);
+        }
+        case "Body": {
+          return getProvisioningState(rawResponse);
+        }
+        default:
+          throw new Error(`Internal error: Unexpected operation mode: ${mode}`);
+      }
+    }
+    __name(getOperationStatus, "getOperationStatus");
+    function getResourceLocation({ flatResponse }, state) {
+      if (typeof flatResponse === "object") {
+        const resourceLocation = flatResponse.resourceLocation;
+        if (resourceLocation !== void 0) {
+          state.config.resourceLocation = resourceLocation;
+        }
+      }
+      return state.config.resourceLocation;
+    }
+    __name(getResourceLocation, "getResourceLocation");
+    function isOperationError(e) {
+      return e.name === "RestError";
+    }
+    __name(isOperationError, "isOperationError");
+    async function pollHttpOperation(inputs) {
+      const { lro, stateProxy, options, processResult, updateState, setDelay, state, setErrorAsResult } = inputs;
+      return pollOperation({
+        state,
+        stateProxy,
+        setDelay,
+        processResult: processResult ? ({ flatResponse }, inputState) => processResult(flatResponse, inputState) : ({ flatResponse }) => flatResponse,
+        getError: getErrorFromResponse,
+        updateState,
+        getPollingInterval: parseRetryAfter,
+        getOperationLocation,
+        getOperationStatus,
+        isOperationError,
+        getResourceLocation,
+        options,
+        poll: async (location, inputOptions) => lro.sendPollRequest(location, inputOptions),
+        setErrorAsResult
+      });
+    }
+    __name(pollHttpOperation, "pollHttpOperation");
+    var createStateProxy$1 = /* @__PURE__ */ __name(() => ({
+      initState: (config) => ({ status: "running", config }),
+      setCanceled: (state) => state.status = "canceled",
+      setError: (state, error) => state.error = error,
+      setResult: (state, result) => state.result = result,
+      setRunning: (state) => state.status = "running",
+      setSucceeded: (state) => state.status = "succeeded",
+      setFailed: (state) => state.status = "failed",
+      getError: (state) => state.error,
+      getResult: (state) => state.result,
+      isCanceled: (state) => state.status === "canceled",
+      isFailed: (state) => state.status === "failed",
+      isRunning: (state) => state.status === "running",
+      isSucceeded: (state) => state.status === "succeeded"
+    }), "createStateProxy$1");
+    function buildCreatePoller(inputs) {
+      const { getOperationLocation: getOperationLocation2, getStatusFromInitialResponse: getStatusFromInitialResponse2, getStatusFromPollResponse, isOperationError: isOperationError2, getResourceLocation: getResourceLocation2, getPollingInterval, getError, resolveOnUnsuccessful } = inputs;
+      return async ({ init, poll }, options) => {
+        const { processResult, updateState, withOperationLocation: withOperationLocationCallback, intervalInMs = POLL_INTERVAL_IN_MS, restoreFrom } = options || {};
+        const stateProxy = createStateProxy$1();
+        const withOperationLocation = withOperationLocationCallback ? (() => {
+          let called = false;
+          return (operationLocation, isUpdated) => {
+            if (isUpdated)
+              withOperationLocationCallback(operationLocation);
+            else if (!called)
+              withOperationLocationCallback(operationLocation);
+            called = true;
+          };
+        })() : void 0;
+        const state = restoreFrom ? deserializeState(restoreFrom) : await initOperation({
+          init,
+          stateProxy,
+          processResult,
+          getOperationStatus: getStatusFromInitialResponse2,
+          withOperationLocation,
+          setErrorAsResult: !resolveOnUnsuccessful
+        });
+        let resultPromise;
+        const abortController$1 = new abortController.AbortController();
+        const handlers = /* @__PURE__ */ new Map();
+        const handleProgressEvents = /* @__PURE__ */ __name(async () => handlers.forEach((h) => h(state)), "handleProgressEvents");
+        const cancelErrMsg = "Operation was canceled";
+        let currentPollIntervalInMs = intervalInMs;
+        const poller = {
+          getOperationState: () => state,
+          getResult: () => state.result,
+          isDone: () => ["succeeded", "failed", "canceled"].includes(state.status),
+          isStopped: () => resultPromise === void 0,
+          stopPolling: () => {
+            abortController$1.abort();
+          },
+          toString: () => JSON.stringify({
+            state
+          }),
+          onProgress: (callback) => {
+            const s = Symbol();
+            handlers.set(s, callback);
+            return () => handlers.delete(s);
+          },
+          pollUntilDone: (pollOptions) => resultPromise !== null && resultPromise !== void 0 ? resultPromise : resultPromise = (async () => {
+            const { abortSignal: inputAbortSignal } = pollOptions || {};
+            const { signal: abortSignal } = inputAbortSignal ? new abortController.AbortController([inputAbortSignal, abortController$1.signal]) : abortController$1;
+            if (!poller.isDone()) {
+              await poller.poll({ abortSignal });
+              while (!poller.isDone()) {
+                await coreUtil.delay(currentPollIntervalInMs, { abortSignal });
+                await poller.poll({ abortSignal });
+              }
+            }
+            if (resolveOnUnsuccessful) {
+              return poller.getResult();
+            } else {
+              switch (state.status) {
+                case "succeeded":
+                  return poller.getResult();
+                case "canceled":
+                  throw new Error(cancelErrMsg);
+                case "failed":
+                  throw state.error;
+                case "notStarted":
+                case "running":
+                  throw new Error(`Polling completed without succeeding or failing`);
+              }
+            }
+          })().finally(() => {
+            resultPromise = void 0;
+          }),
+          async poll(pollOptions) {
+            if (resolveOnUnsuccessful) {
+              if (poller.isDone())
+                return;
+            } else {
+              switch (state.status) {
+                case "succeeded":
+                  return;
+                case "canceled":
+                  throw new Error(cancelErrMsg);
+                case "failed":
+                  throw state.error;
+              }
+            }
+            await pollOperation({
+              poll,
+              state,
+              stateProxy,
+              getOperationLocation: getOperationLocation2,
+              isOperationError: isOperationError2,
+              withOperationLocation,
+              getPollingInterval,
+              getOperationStatus: getStatusFromPollResponse,
+              getResourceLocation: getResourceLocation2,
+              processResult,
+              getError,
+              updateState,
+              options: pollOptions,
+              setDelay: (pollIntervalInMs) => {
+                currentPollIntervalInMs = pollIntervalInMs;
+              },
+              setErrorAsResult: !resolveOnUnsuccessful
+            });
+            await handleProgressEvents();
+            if (!resolveOnUnsuccessful) {
+              switch (state.status) {
+                case "canceled":
+                  throw new Error(cancelErrMsg);
+                case "failed":
+                  throw state.error;
+              }
+            }
+          }
+        };
+        return poller;
+      };
+    }
+    __name(buildCreatePoller, "buildCreatePoller");
+    async function createHttpPoller(lro, options) {
+      const { resourceLocationConfig, intervalInMs, processResult, restoreFrom, updateState, withOperationLocation, resolveOnUnsuccessful = false } = options || {};
+      return buildCreatePoller({
+        getStatusFromInitialResponse,
+        getStatusFromPollResponse: getOperationStatus,
+        isOperationError,
+        getOperationLocation,
+        getResourceLocation,
+        getPollingInterval: parseRetryAfter,
+        getError: getErrorFromResponse,
+        resolveOnUnsuccessful
+      })({
+        init: async () => {
+          const response = await lro.sendInitialRequest();
+          const config = inferLroMode({
+            rawResponse: response.rawResponse,
+            requestPath: lro.requestPath,
+            requestMethod: lro.requestMethod,
+            resourceLocationConfig
+          });
+          return Object.assign({ response, operationLocation: config === null || config === void 0 ? void 0 : config.operationLocation, resourceLocation: config === null || config === void 0 ? void 0 : config.resourceLocation }, (config === null || config === void 0 ? void 0 : config.mode) ? { metadata: { mode: config.mode } } : {});
+        },
+        poll: lro.sendPollRequest
+      }, {
+        intervalInMs,
+        withOperationLocation,
+        restoreFrom,
+        updateState,
+        processResult: processResult ? ({ flatResponse }, state) => processResult(flatResponse, state) : ({ flatResponse }) => flatResponse
+      });
+    }
+    __name(createHttpPoller, "createHttpPoller");
+    var createStateProxy = /* @__PURE__ */ __name(() => ({
+      initState: (config) => ({ config, isStarted: true }),
+      setCanceled: (state) => state.isCancelled = true,
+      setError: (state, error) => state.error = error,
+      setResult: (state, result) => state.result = result,
+      setRunning: (state) => state.isStarted = true,
+      setSucceeded: (state) => state.isCompleted = true,
+      setFailed: () => {
+      },
+      getError: (state) => state.error,
+      getResult: (state) => state.result,
+      isCanceled: (state) => !!state.isCancelled,
+      isFailed: (state) => !!state.error,
+      isRunning: (state) => !!state.isStarted,
+      isSucceeded: (state) => Boolean(state.isCompleted && !state.isCancelled && !state.error)
+    }), "createStateProxy");
+    var GenericPollOperation = class {
+      constructor(state, lro, setErrorAsResult, lroResourceLocationConfig, processResult, updateState, isDone) {
+        this.state = state;
+        this.lro = lro;
+        this.setErrorAsResult = setErrorAsResult;
+        this.lroResourceLocationConfig = lroResourceLocationConfig;
+        this.processResult = processResult;
+        this.updateState = updateState;
+        this.isDone = isDone;
+      }
+      setPollerConfig(pollerConfig) {
+        this.pollerConfig = pollerConfig;
+      }
+      async update(options) {
+        var _a;
+        const stateProxy = createStateProxy();
+        if (!this.state.isStarted) {
+          this.state = Object.assign(Object.assign({}, this.state), await initHttpOperation({
+            lro: this.lro,
+            stateProxy,
+            resourceLocationConfig: this.lroResourceLocationConfig,
+            processResult: this.processResult,
+            setErrorAsResult: this.setErrorAsResult
+          }));
+        }
+        const updateState = this.updateState;
+        const isDone = this.isDone;
+        if (!this.state.isCompleted && this.state.error === void 0) {
+          await pollHttpOperation({
+            lro: this.lro,
+            state: this.state,
+            stateProxy,
+            processResult: this.processResult,
+            updateState: updateState ? (state, { rawResponse }) => updateState(state, rawResponse) : void 0,
+            isDone: isDone ? ({ flatResponse }, state) => isDone(flatResponse, state) : void 0,
+            options,
+            setDelay: (intervalInMs) => {
+              this.pollerConfig.intervalInMs = intervalInMs;
+            },
+            setErrorAsResult: this.setErrorAsResult
+          });
+        }
+        (_a = options === null || options === void 0 ? void 0 : options.fireProgress) === null || _a === void 0 ? void 0 : _a.call(options, this.state);
+        return this;
+      }
+      async cancel() {
+        logger.error("`cancelOperation` is deprecated because it wasn't implemented");
+        return this;
+      }
+      toString() {
+        return JSON.stringify({
+          state: this.state
+        });
+      }
+    };
+    __name(GenericPollOperation, "GenericPollOperation");
     var PollerStoppedError = class extends Error {
       constructor(message) {
         super(message);
@@ -38539,6 +38650,7 @@ var require_dist11 = __commonJS({
     __name(PollerCancelledError, "PollerCancelledError");
     var Poller = class {
       constructor(operation) {
+        this.resolveOnUnsuccessful = false;
         this.stopped = true;
         this.pollProgressCallbacks = [];
         this.operation = operation;
@@ -38549,33 +38661,23 @@ var require_dist11 = __commonJS({
         this.promise.catch(() => {
         });
       }
-      async startPolling() {
+      async startPolling(pollOptions = {}) {
         if (this.stopped) {
           this.stopped = false;
         }
         while (!this.isStopped() && !this.isDone()) {
-          await this.poll();
+          await this.poll(pollOptions);
           await this.delay();
         }
       }
       async pollOnce(options = {}) {
-        try {
-          if (!this.isDone()) {
-            this.operation = await this.operation.update({
-              abortSignal: options.abortSignal,
-              fireProgress: this.fireProgress.bind(this)
-            });
-            if (this.isDone() && this.resolve) {
-              this.resolve(this.operation.state.result);
-            }
-          }
-        } catch (e) {
-          this.operation.state.error = e;
-          if (this.reject) {
-            this.reject(e);
-          }
-          throw e;
+        if (!this.isDone()) {
+          this.operation = await this.operation.update({
+            abortSignal: options.abortSignal,
+            fireProgress: this.fireProgress.bind(this)
+          });
         }
+        this.processUpdatedState();
       }
       fireProgress(state) {
         for (const callback of this.pollProgressCallbacks) {
@@ -38584,9 +38686,6 @@ var require_dist11 = __commonJS({
       }
       async cancelOnce(options = {}) {
         this.operation = await this.operation.cancel(options);
-        if (this.reject) {
-          this.reject(new PollerCancelledError("Poller cancelled"));
-        }
       }
       poll(options = {}) {
         if (!this.pollOncePromise) {
@@ -38598,10 +38697,31 @@ var require_dist11 = __commonJS({
         }
         return this.pollOncePromise;
       }
-      async pollUntilDone() {
-        if (this.stopped) {
-          this.startPolling().catch(this.reject);
+      processUpdatedState() {
+        if (this.operation.state.error) {
+          this.stopped = true;
+          if (!this.resolveOnUnsuccessful) {
+            this.reject(this.operation.state.error);
+            throw this.operation.state.error;
+          }
         }
+        if (this.operation.state.isCancelled) {
+          this.stopped = true;
+          if (!this.resolveOnUnsuccessful) {
+            const error = new PollerCancelledError("Operation was canceled");
+            this.reject(error);
+            throw error;
+          }
+        }
+        if (this.isDone() && this.resolve) {
+          this.resolve(this.getResult());
+        }
+      }
+      async pollUntilDone(pollOptions = {}) {
+        if (this.stopped) {
+          this.startPolling(pollOptions).catch(this.reject);
+        }
+        this.processUpdatedState();
         return this.promise;
       }
       onProgress(callback) {
@@ -38626,9 +38746,6 @@ var require_dist11 = __commonJS({
         return this.stopped;
       }
       cancelOperation(options = {}) {
-        if (!this.stopped) {
-          this.stopped = true;
-        }
         if (!this.cancelPromise) {
           this.cancelPromise = this.cancelOnce(options);
         } else if (options.abortSignal) {
@@ -38648,275 +38765,13 @@ var require_dist11 = __commonJS({
       }
     };
     __name(Poller, "Poller");
-    function getPollingUrl(rawResponse, defaultPath) {
-      var _a, _b, _c;
-      return (_c = (_b = (_a = getAzureAsyncOperation(rawResponse)) !== null && _a !== void 0 ? _a : getLocation(rawResponse)) !== null && _b !== void 0 ? _b : getOperationLocation(rawResponse)) !== null && _c !== void 0 ? _c : defaultPath;
-    }
-    __name(getPollingUrl, "getPollingUrl");
-    function getLocation(rawResponse) {
-      return rawResponse.headers["location"];
-    }
-    __name(getLocation, "getLocation");
-    function getOperationLocation(rawResponse) {
-      return rawResponse.headers["operation-location"];
-    }
-    __name(getOperationLocation, "getOperationLocation");
-    function getAzureAsyncOperation(rawResponse) {
-      return rawResponse.headers["azure-asyncoperation"];
-    }
-    __name(getAzureAsyncOperation, "getAzureAsyncOperation");
-    function inferLroMode(requestPath, requestMethod, rawResponse) {
-      if (getAzureAsyncOperation(rawResponse) !== void 0) {
-        return {
-          mode: "AzureAsync",
-          resourceLocation: requestMethod === "PUT" ? requestPath : requestMethod === "POST" || requestMethod === "PATCH" ? getLocation(rawResponse) : void 0
-        };
-      } else if (getLocation(rawResponse) !== void 0 || getOperationLocation(rawResponse) !== void 0) {
-        return {
-          mode: "Location"
-        };
-      } else if (["PUT", "PATCH"].includes(requestMethod)) {
-        return {
-          mode: "Body"
-        };
-      }
-      return {};
-    }
-    __name(inferLroMode, "inferLroMode");
-    var SimpleRestError = class extends Error {
-      constructor(message, statusCode) {
-        super(message);
-        this.name = "RestError";
-        this.statusCode = statusCode;
-        Object.setPrototypeOf(this, SimpleRestError.prototype);
-      }
-    };
-    __name(SimpleRestError, "SimpleRestError");
-    function isUnexpectedInitialResponse(rawResponse) {
-      const code = rawResponse.statusCode;
-      if (![203, 204, 202, 201, 200, 500].includes(code)) {
-        throw new SimpleRestError(`Received unexpected HTTP status code ${code} in the initial response. This may indicate a server issue.`, code);
-      }
-      return false;
-    }
-    __name(isUnexpectedInitialResponse, "isUnexpectedInitialResponse");
-    function isUnexpectedPollingResponse(rawResponse) {
-      const code = rawResponse.statusCode;
-      if (![202, 201, 200, 500].includes(code)) {
-        throw new SimpleRestError(`Received unexpected HTTP status code ${code} while polling. This may indicate a server issue.`, code);
-      }
-      return false;
-    }
-    __name(isUnexpectedPollingResponse, "isUnexpectedPollingResponse");
-    var successStates = ["succeeded"];
-    var failureStates = ["failed", "canceled", "cancelled"];
-    function getProvisioningState(rawResponse) {
-      var _a, _b;
-      const { properties, provisioningState } = (_a = rawResponse.body) !== null && _a !== void 0 ? _a : {};
-      const state = (_b = properties === null || properties === void 0 ? void 0 : properties.provisioningState) !== null && _b !== void 0 ? _b : provisioningState;
-      return typeof state === "string" ? state.toLowerCase() : "succeeded";
-    }
-    __name(getProvisioningState, "getProvisioningState");
-    function isBodyPollingDone(rawResponse) {
-      const state = getProvisioningState(rawResponse);
-      if (isUnexpectedPollingResponse(rawResponse) || failureStates.includes(state)) {
-        throw new Error(`The long running operation has failed. The provisioning state: ${state}.`);
-      }
-      return successStates.includes(state);
-    }
-    __name(isBodyPollingDone, "isBodyPollingDone");
-    function processBodyPollingOperationResult(response) {
-      return Object.assign(Object.assign({}, response), { done: isBodyPollingDone(response.rawResponse) });
-    }
-    __name(processBodyPollingOperationResult, "processBodyPollingOperationResult");
-    var logger = logger$1.createClientLogger("core-lro");
-    function getResponseStatus(rawResponse) {
-      var _a;
-      const { status } = (_a = rawResponse.body) !== null && _a !== void 0 ? _a : {};
-      return typeof status === "string" ? status.toLowerCase() : "succeeded";
-    }
-    __name(getResponseStatus, "getResponseStatus");
-    function isAzureAsyncPollingDone(rawResponse) {
-      const state = getResponseStatus(rawResponse);
-      if (isUnexpectedPollingResponse(rawResponse) || failureStates.includes(state)) {
-        throw new Error(`The long running operation has failed. The provisioning state: ${state}.`);
-      }
-      return successStates.includes(state);
-    }
-    __name(isAzureAsyncPollingDone, "isAzureAsyncPollingDone");
-    async function sendFinalRequest(lro, resourceLocation, lroResourceLocationConfig) {
-      switch (lroResourceLocationConfig) {
-        case "original-uri":
-          return lro.sendPollRequest(lro.requestPath);
-        case "azure-async-operation":
-          return void 0;
-        case "location":
-        default:
-          return lro.sendPollRequest(resourceLocation !== null && resourceLocation !== void 0 ? resourceLocation : lro.requestPath);
-      }
-    }
-    __name(sendFinalRequest, "sendFinalRequest");
-    function processAzureAsyncOperationResult(lro, resourceLocation, lroResourceLocationConfig) {
-      return (response) => {
-        if (isAzureAsyncPollingDone(response.rawResponse)) {
-          if (resourceLocation === void 0) {
-            return Object.assign(Object.assign({}, response), { done: true });
-          } else {
-            return Object.assign(Object.assign({}, response), { done: false, next: async () => {
-              const finalResponse = await sendFinalRequest(lro, resourceLocation, lroResourceLocationConfig);
-              return Object.assign(Object.assign({}, finalResponse !== null && finalResponse !== void 0 ? finalResponse : response), { done: true });
-            } });
-          }
-        }
-        return Object.assign(Object.assign({}, response), { done: false });
-      };
-    }
-    __name(processAzureAsyncOperationResult, "processAzureAsyncOperationResult");
-    function isLocationPollingDone(rawResponse) {
-      return !isUnexpectedPollingResponse(rawResponse) && rawResponse.statusCode !== 202;
-    }
-    __name(isLocationPollingDone, "isLocationPollingDone");
-    function processLocationPollingOperationResult(response) {
-      return Object.assign(Object.assign({}, response), { done: isLocationPollingDone(response.rawResponse) });
-    }
-    __name(processLocationPollingOperationResult, "processLocationPollingOperationResult");
-    function processPassthroughOperationResult(response) {
-      return Object.assign(Object.assign({}, response), { done: true });
-    }
-    __name(processPassthroughOperationResult, "processPassthroughOperationResult");
-    function createGetLroStatusFromResponse(lroPrimitives, config, lroResourceLocationConfig) {
-      switch (config.mode) {
-        case "AzureAsync": {
-          return processAzureAsyncOperationResult(lroPrimitives, config.resourceLocation, lroResourceLocationConfig);
-        }
-        case "Location": {
-          return processLocationPollingOperationResult;
-        }
-        case "Body": {
-          return processBodyPollingOperationResult;
-        }
-        default: {
-          return processPassthroughOperationResult;
-        }
-      }
-    }
-    __name(createGetLroStatusFromResponse, "createGetLroStatusFromResponse");
-    function createPoll(lroPrimitives) {
-      return async (path, pollerConfig, getLroStatusFromResponse) => {
-        const response = await lroPrimitives.sendPollRequest(path);
-        const retryAfter = response.rawResponse.headers["retry-after"];
-        if (retryAfter !== void 0) {
-          const retryAfterInSeconds = parseInt(retryAfter);
-          pollerConfig.intervalInMs = isNaN(retryAfterInSeconds) ? calculatePollingIntervalFromDate(new Date(retryAfter), pollerConfig.intervalInMs) : retryAfterInSeconds * 1e3;
-        }
-        return getLroStatusFromResponse(response);
-      };
-    }
-    __name(createPoll, "createPoll");
-    function calculatePollingIntervalFromDate(retryAfterDate, defaultIntervalInMs) {
-      const timeNow = Math.floor(new Date().getTime());
-      const retryAfterTime = retryAfterDate.getTime();
-      if (timeNow < retryAfterTime) {
-        return retryAfterTime - timeNow;
-      }
-      return defaultIntervalInMs;
-    }
-    __name(calculatePollingIntervalFromDate, "calculatePollingIntervalFromDate");
-    function createInitializeState(state, requestPath, requestMethod) {
-      return (response) => {
-        if (isUnexpectedInitialResponse(response.rawResponse))
-          ;
-        state.initialRawResponse = response.rawResponse;
-        state.isStarted = true;
-        state.pollingURL = getPollingUrl(state.initialRawResponse, requestPath);
-        state.config = inferLroMode(requestPath, requestMethod, state.initialRawResponse);
-        if (state.config.mode === void 0 || state.config.mode === "Body" && isBodyPollingDone(state.initialRawResponse)) {
-          state.result = response.flatResponse;
-          state.isCompleted = true;
-        }
-        logger.verbose(`LRO: initial state: ${JSON.stringify(state)}`);
-        return Boolean(state.isCompleted);
-      };
-    }
-    __name(createInitializeState, "createInitializeState");
-    var GenericPollOperation = class {
-      constructor(state, lro, lroResourceLocationConfig, processResult, updateState, isDone) {
-        this.state = state;
-        this.lro = lro;
-        this.lroResourceLocationConfig = lroResourceLocationConfig;
-        this.processResult = processResult;
-        this.updateState = updateState;
-        this.isDone = isDone;
-      }
-      setPollerConfig(pollerConfig) {
-        this.pollerConfig = pollerConfig;
-      }
-      async update(options) {
-        var _a, _b, _c;
-        const state = this.state;
-        let lastResponse = void 0;
-        if (!state.isStarted) {
-          const initializeState = createInitializeState(state, this.lro.requestPath, this.lro.requestMethod);
-          lastResponse = await this.lro.sendInitialRequest();
-          initializeState(lastResponse);
-        }
-        if (!state.isCompleted) {
-          if (!this.poll || !this.getLroStatusFromResponse) {
-            if (!state.config) {
-              throw new Error("Bad state: LRO mode is undefined. Please check if the serialized state is well-formed.");
-            }
-            const isDone = this.isDone;
-            this.getLroStatusFromResponse = isDone ? (response) => Object.assign(Object.assign({}, response), { done: isDone(response.flatResponse, this.state) }) : createGetLroStatusFromResponse(this.lro, state.config, this.lroResourceLocationConfig);
-            this.poll = createPoll(this.lro);
-          }
-          if (!state.pollingURL) {
-            throw new Error("Bad state: polling URL is undefined. Please check if the serialized state is well-formed.");
-          }
-          const currentState = await this.poll(state.pollingURL, this.pollerConfig, this.getLroStatusFromResponse);
-          logger.verbose(`LRO: polling response: ${JSON.stringify(currentState.rawResponse)}`);
-          if (currentState.done) {
-            state.result = this.processResult ? this.processResult(currentState.flatResponse, state) : currentState.flatResponse;
-            state.isCompleted = true;
-          } else {
-            this.poll = (_a = currentState.next) !== null && _a !== void 0 ? _a : this.poll;
-            state.pollingURL = getPollingUrl(currentState.rawResponse, state.pollingURL);
-          }
-          lastResponse = currentState;
-        }
-        logger.verbose(`LRO: current state: ${JSON.stringify(state)}`);
-        if (lastResponse) {
-          (_b = this.updateState) === null || _b === void 0 ? void 0 : _b.call(this, state, lastResponse === null || lastResponse === void 0 ? void 0 : lastResponse.rawResponse);
-        } else {
-          logger.error(`LRO: no response was received`);
-        }
-        (_c = options === null || options === void 0 ? void 0 : options.fireProgress) === null || _c === void 0 ? void 0 : _c.call(options, state);
-        return this;
-      }
-      async cancel() {
-        this.state.isCancelled = true;
-        return this;
-      }
-      toString() {
-        return JSON.stringify({
-          state: this.state
-        });
-      }
-    };
-    __name(GenericPollOperation, "GenericPollOperation");
-    function deserializeState(serializedState) {
-      try {
-        return JSON.parse(serializedState).state;
-      } catch (e) {
-        throw new Error(`LroEngine: Unable to deserialize state: ${serializedState}`);
-      }
-    }
-    __name(deserializeState, "deserializeState");
     var LroEngine = class extends Poller {
       constructor(lro, options) {
-        const { intervalInMs = 2e3, resumeFrom } = options || {};
+        const { intervalInMs = POLL_INTERVAL_IN_MS, resumeFrom, resolveOnUnsuccessful = false, isDone, lroResourceLocationConfig, processResult, updateState } = options || {};
         const state = resumeFrom ? deserializeState(resumeFrom) : {};
-        const operation = new GenericPollOperation(state, lro, options === null || options === void 0 ? void 0 : options.lroResourceLocationConfig, options === null || options === void 0 ? void 0 : options.processResult, options === null || options === void 0 ? void 0 : options.updateState, options === null || options === void 0 ? void 0 : options.isDone);
+        const operation = new GenericPollOperation(state, lro, !resolveOnUnsuccessful, lroResourceLocationConfig, processResult, updateState, isDone);
         super(operation);
+        this.resolveOnUnsuccessful = resolveOnUnsuccessful;
         this.config = { intervalInMs };
         operation.setPollerConfig(this.config);
       }
@@ -38929,24 +38784,25 @@ var require_dist11 = __commonJS({
     exports2.Poller = Poller;
     exports2.PollerCancelledError = PollerCancelledError;
     exports2.PollerStoppedError = PollerStoppedError;
+    exports2.createHttpPoller = createHttpPoller;
   }
 });
 
 // node_modules/@azure/storage-blob/dist/index.js
-var require_dist12 = __commonJS({
+var require_dist11 = __commonJS({
   "node_modules/@azure/storage-blob/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var coreHttp = require_dist8();
-    var tslib = require_tslib2();
+    var tslib = require_tslib();
     var coreTracing = require_dist7();
     var logger$1 = require_dist5();
     var abortController = require_dist3();
     var os = require("os");
     var crypto = require("crypto");
     var stream = require("stream");
-    require_dist10();
-    var coreLro = require_dist11();
+    require_dist9();
+    var coreLro = require_dist10();
     var events = require("events");
     var fs = require("fs");
     var util = require("util");
@@ -47426,7 +47282,7 @@ var require_dist12 = __commonJS({
     var version2 = {
       parameterPath: "version",
       mapper: {
-        defaultValue: "2021-12-02",
+        defaultValue: "2022-11-02",
         isConstant: true,
         serializedName: "x-ms-version",
         type: {
@@ -51737,8 +51593,8 @@ var require_dist12 = __commonJS({
       serializer: xmlSerializer
     };
     var logger = logger$1.createClientLogger("storage-blob");
-    var SDK_VERSION = "12.13.0";
-    var SERVICE_VERSION = "2021-12-02";
+    var SDK_VERSION = "12.14.0";
+    var SERVICE_VERSION = "2022-11-02";
     var BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES = 256 * 1024 * 1024;
     var BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES = 4e3 * 1024 * 1024;
     var BLOCK_BLOB_MAX_BLOCKS = 5e4;
@@ -52947,7 +52803,7 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
     };
     __name(StorageSharedKeyCredential, "StorageSharedKeyCredential");
     var packageName = "azure-storage-blob";
-    var packageVersion = "12.13.0";
+    var packageVersion = "12.14.0";
     var StorageClientContext = class extends coreHttp__namespace.ServiceClient {
       constructor(url2, options) {
         if (url2 === void 0) {
@@ -52964,7 +52820,7 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
         this.requestContentType = "application/json; charset=utf-8";
         this.baseUri = options.endpoint || "{url}";
         this.url = url2;
-        this.version = options.version || "2021-12-02";
+        this.version = options.version || "2022-11-02";
       }
     };
     __name(StorageClientContext, "StorageClientContext");
@@ -55448,6 +55304,9 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
           pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
         } else if (!credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName !== "string") {
           url2 = urlOrConnectionString;
+          if (blobNameOrOptions && typeof blobNameOrOptions !== "string") {
+            options = blobNameOrOptions;
+          }
           pipeline = newPipeline(new AnonymousCredential(), options);
         } else if (credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName === "string" && blobNameOrOptions && typeof blobNameOrOptions === "string") {
           const containerName = credentialOrPipelineOrContainerName;
@@ -56179,6 +56038,9 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
           pipeline = newPipeline(credentialOrPipelineOrContainerName, options);
         } else if (!credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName !== "string") {
           url2 = urlOrConnectionString;
+          if (blobNameOrOptions && typeof blobNameOrOptions !== "string") {
+            options = blobNameOrOptions;
+          }
           pipeline = newPipeline(new AnonymousCredential(), options);
         } else if (credentialOrPipelineOrContainerName && typeof credentialOrPipelineOrContainerName === "string" && blobNameOrOptions && typeof blobNameOrOptions === "string") {
           const containerName = credentialOrPipelineOrContainerName;
@@ -58734,6 +58596,38 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
 var require_requestUtils2 = __commonJS({
   "node_modules/@actions/cache/lib/internal/requestUtils.js"(exports2) {
     "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
+      }
+      __setModuleDefault2(result, mod);
+      return result;
+    };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -58765,19 +58659,8 @@ var require_requestUtils2 = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (Object.hasOwnProperty.call(mod, k))
-            result[k] = mod[k];
-      }
-      result["default"] = mod;
-      return result;
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.retryHttpClientResponse = exports2.retryTypedResponse = exports2.retry = exports2.isRetryableStatusCode = exports2.isServerErrorStatusCode = exports2.isSuccessStatusCode = void 0;
     var core2 = __importStar2(require_core());
     var http_client_1 = require_lib2();
     var constants_1 = require_constants();
@@ -58895,6 +58778,38 @@ var require_requestUtils2 = __commonJS({
 var require_downloadUtils = __commonJS({
   "node_modules/@actions/cache/lib/internal/downloadUtils.js"(exports2) {
     "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
+      }
+      __setModuleDefault2(result, mod);
+      return result;
+    };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -58926,22 +58841,11 @@ var require_downloadUtils = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (Object.hasOwnProperty.call(mod, k))
-            result[k] = mod[k];
-      }
-      result["default"] = mod;
-      return result;
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.downloadCacheStorageSDK = exports2.downloadCacheHttpClient = exports2.DownloadProgress = void 0;
     var core2 = __importStar2(require_core());
     var http_client_1 = require_lib2();
-    var storage_blob_1 = require_dist12();
+    var storage_blob_1 = require_dist11();
     var buffer = __importStar2(require("buffer"));
     var fs = __importStar2(require("fs"));
     var stream = __importStar2(require("stream"));
@@ -59024,7 +58928,7 @@ var require_downloadUtils = __commonJS({
       return __awaiter2(this, void 0, void 0, function* () {
         const writeStream = fs.createWriteStream(archivePath);
         const httpClient = new http_client_1.HttpClient("actions/cache");
-        const downloadResponse = yield requestUtils_1.retryHttpClientResponse("downloadCache", () => __awaiter2(this, void 0, void 0, function* () {
+        const downloadResponse = yield (0, requestUtils_1.retryHttpClientResponse)("downloadCache", () => __awaiter2(this, void 0, void 0, function* () {
           return httpClient.get(archiveLocation);
         }));
         downloadResponse.message.socket.setTimeout(constants_1.SocketTimeout, () => {
@@ -59060,7 +58964,7 @@ var require_downloadUtils = __commonJS({
           core2.debug("Unable to determine content length, downloading file with http-client...");
           yield downloadCacheHttpClient(archiveLocation, archivePath);
         } else {
-          const maxSegmentSize = Math.min(2147483647, buffer.constants.MAX_LENGTH);
+          const maxSegmentSize = Math.min(134217728, buffer.constants.MAX_LENGTH);
           const downloadProgress = new DownloadProgress(contentLength);
           const fd = fs.openSync(archivePath, "w");
           try {
@@ -59109,19 +59013,40 @@ var require_downloadUtils = __commonJS({
 var require_options = __commonJS({
   "node_modules/@actions/cache/lib/options.js"(exports2) {
     "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
     var __importStar2 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
-          if (Object.hasOwnProperty.call(mod, k))
-            result[k] = mod[k];
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
       }
-      result["default"] = mod;
+      __setModuleDefault2(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.getDownloadOptions = exports2.getUploadOptions = void 0;
     var core2 = __importStar2(require_core());
     function getUploadOptions(copy) {
       const result = {
@@ -59147,7 +59072,8 @@ var require_options = __commonJS({
         useAzureSdk: true,
         downloadConcurrency: 8,
         timeoutInMs: 3e4,
-        segmentTimeoutInMs: 36e5
+        segmentTimeoutInMs: 6e5,
+        lookupOnly: false
       };
       if (copy) {
         if (typeof copy.useAzureSdk === "boolean") {
@@ -59162,6 +59088,9 @@ var require_options = __commonJS({
         if (typeof copy.segmentTimeoutInMs === "number") {
           result.segmentTimeoutInMs = copy.segmentTimeoutInMs;
         }
+        if (typeof copy.lookupOnly === "boolean") {
+          result.lookupOnly = copy.lookupOnly;
+        }
       }
       const segmentDownloadTimeoutMins = process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"];
       if (segmentDownloadTimeoutMins && !isNaN(Number(segmentDownloadTimeoutMins)) && isFinite(Number(segmentDownloadTimeoutMins))) {
@@ -59172,6 +59101,7 @@ var require_options = __commonJS({
       core2.debug(`Request timeout (ms): ${result.timeoutInMs}`);
       core2.debug(`Cache segment download timeout mins env var: ${process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"]}`);
       core2.debug(`Segment download timeout (ms): ${result.segmentTimeoutInMs}`);
+      core2.debug(`Lookup only: ${result.lookupOnly}`);
       return result;
     }
     __name(getDownloadOptions, "getDownloadOptions");
@@ -59183,6 +59113,38 @@ var require_options = __commonJS({
 var require_cacheHttpClient = __commonJS({
   "node_modules/@actions/cache/lib/internal/cacheHttpClient.js"(exports2) {
     "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
+      }
+      __setModuleDefault2(result, mod);
+      return result;
+    };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -59214,19 +59176,8 @@ var require_cacheHttpClient = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (Object.hasOwnProperty.call(mod, k))
-            result[k] = mod[k];
-      }
-      result["default"] = mod;
-      return result;
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.saveCache = exports2.reserveCache = exports2.downloadCache = exports2.getCacheEntry = exports2.getCacheVersion = void 0;
     var core2 = __importStar2(require_core());
     var http_client_1 = require_lib2();
     var auth_1 = require_auth3();
@@ -59234,7 +59185,6 @@ var require_cacheHttpClient = __commonJS({
     var fs = __importStar2(require("fs"));
     var url_1 = require("url");
     var utils = __importStar2(require_cacheUtils());
-    var constants_1 = require_constants();
     var downloadUtils_1 = require_downloadUtils();
     var options_1 = require_options();
     var requestUtils_1 = require_requestUtils2();
@@ -59268,8 +59218,14 @@ var require_cacheHttpClient = __commonJS({
       return new http_client_1.HttpClient("actions/cache", [bearerCredentialHandler], getRequestOptions());
     }
     __name(createHttpClient, "createHttpClient");
-    function getCacheVersion(paths, compressionMethod) {
-      const components = paths.concat(!compressionMethod || compressionMethod === constants_1.CompressionMethod.Gzip ? [] : [compressionMethod]);
+    function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false) {
+      const components = paths;
+      if (compressionMethod) {
+        components.push(compressionMethod);
+      }
+      if (process.platform === "win32" && !enableCrossOsArchive) {
+        components.push("windows-only");
+      }
       components.push(versionSalt);
       return crypto.createHash("sha256").update(components.join("|")).digest("hex");
     }
@@ -59278,15 +59234,18 @@ var require_cacheHttpClient = __commonJS({
     function getCacheEntry(keys, paths, options) {
       return __awaiter2(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version2 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
+        const version2 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
         const resource = `cache?keys=${encodeURIComponent(keys.join(","))}&version=${version2}`;
-        const response = yield requestUtils_1.retryTypedResponse("getCacheEntry", () => __awaiter2(this, void 0, void 0, function* () {
+        const response = yield (0, requestUtils_1.retryTypedResponse)("getCacheEntry", () => __awaiter2(this, void 0, void 0, function* () {
           return httpClient.getJson(getCacheApiUrl(resource));
         }));
         if (response.statusCode === 204) {
+          if (core2.isDebug()) {
+            yield printCachesListForDiagnostics(keys[0], httpClient, version2);
+          }
           return null;
         }
-        if (!requestUtils_1.isSuccessStatusCode(response.statusCode)) {
+        if (!(0, requestUtils_1.isSuccessStatusCode)(response.statusCode)) {
           throw new Error(`Cache service responded with ${response.statusCode}`);
         }
         const cacheResult = response.result;
@@ -59302,14 +59261,34 @@ var require_cacheHttpClient = __commonJS({
     }
     __name(getCacheEntry, "getCacheEntry");
     exports2.getCacheEntry = getCacheEntry;
+    function printCachesListForDiagnostics(key, httpClient, version2) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const resource = `caches?key=${encodeURIComponent(key)}`;
+        const response = yield (0, requestUtils_1.retryTypedResponse)("listCache", () => __awaiter2(this, void 0, void 0, function* () {
+          return httpClient.getJson(getCacheApiUrl(resource));
+        }));
+        if (response.statusCode === 200) {
+          const cacheListResult = response.result;
+          const totalCount = cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.totalCount;
+          if (totalCount && totalCount > 0) {
+            core2.debug(`No matching cache found for cache key '${key}', version '${version2} and scope ${process.env["GITHUB_REF"]}. There exist one or more cache(s) with similar key but they have different version or scope. See more info on cache matching here: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#matching-a-cache-key 
+Other caches with similar key:`);
+            for (const cacheEntry of (cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.artifactCaches) || []) {
+              core2.debug(`Cache Key: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheKey}, Cache Version: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheVersion}, Cache Scope: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.scope}, Cache Created: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.creationTime}`);
+            }
+          }
+        }
+      });
+    }
+    __name(printCachesListForDiagnostics, "printCachesListForDiagnostics");
     function downloadCache(archiveLocation, archivePath, options) {
       return __awaiter2(this, void 0, void 0, function* () {
         const archiveUrl = new url_1.URL(archiveLocation);
-        const downloadOptions = options_1.getDownloadOptions(options);
+        const downloadOptions = (0, options_1.getDownloadOptions)(options);
         if (downloadOptions.useAzureSdk && archiveUrl.hostname.endsWith(".blob.core.windows.net")) {
-          yield downloadUtils_1.downloadCacheStorageSDK(archiveLocation, archivePath, downloadOptions);
+          yield (0, downloadUtils_1.downloadCacheStorageSDK)(archiveLocation, archivePath, downloadOptions);
         } else {
-          yield downloadUtils_1.downloadCacheHttpClient(archiveLocation, archivePath);
+          yield (0, downloadUtils_1.downloadCacheHttpClient)(archiveLocation, archivePath);
         }
       });
     }
@@ -59318,13 +59297,13 @@ var require_cacheHttpClient = __commonJS({
     function reserveCache(key, paths, options) {
       return __awaiter2(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version2 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod);
+        const version2 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
         const reserveCacheRequest = {
           key,
           version: version2,
           cacheSize: options === null || options === void 0 ? void 0 : options.cacheSize
         };
-        const response = yield requestUtils_1.retryTypedResponse("reserveCache", () => __awaiter2(this, void 0, void 0, function* () {
+        const response = yield (0, requestUtils_1.retryTypedResponse)("reserveCache", () => __awaiter2(this, void 0, void 0, function* () {
           return httpClient.postJson(getCacheApiUrl("caches"), reserveCacheRequest);
         }));
         return response;
@@ -59343,10 +59322,10 @@ var require_cacheHttpClient = __commonJS({
           "Content-Type": "application/octet-stream",
           "Content-Range": getContentRange(start, end)
         };
-        const uploadChunkResponse = yield requestUtils_1.retryHttpClientResponse(`uploadChunk (start: ${start}, end: ${end})`, () => __awaiter2(this, void 0, void 0, function* () {
+        const uploadChunkResponse = yield (0, requestUtils_1.retryHttpClientResponse)(`uploadChunk (start: ${start}, end: ${end})`, () => __awaiter2(this, void 0, void 0, function* () {
           return httpClient.sendStream("PATCH", resourceUrl, openStream(), additionalHeaders);
         }));
-        if (!requestUtils_1.isSuccessStatusCode(uploadChunkResponse.message.statusCode)) {
+        if (!(0, requestUtils_1.isSuccessStatusCode)(uploadChunkResponse.message.statusCode)) {
           throw new Error(`Cache service responded with ${uploadChunkResponse.message.statusCode} during upload chunk.`);
         }
       });
@@ -59357,7 +59336,7 @@ var require_cacheHttpClient = __commonJS({
         const fileSize = utils.getArchiveFileSizeInBytes(archivePath);
         const resourceUrl = getCacheApiUrl(`caches/${cacheId.toString()}`);
         const fd = fs.openSync(archivePath, "r");
-        const uploadOptions = options_1.getUploadOptions(options);
+        const uploadOptions = (0, options_1.getUploadOptions)(options);
         const concurrency = utils.assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
         const maxChunkSize = utils.assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
         const parallelUploads = [...new Array(concurrency).keys()];
@@ -59390,7 +59369,7 @@ var require_cacheHttpClient = __commonJS({
     function commitCache(httpClient, cacheId, filesize) {
       return __awaiter2(this, void 0, void 0, function* () {
         const commitCacheRequest = { size: filesize };
-        return yield requestUtils_1.retryTypedResponse("commitCache", () => __awaiter2(this, void 0, void 0, function* () {
+        return yield (0, requestUtils_1.retryTypedResponse)("commitCache", () => __awaiter2(this, void 0, void 0, function* () {
           return httpClient.postJson(getCacheApiUrl(`caches/${cacheId.toString()}`), commitCacheRequest);
         }));
       });
@@ -59405,7 +59384,7 @@ var require_cacheHttpClient = __commonJS({
         const cacheSize = utils.getArchiveFileSizeInBytes(archivePath);
         core2.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
         const commitCacheResponse = yield commitCache(httpClient, cacheId, cacheSize);
-        if (!requestUtils_1.isSuccessStatusCode(commitCacheResponse.statusCode)) {
+        if (!(0, requestUtils_1.isSuccessStatusCode)(commitCacheResponse.statusCode)) {
           throw new Error(`Cache service responded with ${commitCacheResponse.statusCode} during commit cache.`);
         }
         core2.info("Cache saved successfully");
@@ -59420,6 +59399,38 @@ var require_cacheHttpClient = __commonJS({
 var require_tar = __commonJS({
   "node_modules/@actions/cache/lib/internal/tar.js"(exports2) {
     "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
+      }
+      __setModuleDefault2(result, mod);
+      return result;
+    };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -59451,19 +59462,8 @@ var require_tar = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (Object.hasOwnProperty.call(mod, k))
-            result[k] = mod[k];
-      }
-      result["default"] = mod;
-      return result;
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.createTar = exports2.extractTar = exports2.listTar = void 0;
     var exec_1 = require_exec();
     var io2 = __importStar2(require_io());
     var fs_1 = require("fs");
@@ -59471,73 +59471,166 @@ var require_tar = __commonJS({
     var utils = __importStar2(require_cacheUtils());
     var constants_1 = require_constants();
     var IS_WINDOWS = process.platform === "win32";
-    function getTarPath(args, compressionMethod) {
+    function getTarPath() {
       return __awaiter2(this, void 0, void 0, function* () {
         switch (process.platform) {
           case "win32": {
-            const systemTar = `${process.env["windir"]}\\System32\\tar.exe`;
-            if (compressionMethod !== constants_1.CompressionMethod.Gzip) {
-              args.push("--force-local");
-            } else if (fs_1.existsSync(systemTar)) {
-              return systemTar;
-            } else if (yield utils.isGnuTarInstalled()) {
-              args.push("--force-local");
+            const gnuTar = yield utils.getGnuTarPathOnWindows();
+            const systemTar = constants_1.SystemTarPathOnWindows;
+            if (gnuTar) {
+              return { path: gnuTar, type: constants_1.ArchiveToolType.GNU };
+            } else if ((0, fs_1.existsSync)(systemTar)) {
+              return { path: systemTar, type: constants_1.ArchiveToolType.BSD };
             }
             break;
           }
           case "darwin": {
             const gnuTar = yield io2.which("gtar", false);
             if (gnuTar) {
-              args.push("--delay-directory-restore");
-              return gnuTar;
+              return { path: gnuTar, type: constants_1.ArchiveToolType.GNU };
+            } else {
+              return {
+                path: yield io2.which("tar", true),
+                type: constants_1.ArchiveToolType.BSD
+              };
             }
-            break;
           }
           default:
             break;
         }
-        return yield io2.which("tar", true);
+        return {
+          path: yield io2.which("tar", true),
+          type: constants_1.ArchiveToolType.GNU
+        };
       });
     }
     __name(getTarPath, "getTarPath");
-    function execTar(args, compressionMethod, cwd) {
+    function getTarArgs(tarPath, compressionMethod, type, archivePath = "") {
       return __awaiter2(this, void 0, void 0, function* () {
-        try {
-          yield exec_1.exec(`"${yield getTarPath(args, compressionMethod)}"`, args, { cwd });
-        } catch (error) {
-          throw new Error(`Tar failed with error: ${error === null || error === void 0 ? void 0 : error.message}`);
+        const args = [`"${tarPath.path}"`];
+        const cacheFileName = utils.getCacheFileName(compressionMethod);
+        const tarFile = "cache.tar";
+        const workingDirectory = getWorkingDirectory();
+        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
+        switch (type) {
+          case "create":
+            args.push("--posix", "-cf", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "--exclude", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "--files-from", constants_1.ManifestFilename);
+            break;
+          case "extract":
+            args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path.sep}`, "g"), "/"));
+            break;
+          case "list":
+            args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "-P");
+            break;
         }
+        if (tarPath.type === constants_1.ArchiveToolType.GNU) {
+          switch (process.platform) {
+            case "win32":
+              args.push("--force-local");
+              break;
+            case "darwin":
+              args.push("--delay-directory-restore");
+              break;
+          }
+        }
+        return args;
       });
     }
-    __name(execTar, "execTar");
+    __name(getTarArgs, "getTarArgs");
+    function getCommands(compressionMethod, type, archivePath = "") {
+      return __awaiter2(this, void 0, void 0, function* () {
+        let args;
+        const tarPath = yield getTarPath();
+        const tarArgs = yield getTarArgs(tarPath, compressionMethod, type, archivePath);
+        const compressionArgs = type !== "create" ? yield getDecompressionProgram(tarPath, compressionMethod, archivePath) : yield getCompressionProgram(tarPath, compressionMethod);
+        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
+        if (BSD_TAR_ZSTD && type !== "create") {
+          args = [[...compressionArgs].join(" "), [...tarArgs].join(" ")];
+        } else {
+          args = [[...tarArgs].join(" "), [...compressionArgs].join(" ")];
+        }
+        if (BSD_TAR_ZSTD) {
+          return args;
+        }
+        return [args.join(" ")];
+      });
+    }
+    __name(getCommands, "getCommands");
     function getWorkingDirectory() {
       var _a;
       return (_a = process.env["GITHUB_WORKSPACE"]) !== null && _a !== void 0 ? _a : process.cwd();
     }
     __name(getWorkingDirectory, "getWorkingDirectory");
-    function getCompressionProgram(compressionMethod) {
-      switch (compressionMethod) {
-        case constants_1.CompressionMethod.Zstd:
-          return [
-            "--use-compress-program",
-            IS_WINDOWS ? "zstd -d --long=30" : "unzstd --long=30"
-          ];
-        case constants_1.CompressionMethod.ZstdWithoutLong:
-          return ["--use-compress-program", IS_WINDOWS ? "zstd -d" : "unzstd"];
-        default:
-          return ["-z"];
-      }
+    function getDecompressionProgram(tarPath, compressionMethod, archivePath) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
+        switch (compressionMethod) {
+          case constants_1.CompressionMethod.Zstd:
+            return BSD_TAR_ZSTD ? [
+              "zstd -d --long=30 --force -o",
+              constants_1.TarFilename,
+              archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/")
+            ] : [
+              "--use-compress-program",
+              IS_WINDOWS ? '"zstd -d --long=30"' : "unzstd --long=30"
+            ];
+          case constants_1.CompressionMethod.ZstdWithoutLong:
+            return BSD_TAR_ZSTD ? [
+              "zstd -d --force -o",
+              constants_1.TarFilename,
+              archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/")
+            ] : ["--use-compress-program", IS_WINDOWS ? '"zstd -d"' : "unzstd"];
+          default:
+            return ["-z"];
+        }
+      });
+    }
+    __name(getDecompressionProgram, "getDecompressionProgram");
+    function getCompressionProgram(tarPath, compressionMethod) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const cacheFileName = utils.getCacheFileName(compressionMethod);
+        const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
+        switch (compressionMethod) {
+          case constants_1.CompressionMethod.Zstd:
+            return BSD_TAR_ZSTD ? [
+              "zstd -T0 --long=30 --force -o",
+              cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"),
+              constants_1.TarFilename
+            ] : [
+              "--use-compress-program",
+              IS_WINDOWS ? '"zstd -T0 --long=30"' : "zstdmt --long=30"
+            ];
+          case constants_1.CompressionMethod.ZstdWithoutLong:
+            return BSD_TAR_ZSTD ? [
+              "zstd -T0 --force -o",
+              cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"),
+              constants_1.TarFilename
+            ] : ["--use-compress-program", IS_WINDOWS ? '"zstd -T0"' : "zstdmt"];
+          default:
+            return ["-z"];
+        }
+      });
     }
     __name(getCompressionProgram, "getCompressionProgram");
+    function execCommands(commands, cwd) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        for (const command of commands) {
+          try {
+            yield (0, exec_1.exec)(command, void 0, {
+              cwd,
+              env: Object.assign(Object.assign({}, process.env), { MSYS: "winsymlinks:nativestrict" })
+            });
+          } catch (error) {
+            throw new Error(`${command.split(" ")[0]} failed with error: ${error === null || error === void 0 ? void 0 : error.message}`);
+          }
+        }
+      });
+    }
+    __name(execCommands, "execCommands");
     function listTar(archivePath, compressionMethod) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const args = [
-          ...getCompressionProgram(compressionMethod),
-          "-tf",
-          archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/"),
-          "-P"
-        ];
-        yield execTar(args, compressionMethod);
+        const commands = yield getCommands(compressionMethod, "list", archivePath);
+        yield execCommands(commands);
       });
     }
     __name(listTar, "listTar");
@@ -59546,53 +59639,17 @@ var require_tar = __commonJS({
       return __awaiter2(this, void 0, void 0, function* () {
         const workingDirectory = getWorkingDirectory();
         yield io2.mkdirP(workingDirectory);
-        const args = [
-          ...getCompressionProgram(compressionMethod),
-          "-xf",
-          archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/"),
-          "-P",
-          "-C",
-          workingDirectory.replace(new RegExp(`\\${path.sep}`, "g"), "/")
-        ];
-        yield execTar(args, compressionMethod);
+        const commands = yield getCommands(compressionMethod, "extract", archivePath);
+        yield execCommands(commands);
       });
     }
     __name(extractTar, "extractTar");
     exports2.extractTar = extractTar;
     function createTar(archiveFolder, sourceDirectories, compressionMethod) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const manifestFilename = "manifest.txt";
-        const cacheFileName = utils.getCacheFileName(compressionMethod);
-        fs_1.writeFileSync(path.join(archiveFolder, manifestFilename), sourceDirectories.join("\n"));
-        const workingDirectory = getWorkingDirectory();
-        function getCompressionProgram2() {
-          switch (compressionMethod) {
-            case constants_1.CompressionMethod.Zstd:
-              return [
-                "--use-compress-program",
-                IS_WINDOWS ? "zstd -T0 --long=30" : "zstdmt --long=30"
-              ];
-            case constants_1.CompressionMethod.ZstdWithoutLong:
-              return ["--use-compress-program", IS_WINDOWS ? "zstd -T0" : "zstdmt"];
-            default:
-              return ["-z"];
-          }
-        }
-        __name(getCompressionProgram2, "getCompressionProgram");
-        const args = [
-          "--posix",
-          ...getCompressionProgram2(),
-          "-cf",
-          cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"),
-          "--exclude",
-          cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"),
-          "-P",
-          "-C",
-          workingDirectory.replace(new RegExp(`\\${path.sep}`, "g"), "/"),
-          "--files-from",
-          manifestFilename
-        ];
-        yield execTar(args, compressionMethod, archiveFolder);
+        (0, fs_1.writeFileSync)(path.join(archiveFolder, constants_1.ManifestFilename), sourceDirectories.join("\n"));
+        const commands = yield getCommands(compressionMethod, "create");
+        yield execCommands(commands, archiveFolder);
       });
     }
     __name(createTar, "createTar");
@@ -59604,6 +59661,38 @@ var require_tar = __commonJS({
 var require_cache = __commonJS({
   "node_modules/@actions/cache/lib/cache.js"(exports2) {
     "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
+      }
+      __setModuleDefault2(result, mod);
+      return result;
+    };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -59635,19 +59724,8 @@ var require_cache = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod)
-          if (Object.hasOwnProperty.call(mod, k))
-            result[k] = mod[k];
-      }
-      result["default"] = mod;
-      return result;
-    };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.saveCache = exports2.restoreCache = exports2.isFeatureAvailable = exports2.ReserveCacheError = exports2.ValidationError = void 0;
     var core2 = __importStar2(require_core());
     var path = __importStar2(require("path"));
     var utils = __importStar2(require_cacheUtils());
@@ -59692,7 +59770,7 @@ var require_cache = __commonJS({
     }
     __name(isFeatureAvailable, "isFeatureAvailable");
     exports2.isFeatureAvailable = isFeatureAvailable;
-    function restoreCache(paths, primaryKey, restoreKeys, options) {
+    function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false) {
       return __awaiter2(this, void 0, void 0, function* () {
         checkPaths(paths);
         restoreKeys = restoreKeys || [];
@@ -59709,20 +59787,25 @@ var require_cache = __commonJS({
         let archivePath = "";
         try {
           const cacheEntry = yield cacheHttpClient.getCacheEntry(keys, paths, {
-            compressionMethod
+            compressionMethod,
+            enableCrossOsArchive
           });
           if (!(cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.archiveLocation)) {
             return void 0;
+          }
+          if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
+            core2.info("Lookup only - skipping download");
+            return cacheEntry.cacheKey;
           }
           archivePath = path.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
           core2.debug(`Archive Path: ${archivePath}`);
           yield cacheHttpClient.downloadCache(cacheEntry.archiveLocation, archivePath, options);
           if (core2.isDebug()) {
-            yield tar_1.listTar(archivePath, compressionMethod);
+            yield (0, tar_1.listTar)(archivePath, compressionMethod);
           }
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
           core2.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
-          yield tar_1.extractTar(archivePath, compressionMethod);
+          yield (0, tar_1.extractTar)(archivePath, compressionMethod);
           core2.info("Cache restored successfully");
           return cacheEntry.cacheKey;
         } catch (error) {
@@ -59744,7 +59827,7 @@ var require_cache = __commonJS({
     }
     __name(restoreCache, "restoreCache");
     exports2.restoreCache = restoreCache;
-    function saveCache(paths, key, options) {
+    function saveCache(paths, key, options, enableCrossOsArchive = false) {
       var _a, _b, _c, _d, _e;
       return __awaiter2(this, void 0, void 0, function* () {
         checkPaths(paths);
@@ -59761,9 +59844,9 @@ var require_cache = __commonJS({
         const archivePath = path.join(archiveFolder, utils.getCacheFileName(compressionMethod));
         core2.debug(`Archive Path: ${archivePath}`);
         try {
-          yield tar_1.createTar(archiveFolder, cachePaths, compressionMethod);
+          yield (0, tar_1.createTar)(archiveFolder, cachePaths, compressionMethod);
           if (core2.isDebug()) {
-            yield tar_1.listTar(archivePath, compressionMethod);
+            yield (0, tar_1.listTar)(archivePath, compressionMethod);
           }
           const fileSizeLimit = 10 * 1024 * 1024 * 1024;
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
@@ -59774,6 +59857,7 @@ var require_cache = __commonJS({
           core2.debug("Reserving Cache");
           const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, paths, {
             compressionMethod,
+            enableCrossOsArchive,
             cacheSize: archiveFileSize
           });
           if ((_a = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a === void 0 ? void 0 : _a.cacheId) {
@@ -59865,8 +59949,639 @@ var require_context3 = __commonJS({
   }
 });
 
+// node_modules/@actions/github/node_modules/@actions/http-client/lib/proxy.js
+var require_proxy4 = __commonJS({
+  "node_modules/@actions/github/node_modules/@actions/http-client/lib/proxy.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.checkBypass = exports2.getProxyUrl = void 0;
+    function getProxyUrl(reqUrl) {
+      const usingSsl = reqUrl.protocol === "https:";
+      if (checkBypass(reqUrl)) {
+        return void 0;
+      }
+      const proxyVar = (() => {
+        if (usingSsl) {
+          return process.env["https_proxy"] || process.env["HTTPS_PROXY"];
+        } else {
+          return process.env["http_proxy"] || process.env["HTTP_PROXY"];
+        }
+      })();
+      if (proxyVar) {
+        return new URL(proxyVar);
+      } else {
+        return void 0;
+      }
+    }
+    __name(getProxyUrl, "getProxyUrl");
+    exports2.getProxyUrl = getProxyUrl;
+    function checkBypass(reqUrl) {
+      if (!reqUrl.hostname) {
+        return false;
+      }
+      const reqHost = reqUrl.hostname;
+      if (isLoopbackAddress(reqHost)) {
+        return true;
+      }
+      const noProxy = process.env["no_proxy"] || process.env["NO_PROXY"] || "";
+      if (!noProxy) {
+        return false;
+      }
+      let reqPort;
+      if (reqUrl.port) {
+        reqPort = Number(reqUrl.port);
+      } else if (reqUrl.protocol === "http:") {
+        reqPort = 80;
+      } else if (reqUrl.protocol === "https:") {
+        reqPort = 443;
+      }
+      const upperReqHosts = [reqUrl.hostname.toUpperCase()];
+      if (typeof reqPort === "number") {
+        upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
+      }
+      for (const upperNoProxyItem of noProxy.split(",").map((x) => x.trim().toUpperCase()).filter((x) => x)) {
+        if (upperNoProxyItem === "*" || upperReqHosts.some((x) => x === upperNoProxyItem || x.endsWith(`.${upperNoProxyItem}`) || upperNoProxyItem.startsWith(".") && x.endsWith(`${upperNoProxyItem}`))) {
+          return true;
+        }
+      }
+      return false;
+    }
+    __name(checkBypass, "checkBypass");
+    exports2.checkBypass = checkBypass;
+    function isLoopbackAddress(host) {
+      const hostLower = host.toLowerCase();
+      return hostLower === "localhost" || hostLower.startsWith("127.") || hostLower.startsWith("[::1]") || hostLower.startsWith("[0:0:0:0:0:0:0:1]");
+    }
+    __name(isLoopbackAddress, "isLoopbackAddress");
+  }
+});
+
+// node_modules/@actions/github/node_modules/@actions/http-client/lib/index.js
+var require_lib6 = __commonJS({
+  "node_modules/@actions/github/node_modules/@actions/http-client/lib/index.js"(exports2) {
+    "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      Object.defineProperty(o, k2, { enumerable: true, get: function() {
+        return m[k];
+      } });
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
+      }
+      __setModuleDefault2(result, mod);
+      return result;
+    };
+    var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+      function adopt(value) {
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
+        });
+      }
+      __name(adopt, "adopt");
+      return new (P || (P = Promise))(function(resolve, reject) {
+        function fulfilled(value) {
+          try {
+            step(generator.next(value));
+          } catch (e) {
+            reject(e);
+          }
+        }
+        __name(fulfilled, "fulfilled");
+        function rejected(value) {
+          try {
+            step(generator["throw"](value));
+          } catch (e) {
+            reject(e);
+          }
+        }
+        __name(rejected, "rejected");
+        function step(result) {
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+        }
+        __name(step, "step");
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+      });
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.HttpClient = exports2.isHttps = exports2.HttpClientResponse = exports2.HttpClientError = exports2.getProxyUrl = exports2.MediaTypes = exports2.Headers = exports2.HttpCodes = void 0;
+    var http = __importStar2(require("http"));
+    var https = __importStar2(require("https"));
+    var pm = __importStar2(require_proxy4());
+    var tunnel = __importStar2(require_tunnel2());
+    var HttpCodes;
+    (function(HttpCodes2) {
+      HttpCodes2[HttpCodes2["OK"] = 200] = "OK";
+      HttpCodes2[HttpCodes2["MultipleChoices"] = 300] = "MultipleChoices";
+      HttpCodes2[HttpCodes2["MovedPermanently"] = 301] = "MovedPermanently";
+      HttpCodes2[HttpCodes2["ResourceMoved"] = 302] = "ResourceMoved";
+      HttpCodes2[HttpCodes2["SeeOther"] = 303] = "SeeOther";
+      HttpCodes2[HttpCodes2["NotModified"] = 304] = "NotModified";
+      HttpCodes2[HttpCodes2["UseProxy"] = 305] = "UseProxy";
+      HttpCodes2[HttpCodes2["SwitchProxy"] = 306] = "SwitchProxy";
+      HttpCodes2[HttpCodes2["TemporaryRedirect"] = 307] = "TemporaryRedirect";
+      HttpCodes2[HttpCodes2["PermanentRedirect"] = 308] = "PermanentRedirect";
+      HttpCodes2[HttpCodes2["BadRequest"] = 400] = "BadRequest";
+      HttpCodes2[HttpCodes2["Unauthorized"] = 401] = "Unauthorized";
+      HttpCodes2[HttpCodes2["PaymentRequired"] = 402] = "PaymentRequired";
+      HttpCodes2[HttpCodes2["Forbidden"] = 403] = "Forbidden";
+      HttpCodes2[HttpCodes2["NotFound"] = 404] = "NotFound";
+      HttpCodes2[HttpCodes2["MethodNotAllowed"] = 405] = "MethodNotAllowed";
+      HttpCodes2[HttpCodes2["NotAcceptable"] = 406] = "NotAcceptable";
+      HttpCodes2[HttpCodes2["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
+      HttpCodes2[HttpCodes2["RequestTimeout"] = 408] = "RequestTimeout";
+      HttpCodes2[HttpCodes2["Conflict"] = 409] = "Conflict";
+      HttpCodes2[HttpCodes2["Gone"] = 410] = "Gone";
+      HttpCodes2[HttpCodes2["TooManyRequests"] = 429] = "TooManyRequests";
+      HttpCodes2[HttpCodes2["InternalServerError"] = 500] = "InternalServerError";
+      HttpCodes2[HttpCodes2["NotImplemented"] = 501] = "NotImplemented";
+      HttpCodes2[HttpCodes2["BadGateway"] = 502] = "BadGateway";
+      HttpCodes2[HttpCodes2["ServiceUnavailable"] = 503] = "ServiceUnavailable";
+      HttpCodes2[HttpCodes2["GatewayTimeout"] = 504] = "GatewayTimeout";
+    })(HttpCodes = exports2.HttpCodes || (exports2.HttpCodes = {}));
+    var Headers;
+    (function(Headers2) {
+      Headers2["Accept"] = "accept";
+      Headers2["ContentType"] = "content-type";
+    })(Headers = exports2.Headers || (exports2.Headers = {}));
+    var MediaTypes;
+    (function(MediaTypes2) {
+      MediaTypes2["ApplicationJson"] = "application/json";
+    })(MediaTypes = exports2.MediaTypes || (exports2.MediaTypes = {}));
+    function getProxyUrl(serverUrl) {
+      const proxyUrl = pm.getProxyUrl(new URL(serverUrl));
+      return proxyUrl ? proxyUrl.href : "";
+    }
+    __name(getProxyUrl, "getProxyUrl");
+    exports2.getProxyUrl = getProxyUrl;
+    var HttpRedirectCodes = [
+      HttpCodes.MovedPermanently,
+      HttpCodes.ResourceMoved,
+      HttpCodes.SeeOther,
+      HttpCodes.TemporaryRedirect,
+      HttpCodes.PermanentRedirect
+    ];
+    var HttpResponseRetryCodes = [
+      HttpCodes.BadGateway,
+      HttpCodes.ServiceUnavailable,
+      HttpCodes.GatewayTimeout
+    ];
+    var RetryableHttpVerbs = ["OPTIONS", "GET", "DELETE", "HEAD"];
+    var ExponentialBackoffCeiling = 10;
+    var ExponentialBackoffTimeSlice = 5;
+    var HttpClientError = class extends Error {
+      constructor(message, statusCode) {
+        super(message);
+        this.name = "HttpClientError";
+        this.statusCode = statusCode;
+        Object.setPrototypeOf(this, HttpClientError.prototype);
+      }
+    };
+    __name(HttpClientError, "HttpClientError");
+    exports2.HttpClientError = HttpClientError;
+    var HttpClientResponse = class {
+      constructor(message) {
+        this.message = message;
+      }
+      readBody() {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve) => __awaiter2(this, void 0, void 0, function* () {
+            let output = Buffer.alloc(0);
+            this.message.on("data", (chunk) => {
+              output = Buffer.concat([output, chunk]);
+            });
+            this.message.on("end", () => {
+              resolve(output.toString());
+            });
+          }));
+        });
+      }
+    };
+    __name(HttpClientResponse, "HttpClientResponse");
+    exports2.HttpClientResponse = HttpClientResponse;
+    function isHttps(requestUrl) {
+      const parsedUrl = new URL(requestUrl);
+      return parsedUrl.protocol === "https:";
+    }
+    __name(isHttps, "isHttps");
+    exports2.isHttps = isHttps;
+    var HttpClient = class {
+      constructor(userAgent, handlers, requestOptions) {
+        this._ignoreSslError = false;
+        this._allowRedirects = true;
+        this._allowRedirectDowngrade = false;
+        this._maxRedirects = 50;
+        this._allowRetries = false;
+        this._maxRetries = 1;
+        this._keepAlive = false;
+        this._disposed = false;
+        this.userAgent = userAgent;
+        this.handlers = handlers || [];
+        this.requestOptions = requestOptions;
+        if (requestOptions) {
+          if (requestOptions.ignoreSslError != null) {
+            this._ignoreSslError = requestOptions.ignoreSslError;
+          }
+          this._socketTimeout = requestOptions.socketTimeout;
+          if (requestOptions.allowRedirects != null) {
+            this._allowRedirects = requestOptions.allowRedirects;
+          }
+          if (requestOptions.allowRedirectDowngrade != null) {
+            this._allowRedirectDowngrade = requestOptions.allowRedirectDowngrade;
+          }
+          if (requestOptions.maxRedirects != null) {
+            this._maxRedirects = Math.max(requestOptions.maxRedirects, 0);
+          }
+          if (requestOptions.keepAlive != null) {
+            this._keepAlive = requestOptions.keepAlive;
+          }
+          if (requestOptions.allowRetries != null) {
+            this._allowRetries = requestOptions.allowRetries;
+          }
+          if (requestOptions.maxRetries != null) {
+            this._maxRetries = requestOptions.maxRetries;
+          }
+        }
+      }
+      options(requestUrl, additionalHeaders) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return this.request("OPTIONS", requestUrl, null, additionalHeaders || {});
+        });
+      }
+      get(requestUrl, additionalHeaders) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return this.request("GET", requestUrl, null, additionalHeaders || {});
+        });
+      }
+      del(requestUrl, additionalHeaders) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return this.request("DELETE", requestUrl, null, additionalHeaders || {});
+        });
+      }
+      post(requestUrl, data, additionalHeaders) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return this.request("POST", requestUrl, data, additionalHeaders || {});
+        });
+      }
+      patch(requestUrl, data, additionalHeaders) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return this.request("PATCH", requestUrl, data, additionalHeaders || {});
+        });
+      }
+      put(requestUrl, data, additionalHeaders) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return this.request("PUT", requestUrl, data, additionalHeaders || {});
+        });
+      }
+      head(requestUrl, additionalHeaders) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return this.request("HEAD", requestUrl, null, additionalHeaders || {});
+        });
+      }
+      sendStream(verb, requestUrl, stream, additionalHeaders) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return this.request(verb, requestUrl, stream, additionalHeaders);
+        });
+      }
+      getJson(requestUrl, additionalHeaders = {}) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+          const res = yield this.get(requestUrl, additionalHeaders);
+          return this._processResponse(res, this.requestOptions);
+        });
+      }
+      postJson(requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          const data = JSON.stringify(obj, null, 2);
+          additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+          additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+          const res = yield this.post(requestUrl, data, additionalHeaders);
+          return this._processResponse(res, this.requestOptions);
+        });
+      }
+      putJson(requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          const data = JSON.stringify(obj, null, 2);
+          additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+          additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+          const res = yield this.put(requestUrl, data, additionalHeaders);
+          return this._processResponse(res, this.requestOptions);
+        });
+      }
+      patchJson(requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          const data = JSON.stringify(obj, null, 2);
+          additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+          additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+          const res = yield this.patch(requestUrl, data, additionalHeaders);
+          return this._processResponse(res, this.requestOptions);
+        });
+      }
+      request(verb, requestUrl, data, headers) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (this._disposed) {
+            throw new Error("Client has already been disposed.");
+          }
+          const parsedUrl = new URL(requestUrl);
+          let info = this._prepareRequest(verb, parsedUrl, headers);
+          const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
+          let numTries = 0;
+          let response;
+          do {
+            response = yield this.requestRaw(info, data);
+            if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
+              let authenticationHandler;
+              for (const handler of this.handlers) {
+                if (handler.canHandleAuthentication(response)) {
+                  authenticationHandler = handler;
+                  break;
+                }
+              }
+              if (authenticationHandler) {
+                return authenticationHandler.handleAuthentication(this, info, data);
+              } else {
+                return response;
+              }
+            }
+            let redirectsRemaining = this._maxRedirects;
+            while (response.message.statusCode && HttpRedirectCodes.includes(response.message.statusCode) && this._allowRedirects && redirectsRemaining > 0) {
+              const redirectUrl = response.message.headers["location"];
+              if (!redirectUrl) {
+                break;
+              }
+              const parsedRedirectUrl = new URL(redirectUrl);
+              if (parsedUrl.protocol === "https:" && parsedUrl.protocol !== parsedRedirectUrl.protocol && !this._allowRedirectDowngrade) {
+                throw new Error("Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.");
+              }
+              yield response.readBody();
+              if (parsedRedirectUrl.hostname !== parsedUrl.hostname) {
+                for (const header in headers) {
+                  if (header.toLowerCase() === "authorization") {
+                    delete headers[header];
+                  }
+                }
+              }
+              info = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info, data);
+              redirectsRemaining--;
+            }
+            if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
+              return response;
+            }
+            numTries += 1;
+            if (numTries < maxTries) {
+              yield response.readBody();
+              yield this._performExponentialBackoff(numTries);
+            }
+          } while (numTries < maxTries);
+          return response;
+        });
+      }
+      dispose() {
+        if (this._agent) {
+          this._agent.destroy();
+        }
+        this._disposed = true;
+      }
+      requestRaw(info, data) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject) => {
+            function callbackForResult(err, res) {
+              if (err) {
+                reject(err);
+              } else if (!res) {
+                reject(new Error("Unknown error"));
+              } else {
+                resolve(res);
+              }
+            }
+            __name(callbackForResult, "callbackForResult");
+            this.requestRawWithCallback(info, data, callbackForResult);
+          });
+        });
+      }
+      requestRawWithCallback(info, data, onResult) {
+        if (typeof data === "string") {
+          if (!info.options.headers) {
+            info.options.headers = {};
+          }
+          info.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+        }
+        let callbackCalled = false;
+        function handleResult(err, res) {
+          if (!callbackCalled) {
+            callbackCalled = true;
+            onResult(err, res);
+          }
+        }
+        __name(handleResult, "handleResult");
+        const req = info.httpModule.request(info.options, (msg) => {
+          const res = new HttpClientResponse(msg);
+          handleResult(void 0, res);
+        });
+        let socket;
+        req.on("socket", (sock) => {
+          socket = sock;
+        });
+        req.setTimeout(this._socketTimeout || 3 * 6e4, () => {
+          if (socket) {
+            socket.end();
+          }
+          handleResult(new Error(`Request timeout: ${info.options.path}`));
+        });
+        req.on("error", function(err) {
+          handleResult(err);
+        });
+        if (data && typeof data === "string") {
+          req.write(data, "utf8");
+        }
+        if (data && typeof data !== "string") {
+          data.on("close", function() {
+            req.end();
+          });
+          data.pipe(req);
+        } else {
+          req.end();
+        }
+      }
+      getAgent(serverUrl) {
+        const parsedUrl = new URL(serverUrl);
+        return this._getAgent(parsedUrl);
+      }
+      _prepareRequest(method, requestUrl, headers) {
+        const info = {};
+        info.parsedUrl = requestUrl;
+        const usingSsl = info.parsedUrl.protocol === "https:";
+        info.httpModule = usingSsl ? https : http;
+        const defaultPort = usingSsl ? 443 : 80;
+        info.options = {};
+        info.options.host = info.parsedUrl.hostname;
+        info.options.port = info.parsedUrl.port ? parseInt(info.parsedUrl.port) : defaultPort;
+        info.options.path = (info.parsedUrl.pathname || "") + (info.parsedUrl.search || "");
+        info.options.method = method;
+        info.options.headers = this._mergeHeaders(headers);
+        if (this.userAgent != null) {
+          info.options.headers["user-agent"] = this.userAgent;
+        }
+        info.options.agent = this._getAgent(info.parsedUrl);
+        if (this.handlers) {
+          for (const handler of this.handlers) {
+            handler.prepareRequest(info.options);
+          }
+        }
+        return info;
+      }
+      _mergeHeaders(headers) {
+        if (this.requestOptions && this.requestOptions.headers) {
+          return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers || {}));
+        }
+        return lowercaseKeys(headers || {});
+      }
+      _getExistingOrDefaultHeader(additionalHeaders, header, _default) {
+        let clientHeader;
+        if (this.requestOptions && this.requestOptions.headers) {
+          clientHeader = lowercaseKeys(this.requestOptions.headers)[header];
+        }
+        return additionalHeaders[header] || clientHeader || _default;
+      }
+      _getAgent(parsedUrl) {
+        let agent;
+        const proxyUrl = pm.getProxyUrl(parsedUrl);
+        const useProxy = proxyUrl && proxyUrl.hostname;
+        if (this._keepAlive && useProxy) {
+          agent = this._proxyAgent;
+        }
+        if (this._keepAlive && !useProxy) {
+          agent = this._agent;
+        }
+        if (agent) {
+          return agent;
+        }
+        const usingSsl = parsedUrl.protocol === "https:";
+        let maxSockets = 100;
+        if (this.requestOptions) {
+          maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
+        }
+        if (proxyUrl && proxyUrl.hostname) {
+          const agentOptions = {
+            maxSockets,
+            keepAlive: this._keepAlive,
+            proxy: Object.assign(Object.assign({}, (proxyUrl.username || proxyUrl.password) && {
+              proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`
+            }), { host: proxyUrl.hostname, port: proxyUrl.port })
+          };
+          let tunnelAgent;
+          const overHttps = proxyUrl.protocol === "https:";
+          if (usingSsl) {
+            tunnelAgent = overHttps ? tunnel.httpsOverHttps : tunnel.httpsOverHttp;
+          } else {
+            tunnelAgent = overHttps ? tunnel.httpOverHttps : tunnel.httpOverHttp;
+          }
+          agent = tunnelAgent(agentOptions);
+          this._proxyAgent = agent;
+        }
+        if (this._keepAlive && !agent) {
+          const options = { keepAlive: this._keepAlive, maxSockets };
+          agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
+          this._agent = agent;
+        }
+        if (!agent) {
+          agent = usingSsl ? https.globalAgent : http.globalAgent;
+        }
+        if (usingSsl && this._ignoreSslError) {
+          agent.options = Object.assign(agent.options || {}, {
+            rejectUnauthorized: false
+          });
+        }
+        return agent;
+      }
+      _performExponentialBackoff(retryNumber) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
+          const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
+          return new Promise((resolve) => setTimeout(() => resolve(), ms));
+        });
+      }
+      _processResponse(res, options) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject) => __awaiter2(this, void 0, void 0, function* () {
+            const statusCode = res.message.statusCode || 0;
+            const response = {
+              statusCode,
+              result: null,
+              headers: {}
+            };
+            if (statusCode === HttpCodes.NotFound) {
+              resolve(response);
+            }
+            function dateTimeDeserializer(key, value) {
+              if (typeof value === "string") {
+                const a = new Date(value);
+                if (!isNaN(a.valueOf())) {
+                  return a;
+                }
+              }
+              return value;
+            }
+            __name(dateTimeDeserializer, "dateTimeDeserializer");
+            let obj;
+            let contents;
+            try {
+              contents = yield res.readBody();
+              if (contents && contents.length > 0) {
+                if (options && options.deserializeDates) {
+                  obj = JSON.parse(contents, dateTimeDeserializer);
+                } else {
+                  obj = JSON.parse(contents);
+                }
+                response.result = obj;
+              }
+              response.headers = res.message.headers;
+            } catch (err) {
+            }
+            if (statusCode > 299) {
+              let msg;
+              if (obj && obj.message) {
+                msg = obj.message;
+              } else if (contents && contents.length > 0) {
+                msg = contents;
+              } else {
+                msg = `Failed request: (${statusCode})`;
+              }
+              const err = new HttpClientError(msg, statusCode);
+              err.result = response.result;
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          }));
+        });
+      }
+    };
+    __name(HttpClient, "HttpClient");
+    exports2.HttpClient = HttpClient;
+    var lowercaseKeys = /* @__PURE__ */ __name((obj) => Object.keys(obj).reduce((c, k) => (c[k.toLowerCase()] = obj[k], c), {}), "lowercaseKeys");
+  }
+});
+
 // node_modules/@actions/github/lib/internal/utils.js
-var require_utils5 = __commonJS({
+var require_utils6 = __commonJS({
   "node_modules/@actions/github/lib/internal/utils.js"(exports2) {
     "use strict";
     var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
@@ -59899,7 +60614,7 @@ var require_utils5 = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getApiBaseUrl = exports2.getProxyAgent = exports2.getAuthString = void 0;
-    var httpClient = __importStar2(require_http_client());
+    var httpClient = __importStar2(require_lib6());
     function getAuthString(token, options) {
       if (!token && !options.auth) {
         throw new Error("Parameter token or opts.auth is required");
@@ -60042,7 +60757,10 @@ var require_before_after_hook = __commonJS({
     var bind = Function.bind;
     var bindable = bind.bind(bind);
     function bindApi(hook, state, name) {
-      var removeHookRef = bindable(removeHook, null).apply(null, name ? [state, name] : [state]);
+      var removeHookRef = bindable(removeHook, null).apply(
+        null,
+        name ? [state, name] : [state]
+      );
       hook.api = { remove: removeHookRef };
       hook.remove = removeHookRef;
       ["before", "error", "after", "wrap"].forEach(function(kind) {
@@ -60073,7 +60791,9 @@ var require_before_after_hook = __commonJS({
     var collectionHookDeprecationMessageDisplayed = false;
     function Hook() {
       if (!collectionHookDeprecationMessageDisplayed) {
-        console.warn('[before-after-hook]: "Hook()" repurposing warning, use "Hook.Collection()". Read more: https://git.io/upgrade-before-after-hook-to-1.4');
+        console.warn(
+          '[before-after-hook]: "Hook()" repurposing warning, use "Hook.Collection()". Read more: https://git.io/upgrade-before-after-hook-to-1.4'
+        );
         collectionHookDeprecationMessageDisplayed = true;
       }
       return HookCollection();
@@ -60117,9 +60837,9 @@ var require_is_plain_object = __commonJS({
   }
 });
 
-// node_modules/@octokit/endpoint/dist-node/index.js
+// node_modules/@actions/github/node_modules/@octokit/endpoint/dist-node/index.js
 var require_dist_node2 = __commonJS({
-  "node_modules/@octokit/endpoint/dist-node/index.js"(exports2) {
+  "node_modules/@actions/github/node_modules/@octokit/endpoint/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var isPlainObject = require_is_plain_object();
@@ -60454,9 +61174,9 @@ var require_dist_node3 = __commonJS({
   }
 });
 
-// node_modules/@octokit/request-error/dist-node/index.js
+// node_modules/@actions/github/node_modules/@octokit/request-error/dist-node/index.js
 var require_dist_node4 = __commonJS({
-  "node_modules/@octokit/request-error/dist-node/index.js"(exports2) {
+  "node_modules/@actions/github/node_modules/@octokit/request-error/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     function _interopDefault(ex) {
@@ -60510,9 +61230,9 @@ var require_dist_node4 = __commonJS({
   }
 });
 
-// node_modules/@octokit/request/dist-node/index.js
+// node_modules/@actions/github/node_modules/@octokit/request/dist-node/index.js
 var require_dist_node5 = __commonJS({
-  "node_modules/@octokit/request/dist-node/index.js"(exports2) {
+  "node_modules/@actions/github/node_modules/@octokit/request/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     function _interopDefault(ex) {
@@ -60669,9 +61389,9 @@ var require_dist_node5 = __commonJS({
   }
 });
 
-// node_modules/@octokit/graphql/dist-node/index.js
+// node_modules/@actions/github/node_modules/@octokit/graphql/dist-node/index.js
 var require_dist_node6 = __commonJS({
-  "node_modules/@octokit/graphql/dist-node/index.js"(exports2) {
+  "node_modules/@actions/github/node_modules/@octokit/graphql/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var request = require_dist_node5();
@@ -60772,9 +61492,9 @@ var require_dist_node6 = __commonJS({
   }
 });
 
-// node_modules/@octokit/auth-token/dist-node/index.js
+// node_modules/@actions/github/node_modules/@octokit/auth-token/dist-node/index.js
 var require_dist_node7 = __commonJS({
-  "node_modules/@octokit/auth-token/dist-node/index.js"(exports2) {
+  "node_modules/@actions/github/node_modules/@octokit/auth-token/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var REGEX_IS_INSTALLATION_LEGACY = /^v1\./;
@@ -60821,9 +61541,9 @@ var require_dist_node7 = __commonJS({
   }
 });
 
-// node_modules/@octokit/core/dist-node/index.js
+// node_modules/@actions/github/node_modules/@octokit/core/dist-node/index.js
 var require_dist_node8 = __commonJS({
-  "node_modules/@octokit/core/dist-node/index.js"(exports2) {
+  "node_modules/@actions/github/node_modules/@octokit/core/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var universalUserAgent = require_dist_node();
@@ -60865,7 +61585,7 @@ var require_dist_node8 = __commonJS({
       return target;
     }
     __name(_objectWithoutProperties, "_objectWithoutProperties");
-    var VERSION2 = "3.5.1";
+    var VERSION2 = "3.6.0";
     var _excluded = ["authStrategy"];
     var Octokit = class {
       constructor(options = {}) {
@@ -61013,6 +61733,8 @@ var require_dist_node9 = __commonJS({
     __name(_defineProperty, "_defineProperty");
     var Endpoints = {
       actions: {
+        addCustomLabelsToSelfHostedRunnerForOrg: ["POST /orgs/{org}/actions/runners/{runner_id}/labels"],
+        addCustomLabelsToSelfHostedRunnerForRepo: ["POST /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"],
         addSelectedRepoToOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"],
         approveWorkflowRun: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/approve"],
         cancelWorkflowRun: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel"],
@@ -61024,6 +61746,8 @@ var require_dist_node9 = __commonJS({
         createRemoveTokenForOrg: ["POST /orgs/{org}/actions/runners/remove-token"],
         createRemoveTokenForRepo: ["POST /repos/{owner}/{repo}/actions/runners/remove-token"],
         createWorkflowDispatch: ["POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches"],
+        deleteActionsCacheById: ["DELETE /repos/{owner}/{repo}/actions/caches/{cache_id}"],
+        deleteActionsCacheByKey: ["DELETE /repos/{owner}/{repo}/actions/caches{?key,ref}"],
         deleteArtifact: ["DELETE /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"],
         deleteEnvironmentSecret: ["DELETE /repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}"],
         deleteOrgSecret: ["DELETE /orgs/{org}/actions/secrets/{secret_name}"],
@@ -61040,11 +61764,19 @@ var require_dist_node9 = __commonJS({
         downloadWorkflowRunLogs: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs"],
         enableSelectedRepositoryGithubActionsOrganization: ["PUT /orgs/{org}/actions/permissions/repositories/{repository_id}"],
         enableWorkflow: ["PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable"],
+        getActionsCacheList: ["GET /repos/{owner}/{repo}/actions/caches"],
+        getActionsCacheUsage: ["GET /repos/{owner}/{repo}/actions/cache/usage"],
+        getActionsCacheUsageByRepoForOrg: ["GET /orgs/{org}/actions/cache/usage-by-repository"],
+        getActionsCacheUsageForEnterprise: ["GET /enterprises/{enterprise}/actions/cache/usage"],
+        getActionsCacheUsageForOrg: ["GET /orgs/{org}/actions/cache/usage"],
         getAllowedActionsOrganization: ["GET /orgs/{org}/actions/permissions/selected-actions"],
         getAllowedActionsRepository: ["GET /repos/{owner}/{repo}/actions/permissions/selected-actions"],
         getArtifact: ["GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"],
         getEnvironmentPublicKey: ["GET /repositories/{repository_id}/environments/{environment_name}/secrets/public-key"],
         getEnvironmentSecret: ["GET /repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}"],
+        getGithubActionsDefaultWorkflowPermissionsEnterprise: ["GET /enterprises/{enterprise}/actions/permissions/workflow"],
+        getGithubActionsDefaultWorkflowPermissionsOrganization: ["GET /orgs/{org}/actions/permissions/workflow"],
+        getGithubActionsDefaultWorkflowPermissionsRepository: ["GET /repos/{owner}/{repo}/actions/permissions/workflow"],
         getGithubActionsPermissionsOrganization: ["GET /orgs/{org}/actions/permissions"],
         getGithubActionsPermissionsRepository: ["GET /repos/{owner}/{repo}/actions/permissions"],
         getJobForWorkflowRun: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}"],
@@ -61060,6 +61792,7 @@ var require_dist_node9 = __commonJS({
         getSelfHostedRunnerForOrg: ["GET /orgs/{org}/actions/runners/{runner_id}"],
         getSelfHostedRunnerForRepo: ["GET /repos/{owner}/{repo}/actions/runners/{runner_id}"],
         getWorkflow: ["GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}"],
+        getWorkflowAccessToRepository: ["GET /repos/{owner}/{repo}/actions/permissions/access"],
         getWorkflowRun: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}"],
         getWorkflowRunAttempt: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}"],
         getWorkflowRunUsage: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/timing"],
@@ -61068,6 +61801,8 @@ var require_dist_node9 = __commonJS({
         listEnvironmentSecrets: ["GET /repositories/{repository_id}/environments/{environment_name}/secrets"],
         listJobsForWorkflowRun: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs"],
         listJobsForWorkflowRunAttempt: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs"],
+        listLabelsForSelfHostedRunnerForOrg: ["GET /orgs/{org}/actions/runners/{runner_id}/labels"],
+        listLabelsForSelfHostedRunnerForRepo: ["GET /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"],
         listOrgSecrets: ["GET /orgs/{org}/actions/secrets"],
         listRepoSecrets: ["GET /repos/{owner}/{repo}/actions/secrets"],
         listRepoWorkflows: ["GET /repos/{owner}/{repo}/actions/workflows"],
@@ -61080,14 +61815,27 @@ var require_dist_node9 = __commonJS({
         listWorkflowRunArtifacts: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"],
         listWorkflowRuns: ["GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"],
         listWorkflowRunsForRepo: ["GET /repos/{owner}/{repo}/actions/runs"],
+        reRunJobForWorkflowRun: ["POST /repos/{owner}/{repo}/actions/jobs/{job_id}/rerun"],
+        reRunWorkflow: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun"],
+        reRunWorkflowFailedJobs: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs"],
+        removeAllCustomLabelsFromSelfHostedRunnerForOrg: ["DELETE /orgs/{org}/actions/runners/{runner_id}/labels"],
+        removeAllCustomLabelsFromSelfHostedRunnerForRepo: ["DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"],
+        removeCustomLabelFromSelfHostedRunnerForOrg: ["DELETE /orgs/{org}/actions/runners/{runner_id}/labels/{name}"],
+        removeCustomLabelFromSelfHostedRunnerForRepo: ["DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels/{name}"],
         removeSelectedRepoFromOrgSecret: ["DELETE /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"],
         reviewPendingDeploymentsForRun: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"],
         setAllowedActionsOrganization: ["PUT /orgs/{org}/actions/permissions/selected-actions"],
         setAllowedActionsRepository: ["PUT /repos/{owner}/{repo}/actions/permissions/selected-actions"],
+        setCustomLabelsForSelfHostedRunnerForOrg: ["PUT /orgs/{org}/actions/runners/{runner_id}/labels"],
+        setCustomLabelsForSelfHostedRunnerForRepo: ["PUT /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"],
+        setGithubActionsDefaultWorkflowPermissionsEnterprise: ["PUT /enterprises/{enterprise}/actions/permissions/workflow"],
+        setGithubActionsDefaultWorkflowPermissionsOrganization: ["PUT /orgs/{org}/actions/permissions/workflow"],
+        setGithubActionsDefaultWorkflowPermissionsRepository: ["PUT /repos/{owner}/{repo}/actions/permissions/workflow"],
         setGithubActionsPermissionsOrganization: ["PUT /orgs/{org}/actions/permissions"],
         setGithubActionsPermissionsRepository: ["PUT /repos/{owner}/{repo}/actions/permissions"],
         setSelectedReposForOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}/repositories"],
-        setSelectedRepositoriesEnabledGithubActionsOrganization: ["PUT /orgs/{org}/actions/permissions/repositories"]
+        setSelectedRepositoriesEnabledGithubActionsOrganization: ["PUT /orgs/{org}/actions/permissions/repositories"],
+        setWorkflowAccessToRepository: ["PUT /repos/{owner}/{repo}/actions/permissions/access"]
       },
       activity: {
         checkRepoIsStarredByAuthenticatedUser: ["GET /user/starred/{owner}/{repo}"],
@@ -61128,16 +61876,6 @@ var require_dist_node9 = __commonJS({
         }],
         addRepoToInstallationForAuthenticatedUser: ["PUT /user/installations/{installation_id}/repositories/{repository_id}"],
         checkToken: ["POST /applications/{client_id}/token"],
-        createContentAttachment: ["POST /content_references/{content_reference_id}/attachments", {
-          mediaType: {
-            previews: ["corsair"]
-          }
-        }],
-        createContentAttachmentForRepo: ["POST /repos/{owner}/{repo}/content_references/{content_reference_id}/attachments", {
-          mediaType: {
-            previews: ["corsair"]
-          }
-        }],
         createFromManifest: ["POST /app-manifests/{code}/conversions"],
         createInstallationAccessToken: ["POST /app/installations/{installation_id}/access_tokens"],
         deleteAuthorization: ["DELETE /applications/{client_id}/grant"],
@@ -61179,6 +61917,8 @@ var require_dist_node9 = __commonJS({
       billing: {
         getGithubActionsBillingOrg: ["GET /orgs/{org}/settings/billing/actions"],
         getGithubActionsBillingUser: ["GET /users/{username}/settings/billing/actions"],
+        getGithubAdvancedSecurityBillingGhe: ["GET /enterprises/{enterprise}/settings/billing/advanced-security"],
+        getGithubAdvancedSecurityBillingOrg: ["GET /orgs/{org}/settings/billing/advanced-security"],
         getGithubPackagesBillingOrg: ["GET /orgs/{org}/settings/billing/packages"],
         getGithubPackagesBillingUser: ["GET /users/{username}/settings/billing/packages"],
         getSharedStorageBillingOrg: ["GET /orgs/{org}/settings/billing/shared-storage"],
@@ -61208,6 +61948,7 @@ var require_dist_node9 = __commonJS({
         getAnalysis: ["GET /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}"],
         getSarif: ["GET /repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}"],
         listAlertInstances: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances"],
+        listAlertsForOrg: ["GET /orgs/{org}/code-scanning/alerts"],
         listAlertsForRepo: ["GET /repos/{owner}/{repo}/code-scanning/alerts"],
         listAlertsInstances: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances", {}, {
           renamed: ["codeScanning", "listAlertInstances"]
@@ -61220,16 +61961,80 @@ var require_dist_node9 = __commonJS({
         getAllCodesOfConduct: ["GET /codes_of_conduct"],
         getConductCode: ["GET /codes_of_conduct/{key}"]
       },
+      codespaces: {
+        addRepositoryForSecretForAuthenticatedUser: ["PUT /user/codespaces/secrets/{secret_name}/repositories/{repository_id}"],
+        codespaceMachinesForAuthenticatedUser: ["GET /user/codespaces/{codespace_name}/machines"],
+        createForAuthenticatedUser: ["POST /user/codespaces"],
+        createOrUpdateRepoSecret: ["PUT /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"],
+        createOrUpdateSecretForAuthenticatedUser: ["PUT /user/codespaces/secrets/{secret_name}"],
+        createWithPrForAuthenticatedUser: ["POST /repos/{owner}/{repo}/pulls/{pull_number}/codespaces"],
+        createWithRepoForAuthenticatedUser: ["POST /repos/{owner}/{repo}/codespaces"],
+        deleteForAuthenticatedUser: ["DELETE /user/codespaces/{codespace_name}"],
+        deleteFromOrganization: ["DELETE /orgs/{org}/members/{username}/codespaces/{codespace_name}"],
+        deleteRepoSecret: ["DELETE /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"],
+        deleteSecretForAuthenticatedUser: ["DELETE /user/codespaces/secrets/{secret_name}"],
+        exportForAuthenticatedUser: ["POST /user/codespaces/{codespace_name}/exports"],
+        getExportDetailsForAuthenticatedUser: ["GET /user/codespaces/{codespace_name}/exports/{export_id}"],
+        getForAuthenticatedUser: ["GET /user/codespaces/{codespace_name}"],
+        getPublicKeyForAuthenticatedUser: ["GET /user/codespaces/secrets/public-key"],
+        getRepoPublicKey: ["GET /repos/{owner}/{repo}/codespaces/secrets/public-key"],
+        getRepoSecret: ["GET /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"],
+        getSecretForAuthenticatedUser: ["GET /user/codespaces/secrets/{secret_name}"],
+        listDevcontainersInRepositoryForAuthenticatedUser: ["GET /repos/{owner}/{repo}/codespaces/devcontainers"],
+        listForAuthenticatedUser: ["GET /user/codespaces"],
+        listInOrganization: ["GET /orgs/{org}/codespaces", {}, {
+          renamedParameters: {
+            org_id: "org"
+          }
+        }],
+        listInRepositoryForAuthenticatedUser: ["GET /repos/{owner}/{repo}/codespaces"],
+        listRepoSecrets: ["GET /repos/{owner}/{repo}/codespaces/secrets"],
+        listRepositoriesForSecretForAuthenticatedUser: ["GET /user/codespaces/secrets/{secret_name}/repositories"],
+        listSecretsForAuthenticatedUser: ["GET /user/codespaces/secrets"],
+        removeRepositoryForSecretForAuthenticatedUser: ["DELETE /user/codespaces/secrets/{secret_name}/repositories/{repository_id}"],
+        repoMachinesForAuthenticatedUser: ["GET /repos/{owner}/{repo}/codespaces/machines"],
+        setRepositoriesForSecretForAuthenticatedUser: ["PUT /user/codespaces/secrets/{secret_name}/repositories"],
+        startForAuthenticatedUser: ["POST /user/codespaces/{codespace_name}/start"],
+        stopForAuthenticatedUser: ["POST /user/codespaces/{codespace_name}/stop"],
+        stopInOrganization: ["POST /orgs/{org}/members/{username}/codespaces/{codespace_name}/stop"],
+        updateForAuthenticatedUser: ["PATCH /user/codespaces/{codespace_name}"]
+      },
+      dependabot: {
+        addSelectedRepoToOrgSecret: ["PUT /orgs/{org}/dependabot/secrets/{secret_name}/repositories/{repository_id}"],
+        createOrUpdateOrgSecret: ["PUT /orgs/{org}/dependabot/secrets/{secret_name}"],
+        createOrUpdateRepoSecret: ["PUT /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"],
+        deleteOrgSecret: ["DELETE /orgs/{org}/dependabot/secrets/{secret_name}"],
+        deleteRepoSecret: ["DELETE /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"],
+        getOrgPublicKey: ["GET /orgs/{org}/dependabot/secrets/public-key"],
+        getOrgSecret: ["GET /orgs/{org}/dependabot/secrets/{secret_name}"],
+        getRepoPublicKey: ["GET /repos/{owner}/{repo}/dependabot/secrets/public-key"],
+        getRepoSecret: ["GET /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"],
+        listOrgSecrets: ["GET /orgs/{org}/dependabot/secrets"],
+        listRepoSecrets: ["GET /repos/{owner}/{repo}/dependabot/secrets"],
+        listSelectedReposForOrgSecret: ["GET /orgs/{org}/dependabot/secrets/{secret_name}/repositories"],
+        removeSelectedRepoFromOrgSecret: ["DELETE /orgs/{org}/dependabot/secrets/{secret_name}/repositories/{repository_id}"],
+        setSelectedReposForOrgSecret: ["PUT /orgs/{org}/dependabot/secrets/{secret_name}/repositories"]
+      },
+      dependencyGraph: {
+        createRepositorySnapshot: ["POST /repos/{owner}/{repo}/dependency-graph/snapshots"],
+        diffRange: ["GET /repos/{owner}/{repo}/dependency-graph/compare/{basehead}"]
+      },
       emojis: {
         get: ["GET /emojis"]
       },
       enterpriseAdmin: {
+        addCustomLabelsToSelfHostedRunnerForEnterprise: ["POST /enterprises/{enterprise}/actions/runners/{runner_id}/labels"],
         disableSelectedOrganizationGithubActionsEnterprise: ["DELETE /enterprises/{enterprise}/actions/permissions/organizations/{org_id}"],
         enableSelectedOrganizationGithubActionsEnterprise: ["PUT /enterprises/{enterprise}/actions/permissions/organizations/{org_id}"],
         getAllowedActionsEnterprise: ["GET /enterprises/{enterprise}/actions/permissions/selected-actions"],
         getGithubActionsPermissionsEnterprise: ["GET /enterprises/{enterprise}/actions/permissions"],
+        getServerStatistics: ["GET /enterprise-installation/{enterprise_or_org}/server-statistics"],
+        listLabelsForSelfHostedRunnerForEnterprise: ["GET /enterprises/{enterprise}/actions/runners/{runner_id}/labels"],
         listSelectedOrganizationsEnabledGithubActionsEnterprise: ["GET /enterprises/{enterprise}/actions/permissions/organizations"],
+        removeAllCustomLabelsFromSelfHostedRunnerForEnterprise: ["DELETE /enterprises/{enterprise}/actions/runners/{runner_id}/labels"],
+        removeCustomLabelFromSelfHostedRunnerForEnterprise: ["DELETE /enterprises/{enterprise}/actions/runners/{runner_id}/labels/{name}"],
         setAllowedActionsEnterprise: ["PUT /enterprises/{enterprise}/actions/permissions/selected-actions"],
+        setCustomLabelsForSelfHostedRunnerForEnterprise: ["PUT /enterprises/{enterprise}/actions/runners/{runner_id}/labels"],
         setGithubActionsPermissionsEnterprise: ["PUT /enterprises/{enterprise}/actions/permissions"],
         setSelectedOrganizationsEnabledGithubActionsEnterprise: ["PUT /enterprises/{enterprise}/actions/permissions/organizations"]
       },
@@ -61400,6 +62205,7 @@ var require_dist_node9 = __commonJS({
         list: ["GET /organizations"],
         listAppInstallations: ["GET /orgs/{org}/installations"],
         listBlockedUsers: ["GET /orgs/{org}/blocks"],
+        listCustomRoles: ["GET /organizations/{organization_id}/custom_roles"],
         listFailedInvitations: ["GET /orgs/{org}/failed_invitations"],
         listForAuthenticatedUser: ["GET /user/orgs"],
         listForUser: ["GET /users/{username}/orgs"],
@@ -61528,12 +62334,14 @@ var require_dist_node9 = __commonJS({
         deleteForIssue: ["DELETE /repos/{owner}/{repo}/issues/{issue_number}/reactions/{reaction_id}"],
         deleteForIssueComment: ["DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions/{reaction_id}"],
         deleteForPullRequestComment: ["DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions/{reaction_id}"],
+        deleteForRelease: ["DELETE /repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id}"],
         deleteForTeamDiscussion: ["DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions/{reaction_id}"],
         deleteForTeamDiscussionComment: ["DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions/{reaction_id}"],
         listForCommitComment: ["GET /repos/{owner}/{repo}/comments/{comment_id}/reactions"],
         listForIssue: ["GET /repos/{owner}/{repo}/issues/{issue_number}/reactions"],
         listForIssueComment: ["GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"],
         listForPullRequestReviewComment: ["GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"],
+        listForRelease: ["GET /repos/{owner}/{repo}/releases/{release_id}/reactions"],
         listForTeamDiscussionCommentInOrg: ["GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"],
         listForTeamDiscussionInOrg: ["GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"]
       },
@@ -61557,6 +62365,7 @@ var require_dist_node9 = __commonJS({
         }],
         checkCollaborator: ["GET /repos/{owner}/{repo}/collaborators/{username}"],
         checkVulnerabilityAlerts: ["GET /repos/{owner}/{repo}/vulnerability-alerts"],
+        codeownersErrors: ["GET /repos/{owner}/{repo}/codeowners/errors"],
         compareCommits: ["GET /repos/{owner}/{repo}/compare/{base}...{head}"],
         compareCommitsWithBasehead: ["GET /repos/{owner}/{repo}/compare/{basehead}"],
         createAutolink: ["POST /repos/{owner}/{repo}/autolinks"],
@@ -61574,6 +62383,7 @@ var require_dist_node9 = __commonJS({
         createOrUpdateFileContents: ["PUT /repos/{owner}/{repo}/contents/{path}"],
         createPagesSite: ["POST /repos/{owner}/{repo}/pages"],
         createRelease: ["POST /repos/{owner}/{repo}/releases"],
+        createTagProtection: ["POST /repos/{owner}/{repo}/tags/protection"],
         createUsingTemplate: ["POST /repos/{template_owner}/{template_repo}/generate"],
         createWebhook: ["POST /repos/{owner}/{repo}/hooks"],
         declineInvitation: ["DELETE /user/repository_invitations/{invitation_id}", {}, {
@@ -61596,6 +62406,7 @@ var require_dist_node9 = __commonJS({
         deletePullRequestReviewProtection: ["DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"],
         deleteRelease: ["DELETE /repos/{owner}/{repo}/releases/{release_id}"],
         deleteReleaseAsset: ["DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}"],
+        deleteTagProtection: ["DELETE /repos/{owner}/{repo}/tags/protection/{tag_protection_id}"],
         deleteWebhook: ["DELETE /repos/{owner}/{repo}/hooks/{hook_id}"],
         disableAutomatedSecurityFixes: ["DELETE /repos/{owner}/{repo}/automated-security-fixes"],
         disableLfsForRepo: ["DELETE /repos/{owner}/{repo}/lfs"],
@@ -61614,11 +62425,7 @@ var require_dist_node9 = __commonJS({
         getAdminBranchProtection: ["GET /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"],
         getAllEnvironments: ["GET /repos/{owner}/{repo}/environments"],
         getAllStatusCheckContexts: ["GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts"],
-        getAllTopics: ["GET /repos/{owner}/{repo}/topics", {
-          mediaType: {
-            previews: ["mercy"]
-          }
-        }],
+        getAllTopics: ["GET /repos/{owner}/{repo}/topics"],
         getAppsWithAccessToProtectedBranch: ["GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps"],
         getAutolink: ["GET /repos/{owner}/{repo}/autolinks/{autolink_id}"],
         getBranch: ["GET /repos/{owner}/{repo}/branches/{branch}"],
@@ -61684,6 +62491,7 @@ var require_dist_node9 = __commonJS({
         listPullRequestsAssociatedWithCommit: ["GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls"],
         listReleaseAssets: ["GET /repos/{owner}/{repo}/releases/{release_id}/assets"],
         listReleases: ["GET /repos/{owner}/{repo}/releases"],
+        listTagProtection: ["GET /repos/{owner}/{repo}/tags/protection"],
         listTags: ["GET /repos/{owner}/{repo}/tags"],
         listTeams: ["GET /repos/{owner}/{repo}/teams"],
         listWebhookDeliveries: ["GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries"],
@@ -61707,11 +62515,7 @@ var require_dist_node9 = __commonJS({
           mapToData: "users"
         }],
         renameBranch: ["POST /repos/{owner}/{repo}/branches/{branch}/rename"],
-        replaceAllTopics: ["PUT /repos/{owner}/{repo}/topics", {
-          mediaType: {
-            previews: ["mercy"]
-          }
-        }],
+        replaceAllTopics: ["PUT /repos/{owner}/{repo}/topics"],
         requestPagesBuild: ["POST /repos/{owner}/{repo}/pages/builds"],
         setAdminBranchProtection: ["POST /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"],
         setAppAccessRestrictions: ["PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps", {}, {
@@ -61752,17 +62556,15 @@ var require_dist_node9 = __commonJS({
         issuesAndPullRequests: ["GET /search/issues"],
         labels: ["GET /search/labels"],
         repos: ["GET /search/repositories"],
-        topics: ["GET /search/topics", {
-          mediaType: {
-            previews: ["mercy"]
-          }
-        }],
+        topics: ["GET /search/topics"],
         users: ["GET /search/users"]
       },
       secretScanning: {
         getAlert: ["GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"],
+        listAlertsForEnterprise: ["GET /enterprises/{enterprise}/secret-scanning/alerts"],
         listAlertsForOrg: ["GET /orgs/{org}/secret-scanning/alerts"],
         listAlertsForRepo: ["GET /repos/{owner}/{repo}/secret-scanning/alerts"],
+        listLocationsForAlert: ["GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations"],
         updateAlert: ["PATCH /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"]
       },
       teams: {
@@ -61877,7 +62679,7 @@ var require_dist_node9 = __commonJS({
         updateAuthenticated: ["PATCH /user"]
       }
     };
-    var VERSION2 = "5.13.0";
+    var VERSION2 = "5.16.2";
     function endpointsToMethods(octokit, endpointsMap) {
       const newMethods = {};
       for (const [scope, endpoints] of Object.entries(endpointsMap)) {
@@ -61960,40 +62762,31 @@ var require_dist_node9 = __commonJS({
   }
 });
 
-// node_modules/@octokit/plugin-paginate-rest/dist-node/index.js
+// node_modules/@actions/github/node_modules/@octokit/plugin-paginate-rest/dist-node/index.js
 var require_dist_node10 = __commonJS({
-  "node_modules/@octokit/plugin-paginate-rest/dist-node/index.js"(exports2) {
+  "node_modules/@actions/github/node_modules/@octokit/plugin-paginate-rest/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var VERSION2 = "2.17.0";
+    var VERSION2 = "2.21.3";
     function ownKeys(object, enumerableOnly) {
       var keys = Object.keys(object);
       if (Object.getOwnPropertySymbols) {
         var symbols = Object.getOwnPropertySymbols(object);
-        if (enumerableOnly) {
-          symbols = symbols.filter(function(sym) {
-            return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-          });
-        }
-        keys.push.apply(keys, symbols);
+        enumerableOnly && (symbols = symbols.filter(function(sym) {
+          return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+        })), keys.push.apply(keys, symbols);
       }
       return keys;
     }
     __name(ownKeys, "ownKeys");
     function _objectSpread2(target) {
       for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i] != null ? arguments[i] : {};
-        if (i % 2) {
-          ownKeys(Object(source), true).forEach(function(key) {
-            _defineProperty(target, key, source[key]);
-          });
-        } else if (Object.getOwnPropertyDescriptors) {
-          Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-        } else {
-          ownKeys(Object(source)).forEach(function(key) {
-            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-          });
-        }
+        var source = null != arguments[i] ? arguments[i] : {};
+        i % 2 ? ownKeys(Object(source), true).forEach(function(key) {
+          _defineProperty(target, key, source[key]);
+        }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function(key) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
       }
       return target;
     }
@@ -62110,7 +62903,7 @@ var require_dist_node10 = __commonJS({
     var composePaginateRest = Object.assign(paginate, {
       iterator
     });
-    var paginatingEndpoints = ["GET /app/hook/deliveries", "GET /app/installations", "GET /applications/grants", "GET /authorizations", "GET /enterprises/{enterprise}/actions/permissions/organizations", "GET /enterprises/{enterprise}/actions/runner-groups", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/organizations", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/runners", "GET /enterprises/{enterprise}/actions/runners", "GET /enterprises/{enterprise}/actions/runners/downloads", "GET /events", "GET /gists", "GET /gists/public", "GET /gists/starred", "GET /gists/{gist_id}/comments", "GET /gists/{gist_id}/commits", "GET /gists/{gist_id}/forks", "GET /installation/repositories", "GET /issues", "GET /marketplace_listing/plans", "GET /marketplace_listing/plans/{plan_id}/accounts", "GET /marketplace_listing/stubbed/plans", "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts", "GET /networks/{owner}/{repo}/events", "GET /notifications", "GET /organizations", "GET /orgs/{org}/actions/permissions/repositories", "GET /orgs/{org}/actions/runner-groups", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/runners", "GET /orgs/{org}/actions/runners", "GET /orgs/{org}/actions/runners/downloads", "GET /orgs/{org}/actions/secrets", "GET /orgs/{org}/actions/secrets/{secret_name}/repositories", "GET /orgs/{org}/blocks", "GET /orgs/{org}/credential-authorizations", "GET /orgs/{org}/events", "GET /orgs/{org}/failed_invitations", "GET /orgs/{org}/hooks", "GET /orgs/{org}/hooks/{hook_id}/deliveries", "GET /orgs/{org}/installations", "GET /orgs/{org}/invitations", "GET /orgs/{org}/invitations/{invitation_id}/teams", "GET /orgs/{org}/issues", "GET /orgs/{org}/members", "GET /orgs/{org}/migrations", "GET /orgs/{org}/migrations/{migration_id}/repositories", "GET /orgs/{org}/outside_collaborators", "GET /orgs/{org}/packages", "GET /orgs/{org}/projects", "GET /orgs/{org}/public_members", "GET /orgs/{org}/repos", "GET /orgs/{org}/secret-scanning/alerts", "GET /orgs/{org}/team-sync/groups", "GET /orgs/{org}/teams", "GET /orgs/{org}/teams/{team_slug}/discussions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/invitations", "GET /orgs/{org}/teams/{team_slug}/members", "GET /orgs/{org}/teams/{team_slug}/projects", "GET /orgs/{org}/teams/{team_slug}/repos", "GET /orgs/{org}/teams/{team_slug}/team-sync/group-mappings", "GET /orgs/{org}/teams/{team_slug}/teams", "GET /projects/columns/{column_id}/cards", "GET /projects/{project_id}/collaborators", "GET /projects/{project_id}/columns", "GET /repos/{owner}/{repo}/actions/artifacts", "GET /repos/{owner}/{repo}/actions/runners", "GET /repos/{owner}/{repo}/actions/runners/downloads", "GET /repos/{owner}/{repo}/actions/runs", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs", "GET /repos/{owner}/{repo}/actions/secrets", "GET /repos/{owner}/{repo}/actions/workflows", "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs", "GET /repos/{owner}/{repo}/assignees", "GET /repos/{owner}/{repo}/autolinks", "GET /repos/{owner}/{repo}/branches", "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations", "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs", "GET /repos/{owner}/{repo}/code-scanning/alerts", "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances", "GET /repos/{owner}/{repo}/code-scanning/analyses", "GET /repos/{owner}/{repo}/collaborators", "GET /repos/{owner}/{repo}/comments", "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/commits", "GET /repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head", "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments", "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls", "GET /repos/{owner}/{repo}/commits/{ref}/check-runs", "GET /repos/{owner}/{repo}/commits/{ref}/check-suites", "GET /repos/{owner}/{repo}/commits/{ref}/statuses", "GET /repos/{owner}/{repo}/contributors", "GET /repos/{owner}/{repo}/deployments", "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses", "GET /repos/{owner}/{repo}/events", "GET /repos/{owner}/{repo}/forks", "GET /repos/{owner}/{repo}/git/matching-refs/{ref}", "GET /repos/{owner}/{repo}/hooks", "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries", "GET /repos/{owner}/{repo}/invitations", "GET /repos/{owner}/{repo}/issues", "GET /repos/{owner}/{repo}/issues/comments", "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/issues/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/comments", "GET /repos/{owner}/{repo}/issues/{issue_number}/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/labels", "GET /repos/{owner}/{repo}/issues/{issue_number}/reactions", "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline", "GET /repos/{owner}/{repo}/keys", "GET /repos/{owner}/{repo}/labels", "GET /repos/{owner}/{repo}/milestones", "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels", "GET /repos/{owner}/{repo}/notifications", "GET /repos/{owner}/{repo}/pages/builds", "GET /repos/{owner}/{repo}/projects", "GET /repos/{owner}/{repo}/pulls", "GET /repos/{owner}/{repo}/pulls/comments", "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments", "GET /repos/{owner}/{repo}/pulls/{pull_number}/commits", "GET /repos/{owner}/{repo}/pulls/{pull_number}/files", "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments", "GET /repos/{owner}/{repo}/releases", "GET /repos/{owner}/{repo}/releases/{release_id}/assets", "GET /repos/{owner}/{repo}/secret-scanning/alerts", "GET /repos/{owner}/{repo}/stargazers", "GET /repos/{owner}/{repo}/subscribers", "GET /repos/{owner}/{repo}/tags", "GET /repos/{owner}/{repo}/teams", "GET /repositories", "GET /repositories/{repository_id}/environments/{environment_name}/secrets", "GET /scim/v2/enterprises/{enterprise}/Groups", "GET /scim/v2/enterprises/{enterprise}/Users", "GET /scim/v2/organizations/{org}/Users", "GET /search/code", "GET /search/commits", "GET /search/issues", "GET /search/labels", "GET /search/repositories", "GET /search/topics", "GET /search/users", "GET /teams/{team_id}/discussions", "GET /teams/{team_id}/discussions/{discussion_number}/comments", "GET /teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /teams/{team_id}/discussions/{discussion_number}/reactions", "GET /teams/{team_id}/invitations", "GET /teams/{team_id}/members", "GET /teams/{team_id}/projects", "GET /teams/{team_id}/repos", "GET /teams/{team_id}/team-sync/group-mappings", "GET /teams/{team_id}/teams", "GET /user/blocks", "GET /user/emails", "GET /user/followers", "GET /user/following", "GET /user/gpg_keys", "GET /user/installations", "GET /user/installations/{installation_id}/repositories", "GET /user/issues", "GET /user/keys", "GET /user/marketplace_purchases", "GET /user/marketplace_purchases/stubbed", "GET /user/memberships/orgs", "GET /user/migrations", "GET /user/migrations/{migration_id}/repositories", "GET /user/orgs", "GET /user/packages", "GET /user/public_emails", "GET /user/repos", "GET /user/repository_invitations", "GET /user/starred", "GET /user/subscriptions", "GET /user/teams", "GET /users", "GET /users/{username}/events", "GET /users/{username}/events/orgs/{org}", "GET /users/{username}/events/public", "GET /users/{username}/followers", "GET /users/{username}/following", "GET /users/{username}/gists", "GET /users/{username}/gpg_keys", "GET /users/{username}/keys", "GET /users/{username}/orgs", "GET /users/{username}/packages", "GET /users/{username}/projects", "GET /users/{username}/received_events", "GET /users/{username}/received_events/public", "GET /users/{username}/repos", "GET /users/{username}/starred", "GET /users/{username}/subscriptions"];
+    var paginatingEndpoints = ["GET /app/hook/deliveries", "GET /app/installations", "GET /applications/grants", "GET /authorizations", "GET /enterprises/{enterprise}/actions/permissions/organizations", "GET /enterprises/{enterprise}/actions/runner-groups", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/organizations", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/runners", "GET /enterprises/{enterprise}/actions/runners", "GET /enterprises/{enterprise}/audit-log", "GET /enterprises/{enterprise}/secret-scanning/alerts", "GET /enterprises/{enterprise}/settings/billing/advanced-security", "GET /events", "GET /gists", "GET /gists/public", "GET /gists/starred", "GET /gists/{gist_id}/comments", "GET /gists/{gist_id}/commits", "GET /gists/{gist_id}/forks", "GET /installation/repositories", "GET /issues", "GET /licenses", "GET /marketplace_listing/plans", "GET /marketplace_listing/plans/{plan_id}/accounts", "GET /marketplace_listing/stubbed/plans", "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts", "GET /networks/{owner}/{repo}/events", "GET /notifications", "GET /organizations", "GET /orgs/{org}/actions/cache/usage-by-repository", "GET /orgs/{org}/actions/permissions/repositories", "GET /orgs/{org}/actions/runner-groups", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/runners", "GET /orgs/{org}/actions/runners", "GET /orgs/{org}/actions/secrets", "GET /orgs/{org}/actions/secrets/{secret_name}/repositories", "GET /orgs/{org}/audit-log", "GET /orgs/{org}/blocks", "GET /orgs/{org}/code-scanning/alerts", "GET /orgs/{org}/codespaces", "GET /orgs/{org}/credential-authorizations", "GET /orgs/{org}/dependabot/secrets", "GET /orgs/{org}/dependabot/secrets/{secret_name}/repositories", "GET /orgs/{org}/events", "GET /orgs/{org}/external-groups", "GET /orgs/{org}/failed_invitations", "GET /orgs/{org}/hooks", "GET /orgs/{org}/hooks/{hook_id}/deliveries", "GET /orgs/{org}/installations", "GET /orgs/{org}/invitations", "GET /orgs/{org}/invitations/{invitation_id}/teams", "GET /orgs/{org}/issues", "GET /orgs/{org}/members", "GET /orgs/{org}/migrations", "GET /orgs/{org}/migrations/{migration_id}/repositories", "GET /orgs/{org}/outside_collaborators", "GET /orgs/{org}/packages", "GET /orgs/{org}/packages/{package_type}/{package_name}/versions", "GET /orgs/{org}/projects", "GET /orgs/{org}/public_members", "GET /orgs/{org}/repos", "GET /orgs/{org}/secret-scanning/alerts", "GET /orgs/{org}/settings/billing/advanced-security", "GET /orgs/{org}/team-sync/groups", "GET /orgs/{org}/teams", "GET /orgs/{org}/teams/{team_slug}/discussions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/invitations", "GET /orgs/{org}/teams/{team_slug}/members", "GET /orgs/{org}/teams/{team_slug}/projects", "GET /orgs/{org}/teams/{team_slug}/repos", "GET /orgs/{org}/teams/{team_slug}/teams", "GET /projects/columns/{column_id}/cards", "GET /projects/{project_id}/collaborators", "GET /projects/{project_id}/columns", "GET /repos/{owner}/{repo}/actions/artifacts", "GET /repos/{owner}/{repo}/actions/caches", "GET /repos/{owner}/{repo}/actions/runners", "GET /repos/{owner}/{repo}/actions/runs", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs", "GET /repos/{owner}/{repo}/actions/secrets", "GET /repos/{owner}/{repo}/actions/workflows", "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs", "GET /repos/{owner}/{repo}/assignees", "GET /repos/{owner}/{repo}/branches", "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations", "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs", "GET /repos/{owner}/{repo}/code-scanning/alerts", "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances", "GET /repos/{owner}/{repo}/code-scanning/analyses", "GET /repos/{owner}/{repo}/codespaces", "GET /repos/{owner}/{repo}/codespaces/devcontainers", "GET /repos/{owner}/{repo}/codespaces/secrets", "GET /repos/{owner}/{repo}/collaborators", "GET /repos/{owner}/{repo}/comments", "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/commits", "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments", "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls", "GET /repos/{owner}/{repo}/commits/{ref}/check-runs", "GET /repos/{owner}/{repo}/commits/{ref}/check-suites", "GET /repos/{owner}/{repo}/commits/{ref}/status", "GET /repos/{owner}/{repo}/commits/{ref}/statuses", "GET /repos/{owner}/{repo}/contributors", "GET /repos/{owner}/{repo}/dependabot/secrets", "GET /repos/{owner}/{repo}/deployments", "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses", "GET /repos/{owner}/{repo}/environments", "GET /repos/{owner}/{repo}/events", "GET /repos/{owner}/{repo}/forks", "GET /repos/{owner}/{repo}/git/matching-refs/{ref}", "GET /repos/{owner}/{repo}/hooks", "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries", "GET /repos/{owner}/{repo}/invitations", "GET /repos/{owner}/{repo}/issues", "GET /repos/{owner}/{repo}/issues/comments", "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/issues/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/comments", "GET /repos/{owner}/{repo}/issues/{issue_number}/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/labels", "GET /repos/{owner}/{repo}/issues/{issue_number}/reactions", "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline", "GET /repos/{owner}/{repo}/keys", "GET /repos/{owner}/{repo}/labels", "GET /repos/{owner}/{repo}/milestones", "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels", "GET /repos/{owner}/{repo}/notifications", "GET /repos/{owner}/{repo}/pages/builds", "GET /repos/{owner}/{repo}/projects", "GET /repos/{owner}/{repo}/pulls", "GET /repos/{owner}/{repo}/pulls/comments", "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments", "GET /repos/{owner}/{repo}/pulls/{pull_number}/commits", "GET /repos/{owner}/{repo}/pulls/{pull_number}/files", "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments", "GET /repos/{owner}/{repo}/releases", "GET /repos/{owner}/{repo}/releases/{release_id}/assets", "GET /repos/{owner}/{repo}/releases/{release_id}/reactions", "GET /repos/{owner}/{repo}/secret-scanning/alerts", "GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations", "GET /repos/{owner}/{repo}/stargazers", "GET /repos/{owner}/{repo}/subscribers", "GET /repos/{owner}/{repo}/tags", "GET /repos/{owner}/{repo}/teams", "GET /repos/{owner}/{repo}/topics", "GET /repositories", "GET /repositories/{repository_id}/environments/{environment_name}/secrets", "GET /search/code", "GET /search/commits", "GET /search/issues", "GET /search/labels", "GET /search/repositories", "GET /search/topics", "GET /search/users", "GET /teams/{team_id}/discussions", "GET /teams/{team_id}/discussions/{discussion_number}/comments", "GET /teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /teams/{team_id}/discussions/{discussion_number}/reactions", "GET /teams/{team_id}/invitations", "GET /teams/{team_id}/members", "GET /teams/{team_id}/projects", "GET /teams/{team_id}/repos", "GET /teams/{team_id}/teams", "GET /user/blocks", "GET /user/codespaces", "GET /user/codespaces/secrets", "GET /user/emails", "GET /user/followers", "GET /user/following", "GET /user/gpg_keys", "GET /user/installations", "GET /user/installations/{installation_id}/repositories", "GET /user/issues", "GET /user/keys", "GET /user/marketplace_purchases", "GET /user/marketplace_purchases/stubbed", "GET /user/memberships/orgs", "GET /user/migrations", "GET /user/migrations/{migration_id}/repositories", "GET /user/orgs", "GET /user/packages", "GET /user/packages/{package_type}/{package_name}/versions", "GET /user/public_emails", "GET /user/repos", "GET /user/repository_invitations", "GET /user/starred", "GET /user/subscriptions", "GET /user/teams", "GET /users", "GET /users/{username}/events", "GET /users/{username}/events/orgs/{org}", "GET /users/{username}/events/public", "GET /users/{username}/followers", "GET /users/{username}/following", "GET /users/{username}/gists", "GET /users/{username}/gpg_keys", "GET /users/{username}/keys", "GET /users/{username}/orgs", "GET /users/{username}/packages", "GET /users/{username}/projects", "GET /users/{username}/received_events", "GET /users/{username}/received_events/public", "GET /users/{username}/repos", "GET /users/{username}/starred", "GET /users/{username}/subscriptions"];
     function isPaginatingEndpoint(arg) {
       if (typeof arg === "string") {
         return paginatingEndpoints.includes(arg);
@@ -62136,7 +62929,7 @@ var require_dist_node10 = __commonJS({
 });
 
 // node_modules/@actions/github/lib/utils.js
-var require_utils6 = __commonJS({
+var require_utils7 = __commonJS({
   "node_modules/@actions/github/lib/utils.js"(exports2) {
     "use strict";
     var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
@@ -62168,21 +62961,21 @@ var require_utils6 = __commonJS({
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.getOctokitOptions = exports2.GitHub = exports2.context = void 0;
+    exports2.getOctokitOptions = exports2.GitHub = exports2.defaults = exports2.context = void 0;
     var Context = __importStar2(require_context3());
-    var Utils = __importStar2(require_utils5());
+    var Utils = __importStar2(require_utils6());
     var core_1 = require_dist_node8();
     var plugin_rest_endpoint_methods_1 = require_dist_node9();
     var plugin_paginate_rest_1 = require_dist_node10();
     exports2.context = new Context.Context();
     var baseUrl = Utils.getApiBaseUrl();
-    var defaults = {
+    exports2.defaults = {
       baseUrl,
       request: {
         agent: Utils.getProxyAgent(baseUrl)
       }
     };
-    exports2.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(defaults);
+    exports2.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(exports2.defaults);
     function getOctokitOptions(token, options) {
       const opts = Object.assign({}, options || {});
       const auth = Utils.getAuthString(token, opts);
@@ -62231,10 +63024,11 @@ var require_github = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getOctokit = exports2.context = void 0;
     var Context = __importStar2(require_context3());
-    var utils_12 = require_utils6();
+    var utils_12 = require_utils7();
     exports2.context = new Context.Context();
-    function getOctokit(token, options) {
-      return new utils_12.GitHub(utils_12.getOctokitOptions(token, options));
+    function getOctokit(token, options, ...additionalPlugins) {
+      const GitHubWithPlugins = utils_12.GitHub.plugin(...additionalPlugins);
+      return new GitHubWithPlugins(utils_12.getOctokitOptions(token, options));
     }
     __name(getOctokit, "getOctokit");
     exports2.getOctokit = getOctokit;
@@ -63077,15 +63871,19 @@ var require_tool_cache = __commonJS({
 });
 
 // lib/utils.js
-var require_utils7 = __commonJS({
+var require_utils8 = __commonJS({
   "lib/utils.js"(exports2) {
     "use strict";
     var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
@@ -63338,9 +64136,13 @@ var require_annotations = __commonJS({
     var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
@@ -63399,7 +64201,7 @@ var require_annotations = __commonJS({
     var core2 = __importStar2(require_core());
     var fs = __importStar2(require("fs"));
     var github_1 = require_github();
-    var utils_12 = require_utils7();
+    var utils_12 = require_utils8();
     function getQodanaHelpString() {
       return `This result was published with [Qodana GitHub Action](${(0, utils_12.getWorkflowRunUrl)()})`;
     }
@@ -63563,9 +64365,13 @@ var require_output = __commonJS({
     var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
@@ -63619,13 +64425,35 @@ var require_output = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
+    var __asyncValues = exports2 && exports2.__asyncValues || function(o) {
+      if (!Symbol.asyncIterator)
+        throw new TypeError("Symbol.asyncIterator is not defined.");
+      var m = o[Symbol.asyncIterator], i;
+      return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+        return this;
+      }, i);
+      function verb(n) {
+        i[n] = o[n] && function(v) {
+          return new Promise(function(resolve, reject) {
+            v = o[n](v), settle(resolve, reject, v.done, v.value);
+          });
+        };
+      }
+      __name(verb, "verb");
+      function settle(resolve, reject, d, v) {
+        Promise.resolve(v).then(function(v2) {
+          resolve({ value: v2, done: d });
+        }, reject);
+      }
+      __name(settle, "settle");
+    };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.publishOutput = void 0;
     var core2 = __importStar2(require_core());
     var fs = __importStar2(require("fs"));
     var github = __importStar2(require_github());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
-    var utils_12 = require_utils7();
+    var utils_12 = require_utils8();
     var annotations_1 = require_annotations();
     var QODANA_CHECK_NAME = "Qodana";
     var UNKNOWN_RULE_ID = "Unknown";
@@ -63731,38 +64559,79 @@ ${body}
             }
           }
           const annotations = (_a = problems.annotations) !== null && _a !== void 0 ? _a : [];
-          const summary = getSummary(annotations, licensesInfo, reportUrl);
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : QODANA_CHECK_NAME;
-          problems.summary = summary;
+          problems.summary = getSummary(annotations, licensesInfo, reportUrl);
           yield Promise.all([
-            (0, annotations_1.publishAnnotations)(toolName, problems, failedByThreshold, (0, utils_12.getInputs)().githubToken, useAnnotations),
-            core2.summary.addRaw(summary).write(),
-            postCommentToPullRequest(summary, postComment)
+            postResultsToPRComments(problems.summary, postComment),
+            core2.summary.addRaw(problems.summary).write(),
+            (0, annotations_1.publishAnnotations)(toolName, problems, failedByThreshold, (0, utils_12.getInputs)().githubToken, useAnnotations)
           ]);
         } catch (error) {
-          core2.warning(`Failed to publish annotations \u2013 ${error.message}`);
+          core2.warning(`Qodana has problems with publishing results to GitHub \u2013 ${error.message}`);
         }
       });
     }
     __name(publishOutput, "publishOutput");
     exports2.publishOutput = publishOutput;
-    function postCommentToPullRequest(comment, postComment) {
-      var _a;
+    function postResultsToPRComments(content, postComment) {
+      var _a, e_1, _b, _c;
+      var _d, _e;
       return __awaiter2(this, void 0, void 0, function* () {
-        const pr = (_a = github.context.payload.pull_request) !== null && _a !== void 0 ? _a : "";
+        const context = github.context;
+        const pr = (_d = context.payload.pull_request) !== null && _d !== void 0 ? _d : "";
         if (!postComment || !pr) {
           return;
         }
+        const issue_number = (_e = pr === null || pr === void 0 ? void 0 : pr.number) !== null && _e !== void 0 ? _e : 0;
+        if (issue_number === 0) {
+          core2.warning("Could not find pull request to post comment to in the current context");
+          return;
+        }
         const client = github.getOctokit((0, utils_12.getInputs)().githubToken);
-        yield client.rest.issues.createComment({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
-          issue_number: github.context.issue.number,
-          body: comment
-        });
+        const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${qodana_12.VERSION} -->`;
+        const body = comment_tag_pattern ? `${content}
+${comment_tag_pattern}` : content;
+        let comment;
+        try {
+          for (var _f = true, _g = __asyncValues(client.paginate.iterator(client.rest.issues.listComments, Object.assign(Object.assign({}, context.repo), { issue_number }))), _h; _h = yield _g.next(), _a = _h.done, !_a; ) {
+            _c = _h.value;
+            _f = false;
+            try {
+              const { data: comments } = _c;
+              comment = comments.find((c) => {
+                var _a2;
+                return (_a2 = c === null || c === void 0 ? void 0 : c.body) === null || _a2 === void 0 ? void 0 : _a2.includes(comment_tag_pattern);
+              });
+              if (comment)
+                break;
+            } finally {
+              _f = true;
+            }
+          }
+        } catch (e_1_1) {
+          e_1 = { error: e_1_1 };
+        } finally {
+          try {
+            if (!_f && !_a && (_b = _g.return))
+              yield _b.call(_g);
+          } finally {
+            if (e_1)
+              throw e_1.error;
+          }
+        }
+        if (comment) {
+          yield client.rest.issues.updateComment(Object.assign(Object.assign({}, context.repo), { comment_id: comment.id, body }));
+        } else {
+          yield client.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body
+          });
+        }
       });
     }
-    __name(postCommentToPullRequest, "postCommentToPullRequest");
+    __name(postResultsToPRComments, "postResultsToPRComments");
   }
 });
 
@@ -63770,9 +64639,13 @@ ${body}
 var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
   if (k2 === void 0)
     k2 = k;
-  Object.defineProperty(o, k2, { enumerable: true, get: function() {
-    return m[k];
-  } });
+  var desc = Object.getOwnPropertyDescriptor(m, k);
+  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    desc = { enumerable: true, get: function() {
+      return m[k];
+    } };
+  }
+  Object.defineProperty(o, k2, desc);
 } : function(o, m, k, k2) {
   if (k2 === void 0)
     k2 = k;
@@ -63830,7 +64703,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core = __importStar(require_core());
 var io = __importStar(require_io());
 var qodana_1 = (init_qodana(), __toCommonJS(qodana_exports));
-var utils_1 = require_utils7();
+var utils_1 = require_utils8();
 var output_1 = require_output();
 process.on("uncaughtException", (e) => core.warning(e.message));
 function setFailed(message) {
@@ -63882,6 +64755,7 @@ main();
 /*!
  * mime-db
  * Copyright(c) 2014 Jonathan Ong
+ * Copyright(c) 2015-2022 Douglas Christopher Wilson
  * MIT Licensed
  */
 /*!
@@ -63890,18 +64764,4 @@ main();
  * Copyright(c) 2015 Douglas Christopher Wilson
  * MIT Licensed
  */
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
 /*! http://mths.be/fromcodepoint v0.1.0 by @mathias */

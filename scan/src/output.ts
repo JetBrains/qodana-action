@@ -1,12 +1,14 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion,sort-imports */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as core from '@actions/core'
 import * as fs from 'fs'
 import * as github from '@actions/github'
+import {GetResponseDataTypeFromEndpointMethod} from '@octokit/types'
 import {
   QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD,
   QODANA_REPORT_URL_NAME,
-  QODANA_SARIF_NAME
+  QODANA_SARIF_NAME,
+  VERSION
 } from '../../common/qodana'
 import {getInputs, getProblemPlural, isPRMode} from './utils'
 import {
@@ -180,44 +182,86 @@ export async function publishOutput(
       }
     }
     const annotations: Annotation[] = problems.annotations ?? []
-    const summary = getSummary(annotations, licensesInfo, reportUrl)
     const toolName = problems.title.split('found by ')[1] ?? QODANA_CHECK_NAME
-    problems.summary = summary
+    problems.summary = getSummary(annotations, licensesInfo, reportUrl)
 
     await Promise.all([
+      postResultsToPRComments(problems.summary, postComment),
+      core.summary.addRaw(problems.summary).write(),
       publishAnnotations(
         toolName,
         problems,
         failedByThreshold,
         getInputs().githubToken,
         useAnnotations
-      ),
-      core.summary.addRaw(summary).write(),
-      postCommentToPullRequest(summary, postComment)
+      )
     ])
   } catch (error) {
-    core.warning(`Failed to publish annotations – ${(error as Error).message}`)
+    core.warning(
+      `Qodana has problems with publishing results to GitHub – ${
+        (error as Error).message
+      }`
+    )
   }
 }
 
 /**
  * Post a new comment to the pull request.
- * @param comment The comment to post.
+ * @param content The comment to post.
  * @param postComment Whether to post a comment or not.
  */
-async function postCommentToPullRequest(
-  comment: string,
+async function postResultsToPRComments(
+  content: string,
   postComment: boolean
 ): Promise<void> {
-  const pr = github.context.payload.pull_request ?? ''
+  const context = github.context
+  const pr = context.payload.pull_request ?? ''
   if (!postComment || !pr) {
     return
   }
+  const issue_number = pr?.number ?? 0
+  if (issue_number === 0) {
+    core.warning(
+      'Could not find pull request to post comment to in the current context'
+    )
+    return
+  }
+
   const client = github.getOctokit(getInputs().githubToken)
-  await client.rest.issues.createComment({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    issue_number: github.context.issue.number,
-    body: comment
-  })
+
+  const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} -->`
+  const body = comment_tag_pattern
+    ? `${content}\n${comment_tag_pattern}`
+    : content
+
+  type ListCommentsResponseDataType = GetResponseDataTypeFromEndpointMethod<
+    typeof client.rest.issues.listComments
+  >
+  let comment: ListCommentsResponseDataType[0] | undefined
+
+  for await (const {data: comments} of client.paginate.iterator(
+    client.rest.issues.listComments,
+    {
+      ...context.repo,
+      issue_number
+    }
+  )) {
+    comment = comments.find(c => c?.body?.includes(comment_tag_pattern))
+    if (comment) break
+  }
+
+  if (comment) {
+    await client.rest.issues.updateComment({
+      ...context.repo,
+      comment_id: comment.id,
+      body
+    })
+  } else {
+    await client.rest.issues.createComment({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      issue_number: context.issue.number,
+      body
+    })
+  }
 }
