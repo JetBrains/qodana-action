@@ -357,6 +357,20 @@ var require_has_symbols = __commonJS({
   }
 });
 
+// node_modules/has-proto/index.js
+var require_has_proto = __commonJS({
+  "node_modules/has-proto/index.js"(exports2, module2) {
+    "use strict";
+    var test = {
+      foo: {}
+    };
+    var $Object = Object;
+    module2.exports = function hasProto() {
+      return { __proto__: test }.foo === test.foo && !({ __proto__: null } instanceof $Object);
+    };
+  }
+});
+
 // node_modules/function-bind/implementation.js
 var require_implementation = __commonJS({
   "node_modules/function-bind/implementation.js"(exports2, module2) {
@@ -463,16 +477,17 @@ var require_get_intrinsic = __commonJS({
       }
     }() : throwTypeError;
     var hasSymbols = require_has_symbols()();
-    var getProto = Object.getPrototypeOf || function(x) {
+    var hasProto = require_has_proto()();
+    var getProto = Object.getPrototypeOf || (hasProto ? function(x) {
       return x.__proto__;
-    };
+    } : null);
     var needsEval = {};
-    var TypedArray = typeof Uint8Array === "undefined" ? undefined2 : getProto(Uint8Array);
+    var TypedArray = typeof Uint8Array === "undefined" || !getProto ? undefined2 : getProto(Uint8Array);
     var INTRINSICS = {
       "%AggregateError%": typeof AggregateError === "undefined" ? undefined2 : AggregateError,
       "%Array%": Array,
       "%ArrayBuffer%": typeof ArrayBuffer === "undefined" ? undefined2 : ArrayBuffer,
-      "%ArrayIteratorPrototype%": hasSymbols ? getProto([][Symbol.iterator]()) : undefined2,
+      "%ArrayIteratorPrototype%": hasSymbols && getProto ? getProto([][Symbol.iterator]()) : undefined2,
       "%AsyncFromSyncIteratorPrototype%": undefined2,
       "%AsyncFunction%": needsEval,
       "%AsyncGenerator%": needsEval,
@@ -480,6 +495,8 @@ var require_get_intrinsic = __commonJS({
       "%AsyncIteratorPrototype%": needsEval,
       "%Atomics%": typeof Atomics === "undefined" ? undefined2 : Atomics,
       "%BigInt%": typeof BigInt === "undefined" ? undefined2 : BigInt,
+      "%BigInt64Array%": typeof BigInt64Array === "undefined" ? undefined2 : BigInt64Array,
+      "%BigUint64Array%": typeof BigUint64Array === "undefined" ? undefined2 : BigUint64Array,
       "%Boolean%": Boolean,
       "%DataView%": typeof DataView === "undefined" ? undefined2 : DataView,
       "%Date%": Date,
@@ -500,10 +517,10 @@ var require_get_intrinsic = __commonJS({
       "%Int32Array%": typeof Int32Array === "undefined" ? undefined2 : Int32Array,
       "%isFinite%": isFinite,
       "%isNaN%": isNaN,
-      "%IteratorPrototype%": hasSymbols ? getProto(getProto([][Symbol.iterator]())) : undefined2,
+      "%IteratorPrototype%": hasSymbols && getProto ? getProto(getProto([][Symbol.iterator]())) : undefined2,
       "%JSON%": typeof JSON === "object" ? JSON : undefined2,
       "%Map%": typeof Map === "undefined" ? undefined2 : Map,
-      "%MapIteratorPrototype%": typeof Map === "undefined" || !hasSymbols ? undefined2 : getProto((/* @__PURE__ */ new Map())[Symbol.iterator]()),
+      "%MapIteratorPrototype%": typeof Map === "undefined" || !hasSymbols || !getProto ? undefined2 : getProto((/* @__PURE__ */ new Map())[Symbol.iterator]()),
       "%Math%": Math,
       "%Number%": Number,
       "%Object%": Object,
@@ -516,10 +533,10 @@ var require_get_intrinsic = __commonJS({
       "%Reflect%": typeof Reflect === "undefined" ? undefined2 : Reflect,
       "%RegExp%": RegExp,
       "%Set%": typeof Set === "undefined" ? undefined2 : Set,
-      "%SetIteratorPrototype%": typeof Set === "undefined" || !hasSymbols ? undefined2 : getProto((/* @__PURE__ */ new Set())[Symbol.iterator]()),
+      "%SetIteratorPrototype%": typeof Set === "undefined" || !hasSymbols || !getProto ? undefined2 : getProto((/* @__PURE__ */ new Set())[Symbol.iterator]()),
       "%SharedArrayBuffer%": typeof SharedArrayBuffer === "undefined" ? undefined2 : SharedArrayBuffer,
       "%String%": String,
-      "%StringIteratorPrototype%": hasSymbols ? getProto(""[Symbol.iterator]()) : undefined2,
+      "%StringIteratorPrototype%": hasSymbols && getProto ? getProto(""[Symbol.iterator]()) : undefined2,
       "%Symbol%": hasSymbols ? Symbol : undefined2,
       "%SyntaxError%": $SyntaxError,
       "%ThrowTypeError%": ThrowTypeError,
@@ -534,6 +551,15 @@ var require_get_intrinsic = __commonJS({
       "%WeakRef%": typeof WeakRef === "undefined" ? undefined2 : WeakRef,
       "%WeakSet%": typeof WeakSet === "undefined" ? undefined2 : WeakSet
     };
+    if (getProto) {
+      try {
+        null.error;
+      } catch (e) {
+        errorProto = getProto(getProto(e));
+        INTRINSICS["%Error.prototype%"] = errorProto;
+      }
+    }
+    var errorProto;
     var doEval = function doEval2(name) {
       var value;
       if (name === "%AsyncFunction%") {
@@ -549,7 +575,7 @@ var require_get_intrinsic = __commonJS({
         }
       } else if (name === "%AsyncIteratorPrototype%") {
         var gen = doEval2("%AsyncGenerator%");
-        if (gen) {
+        if (gen && getProto) {
           value = getProto(gen.prototype);
         }
       }
@@ -615,6 +641,7 @@ var require_get_intrinsic = __commonJS({
     var $spliceApply = bind.call(Function.apply, Array.prototype.splice);
     var $replace = bind.call(Function.call, String.prototype.replace);
     var $strSlice = bind.call(Function.call, String.prototype.slice);
+    var $exec = bind.call(Function.call, RegExp.prototype.exec);
     var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
     var reEscapeChar = /\\(\\)?/g;
     var stringToPath = function stringToPath2(string) {
@@ -660,6 +687,9 @@ var require_get_intrinsic = __commonJS({
       }
       if (arguments.length > 1 && typeof allowMissing !== "boolean") {
         throw new $TypeError('"allowMissing" argument must be a boolean');
+      }
+      if ($exec(/^%?[^%]*%?$/, name) === null) {
+        throw new $SyntaxError("`%` may not be present anywhere but at the beginning and end of the intrinsic name");
       }
       var parts = stringToPath(name);
       var intrinsicBaseName = parts.length > 0 ? parts[0] : "";
@@ -837,8 +867,9 @@ var require_object_inspect = __commonJS({
       }
       return $replace.call(str, sepRegex, "$&_");
     }
-    var inspectCustom = require_util_inspect().custom;
-    var inspectSymbol = inspectCustom && isSymbol(inspectCustom) ? inspectCustom : null;
+    var utilInspect = require_util_inspect();
+    var inspectCustom = utilInspect.custom;
+    var inspectSymbol = isSymbol(inspectCustom) ? inspectCustom : null;
     module2.exports = function inspect_(obj, options, depth, seen) {
       var opts = options || {};
       if (has(opts, "quoteStyle") && (opts.quoteStyle !== "single" && opts.quoteStyle !== "double")) {
@@ -910,7 +941,7 @@ var require_object_inspect = __commonJS({
         }
         return inspect_(value, opts, depth + 1, seen);
       }
-      if (typeof obj === "function") {
+      if (typeof obj === "function" && !isRegExp(obj)) {
         var name = nameOf(obj);
         var keys = arrObjKeys(obj, inspect);
         return "[Function" + (name ? ": " + name : " (anonymous)") + "]" + (keys.length > 0 ? " { " + $join.call(keys, ", ") + " }" : "");
@@ -944,7 +975,7 @@ var require_object_inspect = __commonJS({
       }
       if (isError(obj)) {
         var parts = arrObjKeys(obj, inspect);
-        if ("cause" in obj && !isEnumerable.call(obj, "cause")) {
+        if (!("cause" in Error.prototype) && "cause" in obj && !isEnumerable.call(obj, "cause")) {
           return "{ [" + String(obj) + "] " + $join.call($concat.call("[cause]: " + inspect(obj.cause), parts), ", ") + " }";
         }
         if (parts.length === 0) {
@@ -953,24 +984,28 @@ var require_object_inspect = __commonJS({
         return "{ [" + String(obj) + "] " + $join.call(parts, ", ") + " }";
       }
       if (typeof obj === "object" && customInspect) {
-        if (inspectSymbol && typeof obj[inspectSymbol] === "function") {
-          return obj[inspectSymbol]();
+        if (inspectSymbol && typeof obj[inspectSymbol] === "function" && utilInspect) {
+          return utilInspect(obj, { depth: maxDepth - depth });
         } else if (customInspect !== "symbol" && typeof obj.inspect === "function") {
           return obj.inspect();
         }
       }
       if (isMap(obj)) {
         var mapParts = [];
-        mapForEach.call(obj, function(value, key) {
-          mapParts.push(inspect(key, obj, true) + " => " + inspect(value, obj));
-        });
+        if (mapForEach) {
+          mapForEach.call(obj, function(value, key) {
+            mapParts.push(inspect(key, obj, true) + " => " + inspect(value, obj));
+          });
+        }
         return collectionOf("Map", mapSize.call(obj), mapParts, indent);
       }
       if (isSet(obj)) {
         var setParts = [];
-        setForEach.call(obj, function(value) {
-          setParts.push(inspect(value, obj));
-        });
+        if (setForEach) {
+          setForEach.call(obj, function(value) {
+            setParts.push(inspect(value, obj));
+          });
+        }
         return collectionOf("Set", setSize.call(obj), setParts, indent);
       }
       if (isWeakMap(obj)) {
@@ -1643,7 +1678,6 @@ var require_stringify = __commonJS({
       }
     };
     var isArray = Array.isArray;
-    var split = String.prototype.split;
     var push = Array.prototype.push;
     var pushToArray = function(arr, valueOrArray) {
       push.apply(arr, isArray(valueOrArray) ? valueOrArray : [valueOrArray]);
@@ -1672,7 +1706,7 @@ var require_stringify = __commonJS({
       return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v === "bigint";
     };
     var sentinel = {};
-    var stringify = function stringify2(object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel) {
+    var stringify = function stringify2(object, prefix, generateArrayPrefix, commaRoundTrip, strictNullHandling, skipNulls, encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel) {
       var obj = object;
       var tmpSc = sideChannel;
       var step = 0;
@@ -1712,14 +1746,6 @@ var require_stringify = __commonJS({
       if (isNonNullishPrimitive(obj) || utils.isBuffer(obj)) {
         if (encoder) {
           var keyValue = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder, charset, "key", format);
-          if (generateArrayPrefix === "comma" && encodeValuesOnly) {
-            var valuesArray = split.call(String(obj), ",");
-            var valuesJoined = "";
-            for (var i = 0; i < valuesArray.length; ++i) {
-              valuesJoined += (i === 0 ? "" : ",") + formatter(encoder(valuesArray[i], defaults.encoder, charset, "value", format));
-            }
-            return [formatter(keyValue) + "=" + valuesJoined];
-          }
           return [formatter(keyValue) + "=" + formatter(encoder(obj, defaults.encoder, charset, "value", format))];
         }
         return [formatter(prefix) + "=" + formatter(String(obj))];
@@ -1730,6 +1756,9 @@ var require_stringify = __commonJS({
       }
       var objKeys;
       if (generateArrayPrefix === "comma" && isArray(obj)) {
+        if (encodeValuesOnly && encoder) {
+          obj = utils.maybeMap(obj, encoder);
+        }
         objKeys = [{ value: obj.length > 0 ? obj.join(",") || null : void 0 }];
       } else if (isArray(filter)) {
         objKeys = filter;
@@ -1737,13 +1766,14 @@ var require_stringify = __commonJS({
         var keys = Object.keys(obj);
         objKeys = sort ? keys.sort(sort) : keys;
       }
+      var adjustedPrefix = commaRoundTrip && isArray(obj) && obj.length === 1 ? prefix + "[]" : prefix;
       for (var j = 0; j < objKeys.length; ++j) {
         var key = objKeys[j];
         var value = typeof key === "object" && typeof key.value !== "undefined" ? key.value : obj[key];
         if (skipNulls && value === null) {
           continue;
         }
-        var keyPrefix = isArray(obj) ? typeof generateArrayPrefix === "function" ? generateArrayPrefix(prefix, key) : prefix : prefix + (allowDots ? "." + key : "[" + key + "]");
+        var keyPrefix = isArray(obj) ? typeof generateArrayPrefix === "function" ? generateArrayPrefix(adjustedPrefix, key) : adjustedPrefix : adjustedPrefix + (allowDots ? "." + key : "[" + key + "]");
         sideChannel.set(object, step);
         var valueSideChannel = getSideChannel();
         valueSideChannel.set(sentinel, sideChannel);
@@ -1751,9 +1781,10 @@ var require_stringify = __commonJS({
           value,
           keyPrefix,
           generateArrayPrefix,
+          commaRoundTrip,
           strictNullHandling,
           skipNulls,
-          encoder,
+          generateArrayPrefix === "comma" && encodeValuesOnly && isArray(obj) ? null : encoder,
           filter,
           sort,
           allowDots,
@@ -1833,6 +1864,10 @@ var require_stringify = __commonJS({
         arrayFormat = "indices";
       }
       var generateArrayPrefix = arrayPrefixGenerators[arrayFormat];
+      if (opts && "commaRoundTrip" in opts && typeof opts.commaRoundTrip !== "boolean") {
+        throw new TypeError("`commaRoundTrip` must be a boolean, or absent");
+      }
+      var commaRoundTrip = generateArrayPrefix === "comma" && opts && opts.commaRoundTrip;
       if (!objKeys) {
         objKeys = Object.keys(obj);
       }
@@ -1849,6 +1884,7 @@ var require_stringify = __commonJS({
           obj[key],
           key,
           generateArrayPrefix,
+          commaRoundTrip,
           options.strictNullHandling,
           options.skipNulls,
           options.encode ? options.encoder : null,
@@ -1916,7 +1952,7 @@ var require_parse = __commonJS({
     var isoSentinel = "utf8=%26%2310003%3B";
     var charsetSentinel = "utf8=%E2%9C%93";
     var parseValues = function parseQueryStringValues(str, options) {
-      var obj = {};
+      var obj = { __proto__: null };
       var cleanStr = options.ignoreQueryPrefix ? str.replace(/^\?/, "") : str;
       var limit = options.parameterLimit === Infinity ? void 0 : options.parameterLimit;
       var parts = cleanStr.split(options.delimiter, limit);
@@ -2169,8 +2205,9 @@ var require_Util = __commonJS({
           zlib.gunzip(buffer, function(error, buffer2) {
             if (error) {
               reject(error);
+            } else {
+              resolve(buffer2.toString(charset || "utf-8"));
             }
-            resolve(buffer2.toString(charset || "utf-8"));
           });
         }));
       });
@@ -2512,15 +2549,16 @@ var require_HttpClient = __commonJS({
       }
       readBody() {
         return new Promise((resolve, reject) => __awaiter2(this, void 0, void 0, function* () {
-          let buffer = Buffer.alloc(0);
+          const chunks = [];
           const encodingCharset = util.obtainContentCharset(this);
           const contentEncoding = this.message.headers["content-encoding"] || "";
           const isGzippedEncoded = new RegExp("(gzip$)|(gzip, *deflate)").test(contentEncoding);
           this.message.on("data", function(data) {
             const chunk = typeof data === "string" ? Buffer.from(data, encodingCharset) : data;
-            buffer = Buffer.concat([buffer, chunk]);
+            chunks.push(chunk);
           }).on("end", function() {
             return __awaiter2(this, void 0, void 0, function* () {
+              const buffer = Buffer.concat(chunks);
               if (isGzippedEncoded) {
                 const gunzippedBody = yield util.decompressGzippedContent(buffer, encodingCharset);
                 resolve(gunzippedBody);
@@ -2904,9 +2942,9 @@ var require_HttpClient = __commonJS({
   }
 });
 
-// node_modules/semver/semver.js
+// node_modules/azure-pipelines-tool-lib/node_modules/semver/semver.js
 var require_semver = __commonJS({
-  "node_modules/semver/semver.js"(exports2, module2) {
+  "node_modules/azure-pipelines-tool-lib/node_modules/semver/semver.js"(exports2, module2) {
     exports2 = module2.exports = SemVer;
     var debug;
     if (typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG)) {
@@ -4200,7 +4238,7 @@ var require_tool = __commonJS({
       return versions;
     }
     exports2.findLocalToolVersions = findLocalToolVersions;
-    function downloadTool(url, fileName, handlers) {
+    function downloadTool(url, fileName, handlers, additionalHeaders) {
       return __awaiter2(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter2(this, void 0, void 0, function* () {
           try {
@@ -4221,12 +4259,18 @@ var require_tool = __commonJS({
               throw new Error("Destination file path already exists");
             }
             tl2.debug("downloading");
-            let response = yield http.get(url);
+            let response = yield http.get(url, additionalHeaders);
             if (response.message.statusCode != 200) {
               let err = new Error("Unexpected HTTP response: " + response.message.statusCode);
               err["httpStatusCode"] = response.message.statusCode;
               tl2.debug(`Failed to download "${fileName}" from "${url}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
               throw err;
+            }
+            let downloadedContentLength = _getContentLengthOfDownloadedFile(response);
+            if (!isNaN(downloadedContentLength)) {
+              tl2.debug(`Content-Length of downloaded file: ${downloadedContentLength}`);
+            } else {
+              tl2.debug(`Content-Length header missing`);
             }
             tl2.debug("creating stream");
             let file = fs.createWriteStream(destPath);
@@ -4235,6 +4279,21 @@ var require_tool = __commonJS({
                 let stream = response.message.pipe(file);
                 stream.on("close", () => {
                   tl2.debug("download complete");
+                  let fileSizeInBytes;
+                  try {
+                    fileSizeInBytes = _getFileSizeOnDisk(destPath);
+                  } catch (err) {
+                    fileSizeInBytes = NaN;
+                    tl2.warning(`Unable to check file size of ${destPath} due to error: ${err.Message}`);
+                  }
+                  if (!isNaN(fileSizeInBytes)) {
+                    tl2.debug(`Downloaded file size: ${fileSizeInBytes} bytes`);
+                  } else {
+                    tl2.debug(`File size on disk was not found`);
+                  }
+                  if (!isNaN(downloadedContentLength) && !isNaN(fileSizeInBytes) && fileSizeInBytes !== downloadedContentLength) {
+                    tl2.warning(`Content-Length (${downloadedContentLength} bytes) did not match downloaded file size (${fileSizeInBytes} bytes).`);
+                  }
                   resolve(destPath);
                 });
               } catch (err) {
@@ -4252,6 +4311,16 @@ var require_tool = __commonJS({
       });
     }
     exports2.downloadTool = downloadTool;
+    function _getContentLengthOfDownloadedFile(response) {
+      let contentLengthHeader = response.message.headers["content-length"];
+      let parsedContentLength = parseInt(contentLengthHeader);
+      return parsedContentLength;
+    }
+    function _getFileSizeOnDisk(filePath) {
+      let fileStats = fs.statSync(filePath);
+      let fileSizeInBytes = fileStats.size;
+      return fileSizeInBytes;
+    }
     function _createToolPath(tool, version2, arch) {
       let folderPath = path.join(_getCacheRoot(), tool, semver.clean(version2), arch);
       tl2.debug("destination " + folderPath);
@@ -4304,7 +4373,7 @@ var require_tool = __commonJS({
       });
     }
     exports2.cacheFile = cacheFile;
-    function extract7z(file, dest, _7zPath) {
+    function extract7z(file, dest, _7zPath, overwriteDest) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (process2.platform != "win32") {
           throw new Error("extract7z() not supported on current OS");
@@ -4318,13 +4387,18 @@ var require_tool = __commonJS({
         try {
           process2.chdir(dest);
           if (_7zPath) {
-            let _7z = tl2.tool(_7zPath).arg("x").arg("-bb1").arg("-bd").arg("-sccUTF-8").arg(file);
+            const _7z = tl2.tool(_7zPath);
+            if (overwriteDest) {
+              _7z.arg("-aoa");
+            }
+            _7z.arg("x").arg("-bb1").arg("-bd").arg("-sccUTF-8").arg(file);
             yield _7z.exec();
           } else {
             let escapedScript = path.join(__dirname, "Invoke-7zdec.ps1").replace(/'/g, "''").replace(/"|\n|\r/g, "");
             let escapedFile = file.replace(/'/g, "''").replace(/"|\n|\r/g, "");
             let escapedTarget = dest.replace(/'/g, "''").replace(/"|\n|\r/g, "");
-            let command = `& '${escapedScript}' -Source '${escapedFile}' -Target '${escapedTarget}'`;
+            const overrideDestDirectory = overwriteDest ? 1 : 0;
+            const command = `& '${escapedScript}' -Source '${escapedFile}' -Target '${escapedTarget}' -OverrideDestDirectory ${overrideDestDirectory}`;
             let powershellPath = tl2.which("powershell", true);
             let powershell = tl2.tool(powershellPath).line("-NoLogo -Sta -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -Command").arg(command);
             powershell.on("stdout", (buffer) => {

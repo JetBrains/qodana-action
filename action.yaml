@@ -63,5 +63,5 @@ inputs:
     required: false
     default: "${{ github.token }}"
 runs:
-  using: 'node18'
+  using: 'node16'
   main: 'scan/dist/index.js'
