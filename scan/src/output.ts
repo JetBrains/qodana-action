@@ -14,7 +14,6 @@ import {
   ANALYSIS_STARTED_REACTION,
   createComment,
   findCommentByTag,
-  getFirstCommentId,
   getInputs,
   getProblemPlural,
   isPRMode,
@@ -87,11 +86,13 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
 
 /**
  * Generates action summary string of annotations.
+ * @param toolName The name of the tool to generate the summary from.
  * @param annotations The annotations to generate the summary from.
  * @param licensesInfo The licenses a Markdown text to generate the summary from.
  * @param reportUrl The URL to the Qodana report.
  */
 function getSummary(
+  toolName: string,
   annotations: Annotation[],
   licensesInfo: string,
   reportUrl: string
@@ -107,7 +108,7 @@ function getSummary(
   }
   if (annotations.length === 0) {
     return [
-      `# ${QODANA_CHECK_NAME}`,
+      `# ${toolName}`,
       '',
       '**It seems all right 👌**',
       '',
@@ -120,7 +121,7 @@ function getSummary(
   }
 
   return [
-    `# ${QODANA_CHECK_NAME}`,
+    `# ${toolName}`,
     '',
     `**${annotations.length} ${getProblemPlural(annotations.length)}** found`,
     '',
@@ -193,15 +194,16 @@ export async function publishOutput(
     }
     const annotations: Annotation[] = problems.annotations ?? []
     const toolName = problems.title.split('found by ')[1] ?? QODANA_CHECK_NAME
-    problems.summary = getSummary(annotations, licensesInfo, reportUrl)
+    problems.summary = getSummary(
+      toolName,
+      annotations,
+      licensesInfo,
+      reportUrl
+    )
 
     await Promise.all([
-      putReaction(
-        await getFirstCommentId(),
-        ANALYSIS_FINISHED_REACTION,
-        ANALYSIS_STARTED_REACTION
-      ),
-      postResultsToPRComments(problems.summary, postComment),
+      putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION),
+      postResultsToPRComments(toolName, problems.summary, postComment),
       core.summary.addRaw(problems.summary).write(),
       publishAnnotations(
         toolName,
@@ -222,10 +224,12 @@ export async function publishOutput(
 
 /**
  * Post a new comment to the pull request.
+ * @param toolName The name of the tool to mention in comment.
  * @param content The comment to post.
  * @param postComment Whether to post a comment or not.
  */
 async function postResultsToPRComments(
+  toolName: string,
   content: string,
   postComment: boolean
 ): Promise<void> {
@@ -233,7 +237,7 @@ async function postResultsToPRComments(
   if (!postComment || !pr) {
     return
   }
-  const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} -->`
+  const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName} -->`
   const body = comment_tag_pattern
     ? `${content}\n${comment_tag_pattern}`
     : content
