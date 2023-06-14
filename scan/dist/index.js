@@ -63941,7 +63941,7 @@ var require_utils8 = __commonJS({
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.getWorkflowRunUrl = exports2.getProblemPlural = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.isServer = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
+    exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.getWorkflowRunUrl = exports2.getProblemPlural = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
     var artifact = __importStar2(require_artifact_client2());
     var cache = __importStar2(require_cache());
     var core2 = __importStar2(require_core());
@@ -64036,24 +64036,24 @@ var require_utils8 = __commonJS({
     }
     __name(uploadReport, "uploadReport");
     exports2.uploadReport = uploadReport;
-    function uploadCaches(cacheDir, primaryKey, execute) {
+    function uploadCaches(cacheDir, primaryKey, reservedCacheKey, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
           return;
         }
+        if (primaryKey === reservedCacheKey) {
+          core2.info(`Cache with key ${primaryKey} already exists, skipping cache uploading...`);
+          return;
+        }
         try {
-          if (isServer()) {
-            core2.warning("Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details");
-            return;
-          }
-          try {
-            yield cache.saveCache([cacheDir], primaryKey);
-            core2.info(`Cache saved with key ${primaryKey}`);
-          } catch (error) {
-            core2.warning(`Failed to save cache with key ${primaryKey} \u2013 ${error.message}`);
-          }
+          yield cache.saveCache([cacheDir], primaryKey);
         } catch (error) {
-          core2.warning(`Failed to upload caches \u2013 ${error.message}`);
+          const errorMessage = error.message;
+          if (errorMessage.includes("Cache already exists.")) {
+            core2.info(`Cache with key ${primaryKey} already exists, skipping cache uploading...`);
+          } else {
+            core2.warning(`Failed to upload caches \u2013 ${errorMessage}`);
+          }
         }
       });
     }
@@ -64062,37 +64062,25 @@ var require_utils8 = __commonJS({
     function restoreCaches(cacheDir, primaryKey, additionalCacheKey, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
-          return;
+          return "";
         }
+        const restoreKeys = [additionalCacheKey];
         try {
-          if (isServer()) {
-            core2.warning("Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details");
-            return;
+          const cacheKey = yield cache.restoreCache([cacheDir], primaryKey, restoreKeys);
+          if (!cacheKey) {
+            core2.info(`No cache found for input keys: ${[primaryKey, ...restoreKeys].join(", ")}.
+          With cache the pipeline would be faster.`);
+            return "";
           }
-          const restoreKeys = [additionalCacheKey];
-          try {
-            const cacheKey = yield cache.restoreCache([cacheDir], primaryKey, restoreKeys);
-            if (!cacheKey) {
-              core2.info(`Cache not found for input keys: ${[primaryKey, ...restoreKeys].join(", ")}`);
-              return;
-            }
-            core2.info(`Cache restored from key: ${cacheKey}`);
-          } catch (error) {
-            core2.warning(`Failed to restore cache with key ${primaryKey} \u2013 ${error.message}`);
-          }
+          return cacheKey;
         } catch (error) {
-          core2.warning(`Failed to download caches \u2013 ${error.message}`);
+          core2.warning(`Failed to restore cache with key ${primaryKey} \u2013 ${error.message}`);
         }
+        return "";
       });
     }
     __name(restoreCaches, "restoreCaches");
     exports2.restoreCaches = restoreCaches;
-    function isServer() {
-      const ghUrl = new URL(process.env["GITHUB_SERVER_URL"] || "https://github.com");
-      return ghUrl.hostname.toUpperCase() !== "GITHUB.COM";
-    }
-    __name(isServer, "isServer");
-    exports2.isServer = isServer;
     function isPRMode() {
       return github.context.payload.pull_request !== void 0 && getInputs().prMode;
     }
@@ -64760,16 +64748,18 @@ function main() {
       const inputs = (0, utils_1.getInputs)();
       yield io.mkdirP(inputs.resultsDir);
       yield io.mkdirP(inputs.cacheDir);
+      const restoreCachesPromise = (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.primaryCacheKey, inputs.additionalCacheKey, inputs.useCaches);
       yield Promise.all([
         (0, utils_1.putReaction)(utils_1.ANALYSIS_STARTED_REACTION, utils_1.ANALYSIS_FINISHED_REACTION),
         (0, utils_1.prepareAgent)(inputs.args),
-        (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.primaryCacheKey, inputs.additionalCacheKey, inputs.useCaches)
+        restoreCachesPromise
       ]);
+      const reservedCacheKey = yield restoreCachesPromise;
       const exitCode = yield (0, utils_1.qodana)();
       const canUploadCache = (0, utils_1.isNeedToUploadCache)(inputs.useCaches, inputs.cacheDefaultBranchOnly) && (0, qodana_1.isExecutionSuccessful)(exitCode);
       yield Promise.all([
         (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
-        (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.primaryCacheKey, canUploadCache),
+        (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.primaryCacheKey, reservedCacheKey, canUploadCache),
         (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, inputs.resultsDir, inputs.useAnnotations, inputs.postComment, (0, qodana_1.isExecutionSuccessful)(exitCode))
       ]);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
