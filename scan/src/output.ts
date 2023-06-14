@@ -2,7 +2,6 @@
 import * as core from '@actions/core'
 import * as fs from 'fs'
 import * as github from '@actions/github'
-import {GetResponseDataTypeFromEndpointMethod} from '@octokit/types'
 import {
   QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD,
@@ -10,7 +9,18 @@ import {
   QODANA_SARIF_NAME,
   VERSION
 } from '../../common/qodana'
-import {getInputs, getProblemPlural, isPRMode} from './utils'
+import {
+  ANALYSIS_FINISHED_REACTION,
+  ANALYSIS_STARTED_REACTION,
+  createComment,
+  findCommentByTag,
+  getFirstCommentId,
+  getInputs,
+  getProblemPlural,
+  isPRMode,
+  putReaction,
+  updateComment
+} from './utils'
 import {
   Annotation,
   ANNOTATION_FAILURE,
@@ -186,6 +196,11 @@ export async function publishOutput(
     problems.summary = getSummary(annotations, licensesInfo, reportUrl)
 
     await Promise.all([
+      putReaction(
+        await getFirstCommentId(),
+        ANALYSIS_FINISHED_REACTION,
+        ANALYSIS_STARTED_REACTION
+      ),
       postResultsToPRComments(problems.summary, postComment),
       core.summary.addRaw(problems.summary).write(),
       publishAnnotations(
@@ -214,54 +229,18 @@ async function postResultsToPRComments(
   content: string,
   postComment: boolean
 ): Promise<void> {
-  const context = github.context
-  const pr = context.payload.pull_request ?? ''
+  const pr = github.context.payload.pull_request ?? ''
   if (!postComment || !pr) {
     return
   }
-  const issue_number = pr?.number ?? 0
-  if (issue_number === 0) {
-    core.warning(
-      'Could not find pull request to post comment to in the current context'
-    )
-    return
-  }
-
-  const client = github.getOctokit(getInputs().githubToken)
-
   const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} -->`
   const body = comment_tag_pattern
     ? `${content}\n${comment_tag_pattern}`
     : content
-
-  type ListCommentsResponseDataType = GetResponseDataTypeFromEndpointMethod<
-    typeof client.rest.issues.listComments
-  >
-  let comment: ListCommentsResponseDataType[0] | undefined
-
-  for await (const {data: comments} of client.paginate.iterator(
-    client.rest.issues.listComments,
-    {
-      ...context.repo,
-      issue_number
-    }
-  )) {
-    comment = comments.find(c => c?.body?.includes(comment_tag_pattern))
-    if (comment) break
-  }
-
-  if (comment) {
-    await client.rest.issues.updateComment({
-      ...context.repo,
-      comment_id: comment.id,
-      body
-    })
+  const comment_id = await findCommentByTag(comment_tag_pattern)
+  if (comment_id !== -1) {
+    await updateComment(comment_id, body)
   } else {
-    await client.rest.issues.createComment({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: context.issue.number,
-      body
-    })
+    await createComment(body)
   }
 }

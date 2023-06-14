@@ -19,6 +19,19 @@ import {
   sha256sum
 } from '../../common/qodana'
 import path from 'path'
+export const ANALYSIS_FINISHED_REACTION = '+1'
+export const ANALYSIS_STARTED_REACTION = 'eyes'
+const REACTIONS = [
+  '+1',
+  '-1',
+  'laugh',
+  'confused',
+  'heart',
+  'hooray',
+  'rocket',
+  'eyes'
+] as const
+type Reaction = typeof REACTIONS[number]
 
 /**
  * The context for the action.
@@ -226,6 +239,10 @@ export function isServer(): boolean {
   return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM'
 }
 
+/**
+ * Determines if the action is running in PR mode.
+ * @returns {boolean} - true if the action is running in PR mode, false otherwise.
+ */
 export function isPRMode(): boolean {
   return github.context.payload.pull_request !== undefined && getInputs().prMode
 }
@@ -246,13 +263,20 @@ export function isNeedToUploadCache(
   if (useCaches && cacheDefaultBranchOnly) {
     const currentBranch = github.context.payload.ref
     const defaultBranch = github.context.payload.repository?.default_branch
-
+    core.debug(
+      `Current branch: ${currentBranch} | Default branch: ${defaultBranch}`
+    )
     return currentBranch === defaultBranch
   }
 
   return useCaches
 }
 
+/**
+ * Generates a plural form of the word "problem" depending on the given count.
+ * @param count - A number representing the count of problems
+ * @returns A formatted string with the correct plural form of "problem"
+ */
 export function getProblemPlural(count: number): string {
   return `new problem${count !== 1 ? 's' : ''}`
 }
@@ -269,4 +293,143 @@ export function getWorkflowRunUrl(): string {
   const repo = github.context.repo
   const serverUrl = process.env['GITHUB_SERVER_URL'] || 'https://github.com'
   return `${serverUrl}/${repo.owner}/${repo.repo}/actions/runs/${runId}`
+}
+
+/**
+ * Fetches the ID of the first comment in the repository issue using the GitHub Octokit REST API.
+ *
+ * @returns A Promise resolving to the ID of the first comment or -1 if the operation failed.
+ */
+export async function getFirstCommentId(): Promise<number> {
+  const client = github.getOctokit(getInputs().githubToken)
+
+  try {
+    const {data: comments} = await client.rest.issues.listComments({
+      ...github.context.repo,
+      issue_number: github.context.issue.number
+    })
+    return comments[0].id
+  } catch (error) {
+    core.debug(`Failed to get first comment id – ${(error as Error).message}`)
+    return -1
+  }
+}
+
+/**
+ * Asynchronously finds a comment on the GitHub issue and returns its ID based on the provided tag. If the
+ * comment is not found, returns -1. Utilizes GitHub's Octokit REST API client.
+ *
+ * @param tag - The string to be searched for in the comments' body.
+ * @returns A Promise resolving to the comment's ID if found, or -1 if not found or an error occurs.
+ */
+export async function findCommentByTag(tag: string): Promise<number> {
+  const client = github.getOctokit(getInputs().githubToken)
+
+  try {
+    const {data: comments} = await client.rest.issues.listComments({
+      ...github.context.repo,
+      issue_number: github.context.issue.number
+    })
+    const comment = comments.find(c => c?.body?.includes(tag))
+    return comment ? comment.id : -1
+  } catch (error) {
+    core.debug(`Failed to find comment by tag – ${(error as Error).message}`)
+    return -1
+  }
+}
+
+/**
+ * Asynchronously creates a comment on the current issue using the provided body text.
+ * @param body - The text content of the comment to be created.
+ * @returns A Promise that resolves when the comment is successfully created.
+ */
+export async function createComment(body: string): Promise<void> {
+  const client = github.getOctokit(getInputs().githubToken)
+
+  try {
+    await client.rest.issues.createComment({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: github.context.issue.number,
+      body
+    })
+  } catch (error) {
+    core.debug(`Failed to post comment – ${(error as Error).message}`)
+  }
+}
+
+/**
+ * Asynchronously updates a GitHub comment with the provided `comment_id` and new content/`body`.
+ * Handles any occurring errors
+ * internally by debugging them.
+ *
+ * @param comment_id - The ID of the GitHub comment to be updated.
+ * @param body - The new content of the comment.
+ * @returns A Promise that resolves to void after attempted comment update.
+ */
+export async function updateComment(
+  comment_id: number,
+  body: string
+): Promise<void> {
+  const client = github.getOctokit(getInputs().githubToken)
+
+  try {
+    await client.rest.issues.updateComment({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      comment_id,
+      body
+    })
+  } catch (error) {
+    core.debug(`Failed to update comment – ${(error as Error).message}`)
+  }
+}
+
+/**
+ * Updates the reaction of a pull request review comment to the given 'newReaction'.
+ * Removes the previous reaction if 'oldReaction' is non-empty.
+ *
+ * @param comment_id The ID of the pull request review comment.
+ * @param newReaction The new reaction to be added.
+ * @param oldReaction The old reaction to be removed (if non-empty).
+ * @returns A Promise resolving to void.
+ */
+export async function putReaction(
+  comment_id: number,
+  newReaction: Reaction,
+  oldReaction: string
+): Promise<void> {
+  const client = github.getOctokit(getInputs().githubToken)
+
+  if (oldReaction !== '') {
+    try {
+      const {data: reactions} =
+        await client.rest.reactions.listForPullRequestReviewComment({
+          ...github.context.repo,
+          comment_id
+        })
+      const previousReaction = reactions.find(r => r.content === oldReaction)
+      if (previousReaction) {
+        await client.rest.reactions.deleteForPullRequestComment({
+          ...github.context.repo,
+          comment_id,
+          reaction_id: previousReaction.id
+        })
+      }
+    } catch (error) {
+      core.debug(
+        `Failed to delete previous reaction – ${(error as Error).message}`
+      )
+    }
+  }
+
+  try {
+    await client.rest.reactions.createForPullRequestReviewComment({
+      ...github.context.repo,
+      comment_id,
+      content: newReaction
+    })
+  } catch (error) {
+    core.debug(`Failed to put reaction – ${(error as Error).message}`)
+  }
 }
