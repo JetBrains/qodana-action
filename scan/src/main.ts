@@ -44,16 +44,19 @@ async function main(): Promise<void> {
     const inputs = getInputs()
     await io.mkdirP(inputs.resultsDir)
     await io.mkdirP(inputs.cacheDir)
+
+    const restoreCachesPromise = restoreCaches(
+      inputs.cacheDir,
+      inputs.primaryCacheKey,
+      inputs.additionalCacheKey,
+      inputs.useCaches
+    )
     await Promise.all([
       putReaction(ANALYSIS_STARTED_REACTION, ANALYSIS_FINISHED_REACTION),
       prepareAgent(inputs.args),
-      restoreCaches(
-        inputs.cacheDir,
-        inputs.primaryCacheKey,
-        inputs.additionalCacheKey,
-        inputs.useCaches
-      )
+      restoreCachesPromise
     ])
+    const reservedCacheKey = await restoreCachesPromise
     const exitCode = await qodana()
     const canUploadCache =
       isNeedToUploadCache(inputs.useCaches, inputs.cacheDefaultBranchOnly) &&
@@ -61,7 +64,12 @@ async function main(): Promise<void> {
 
     await Promise.all([
       uploadReport(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
-      uploadCaches(inputs.cacheDir, inputs.primaryCacheKey, canUploadCache),
+      uploadCaches(
+        inputs.cacheDir,
+        inputs.primaryCacheKey,
+        reservedCacheKey,
+        canUploadCache
+      ),
       publishOutput(
         exitCode === QodanaExitCode.FailThreshold,
         inputs.resultsDir,

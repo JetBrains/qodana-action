@@ -146,35 +146,35 @@ export async function uploadReport(
  * Uploads the cache to GitHub Actions cache from the given path.
  * @param cacheDir The path to upload the cache from.
  * @param primaryKey Addition to the generated cache hash
+ * @param reservedCacheKey The cache key to check if the cache already exists.
  * @param execute whether to execute promise or not.
  */
 export async function uploadCaches(
   cacheDir: string,
   primaryKey: string,
+  reservedCacheKey: string,
   execute: boolean
 ): Promise<void> {
   if (!execute) {
     return
   }
+  if (primaryKey === reservedCacheKey) {
+    core.info(
+      `Cache with key ${primaryKey} already exists, skipping cache uploading...`
+    )
+    return
+  }
   try {
-    if (isServer()) {
-      core.warning(
-        'Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details'
-      )
-      return
-    }
-    try {
-      await cache.saveCache([cacheDir], primaryKey)
-      core.info(`Cache saved with key ${primaryKey}`)
-    } catch (error) {
-      core.warning(
-        `Failed to save cache with key ${primaryKey} – ${
-          (error as Error).message
-        }`
-      )
-    }
+    await cache.saveCache([cacheDir], primaryKey)
   } catch (error) {
-    core.warning(`Failed to upload caches – ${(error as Error).message}`)
+    const errorMessage = (error as Error).message
+    if (errorMessage.includes('Cache already exists.')) {
+      core.info(
+        `Cache with key ${primaryKey} already exists, skipping cache uploading...`
+      )
+    } else {
+      core.warning(`Failed to upload caches – ${errorMessage}`)
+    }
   }
 }
 
@@ -190,53 +190,35 @@ export async function restoreCaches(
   primaryKey: string,
   additionalCacheKey: string,
   execute: boolean
-): Promise<void> {
+): Promise<string> {
   if (!execute) {
-    return
+    return ''
   }
+  const restoreKeys = [additionalCacheKey]
   try {
-    if (isServer()) {
-      core.warning(
-        'Cache is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details'
+    const cacheKey = await cache.restoreCache(
+      [cacheDir],
+      primaryKey,
+      restoreKeys
+    )
+    if (!cacheKey) {
+      core.info(
+        `No cache found for input keys: ${[primaryKey, ...restoreKeys].join(
+          ', '
+        )}.
+          With cache the pipeline would be faster.`
       )
-      return
+      return ''
     }
-    const restoreKeys = [additionalCacheKey]
-    try {
-      const cacheKey = await cache.restoreCache(
-        [cacheDir],
-        primaryKey,
-        restoreKeys
-      )
-      if (!cacheKey) {
-        core.info(
-          `Cache not found for input keys: ${[primaryKey, ...restoreKeys].join(
-            ', '
-          )}`
-        )
-        return
-      }
-      core.info(`Cache restored from key: ${cacheKey}`)
-    } catch (error) {
-      core.warning(
-        `Failed to restore cache with key ${primaryKey} – ${
-          (error as Error).message
-        }`
-      )
-    }
+    return cacheKey
   } catch (error) {
-    core.warning(`Failed to download caches – ${(error as Error).message}`)
+    core.warning(
+      `Failed to restore cache with key ${primaryKey} – ${
+        (error as Error).message
+      }`
+    )
   }
-}
-
-/**
- * Check if the action is run on GHE.
- */
-export function isServer(): boolean {
-  const ghUrl = new URL(
-    process.env['GITHUB_SERVER_URL'] || 'https://github.com'
-  )
-  return ghUrl.hostname.toUpperCase() !== 'GITHUB.COM'
+  return ''
 }
 
 /**
