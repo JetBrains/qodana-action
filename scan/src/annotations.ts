@@ -260,6 +260,6 @@ export async function publishAnnotations(
       await publishGitHubCheck(failedByThreshold, name, token, problems)
     }
   } catch (error) {
-    core.warning(`Failed to publish annotations – ${(error as Error).message}`)
+    core.debug(`Failed to publish annotations – ${(error as Error).message}`)
   }
 }

@@ -296,26 +296,6 @@ export function getWorkflowRunUrl(): string {
 }
 
 /**
- * Fetches the ID of the first comment in the repository issue using the GitHub Octokit REST API.
- *
- * @returns A Promise resolving to the ID of the first comment or -1 if the operation failed.
- */
-export async function getFirstCommentId(): Promise<number> {
-  const client = github.getOctokit(getInputs().githubToken)
-
-  try {
-    const {data: comments} = await client.rest.issues.listComments({
-      ...github.context.repo,
-      issue_number: github.context.issue.number
-    })
-    return comments[0].id
-  } catch (error) {
-    core.debug(`Failed to get first comment id – ${(error as Error).message}`)
-    return -1
-  }
-}
-
-/**
  * Asynchronously finds a comment on the GitHub issue and returns its ID based on the provided tag. If the
  * comment is not found, returns -1. Utilizes GitHub's Octokit REST API client.
  *
@@ -389,47 +369,45 @@ export async function updateComment(
  * Updates the reaction of a pull request review comment to the given 'newReaction'.
  * Removes the previous reaction if 'oldReaction' is non-empty.
  *
- * @param comment_id The ID of the pull request review comment.
  * @param newReaction The new reaction to be added.
  * @param oldReaction The old reaction to be removed (if non-empty).
  * @returns A Promise resolving to void.
  */
 export async function putReaction(
-  comment_id: number,
   newReaction: Reaction,
   oldReaction: string
 ): Promise<void> {
   const client = github.getOctokit(getInputs().githubToken)
 
+  const issue_number = github.context.payload.pull_request?.number as number
   if (oldReaction !== '') {
     try {
-      const {data: reactions} =
-        await client.rest.reactions.listForPullRequestReviewComment({
-          ...github.context.repo,
-          comment_id
-        })
+      const {data: reactions} = await client.rest.reactions.listForIssue({
+        ...github.context.repo,
+        issue_number
+      })
       const previousReaction = reactions.find(r => r.content === oldReaction)
       if (previousReaction) {
-        await client.rest.reactions.deleteForPullRequestComment({
+        await client.rest.reactions.deleteForIssue({
           ...github.context.repo,
-          comment_id,
+          issue_number,
           reaction_id: previousReaction.id
         })
       }
     } catch (error) {
-      core.debug(
-        `Failed to delete previous reaction – ${(error as Error).message}`
+      core.warning(
+        `Failed to delete the initial reaction – ${(error as Error).message}`
       )
     }
   }
 
   try {
-    await client.rest.reactions.createForPullRequestReviewComment({
+    await client.rest.reactions.createForIssue({
       ...github.context.repo,
-      comment_id,
+      issue_number,
       content: newReaction
     })
   } catch (error) {
-    core.debug(`Failed to put reaction – ${(error as Error).message}`)
+    core.warning(`Failed to set reaction – ${(error as Error).message}`)
   }
 }

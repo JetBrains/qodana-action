@@ -80,6 +80,8 @@ jobs:
         with:
           args: --print-problems,--log-level,debug
           pr-mode: false
+          use-annotations: false
+          cache-only-default-branch: true
 
 #   Not possible at the moment for GitHub-hosted Windows agents: https://github.com/JetBrains/qodana-action/pull/31#issue-812728409
 #   test-windows:

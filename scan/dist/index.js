@@ -63941,7 +63941,7 @@ var require_utils8 = __commonJS({
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.getFirstCommentId = exports2.getWorkflowRunUrl = exports2.getProblemPlural = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.isServer = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
+    exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.getWorkflowRunUrl = exports2.getProblemPlural = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.isServer = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
     var artifact = __importStar2(require_artifact_client2());
     var cache = __importStar2(require_cache());
     var core2 = __importStar2(require_core());
@@ -64129,20 +64129,6 @@ var require_utils8 = __commonJS({
     }
     __name(getWorkflowRunUrl, "getWorkflowRunUrl");
     exports2.getWorkflowRunUrl = getWorkflowRunUrl;
-    function getFirstCommentId() {
-      return __awaiter2(this, void 0, void 0, function* () {
-        const client = github.getOctokit(getInputs().githubToken);
-        try {
-          const { data: comments } = yield client.rest.issues.listComments(Object.assign(Object.assign({}, github.context.repo), { issue_number: github.context.issue.number }));
-          return comments[0].id;
-        } catch (error) {
-          core2.debug(`Failed to get first comment id \u2013 ${error.message}`);
-          return -1;
-        }
-      });
-    }
-    __name(getFirstCommentId, "getFirstCommentId");
-    exports2.getFirstCommentId = getFirstCommentId;
     function findCommentByTag(tag) {
       return __awaiter2(this, void 0, void 0, function* () {
         const client = github.getOctokit(getInputs().githubToken);
@@ -64195,24 +64181,26 @@ var require_utils8 = __commonJS({
     }
     __name(updateComment, "updateComment");
     exports2.updateComment = updateComment;
-    function putReaction(comment_id, newReaction, oldReaction) {
+    function putReaction(newReaction, oldReaction) {
+      var _a;
       return __awaiter2(this, void 0, void 0, function* () {
         const client = github.getOctokit(getInputs().githubToken);
+        const issue_number = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
         if (oldReaction !== "") {
           try {
-            const { data: reactions } = yield client.rest.reactions.listForPullRequestReviewComment(Object.assign(Object.assign({}, github.context.repo), { comment_id }));
+            const { data: reactions } = yield client.rest.reactions.listForIssue(Object.assign(Object.assign({}, github.context.repo), { issue_number }));
             const previousReaction = reactions.find((r) => r.content === oldReaction);
             if (previousReaction) {
-              yield client.rest.reactions.deleteForPullRequestComment(Object.assign(Object.assign({}, github.context.repo), { comment_id, reaction_id: previousReaction.id }));
+              yield client.rest.reactions.deleteForIssue(Object.assign(Object.assign({}, github.context.repo), { issue_number, reaction_id: previousReaction.id }));
             }
           } catch (error) {
-            core2.debug(`Failed to delete previous reaction \u2013 ${error.message}`);
+            core2.warning(`Failed to delete the initial reaction \u2013 ${error.message}`);
           }
         }
         try {
-          yield client.rest.reactions.createForPullRequestReviewComment(Object.assign(Object.assign({}, github.context.repo), { comment_id, content: newReaction }));
+          yield client.rest.reactions.createForIssue(Object.assign(Object.assign({}, github.context.repo), { issue_number, content: newReaction }));
         } catch (error) {
-          core2.debug(`Failed to put reaction \u2013 ${error.message}`);
+          core2.warning(`Failed to set reaction \u2013 ${error.message}`);
         }
       });
     }
@@ -64441,7 +64429,7 @@ var require_annotations = __commonJS({
             yield publishGitHubCheck(failedByThreshold, name, token, problems);
           }
         } catch (error) {
-          core2.warning(`Failed to publish annotations \u2013 ${error.message}`);
+          core2.debug(`Failed to publish annotations \u2013 ${error.message}`);
         }
       });
     }
@@ -64562,7 +64550,7 @@ ${body}
       return Array.from(problems.entries()).sort((a, b) => b[1] - a[1]).map(([title, count]) => `| ${title} | ${level} | ${count} |`).join("\n");
     }
     __name(getRowsByLevel, "getRowsByLevel");
-    function getSummary(annotations, licensesInfo, reportUrl) {
+    function getSummary(toolName, annotations, licensesInfo, reportUrl) {
       const contactBlock = wrapToToggleBlock("Contact Qodana team", SUMMARY_MISC);
       let licensesBlock = "";
       if (licensesInfo !== "") {
@@ -64574,7 +64562,7 @@ ${body}
       }
       if (annotations.length === 0) {
         return [
-          `# ${QODANA_CHECK_NAME}`,
+          `# ${toolName}`,
           "",
           "**It seems all right \u{1F44C}**",
           "",
@@ -64586,7 +64574,7 @@ ${body}
         ].join("\n");
       }
       return [
-        `# ${QODANA_CHECK_NAME}`,
+        `# ${toolName}`,
         "",
         `**${annotations.length} ${(0, utils_12.getProblemPlural)(annotations.length)}** found`,
         "",
@@ -64630,10 +64618,10 @@ ${body}
           }
           const annotations = (_a = problems.annotations) !== null && _a !== void 0 ? _a : [];
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : QODANA_CHECK_NAME;
-          problems.summary = getSummary(annotations, licensesInfo, reportUrl);
+          problems.summary = getSummary(toolName, annotations, licensesInfo, reportUrl);
           yield Promise.all([
-            (0, utils_12.putReaction)(yield (0, utils_12.getFirstCommentId)(), utils_12.ANALYSIS_FINISHED_REACTION, utils_12.ANALYSIS_STARTED_REACTION),
-            postResultsToPRComments(problems.summary, postComment),
+            (0, utils_12.putReaction)(utils_12.ANALYSIS_FINISHED_REACTION, utils_12.ANALYSIS_STARTED_REACTION),
+            postResultsToPRComments(toolName, problems.summary, postComment),
             core2.summary.addRaw(problems.summary).write(),
             (0, annotations_1.publishAnnotations)(toolName, problems, failedByThreshold, (0, utils_12.getInputs)().githubToken, useAnnotations)
           ]);
@@ -64644,14 +64632,14 @@ ${body}
     }
     __name(publishOutput, "publishOutput");
     exports2.publishOutput = publishOutput;
-    function postResultsToPRComments(content, postComment) {
+    function postResultsToPRComments(toolName, content, postComment) {
       var _a;
       return __awaiter2(this, void 0, void 0, function* () {
         const pr = (_a = github.context.payload.pull_request) !== null && _a !== void 0 ? _a : "";
         if (!postComment || !pr) {
           return;
         }
-        const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${qodana_12.VERSION} -->`;
+        const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${qodana_12.VERSION} : ${toolName} -->`;
         const body = comment_tag_pattern ? `${content}
 ${comment_tag_pattern}` : content;
         const comment_id = yield (0, utils_12.findCommentByTag)(comment_tag_pattern);
@@ -64748,7 +64736,7 @@ function main() {
       yield io.mkdirP(inputs.resultsDir);
       yield io.mkdirP(inputs.cacheDir);
       yield Promise.all([
-        (0, utils_1.putReaction)(yield (0, utils_1.getFirstCommentId)(), utils_1.ANALYSIS_STARTED_REACTION, utils_1.ANALYSIS_FINISHED_REACTION),
+        (0, utils_1.putReaction)(utils_1.ANALYSIS_STARTED_REACTION, utils_1.ANALYSIS_FINISHED_REACTION),
         (0, utils_1.prepareAgent)(inputs.args),
         (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.primaryCacheKey, inputs.additionalCacheKey, inputs.useCaches)
       ]);
