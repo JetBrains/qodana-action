@@ -9,7 +9,7 @@ import {
   prepareAgent,
   qodana,
   setFailed,
-  uploadReport,
+  uploadArtifacts,
   uploadSarif
 } from './utils'
 
@@ -25,7 +25,7 @@ async function main(): Promise<void> {
     tl.mkdirP(inputs.cacheDir)
     await prepareAgent(inputs.args)
     const exitCode = await qodana()
-    await uploadReport(
+    await uploadArtifacts(
       inputs.resultsDir,
       inputs.artifactName,
       inputs.uploadResult

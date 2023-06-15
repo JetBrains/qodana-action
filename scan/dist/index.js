@@ -63941,7 +63941,7 @@ var require_utils8 = __commonJS({
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.getWorkflowRunUrl = exports2.getProblemPlural = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
+    exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.getWorkflowRunUrl = exports2.getProblemPlural = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadArtifacts = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
     var artifact = __importStar2(require_artifact_client2());
     var cache = __importStar2(require_cache());
     var core2 = __importStar2(require_core());
@@ -64017,13 +64017,13 @@ var require_utils8 = __commonJS({
     }
     __name(prepareAgent, "prepareAgent");
     exports2.prepareAgent = prepareAgent;
-    function uploadReport(resultsDir, artifactName, execute) {
+    function uploadArtifacts(resultsDir, artifactName, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
           return;
         }
         try {
-          core2.info("Uploading report...");
+          core2.info("Uploading artifacts...");
           const globber = yield glob.create(`${resultsDir}/*`);
           const files = yield globber.glob();
           yield artifact.create().uploadArtifact(artifactName, files, path_1.default.dirname(resultsDir), {
@@ -64034,8 +64034,8 @@ var require_utils8 = __commonJS({
         }
       });
     }
-    __name(uploadReport, "uploadReport");
-    exports2.uploadReport = uploadReport;
+    __name(uploadArtifacts, "uploadArtifacts");
+    exports2.uploadArtifacts = uploadArtifacts;
     function uploadCaches(cacheDir, primaryKey, reservedCacheKey, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
@@ -64265,7 +64265,7 @@ var require_annotations = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.publishAnnotations = exports2.parseSarif = exports2.ANNOTATION_NOTICE = exports2.ANNOTATION_WARNING = exports2.ANNOTATION_FAILURE = void 0;
+    exports2.toAnnotationProperties = exports2.publishAnnotations = exports2.parseSarif = exports2.ANNOTATION_NOTICE = exports2.ANNOTATION_WARNING = exports2.ANNOTATION_FAILURE = void 0;
     var core2 = __importStar2(require_core());
     var fs = __importStar2(require("fs"));
     var github_1 = require_github();
@@ -64448,6 +64448,7 @@ var require_annotations = __commonJS({
       };
     }
     __name(toAnnotationProperties, "toAnnotationProperties");
+    exports2.toAnnotationProperties = toAnnotationProperties;
   }
 });
 
@@ -64519,7 +64520,7 @@ var require_output = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.publishOutput = void 0;
+    exports2.publishOutput = exports2.getSummary = void 0;
     var core2 = __importStar2(require_core());
     var fs = __importStar2(require("fs"));
     var github = __importStar2(require_github());
@@ -64528,7 +64529,7 @@ var require_output = __commonJS({
     var annotations_1 = require_annotations();
     var QODANA_CHECK_NAME = "Qodana";
     var UNKNOWN_RULE_ID = "Unknown";
-    var SUMMARY_TABLE_HEADER = "| Name | Severity | Problems |";
+    var SUMMARY_TABLE_HEADER = "| Inspection name | Severity | Problems |";
     var SUMMARY_TABLE_SEP = "| --- | --- | --- |";
     var SUMMARY_MISC = `Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   - Or via our issue tracker: https://jb.gg/qodana-issue
@@ -64560,17 +64561,17 @@ ${body}
         var _a, _b;
         return map.set((_a = e.title) !== null && _a !== void 0 ? _a : UNKNOWN_RULE_ID, map.get((_b = e.title) !== null && _b !== void 0 ? _b : UNKNOWN_RULE_ID) !== void 0 ? map.get(e.title) + 1 : 1);
       }, /* @__PURE__ */ new Map());
-      return Array.from(problems.entries()).sort((a, b) => b[1] - a[1]).map(([title, count]) => `| ${title} | ${level} | ${count} |`).join("\n");
+      return Array.from(problems.entries()).sort((a, b) => b[1] - a[1]).map(([title, count]) => `| \`${title}\` | ${level} | ${count} |`).join("\n");
     }
     __name(getRowsByLevel, "getRowsByLevel");
-    function getSummary(toolName, annotations, licensesInfo, reportUrl) {
+    function getSummary(toolName, annotations, licensesInfo, reportUrl, prMode) {
       const contactBlock = wrapToToggleBlock("Contact Qodana team", SUMMARY_MISC);
       let licensesBlock = "";
       if (licensesInfo !== "") {
         licensesBlock = wrapToToggleBlock("Dependencies licenses", licensesInfo);
       }
       let prModeBlock = "";
-      if ((0, utils_12.isPRMode)()) {
+      if (prMode) {
         prModeBlock = SUMMARY_PR_MODE;
       }
       if (annotations.length === 0) {
@@ -64579,7 +64580,7 @@ ${body}
           "",
           "**It seems all right \u{1F44C}**",
           "",
-          "No new problems found according to the checks applied",
+          "No new problems were found according to the checks applied",
           prModeBlock,
           getViewReportText(reportUrl),
           licensesBlock,
@@ -64589,7 +64590,7 @@ ${body}
       return [
         `# ${toolName}`,
         "",
-        `**${annotations.length} ${(0, utils_12.getProblemPlural)(annotations.length)}** found`,
+        `**${annotations.length} ${(0, utils_12.getProblemPlural)(annotations.length)}** were found`,
         "",
         SUMMARY_TABLE_HEADER,
         SUMMARY_TABLE_SEP,
@@ -64606,6 +64607,7 @@ ${body}
       ].join("\n");
     }
     __name(getSummary, "getSummary");
+    exports2.getSummary = getSummary;
     function publishOutput(failedByThreshold, resultsDir, useAnnotations, postComment, execute) {
       var _a, _b;
       return __awaiter2(this, void 0, void 0, function* () {
@@ -64631,7 +64633,7 @@ ${body}
           }
           const annotations = (_a = problems.annotations) !== null && _a !== void 0 ? _a : [];
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : QODANA_CHECK_NAME;
-          problems.summary = getSummary(toolName, annotations, licensesInfo, reportUrl);
+          problems.summary = getSummary(toolName, annotations, licensesInfo, reportUrl, (0, utils_12.isPRMode)());
           yield Promise.all([
             (0, utils_12.putReaction)(utils_12.ANALYSIS_FINISHED_REACTION, utils_12.ANALYSIS_STARTED_REACTION),
             postResultsToPRComments(toolName, problems.summary, postComment),
@@ -64758,7 +64760,7 @@ function main() {
       const exitCode = yield (0, utils_1.qodana)();
       const canUploadCache = (0, utils_1.isNeedToUploadCache)(inputs.useCaches, inputs.cacheDefaultBranchOnly) && (0, qodana_1.isExecutionSuccessful)(exitCode);
       yield Promise.all([
-        (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
+        (0, utils_1.uploadArtifacts)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
         (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.primaryCacheKey, reservedCacheKey, canUploadCache),
         (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, inputs.resultsDir, inputs.useAnnotations, inputs.postComment, (0, qodana_1.isExecutionSuccessful)(exitCode))
       ]);

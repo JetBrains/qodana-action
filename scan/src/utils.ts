@@ -120,7 +120,7 @@ export async function prepareAgent(args: string[]): Promise<void> {
  * @param artifactName Artifact upload name.
  * @param execute whether to execute promise or not.
  */
-export async function uploadReport(
+export async function uploadArtifacts(
   resultsDir: string,
   artifactName: string,
   execute: boolean
@@ -129,7 +129,7 @@ export async function uploadReport(
     return
   }
   try {
-    core.info('Uploading report...')
+    core.info('Uploading artifacts...')
     const globber = await glob.create(`${resultsDir}/*`)
     const files = await globber.glob()
     await artifact

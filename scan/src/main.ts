@@ -15,7 +15,7 @@ import {
   qodana,
   restoreCaches,
   uploadCaches,
-  uploadReport
+  uploadArtifacts
 } from './utils'
 import {publishOutput} from './output'
 
@@ -63,7 +63,11 @@ async function main(): Promise<void> {
       isExecutionSuccessful(exitCode)
 
     await Promise.all([
-      uploadReport(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
+      uploadArtifacts(
+        inputs.resultsDir,
+        inputs.artifactName,
+        inputs.uploadResult
+      ),
       uploadCaches(
         inputs.cacheDir,
         inputs.primaryCacheKey,

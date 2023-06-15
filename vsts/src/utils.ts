@@ -99,7 +99,7 @@ export async function prepareAgent(args: string[]): Promise<void> {
  * @param artifactName Artifact upload name.
  * @param execute whether to execute promise or not.
  */
-export async function uploadReport(
+export async function uploadArtifacts(
   resultsDir: string,
   artifactName: string,
   execute: boolean
