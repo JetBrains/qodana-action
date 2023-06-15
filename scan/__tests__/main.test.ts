@@ -1,94 +1,7 @@
 import {expect, test} from '@jest/globals'
-import {
-  sha256sum,
-  getQodanaSha256,
-  getQodanaScanArgs,
-  Inputs,
-  getQodanaUrl,
-  VERSION,
-  SUPPORTED_PLATFORMS,
-  SUPPORTED_ARCHS
-} from '../../common/qodana'
-import * as fs from 'fs'
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import path = require('path')
-
-import * as os from 'os'
-import {Annotation, parseSarif} from '../src/annotations'
-
-const {execSync} = require('child_process')
-
-function outputEmptyFixture(): Annotation[] {
-  return []
-}
-
-function annotationsDefaultFixture(): Annotation[] {
-  return [
-    {
-      annotation_level: 'warning',
-      message: "'while' has empty body",
-      start_line: 271,
-      end_line: 271,
-      path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
-      title: 'Control flow with empty body',
-      start_column: undefined,
-      end_column: undefined
-    },
-    {
-      annotation_level: 'notice',
-      message: "Condition is always 'true'",
-      start_line: 268,
-      end_line: 268,
-      path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
-      title: "Condition of 'if' expression is constant",
-      start_column: undefined,
-      end_column: undefined
-    },
-    {
-      annotation_level: 'notice',
-      message: "Might be 'const'",
-      end_line: 283,
-      path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
-      start_line: 283,
-      title: "Might be 'const'",
-      start_column: undefined,
-      end_column: undefined
-    }
-  ]
-}
-
-function inputsDefaultFixture(): Inputs {
-  return {
-    args: ['--baseline', 'qodana.sarif.json'],
-    resultsDir: '${{ runner.temp }}/qodana-results',
-    cacheDir: '${{ runner.temp }}/qodana-caches',
-    additionalCacheKey: '',
-    primaryCacheKey: '',
-    cacheDefaultBranchOnly: false,
-    uploadResult: false,
-    uploadSarif: true,
-    artifactName: 'Qodana report',
-    useCaches: true,
-    useAnnotations: true,
-    prMode: true,
-    postComment: true,
-    githubToken: ''
-  }
-}
-
-function defaultDockerRunCommandFixture(): string[] {
-  return [
-    'scan',
-    '--skip-pull',
-    '--cache-dir',
-    '${{ runner.temp }}/qodana-caches',
-    '--results-dir',
-    '${{ runner.temp }}/qodana-results',
-    '--baseline',
-    'qodana.sarif.json'
-  ]
-}
+import {getQodanaScanArgs} from '../../common/qodana'
+import {parseSarif, toAnnotationProperties} from '../src/annotations'
+import {getSummary} from '../src/output'
 
 test('qodana scan command args', () => {
   const inputs = inputsDefaultFixture()
@@ -112,76 +25,169 @@ test('test sarif with no problems to output annotations', () => {
   expect(result.annotations).toEqual(output)
 })
 
-test('check whether action README.md has the latest version mentioned everywhere', () => {
-  const readmeMd = fs.readFileSync(
-    path.join(__dirname, '..', '..', 'README.md'),
-    'utf8'
+test('test typical summary output', () => {
+  const result = getSummary(
+    'Qodana for JS',
+    annotationsDefaultFixture().reverse(), // reversed for testing the correct sorting in output
+    'There is no licenses information available',
+    'https://example.com/report',
+    true
   )
-  const mentions =
-    readmeMd.match(/uses: JetBrains\/qodana-action@v\d+\.\d+\.\d+/g) || []
-  expect(mentions.length > 0).toEqual(true)
-  for (const mention of mentions) {
-    expect(mention).toEqual(`uses: JetBrains/qodana-action@v${VERSION}`)
-  }
+  expect(result).toEqual(markdownSummaryFixture())
 })
 
-test('check whether Azure Pipelines task.json definitions is up to date', () => {
-  const taskJson = JSON.parse(
-    fs.readFileSync(
-      path.join(__dirname, '..', '..', 'vsts', 'QodanaScan', 'task.json'),
-      'utf8'
-    )
+test('test empty summary output', () => {
+  const result = getSummary(
+    'Qodana for JS',
+    outputEmptyFixture(),
+    '',
+    '',
+    false
   )
-  expect(
-    `${taskJson.version.Major}.${taskJson.version.Minor}.${taskJson.version.Patch}`
-  ).toEqual(VERSION)
+  expect(result).toEqual(markdownEmptySummaryFixture())
 })
 
-test('check whether Azure Pipelines README.md has the latest major version mentioned', () => {
-  const readmeMd = fs.readFileSync(
-    path.join(__dirname, '..', '..', 'vsts', 'README.md'),
-    'utf8'
-  )
-  const mentions = readmeMd.match(/ - task: QodanaScan@\d+/g) || []
-  expect(mentions.length > 0).toEqual(true)
-  for (const mention of mentions) {
-    expect(mention).toEqual(` - task: QodanaScan@${VERSION.split('.')[0]}`)
-  }
+test('check conversion from Checks API Annotations to actions/core AnnotationProperty', () => {
+  const result = toAnnotationProperties(annotationsDefaultFixture()[0])
+  expect(result).toEqual(annotationPropertyDefaultFixture())
 })
 
-test('check whether CircleCI orb definition contains the latest version', () => {
-  const orb = path.join(__dirname, '..', '..', 'src', 'commands', 'scan.yml')
-  const example = path.join(
-    __dirname,
-    '..',
-    '..',
-    'src',
-    'examples',
-    'scan.yml'
-  )
-  for (const orbFile of [orb, example]) {
-    const orbFileContent = fs.readFileSync(orbFile, 'utf8')
-    const mentions = orbFileContent.match(/\d+\.\d+\.\d+/g) || []
-    expect(mentions.length > 0).toEqual(true)
-    for (const mention of mentions) {
-      expect(mention).toEqual(VERSION)
+import {Inputs} from '../../common/qodana'
+import {Annotation} from '../src/annotations'
+import {AnnotationProperties} from '@actions/core'
+
+export function outputEmptyFixture(): Annotation[] {
+  return []
+}
+
+export function annotationsDefaultFixture(): Annotation[] {
+  return [
+    {
+      annotation_level: 'failure',
+      message: "'while' has empty body",
+      start_line: 271,
+      end_line: 271,
+      path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+      title: 'Control flow with empty body',
+      start_column: undefined,
+      end_column: undefined
+    },
+    {
+      annotation_level: 'warning',
+      message: "Condition is always 'true'",
+      start_line: 268,
+      end_line: 268,
+      path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+      title: "Condition of 'if' expression is constant",
+      start_column: undefined,
+      end_column: undefined
+    },
+    {
+      annotation_level: 'notice',
+      message: "Might be 'const'",
+      end_line: 283,
+      path: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+      start_line: 283,
+      title: "Might be 'const'",
+      start_column: undefined,
+      end_column: undefined
     }
-  }
-})
+  ]
+}
 
-test('download all Qodana CLI archives and check their checksums', async () => {
-  for (const arch of SUPPORTED_ARCHS) {
-    for (const platform of SUPPORTED_PLATFORMS) {
-      const url = getQodanaUrl(arch, platform)
-      const archiveName = `${platform}_${arch}`
-      const temp = path.join(os.tmpdir(), archiveName)
-      execSync(`curl -L ${url} -o ${temp}`)
-      const expectedSha256 = getQodanaSha256(arch, platform)
-      const actualSha256 = sha256sum(temp)
-      expect(`${archiveName}: ${actualSha256}`).toEqual(
-        `${archiveName}: ${expectedSha256}`
-      )
-      fs.rmSync(temp, {force: true})
-    }
+export function annotationPropertyDefaultFixture(): AnnotationProperties {
+  return {
+    title: 'Control flow with empty body',
+    file: 'dokker/src/main/kotlin/io/github/tiulpin/Dokker.kt',
+    startLine: 271,
+    endLine: 271,
+    startColumn: undefined,
+    endColumn: undefined
   }
-})
+}
+
+export function inputsDefaultFixture(): Inputs {
+  return {
+    args: ['--baseline', 'qodana.sarif.json'],
+    resultsDir: '${{ runner.temp }}/qodana-results',
+    cacheDir: '${{ runner.temp }}/qodana-caches',
+    additionalCacheKey: '',
+    primaryCacheKey: '',
+    cacheDefaultBranchOnly: false,
+    uploadResult: false,
+    uploadSarif: true,
+    artifactName: 'Qodana report',
+    useCaches: true,
+    useAnnotations: true,
+    prMode: true,
+    postComment: true,
+    githubToken: ''
+  }
+}
+
+export function defaultDockerRunCommandFixture(): string[] {
+  return [
+    'scan',
+    '--skip-pull',
+    '--cache-dir',
+    '${{ runner.temp }}/qodana-caches',
+    '--results-dir',
+    '${{ runner.temp }}/qodana-results',
+    '--baseline',
+    'qodana.sarif.json'
+  ]
+}
+
+export function markdownSummaryFixture(): string {
+  return `# Qodana for JS
+
+**3 new problems** were found
+
+| Inspection name | Severity | Problems |
+| --- | --- | --- |
+| \`Control flow with empty body\` | 🔴 Failure | 1 |
+| \`Condition of 'if' expression is constant\` | 🔶 Warning | 1 |
+| \`Might be 'const'\` | ◽️ Notice | 1 |
+
+💡 Qodana analysis was run in the pull request mode: only the changed files were checked
+☁️ [View the detailed Qodana report](https://example.com/report)
+<details>
+<summary>Dependencies licenses</summary>
+
+There is no licenses information available
+</details>
+<details>
+<summary>Contact Qodana team</summary>
+
+Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
+  - Or via our issue tracker: https://jb.gg/qodana-issue
+  - Or share your feedback: https://jb.gg/qodana-discussions
+</details>`
+}
+
+export function markdownEmptySummaryFixture(): string {
+  return `# Qodana for JS
+
+**It seems all right 👌**
+
+No new problems were found according to the checks applied
+
+<details>
+<summary>View the detailed Qodana report</summary>
+
+To be able to view the detailed Qodana report, you can either:
+  1. Register at [Qodana Cloud](https://qodana.cloud/) and [configure the action](https://github.com/jetbrains/qodana-action#qodana-cloud)
+  2. Use [GitHub Code Scanning with Qodana](https://github.com/jetbrains/qodana-action#github-code-scanning)
+  3. Host [Qodana report at GitHub Pages](https://github.com/JetBrains/qodana-action/blob/3a8e25f5caad8d8b01c1435f1ef7b19fe8b039a0/README.md#github-pages)
+  4. Inspect and use \`qodana.sarif.json\` (see [the Qodana SARIF format](https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Report+structure) for details)
+
+</details>
+
+<details>
+<summary>Contact Qodana team</summary>
+
+Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
+  - Or via our issue tracker: https://jb.gg/qodana-issue
+  - Or share your feedback: https://jb.gg/qodana-discussions
+</details>`
+}

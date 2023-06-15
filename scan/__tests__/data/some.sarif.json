@@ -8033,7 +8033,7 @@
         {
           "ruleId": "ControlFlowWithEmptyBody",
           "kind": "fail",
-          "level": "warning",
+          "level": "error",
           "message": {
             "text": "'while' has empty body",
             "markdown": "'while' has empty body"
@@ -8086,7 +8086,7 @@
         {
           "ruleId": "ConstantConditionIf",
           "kind": "fail",
-          "level": "note",
+          "level": "warning",
           "message": {
             "text": "Condition is always 'true'",
             "markdown": "Condition is always 'true'"

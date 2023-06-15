@@ -281,7 +281,7 @@ export async function publishAnnotations(
   }
 }
 
-function toAnnotationProperties(a: Annotation): AnnotationProperties {
+export function toAnnotationProperties(a: Annotation): AnnotationProperties {
   return {
     title: a.title,
     file: a.path,
