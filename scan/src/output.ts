@@ -31,7 +31,7 @@ import {
 
 const QODANA_CHECK_NAME = 'Qodana'
 const UNKNOWN_RULE_ID = 'Unknown'
-const SUMMARY_TABLE_HEADER = '| Name | Severity | Problems |'
+const SUMMARY_TABLE_HEADER = '| Inspection name | Severity | Problems |'
 const SUMMARY_TABLE_SEP = '| --- | --- | --- |'
 const SUMMARY_MISC = `Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com)
   - Or via our issue tracker: https://jb.gg/qodana-issue
@@ -80,7 +80,7 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
   )
   return Array.from(problems.entries())
     .sort((a, b) => b[1] - a[1])
-    .map(([title, count]) => `| ${title} | ${level} | ${count} |`)
+    .map(([title, count]) => `| \`${title}\` | ${level} | ${count} |`)
     .join('\n')
 }
 
@@ -90,12 +90,14 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
  * @param annotations The annotations to generate the summary from.
  * @param licensesInfo The licenses a Markdown text to generate the summary from.
  * @param reportUrl The URL to the Qodana report.
+ * @param prMode Whether the analysis was run in the pull request mode.
  */
-function getSummary(
+export function getSummary(
   toolName: string,
   annotations: Annotation[],
   licensesInfo: string,
-  reportUrl: string
+  reportUrl: string,
+  prMode: boolean
 ): string {
   const contactBlock = wrapToToggleBlock('Contact Qodana team', SUMMARY_MISC)
   let licensesBlock = ''
@@ -103,7 +105,7 @@ function getSummary(
     licensesBlock = wrapToToggleBlock('Dependencies licenses', licensesInfo)
   }
   let prModeBlock = ''
-  if (isPRMode()) {
+  if (prMode) {
     prModeBlock = SUMMARY_PR_MODE
   }
   if (annotations.length === 0) {
@@ -112,7 +114,7 @@ function getSummary(
       '',
       '**It seems all right 👌**',
       '',
-      'No new problems found according to the checks applied',
+      'No new problems were found according to the checks applied',
       prModeBlock,
       getViewReportText(reportUrl),
       licensesBlock,
@@ -123,7 +125,9 @@ function getSummary(
   return [
     `# ${toolName}`,
     '',
-    `**${annotations.length} ${getProblemPlural(annotations.length)}** found`,
+    `**${annotations.length} ${getProblemPlural(
+      annotations.length
+    )}** were found`,
     '',
     SUMMARY_TABLE_HEADER,
     SUMMARY_TABLE_SEP,
@@ -198,7 +202,8 @@ export async function publishOutput(
       toolName,
       annotations,
       licensesInfo,
-      reportUrl
+      reportUrl,
+      isPRMode()
     )
 
     await Promise.all([
