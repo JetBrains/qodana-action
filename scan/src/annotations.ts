@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion,github/array-foreach */
 import * as core from '@actions/core'
+import {AnnotationProperties} from '@actions/core'
 import * as fs from 'fs'
 import type {Log, Result, Tool} from 'sarif'
-import {context, getOctokit} from '@actions/github'
-import {getProblemPlural, getWorkflowRunUrl} from './utils'
-import {GitHub} from '@actions/github/lib/utils'
-import {AnnotationProperties} from '@actions/core'
+import {getWorkflowRunUrl, publishGitHubCheck} from './utils'
+import {getProblemPlural} from './output'
 
 function getQodanaHelpString(): string {
   return `This result was published with [Qodana GitHub Action](${getWorkflowRunUrl()})`
@@ -17,6 +16,57 @@ const FAILURE_STATUS = 'failure'
 const NEUTRAL_STATUS = 'neutral'
 const SUCCESS_STATUS = 'success'
 const MAX_ANNOTATIONS = 50
+
+/**
+ * Publish SARIF to GitHub Checks.
+ * @param name The name of the Check.
+ * @param problems The output to publish.
+ * @param failedByThreshold flag if the Qodana failThreshold was reached.
+ * @param execute whether to execute the promise or not.
+ */
+export async function publishAnnotations(
+  name: string,
+  problems: Output,
+  failedByThreshold: boolean,
+  execute: boolean
+): Promise<void> {
+  if (!execute) {
+    return
+  }
+  try {
+    problems.summary = problems.summary.replace(`# Qodana`, '')
+    if (problems.annotations.length >= MAX_ANNOTATIONS) {
+      for (let i = 0; i < problems.annotations.length; i += MAX_ANNOTATIONS) {
+        await publishGitHubCheck(failedByThreshold, name, {
+          title: problems.title,
+          text: getQodanaHelpString(),
+          summary: problems.summary,
+          annotations: problems.annotations.slice(i, i + MAX_ANNOTATIONS)
+        })
+      }
+    } else {
+      await publishGitHubCheck(failedByThreshold, name, problems)
+    }
+  } catch (error) {
+    core.info(`Not able to publish annotations with Checks API – ${
+      (error as Error).message
+    }, 
+    using limited (10 problems per level) output instead. Check job permissions (checks: write, pull-requests: write needed)`)
+    for (const p of problems.annotations) {
+      const properties = toAnnotationProperties(p)
+      switch (p.annotation_level) {
+        case ANNOTATION_FAILURE:
+          core.error(p.message, properties)
+          break
+        case ANNOTATION_WARNING:
+          core.warning(p.message, properties)
+          break
+        default:
+          core.notice(p.message, properties)
+      }
+    }
+  }
+}
 
 export interface Output {
   title: string
@@ -125,61 +175,12 @@ export function parseSarif(path: string): Output {
 }
 
 /**
- * Creates a GitHub Check.
- * @param octokit The GitHub API client.
- * @param conclusion The conclusion to use for the GitHub Check.
- * @param head_sha The SHA of the head commit.
- * @param name The name of the Check.
- * @param output The Check Output to use.
- */
-async function createCheck(
-  octokit: InstanceType<typeof GitHub>,
-  conclusion: string,
-  head_sha: string,
-  name: string,
-  output: Output
-): Promise<void> {
-  await octokit.rest.checks.create({
-    ...context.repo,
-    accept: 'application/vnd.github.v3+json',
-    status: 'completed',
-    head_sha,
-    conclusion,
-    name,
-    output
-  })
-}
-
-/**
- * Updates a GitHub Check.
- * @param octokit The GitHub API client.
- * @param conclusion The conclusion to use for the GitHub Check.
- * @param check_run_id The ID of the GitHub Check to use for the update.
- * @param output The Check Output to use.
- */
-async function updateCheck(
-  octokit: InstanceType<typeof GitHub>,
-  conclusion: string,
-  check_run_id: number,
-  output: Output
-): Promise<void> {
-  await octokit.rest.checks.update({
-    ...context.repo,
-    accept: 'application/vnd.github.v3+json',
-    status: 'completed',
-    conclusion,
-    check_run_id,
-    output
-  })
-}
-
-/**
  * Get a conclusion for the given set of annotations
  * @param annotations GitHub Check annotations.
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @returns The conclusion to use for the GitHub Check.
  */
-function getConclusion(
+export function getGitHubCheckConclusion(
   annotations: Annotation[],
   failedByThreshold: boolean
 ): string {
@@ -198,89 +199,9 @@ function getConclusion(
 }
 
 /**
- * Publish GitHub Checks output to GitHub Checks.
- * @param failedByThreshold flag if the Qodana failThreshold was reached.
- * @param name The name of the Check.
- * @param token The GitHub token to use.
- * @param output The output to publish.
+ * Converts Annotation to AnnotationProperties for core GitHub actions API.
+ * @param a Annotation to convert.
  */
-async function publishGitHubCheck(
-  failedByThreshold: boolean,
-  name: string,
-  token: string,
-  output: Output
-): Promise<void> {
-  const conclusion = getConclusion(output.annotations, failedByThreshold)
-  let sha = context.sha
-  if (context.payload.pull_request) {
-    sha = context.payload.pull_request.head.sha
-  }
-  const octokit = getOctokit(token)
-  const result = await octokit.rest.checks.listForRef({
-    ...context.repo,
-    ref: sha
-  })
-  const checkExists = result.data.check_runs.find(check => check.name === name)
-  if (checkExists) {
-    await updateCheck(octokit, conclusion, checkExists.id, output)
-  } else {
-    await createCheck(octokit, conclusion, sha, name, output)
-  }
-}
-
-/**
- * Publish SARIF to GitHub Checks.
- * @param name The name of the Check.
- * @param problems The output to publish.
- * @param failedByThreshold flag if the Qodana failThreshold was reached.
- * @param token The GitHub token to use.
- * @param execute whether to execute the promise or not.
- */
-export async function publishAnnotations(
-  name: string,
-  problems: Output,
-  failedByThreshold: boolean,
-  token: string,
-  execute: boolean
-): Promise<void> {
-  if (!execute) {
-    return
-  }
-  try {
-    problems.summary = problems.summary.replace(`# Qodana`, '')
-    if (problems.annotations.length >= MAX_ANNOTATIONS) {
-      for (let i = 0; i < problems.annotations.length; i += MAX_ANNOTATIONS) {
-        await publishGitHubCheck(failedByThreshold, name, token, {
-          title: problems.title,
-          text: getQodanaHelpString(),
-          summary: problems.summary,
-          annotations: problems.annotations.slice(i, i + MAX_ANNOTATIONS)
-        })
-      }
-    } else {
-      await publishGitHubCheck(failedByThreshold, name, token, problems)
-    }
-  } catch (error) {
-    core.info(`Not able to publish annotations with Checks API – ${
-      (error as Error).message
-    }, 
-    using limited (10 problems per level) output instead. Check job permissions (checks: write, pull-requests: write needed)`)
-    for (const p of problems.annotations) {
-      const properties = toAnnotationProperties(p)
-      switch (p.annotation_level) {
-        case ANNOTATION_FAILURE:
-          core.error(p.message, properties)
-          break
-        case ANNOTATION_WARNING:
-          core.warning(p.message, properties)
-          break
-        default:
-          core.notice(p.message, properties)
-      }
-    }
-  }
-}
-
 export function toAnnotationProperties(a: Annotation): AnnotationProperties {
   return {
     title: a.title,

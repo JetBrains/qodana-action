@@ -2,8 +2,6 @@ import {expect, test} from '@jest/globals'
 import {
   sha256sum,
   getQodanaSha256,
-  getQodanaScanArgs,
-  Inputs,
   getQodanaUrl,
   VERSION,
   SUPPORTED_PLATFORMS,

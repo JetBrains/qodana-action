@@ -1,24 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as core from '@actions/core'
 import * as fs from 'fs'
-import * as github from '@actions/github'
 import {
   QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD,
   QODANA_REPORT_URL_NAME,
-  QODANA_SARIF_NAME,
-  VERSION
+  QODANA_SARIF_NAME
 } from '../../common/qodana'
 import {
   ANALYSIS_FINISHED_REACTION,
   ANALYSIS_STARTED_REACTION,
-  createComment,
-  findCommentByTag,
-  getInputs,
-  getProblemPlural,
   isPRMode,
-  putReaction,
-  updateComment
+  postResultsToPRComments,
+  putReaction
 } from './utils'
 import {
   Annotation,
@@ -43,6 +37,72 @@ const VIEW_REPORT_OPTIONS = `To be able to view the detailed Qodana report, you 
   4. Inspect and use \`qodana.sarif.json\` (see [the Qodana SARIF format](https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Report+structure) for details)
 `
 const SUMMARY_PR_MODE = `💡 Qodana analysis was run in the pull request mode: only the changed files were checked`
+
+/**
+ * Publish Qodana results to GitHub: comment, job summary, annotations.
+ * @param failedByThreshold flag if the Qodana failThreshold was reached.
+ * @param resultsDir The path to the results.
+ * @param postComment whether to post a PR comment or not.
+ * @param execute whether to execute the promise or not.
+ * @param useAnnotations whether to publish annotations or not.
+ */
+export async function publishOutput(
+  failedByThreshold: boolean,
+  resultsDir: string,
+  useAnnotations: boolean,
+  postComment: boolean,
+  execute: boolean
+): Promise<void> {
+  if (!execute) {
+    return
+  }
+  try {
+    const problems = parseSarif(`${resultsDir}/${QODANA_SARIF_NAME}`)
+    let reportUrl = ''
+    const reportUrlFile = `${resultsDir}/${QODANA_REPORT_URL_NAME}`
+    if (fs.existsSync(reportUrlFile)) {
+      reportUrl = fs.readFileSync(`${resultsDir}/${QODANA_REPORT_URL_NAME}`, {
+        encoding: 'utf8'
+      })
+    }
+
+    let licensesInfo = ''
+    const licensesJson = `${resultsDir}/projectStructure/${QODANA_LICENSES_JSON}`
+    if (fs.existsSync(licensesJson)) {
+      const licenses = JSON.parse(
+        fs.readFileSync(licensesJson, {encoding: 'utf8'})
+      )
+      if (licenses.length > 0) {
+        licensesInfo = fs.readFileSync(
+          `${resultsDir}/projectStructure/${QODANA_LICENSES_MD}`,
+          {encoding: 'utf8'}
+        )
+      }
+    }
+    const annotations: Annotation[] = problems.annotations ?? []
+    const toolName = problems.title.split('found by ')[1] ?? QODANA_CHECK_NAME
+    problems.summary = getSummary(
+      toolName,
+      annotations,
+      licensesInfo,
+      reportUrl,
+      isPRMode()
+    )
+
+    await Promise.all([
+      putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION),
+      postResultsToPRComments(toolName, problems.summary, postComment),
+      core.summary.addRaw(problems.summary).write(),
+      publishAnnotations(toolName, problems, failedByThreshold, useAnnotations)
+    ])
+  } catch (error) {
+    core.warning(
+      `Qodana has problems with publishing results to GitHub – ${
+        (error as Error).message
+      }`
+    )
+  }
+}
 
 function wrapToToggleBlock(header: string, body: string): string {
   return `<details>
@@ -156,100 +216,10 @@ export function getSummary(
 }
 
 /**
- * Publish SARIF to GitHub Checks.
- * @param failedByThreshold flag if the Qodana failThreshold was reached.
- * @param resultsDir The path to the results.
- * @param postComment whether to post a PR comment or not.
- * @param execute whether to execute the promise or not.
- * @param useAnnotations whether to publish annotations or not.
+ * Generates a plural form of the word "problem" depending on the given count.
+ * @param count A number representing the count of problems
+ * @returns A formatted string with the correct plural form of "problem"
  */
-export async function publishOutput(
-  failedByThreshold: boolean,
-  resultsDir: string,
-  useAnnotations: boolean,
-  postComment: boolean,
-  execute: boolean
-): Promise<void> {
-  if (!execute) {
-    return
-  }
-  try {
-    const problems = parseSarif(`${resultsDir}/${QODANA_SARIF_NAME}`)
-    let reportUrl = ''
-    const reportUrlFile = `${resultsDir}/${QODANA_REPORT_URL_NAME}`
-    if (fs.existsSync(reportUrlFile)) {
-      reportUrl = fs.readFileSync(`${resultsDir}/${QODANA_REPORT_URL_NAME}`, {
-        encoding: 'utf8'
-      })
-    }
-
-    let licensesInfo = ''
-    const licensesJson = `${resultsDir}/projectStructure/${QODANA_LICENSES_JSON}`
-    if (fs.existsSync(licensesJson)) {
-      const licenses = JSON.parse(
-        fs.readFileSync(licensesJson, {encoding: 'utf8'})
-      )
-      if (licenses.length > 0) {
-        licensesInfo = fs.readFileSync(
-          `${resultsDir}/projectStructure/${QODANA_LICENSES_MD}`,
-          {encoding: 'utf8'}
-        )
-      }
-    }
-    const annotations: Annotation[] = problems.annotations ?? []
-    const toolName = problems.title.split('found by ')[1] ?? QODANA_CHECK_NAME
-    problems.summary = getSummary(
-      toolName,
-      annotations,
-      licensesInfo,
-      reportUrl,
-      isPRMode()
-    )
-
-    await Promise.all([
-      putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION),
-      postResultsToPRComments(toolName, problems.summary, postComment),
-      core.summary.addRaw(problems.summary).write(),
-      publishAnnotations(
-        toolName,
-        problems,
-        failedByThreshold,
-        getInputs().githubToken,
-        useAnnotations
-      )
-    ])
-  } catch (error) {
-    core.warning(
-      `Qodana has problems with publishing results to GitHub – ${
-        (error as Error).message
-      }`
-    )
-  }
-}
-
-/**
- * Post a new comment to the pull request.
- * @param toolName The name of the tool to mention in comment.
- * @param content The comment to post.
- * @param postComment Whether to post a comment or not.
- */
-async function postResultsToPRComments(
-  toolName: string,
-  content: string,
-  postComment: boolean
-): Promise<void> {
-  const pr = github.context.payload.pull_request ?? ''
-  if (!postComment || !pr) {
-    return
-  }
-  const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName} -->`
-  const body = comment_tag_pattern
-    ? `${content}\n${comment_tag_pattern}`
-    : content
-  const comment_id = await findCommentByTag(comment_tag_pattern)
-  if (comment_id !== -1) {
-    await updateComment(comment_id, body)
-  } else {
-    await createComment(body)
-  }
+export function getProblemPlural(count: number): string {
+  return `new problem${count !== 1 ? 's' : ''}`
 }
