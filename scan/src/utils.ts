@@ -5,6 +5,8 @@ import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 import * as glob from '@actions/glob'
 import * as tc from '@actions/tool-cache'
+import {GitHub} from '@actions/github/lib/utils'
+import {getGitHubCheckConclusion, Output} from './annotations'
 import {
   EXECUTABLE,
   Inputs,
@@ -223,7 +225,7 @@ export async function restoreCaches(
 
 /**
  * Determines if the action is running in PR mode.
- * @returns {boolean} - true if the action is running in PR mode, false otherwise.
+ * @returns {boolean} true if the action is running in PR mode, false otherwise.
  */
 export function isPRMode(): boolean {
   return github.context.payload.pull_request !== undefined && getInputs().prMode
@@ -255,15 +257,6 @@ export function isNeedToUploadCache(
 }
 
 /**
- * Generates a plural form of the word "problem" depending on the given count.
- * @param count - A number representing the count of problems
- * @returns A formatted string with the correct plural form of "problem"
- */
-export function getProblemPlural(count: number): string {
-  return `new problem${count !== 1 ? 's' : ''}`
-}
-
-/**
  * Returns the URL to the current workflow run.
  */
 export function getWorkflowRunUrl(): string {
@@ -278,15 +271,43 @@ export function getWorkflowRunUrl(): string {
 }
 
 /**
+ * Post a new comment to the pull request.
+ * @param toolName The name of the tool to mention in comment.
+ * @param content The comment to post.
+ * @param postComment Whether to post a comment or not.
+ */
+export async function postResultsToPRComments(
+  toolName: string,
+  content: string,
+  postComment: boolean
+): Promise<void> {
+  const pr = github.context.payload.pull_request ?? ''
+  if (!postComment || !pr) {
+    return
+  }
+  const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName} -->`
+  const body = `${content}\n${comment_tag_pattern}`
+  const client = github.getOctokit(getInputs().githubToken)
+  const comment_id = await findCommentByTag(client, comment_tag_pattern)
+  if (comment_id !== -1) {
+    await updateComment(client, comment_id, body)
+  } else {
+    await createComment(client, body)
+  }
+}
+
+/**
  * Asynchronously finds a comment on the GitHub issue and returns its ID based on the provided tag. If the
  * comment is not found, returns -1. Utilizes GitHub's Octokit REST API client.
  *
- * @param tag - The string to be searched for in the comments' body.
+ * @param client The Octokit REST API client to be used for searching for the comment.
+ * @param tag The string to be searched for in the comments' body.
  * @returns A Promise resolving to the comment's ID if found, or -1 if not found or an error occurs.
  */
-export async function findCommentByTag(tag: string): Promise<number> {
-  const client = github.getOctokit(getInputs().githubToken)
-
+export async function findCommentByTag(
+  client: InstanceType<typeof GitHub>,
+  tag: string
+): Promise<number> {
   try {
     const {data: comments} = await client.rest.issues.listComments({
       ...github.context.repo,
@@ -302,12 +323,14 @@ export async function findCommentByTag(tag: string): Promise<number> {
 
 /**
  * Asynchronously creates a comment on the current issue using the provided body text.
- * @param body - The text content of the comment to be created.
+ * @param client The Octokit REST API client to be used for creating the comment.
+ * @param body The text content of the comment to be created.
  * @returns A Promise that resolves when the comment is successfully created.
  */
-export async function createComment(body: string): Promise<void> {
-  const client = github.getOctokit(getInputs().githubToken)
-
+export async function createComment(
+  client: InstanceType<typeof GitHub>,
+  body: string
+): Promise<void> {
   try {
     await client.rest.issues.createComment({
       owner: github.context.repo.owner,
@@ -325,16 +348,16 @@ export async function createComment(body: string): Promise<void> {
  * Handles any occurring errors
  * internally by debugging them.
  *
- * @param comment_id - The ID of the GitHub comment to be updated.
- * @param body - The new content of the comment.
+ * @param client The Octokit REST API client to be used for updating the comment.
+ * @param comment_id The ID of the GitHub comment to be updated.
+ * @param body The new content of the comment.
  * @returns A Promise that resolves to void after attempted comment update.
  */
 export async function updateComment(
+  client: InstanceType<typeof GitHub>,
   comment_id: number,
   body: string
 ): Promise<void> {
-  const client = github.getOctokit(getInputs().githubToken)
-
   try {
     await client.rest.issues.updateComment({
       owner: github.context.repo.owner,
@@ -377,7 +400,7 @@ export async function putReaction(
         })
       }
     } catch (error) {
-      core.warning(
+      core.debug(
         `Failed to delete the initial reaction – ${(error as Error).message}`
       )
     }
@@ -390,6 +413,87 @@ export async function putReaction(
       content: newReaction
     })
   } catch (error) {
-    core.warning(`Failed to set reaction – ${(error as Error).message}`)
+    core.debug(`Failed to set reaction – ${(error as Error).message}`)
   }
+}
+
+/**
+ * Publish GitHub Checks output to GitHub Checks.
+ * @param failedByThreshold flag if the Qodana failThreshold was reached.
+ * @param name The name of the Check.
+ * @param output The output to publish.
+ */
+export async function publishGitHubCheck(
+  failedByThreshold: boolean,
+  name: string,
+  output: Output
+): Promise<void> {
+  const conclusion = getGitHubCheckConclusion(
+    output.annotations,
+    failedByThreshold
+  )
+  let sha = github.context.sha
+  if (github.context.payload.pull_request) {
+    sha = github.context.payload.pull_request.head.sha
+  }
+  const client = github.getOctokit(getInputs().githubToken)
+  const result = await client.rest.checks.listForRef({
+    ...github.context.repo,
+    ref: sha
+  })
+  const checkExists = result.data.check_runs.find(check => check.name === name)
+  if (checkExists) {
+    await updateCheck(client, conclusion, checkExists.id, output)
+  } else {
+    await createCheck(client, conclusion, sha, name, output)
+  }
+}
+
+/**
+ * Creates a GitHub Check.
+ * @param client The Octokit REST API client to be used for creating the Check.
+ * @param conclusion The conclusion to use for the GitHub Check.
+ * @param head_sha The SHA of the head commit.
+ * @param name The name of the Check.
+ * @param output The Check Output to use.
+ */
+async function createCheck(
+  client: InstanceType<typeof GitHub>,
+  conclusion: string,
+  head_sha: string,
+  name: string,
+  output: Output
+): Promise<void> {
+  await client.rest.checks.create({
+    ...github.context.repo,
+    accept: 'application/vnd.github.v3+json',
+    status: 'completed',
+    head_sha,
+    conclusion,
+    name,
+    output
+  })
+}
+
+/**
+ * Updates a GitHub Check.
+ * @param client The Octokit REST API client to be used for updating the Check.
+ * @param conclusion The conclusion to use for the GitHub Check.
+ * @param check_run_id The ID of the GitHub Check to use for the update.
+ * @param output The Check Output to use.
+ */
+async function updateCheck(
+  client: InstanceType<typeof GitHub>,
+  conclusion: string,
+  check_run_id: number,
+  output: Output
+): Promise<void> {
+  await client.rest.checks.update({
+    ...github.context.repo,
+    accept: 'application/vnd.github.v3+json',
+    status: 'completed',
+    conclusion,
+    check_run_id,
+    output
+  })
 }

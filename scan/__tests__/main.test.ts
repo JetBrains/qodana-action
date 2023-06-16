@@ -1,6 +1,12 @@
 import {expect, test} from '@jest/globals'
-import {getQodanaScanArgs} from '../../common/qodana'
-import {parseSarif, toAnnotationProperties} from '../src/annotations'
+import {AnnotationProperties} from '@actions/core'
+import {getQodanaScanArgs, Inputs} from '../../common/qodana'
+import {
+  Annotation,
+  getGitHubCheckConclusion,
+  parseSarif,
+  toAnnotationProperties
+} from '../src/annotations'
 import {getSummary} from '../src/output'
 
 test('qodana scan command args', () => {
@@ -52,9 +58,20 @@ test('check conversion from Checks API Annotations to actions/core AnnotationPro
   expect(result).toEqual(annotationPropertyDefaultFixture())
 })
 
-import {Inputs} from '../../common/qodana'
-import {Annotation} from '../src/annotations'
-import {AnnotationProperties} from '@actions/core'
+test('check failure conclusion for the Check', () => {
+  const result = getGitHubCheckConclusion(annotationsDefaultFixture(), true)
+  expect(result).toEqual('failure')
+})
+
+test('check neutral conclusion for the Check', () => {
+  const result = getGitHubCheckConclusion(annotationsDefaultFixture(), false)
+  expect(result).toEqual('neutral')
+})
+
+test('check success conclusion for the Check', () => {
+  const result = getGitHubCheckConclusion(outputEmptyFixture(), false)
+  expect(result).toEqual('success')
+})
 
 export function outputEmptyFixture(): Annotation[] {
   return []
