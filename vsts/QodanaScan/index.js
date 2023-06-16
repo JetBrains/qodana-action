@@ -281,9 +281,9 @@ var require_compressutility = __commonJS({
   }
 });
 
-// node_modules/has-symbols/shams.js
+// ../node_modules/has-symbols/shams.js
 var require_shams = __commonJS({
-  "node_modules/has-symbols/shams.js"(exports2, module2) {
+  "../node_modules/has-symbols/shams.js"(exports2, module2) {
     "use strict";
     module2.exports = function hasSymbols() {
       if (typeof Symbol !== "function" || typeof Object.getOwnPropertySymbols !== "function") {
@@ -333,9 +333,9 @@ var require_shams = __commonJS({
   }
 });
 
-// node_modules/has-symbols/index.js
+// ../node_modules/has-symbols/index.js
 var require_has_symbols = __commonJS({
-  "node_modules/has-symbols/index.js"(exports2, module2) {
+  "../node_modules/has-symbols/index.js"(exports2, module2) {
     "use strict";
     var origSymbol = typeof Symbol !== "undefined" && Symbol;
     var hasSymbolSham = require_shams();
@@ -357,9 +357,9 @@ var require_has_symbols = __commonJS({
   }
 });
 
-// node_modules/has-proto/index.js
+// ../node_modules/has-proto/index.js
 var require_has_proto = __commonJS({
-  "node_modules/has-proto/index.js"(exports2, module2) {
+  "../node_modules/has-proto/index.js"(exports2, module2) {
     "use strict";
     var test = {
       foo: {}
@@ -371,9 +371,9 @@ var require_has_proto = __commonJS({
   }
 });
 
-// node_modules/function-bind/implementation.js
+// ../node_modules/function-bind/implementation.js
 var require_implementation = __commonJS({
-  "node_modules/function-bind/implementation.js"(exports2, module2) {
+  "../node_modules/function-bind/implementation.js"(exports2, module2) {
     "use strict";
     var ERROR_MESSAGE = "Function.prototype.bind called on incompatible ";
     var slice = Array.prototype.slice;
@@ -421,27 +421,27 @@ var require_implementation = __commonJS({
   }
 });
 
-// node_modules/function-bind/index.js
+// ../node_modules/function-bind/index.js
 var require_function_bind = __commonJS({
-  "node_modules/function-bind/index.js"(exports2, module2) {
+  "../node_modules/function-bind/index.js"(exports2, module2) {
     "use strict";
     var implementation = require_implementation();
     module2.exports = Function.prototype.bind || implementation;
   }
 });
 
-// node_modules/has/src/index.js
+// ../node_modules/has/src/index.js
 var require_src = __commonJS({
-  "node_modules/has/src/index.js"(exports2, module2) {
+  "../node_modules/has/src/index.js"(exports2, module2) {
     "use strict";
     var bind = require_function_bind();
     module2.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
   }
 });
 
-// node_modules/get-intrinsic/index.js
+// ../node_modules/get-intrinsic/index.js
 var require_get_intrinsic = __commonJS({
-  "node_modules/get-intrinsic/index.js"(exports2, module2) {
+  "../node_modules/get-intrinsic/index.js"(exports2, module2) {
     "use strict";
     var undefined2;
     var $SyntaxError = SyntaxError;
@@ -745,9 +745,9 @@ var require_get_intrinsic = __commonJS({
   }
 });
 
-// node_modules/call-bind/index.js
+// ../node_modules/call-bind/index.js
 var require_call_bind = __commonJS({
-  "node_modules/call-bind/index.js"(exports2, module2) {
+  "../node_modules/call-bind/index.js"(exports2, module2) {
     "use strict";
     var bind = require_function_bind();
     var GetIntrinsic = require_get_intrinsic();
@@ -789,9 +789,9 @@ var require_call_bind = __commonJS({
   }
 });
 
-// node_modules/call-bind/callBound.js
+// ../node_modules/call-bind/callBound.js
 var require_callBound = __commonJS({
-  "node_modules/call-bind/callBound.js"(exports2, module2) {
+  "../node_modules/call-bind/callBound.js"(exports2, module2) {
     "use strict";
     var GetIntrinsic = require_get_intrinsic();
     var callBind = require_call_bind();
@@ -806,16 +806,16 @@ var require_callBound = __commonJS({
   }
 });
 
-// node_modules/object-inspect/util.inspect.js
+// ../node_modules/object-inspect/util.inspect.js
 var require_util_inspect = __commonJS({
-  "node_modules/object-inspect/util.inspect.js"(exports2, module2) {
+  "../node_modules/object-inspect/util.inspect.js"(exports2, module2) {
     module2.exports = require("util").inspect;
   }
 });
 
-// node_modules/object-inspect/index.js
+// ../node_modules/object-inspect/index.js
 var require_object_inspect = __commonJS({
-  "node_modules/object-inspect/index.js"(exports2, module2) {
+  "../node_modules/object-inspect/index.js"(exports2, module2) {
     var hasMap = typeof Map === "function" && Map.prototype;
     var mapSizeDescriptor = Object.getOwnPropertyDescriptor && hasMap ? Object.getOwnPropertyDescriptor(Map.prototype, "size") : null;
     var mapSize = hasMap && mapSizeDescriptor && typeof mapSizeDescriptor.get === "function" ? mapSizeDescriptor.get : null;
@@ -1322,9 +1322,9 @@ var require_object_inspect = __commonJS({
   }
 });
 
-// node_modules/side-channel/index.js
+// ../node_modules/side-channel/index.js
 var require_side_channel = __commonJS({
-  "node_modules/side-channel/index.js"(exports2, module2) {
+  "../node_modules/side-channel/index.js"(exports2, module2) {
     "use strict";
     var GetIntrinsic = require_get_intrinsic();
     var callBound = require_callBound();
@@ -4499,6 +4499,38 @@ var require_tool = __commonJS({
 var require_utils2 = __commonJS({
   "lib/utils.js"(exports2) {
     "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
+      }
+      __setModuleDefault2(result, mod);
+      return result;
+    };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -4527,10 +4559,10 @@ var require_utils2 = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.uploadSarif = exports2.uploadReport = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.setFailed = void 0;
-    var compress = require_compressutility();
-    var tl2 = require("azure-pipelines-task-lib/task");
-    var tool = require_tool();
+    exports2.uploadSarif = exports2.uploadArtifacts = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.setFailed = void 0;
+    var compress = __importStar2(require_compressutility());
+    var tl2 = __importStar2(require("azure-pipelines-task-lib/task"));
+    var tool = __importStar2(require_tool());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var path = require("path");
     function setFailed(message) {
@@ -4594,7 +4626,7 @@ var require_utils2 = __commonJS({
       });
     }
     exports2.prepareAgent = prepareAgent;
-    function uploadReport(resultsDir, artifactName, execute) {
+    function uploadArtifacts(resultsDir, artifactName, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
           return;
@@ -4609,7 +4641,7 @@ var require_utils2 = __commonJS({
         }
       });
     }
-    exports2.uploadReport = uploadReport;
+    exports2.uploadArtifacts = uploadArtifacts;
     function uploadSarif(resultsDir, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
@@ -4630,6 +4662,38 @@ var require_utils2 = __commonJS({
 });
 
 // lib/main.js
+var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+  if (k2 === void 0)
+    k2 = k;
+  var desc = Object.getOwnPropertyDescriptor(m, k);
+  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    desc = { enumerable: true, get: function() {
+      return m[k];
+    } };
+  }
+  Object.defineProperty(o, k2, desc);
+} : function(o, m, k, k2) {
+  if (k2 === void 0)
+    k2 = k;
+  o[k2] = m[k];
+});
+var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+  Object.defineProperty(o, "default", { enumerable: true, value: v });
+} : function(o, v) {
+  o["default"] = v;
+});
+var __importStar = exports && exports.__importStar || function(mod) {
+  if (mod && mod.__esModule)
+    return mod;
+  var result = {};
+  if (mod != null) {
+    for (var k in mod)
+      if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+        __createBinding(result, mod, k);
+  }
+  __setModuleDefault(result, mod);
+  return result;
+};
 var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
   function adopt(value) {
     return value instanceof P ? value : new P(function(resolve) {
@@ -4658,7 +4722,7 @@ var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P,
   });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var tl = require("azure-pipelines-task-lib/task");
+var tl = __importStar(require("azure-pipelines-task-lib/task"));
 var qodana_1 = (init_qodana(), __toCommonJS(qodana_exports));
 var utils_1 = require_utils2();
 process.on("uncaughtException", (e) => tl.warning(e.message));
@@ -4670,7 +4734,7 @@ function main() {
       tl.mkdirP(inputs.cacheDir);
       yield (0, utils_1.prepareAgent)(inputs.args);
       const exitCode = yield (0, utils_1.qodana)();
-      yield (0, utils_1.uploadReport)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult);
+      yield (0, utils_1.uploadArtifacts)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult);
       yield (0, utils_1.uploadSarif)(inputs.resultsDir, inputs.uploadSarif);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         (0, utils_1.setFailed)(`qodana scan failed with exit code ${exitCode}`);

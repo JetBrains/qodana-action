@@ -1,23 +1,18 @@
 {
   "name": "@qodana/ci-common",
   "version": "1.0.0",
-  "description": "Common code for Qodana Scan GitHub action and Qodana Azure Pipelines extension.",
-  "main": "qodana.js",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JetBrains/qodana-cli.git"
   },
-  "files": [
-    "qodana.ts"
-  ],
   "scripts": {
-    "build": "tsc",
-    "format": "prettier --write '**/*.ts'",
-    "format-check": "prettier --check '**/*.ts'",
-    "lint": "eslint *.ts"
+    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts"
   },
-  "keywords": [],
+  "files": [
+    "qodana.ts",
+    "cli.json"
+  ],
   "devDependencies": {
     "@types/node": "^20.3.1",
     "@typescript-eslint/parser": "^5.15.0",

@@ -1,11 +1,24 @@
-name: 'vsts-releaser'
+name: 'Release'
 on:
   push:
     tags:
       - '*'
+permissions:
+  contents: write
 
 jobs:
-  release:
+  github:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: |
+          ./changelog.sh > changelog.md
+          gh release create ${GITHUB_REF##*/} -F changelog.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  azure:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -14,7 +27,7 @@ jobs:
         with:
           node-version: 12.x
       - name: Install dependencies
-        run: cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli
+        run: npm ci && cd vsts/QodanaScan && npm ci && npm i -g tfx-cli
       - name: Package and publish
         run: |
           cd vsts && npm run azure
