@@ -1,44 +1,20 @@
 {
   "name": "@qodana/action",
   "version": "1.0.0",
-  "description": "Qodana is a code quality monitoring tool that identifies bugs, duplications, and imperfections.",
+  "author": "JetBrains",
+  "license": "Apache-2.0",
   "main": "lib/main.js",
   "scripts": {
-    "build": "rm -rf lib && rm -rf ../common/lib && tsc --build .",
-    "format": "prettier --write '**/*.ts'",
-    "format-check": "prettier --check '**/*.ts'",
-    "lint": "eslint --fix src/**/*.ts",
+    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts",
+    "build": "tsc --build .",
     "package": "./node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
-    "test": "jest --coverage --coverageReporters=text-lcov",
-    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2022.2/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md",
-    "all": "npm install && npm run build && npm run format && npm run lint && npm test && npm run package"
+    "test": "jest --config jest.config.js",
+    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2023.1/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"
   },
-  "contributors": [
-    {
-      "name": "Viktor Tiulpin",
-      "url": "https://github.com/tiulpin"
-    },
-    {
-      "name": "Anastasia Kuznetsova",
-      "url": "https://github.com/a-kuznetsova"
-    },
-    {
-      "name": "Anton Monakov",
-      "url": "https://github.com/zeitgen"
-    }
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JetBrains/qodana-action.git"
   },
-  "keywords": [
-    "actions",
-    "code-quality",
-    "static-analysis",
-    "qodana"
-  ],
-  "author": "JetBrains",
-  "license": "Apache-2.0",
   "dependencies": {
     "@actions/artifact": "^0.6.1",
     "@actions/cache": "^3.0.6",

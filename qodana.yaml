@@ -1,6 +1,6 @@
 version: "1.0"
 linter: jetbrains/qodana-js:latest
-bootstrap: cd common && npm install && cd ../scan && npm install && cd ../vsts && npm install
+bootstrap: npm ci && npm run build && npm run test
 plugins:
   - id: com.intellij.grazie.pro
 profile:
@@ -11,6 +11,7 @@ exclude:
       - scan/jest.config.js
       - scan/lib
       - scan/dist
+      - scan/__tests__
       - vsts/lib
       - vsts/QodanaScan
 include:
@@ -18,3 +19,9 @@ include:
   - name: GrazieInspection
   - name: IdentifierGrammar
   - name: LanguageDetectionInspection
+  - name: CheckDependencyLicenses
+licenseRules:
+  - keys:
+      - "Apache-2.0"
+    allowed:
+      - "0BSD"

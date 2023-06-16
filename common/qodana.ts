@@ -44,6 +44,7 @@ export function getProcessArchName(): string {
  * Returns the platform name suitable for the published Qodana CLI archive name.
  */
 export function getProcessPlatformName(): string {
+  // noinspection JSDeprecatedSymbols
   return process.platform === 'win32' ? 'windows' : process.platform
 }
 

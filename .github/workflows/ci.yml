@@ -1,0 +1,147 @@
+name: 'CI'
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'scan/*'
+      - 'vsts/*'
+      - 'common/*'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.base.json'
+      - 'tsconfig.json'
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Node.js 16.x
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 16.x
+      - name: Install dependencies
+        run: npm ci && npm run build
+      - name: Rebuild scan/dist/
+        run: cd scan && npm run package
+      - name: Compare the expected and actual dist/ directories
+        run: |
+          if [ "$(git diff --ignore-space-at-eol scan/dist/ | wc -l)" -gt "0" ]; then
+            echo "Detected uncommitted changes after build.  See status below:"
+            git diff
+            exit 1
+          fi
+        id: diffscan
+      # If index.js was different from expected, upload the expected version as an artifact
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() && steps.diffscan.conclusion == 'failure' }}
+        with:
+          name: dist
+          path: scan/dist/
+      - name: Rebuild vsts/QodanaScan/
+        run: cd vsts && npm run package
+      - name: Compare the expected and actual QodanaScan/ directories
+        run: |
+          if [ "$(git diff --ignore-space-at-eol vsts/QodanaScan/ | wc -l)" -gt
+          "0" ]; then
+            echo "Detected uncommitted changes after build.  See status below:"
+            git diff
+            exit 1
+          fi
+        id: diffvsts
+      - uses: actions/upload-artifact@v2
+        if: '${{ failure() && steps.diffvsts.conclusion == ''failure'' }}'
+        with:
+          name: dist
+          path: vsts/QodanaScan/
+      - name: Lint the code
+        run: npm run lint
+
+  build:
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+    needs: [ lint ]
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci && npm run build
+
+  qodana: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: docker/login-action@v2
+        with:
+          registry: registry.jetbrains.team
+          username: e433d83e-ec9b-4023-98f0-7f181b32c0da
+          password: ${{ secrets.SPACE_PASSWORD }}
+      - uses: ./
+        with:
+          args: --print-problems,--log-level,debug,-l,jetbrains/qodana-js:latest
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+
+  qodana-no-pr: # pr mode disabled and no cloud token
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./
+        with:
+          args: --print-problems,--log-level,debug
+          pr-mode: false
+          use-annotations: false
+          cache-default-branch-only: true
+
+  azure-dev-release:
+    runs-on: ubuntu-latest
+    needs: [ lint, build, qodana ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            azure-dev:
+            - "vsts/vss-extension.dev.json"
+      - name: Set Node.js 12.x
+        if: steps.filter.outputs.azure-dev == 'true'
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 12.x
+      - name: Install dependencies
+        if: steps.filter.outputs.azure-dev == 'true'
+        run: cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli
+      - name: Package and publish
+        if: steps.filter.outputs.azure-dev == 'true'
+        run: |
+          cd vsts && npm run azure-dev
+          mv JetBrains.qodana-dev-*.vsix qodana-dev.vsix
+          tfx extension publish --publisher JetBrains --vsix qodana-dev.vsix --share-with qodana-demo -t $AZURE_TOKEN
+        env:
+          AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
+
+
+#   Not possible at the moment for GitHub-hosted Windows agents: https://github.com/JetBrains/qodana-action/pull/31#issue-812728409
+#   test-windows:
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: ./
+#         with:
+#           linter: jetbrains/qodana-js
