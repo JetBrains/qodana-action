@@ -21,6 +21,6 @@ steps:
         "$(Build.Repository.Name)"
   - task: QodanaScan@2023
     inputs:
-      args: --log-level,debug
+      args: --log-level,debug,-l,jetbrains/qodana-js:latest
     env:
       QODANA_TOKEN: $(QODANA_TOKEN)
