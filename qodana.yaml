@@ -1,8 +1,8 @@
 version: "1.0"
-linter: jetbrains/qodana-js:latest
-bootstrap: npm ci && npm run build && npm run test
+linter: registry.jetbrains.team/p/sa/containers/qodana-js:latest
+bootstrap: npm ci && npm run build && npm run test && mv scan/coverage /data/coverage
 plugins:
-  - id: com.intellij.grazie.pro
+- id: com.intellij.grazie.pro
 profile:
   name: qodana.recommended
 exclude:
@@ -20,6 +20,7 @@ include:
   - name: IdentifierGrammar
   - name: LanguageDetectionInspection
   - name: CheckDependencyLicenses
+  - name: JsCoverageInspection
 licenseRules:
   - keys:
       - "Apache-2.0"
