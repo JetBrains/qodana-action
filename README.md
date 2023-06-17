@@ -48,7 +48,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2023.1.4
+        uses: JetBrains/qodana-action@v2023.1.5
 ```
 
 Using this workflow, Qodana will run on the main branch, release branches, and on the pull requests coming to your
@@ -75,7 +75,7 @@ all you need to do is to specify the `QODANA_TOKEN` environment variable in the 
 
 ```yaml
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2023.1.4
+        uses: JetBrains/qodana-action@v2023.1.5
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 ```
@@ -155,7 +155,7 @@ qodana scan --show-report
 
 ```yaml
 - name: Qodana Scan
-  uses: JetBrains/qodana-action@v2023.1.4
+  uses: JetBrains/qodana-action@v2023.1.5
   with:
     args: --baseline,qodana.sarif.json
 ```
