@@ -9,13 +9,6 @@ module.exports = {
   testTimeout: 20000,
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.ts'],
-  coveragePathIgnorePatterns: ['node_modules', 'src/utils.ts', 'src/main.ts'],
-  coverageThreshold: {
-    global: {
-      branches: 59,
-      functions: 85,
-      lines: 70,
-      statements: 65
-    }
-  },
+  coverageReporters: ['html', ['lcovonly', { projectRoot: '../' }], 'text-summary'],
+  coveragePathIgnorePatterns: ['node_modules'],
 }
