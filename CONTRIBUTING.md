@@ -1,6 +1,6 @@
 # Contributing
 
-By participating in this project, you agree to abide our [Code of conduct](.github/CODE_OF_CONDUCT.md).
+By participating in this project, you agree to abide by our [Code of conduct](.github/CODE_OF_CONDUCT.md).
 
 ## Set up your machine
 
@@ -23,21 +23,21 @@ git clone git@github.com:JetBrains/qodana-action.git
 Install all dependencies:
 
 ```sh
-cd common && npm install && cd ../scan && npm install && cd ../vsts && npm install
+npm install
 ```
 
 Run everything in all subprojects:
 
 ```sh
-cd scan && npm run all && cd ../vsts && npm run all && cd ../
+npm run all
 ```
 
 ### GitHub action
 
-`cd` into the project directory (the only action available for now is Qodana Scan) and install project dependencies:
+`cd` into the project directory
 
 ```sh
-cd scan && npm install
+cd scan
 ```
 
 Build the project:
@@ -52,18 +52,12 @@ Lint your code with [ESLint](https://eslint.org/):
 npm run lint
 ```
 
-Run all required commands to check everything locally for the release:
-
-```sh
-npm run all
-```
-
 ### Azure extension
 
 `cd` into the project directory:
 
 ```sh
-cd vsts && npm install
+cd vsts
 ```
 
 Build the project:
@@ -87,6 +81,7 @@ npm run all
 Update the version – edit the following artifacts:
 
 - [ ] [vsts/vss-extension.json](vsts/vss-extension.json)
+- [ ] [vsts/vss-extension.dev.json](vsts/vss-extension.dev.json)
 - [ ] [vsts/QodanaScan/task.json](vsts/QodanaScan/task.json)
 
 If you forget to do this, repository tests will fail.
@@ -96,6 +91,18 @@ Test extension packing:
 ```sh
 npm run azure-dev
 ```
+
+Also, if you change [vsts/vss-extension.dev.json](vsts/vss-extension.dev.json), release job will automatically publish the test version of an extension. 
+
+### CircleCI orb
+
+`cd` into the project directory:
+
+```sh
+cd src
+```
+
+There are no tests to check or run locally, so just push your changes to the pull request, they will be run on CircleCI automatically.
 
 ## Create a commit
 
@@ -112,7 +119,7 @@ main branch.
 
 ## Release a new version
 
-If you are a core maintainer and want to release a new version, all you need is just running the following command:
+If you are a core maintainer and want to release a new version, all you need is just run the following command:
 
 ```shell
 git tag -a vX.X.X -m "vX.X.X" && git push origin vX.X.X
