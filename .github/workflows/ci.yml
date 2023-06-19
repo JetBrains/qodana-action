@@ -37,7 +37,7 @@ jobs:
             git config user.email github-actions@github.com
             git add .
             git commit -m ":bricks: Update \`scan/dist/index.js\`"
-            git push origin ${{ github.head_ref }}
+            git push
             exit 1
           fi
         id: diffscan
@@ -59,7 +59,7 @@ jobs:
             git config user.email github-actions@github.com
             git add .
             git commit -m ":bricks: Update \`vsts/QodanaScan/index.js\`"
-            git push origin ${{ github.head_ref }}
+            git push
             exit 1
           fi
         id: diffvsts
