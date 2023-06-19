@@ -8198,7 +8198,13 @@
         "\r\n",
         "\n"
       ],
-      "properties": {}
+      "properties": {
+        "coverage": {
+          "totalCoverage": 70.0,
+          "totalLines": 124.0,
+          "totalCoveredLines": 87.0
+        }
+      }
     }
   ]
 }

@@ -1,19 +1,22 @@
 // noinspection JSUnusedGlobalSymbols
 import {checksum, version} from './cli.json'
 import {createHash} from 'crypto'
-import {readFileSync} from 'fs'
+import fs from 'fs'
 
 export const SUPPORTED_PLATFORMS = ['windows', 'linux', 'darwin']
 export const SUPPORTED_ARCHS = ['x86_64', 'arm64']
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
+export const QODANA_SHORT_SARIF_NAME = 'qodana-short.sarif.json'
 export const QODANA_REPORT_URL_NAME = 'qodana.cloud'
 
 export const QODANA_LICENSES_MD = 'thirdPartySoftwareList.md'
 export const QODANA_LICENSES_JSON = 'thirdPartySoftwareList.json'
 export const EXECUTABLE = 'qodana'
 export const VERSION = version
+
+export const COVERAGE_THRESHOLD = 50
 export function getQodanaSha256(arch: string, platform: string): string {
   switch (`${platform}_${arch}`) {
     case 'windows_x86_64':
@@ -164,12 +167,49 @@ export interface Inputs {
 }
 
 /**
+ * The test code coverage information.
+ */
+export interface Coverage {
+  totalCoverage: number
+  totalLines: number
+  totalCoveredLines: number
+}
+
+/**
+ * Read the coverage information from the SARIF file.
+ * @param sarifPath the path to the SARIF file.
+ */
+export function getCoverageFromSarif(sarifPath: string): Coverage {
+  if (fs.existsSync(sarifPath)) {
+    const sarifContents = JSON.parse(
+      fs.readFileSync(sarifPath, {encoding: 'utf8'})
+    )
+    if (sarifContents.runs[0].properties['coverage']) {
+      return {
+        totalCoverage:
+          sarifContents.runs[0].properties['coverage']['totalCoverage'],
+        totalLines: sarifContents.runs[0].properties['coverage']['totalLines'],
+        totalCoveredLines:
+          sarifContents.runs[0].properties['coverage']['totalCoveredLines']
+      }
+    } else {
+      return {
+        totalCoverage: 0,
+        totalLines: 0,
+        totalCoveredLines: 0
+      }
+    }
+  }
+  throw new Error(`SARIF file not found: ${sarifPath}`)
+}
+
+/**
  * Get the SHA256 checksum of the given file.
  * @param file absolute path to the file.
  */
 export function sha256sum(file: string): string {
   const hash = createHash('sha256')
-  hash.update(readFileSync(file))
+  hash.update(fs.readFileSync(file))
   return hash.digest('hex')
 }
 

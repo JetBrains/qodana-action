@@ -10,5 +10,5 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.ts'],
   coverageReporters: ['html', ['lcovonly', { projectRoot: '../' }], 'text-summary'],
-  coveragePathIgnorePatterns: ['node_modules'],
+  coveragePathIgnorePatterns: ['node_modules', 'src/utils.ts', 'src/main.ts'],
 }

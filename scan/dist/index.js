@@ -1,7 +1,9 @@
 "use strict";
+var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 var __esm = (fn, res) => function __init() {
@@ -22,6 +24,10 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // ../node_modules/@actions/core/lib/utils.js
@@ -700,7 +706,7 @@ var require_file_command = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.prepareKeyValueMessage = exports2.issueFileCommand = void 0;
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var os = __importStar2(require("os"));
     var uuid_1 = require_dist();
     var utils_12 = require_utils();
@@ -709,10 +715,10 @@ var require_file_command = __commonJS({
       if (!filePath) {
         throw new Error(`Unable to find environment variable for file command ${command}`);
       }
-      if (!fs.existsSync(filePath)) {
+      if (!fs2.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs.appendFileSync(filePath, `${utils_12.toCommandValue(message)}${os.EOL}`, {
+      fs2.appendFileSync(filePath, `${utils_12.toCommandValue(message)}${os.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -2366,12 +2372,12 @@ var require_io_util = __commonJS({
     var _a;
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getCmdPath = exports2.tryGetExecutablePath = exports2.isRooted = exports2.isDirectory = exports2.exists = exports2.READONLY = exports2.UV_FS_O_EXLOCK = exports2.IS_WINDOWS = exports2.unlink = exports2.symlink = exports2.stat = exports2.rmdir = exports2.rm = exports2.rename = exports2.readlink = exports2.readdir = exports2.open = exports2.mkdir = exports2.lstat = exports2.copyFile = exports2.chmod = void 0;
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var path = __importStar2(require("path"));
-    _a = fs.promises, exports2.chmod = _a.chmod, exports2.copyFile = _a.copyFile, exports2.lstat = _a.lstat, exports2.mkdir = _a.mkdir, exports2.open = _a.open, exports2.readdir = _a.readdir, exports2.readlink = _a.readlink, exports2.rename = _a.rename, exports2.rm = _a.rm, exports2.rmdir = _a.rmdir, exports2.stat = _a.stat, exports2.symlink = _a.symlink, exports2.unlink = _a.unlink;
+    _a = fs2.promises, exports2.chmod = _a.chmod, exports2.copyFile = _a.copyFile, exports2.lstat = _a.lstat, exports2.mkdir = _a.mkdir, exports2.open = _a.open, exports2.readdir = _a.readdir, exports2.readlink = _a.readlink, exports2.rename = _a.rename, exports2.rm = _a.rm, exports2.rmdir = _a.rmdir, exports2.stat = _a.stat, exports2.symlink = _a.symlink, exports2.unlink = _a.unlink;
     exports2.IS_WINDOWS = process.platform === "win32";
     exports2.UV_FS_O_EXLOCK = 268435456;
-    exports2.READONLY = fs.constants.O_RDONLY;
+    exports2.READONLY = fs2.constants.O_RDONLY;
     function exists(fsPath) {
       return __awaiter2(this, void 0, void 0, function* () {
         try {
@@ -2774,17 +2780,20 @@ var init_cli = __esm({
 // ../common/qodana.ts
 var qodana_exports = {};
 __export(qodana_exports, {
+  COVERAGE_THRESHOLD: () => COVERAGE_THRESHOLD,
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
   QODANA_LICENSES_JSON: () => QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD: () => QODANA_LICENSES_MD,
   QODANA_REPORT_URL_NAME: () => QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME: () => QODANA_SARIF_NAME,
+  QODANA_SHORT_SARIF_NAME: () => QODANA_SHORT_SARIF_NAME,
   QodanaExitCode: () => QodanaExitCode,
   SUPPORTED_ARCHS: () => SUPPORTED_ARCHS,
   SUPPORTED_PLATFORMS: () => SUPPORTED_PLATFORMS,
   VERSION: () => VERSION,
   extractArg: () => extractArg,
+  getCoverageFromSarif: () => getCoverageFromSarif,
   getProcessArchName: () => getProcessArchName,
   getProcessPlatformName: () => getProcessPlatformName,
   getQodanaPullArgs: () => getQodanaPullArgs,
@@ -2868,30 +2877,53 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
   }
   return cliArgs;
 }
+function getCoverageFromSarif(sarifPath) {
+  if (import_fs.default.existsSync(sarifPath)) {
+    const sarifContents = JSON.parse(
+      import_fs.default.readFileSync(sarifPath, { encoding: "utf8" })
+    );
+    if (sarifContents.runs[0].properties["coverage"]) {
+      return {
+        totalCoverage: sarifContents.runs[0].properties["coverage"]["totalCoverage"],
+        totalLines: sarifContents.runs[0].properties["coverage"]["totalLines"],
+        totalCoveredLines: sarifContents.runs[0].properties["coverage"]["totalCoveredLines"]
+      };
+    } else {
+      return {
+        totalCoverage: 0,
+        totalLines: 0,
+        totalCoveredLines: 0
+      };
+    }
+  }
+  throw new Error(`SARIF file not found: ${sarifPath}`);
+}
 function sha256sum(file) {
   const hash = (0, import_crypto.createHash)("sha256");
-  hash.update((0, import_fs.readFileSync)(file));
+  hash.update(import_fs.default.readFileSync(file));
   return hash.digest("hex");
 }
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
-var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, QodanaExitCode;
+var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
     init_cli();
     import_crypto = require("crypto");
-    import_fs = require("fs");
+    import_fs = __toESM(require("fs"));
     SUPPORTED_PLATFORMS = ["windows", "linux", "darwin"];
     SUPPORTED_ARCHS = ["x86_64", "arm64"];
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
+    QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
     QODANA_REPORT_URL_NAME = "qodana.cloud";
     QODANA_LICENSES_MD = "thirdPartySoftwareList.md";
     QODANA_LICENSES_JSON = "thirdPartySoftwareList.json";
     EXECUTABLE = "qodana";
     VERSION = version;
+    COVERAGE_THRESHOLD = 50;
     __name(getQodanaSha256, "getQodanaSha256");
     __name(getProcessArchName, "getProcessArchName");
     __name(getProcessPlatformName, "getProcessPlatformName");
@@ -2905,6 +2937,7 @@ var init_qodana = __esm({
     __name(extractArg, "extractArg");
     __name(getQodanaPullArgs, "getQodanaPullArgs");
     __name(getQodanaScanArgs, "getQodanaScanArgs");
+    __name(getCoverageFromSarif, "getCoverageFromSarif");
     __name(sha256sum, "sha256sum");
     __name(getQodanaSha256MismatchMessage, "getQodanaSha256MismatchMessage");
   }
@@ -3004,25 +3037,25 @@ var require_upload_specification = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getUploadSpecification = void 0;
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var core_1 = require_core();
     var path_1 = require("path");
     var path_and_artifact_name_validation_1 = require_path_and_artifact_name_validation();
     function getUploadSpecification(artifactName, rootDirectory, artifactFiles) {
       const specifications = [];
-      if (!fs.existsSync(rootDirectory)) {
+      if (!fs2.existsSync(rootDirectory)) {
         throw new Error(`Provided rootDirectory ${rootDirectory} does not exist`);
       }
-      if (!fs.lstatSync(rootDirectory).isDirectory()) {
+      if (!fs2.lstatSync(rootDirectory).isDirectory()) {
         throw new Error(`Provided rootDirectory ${rootDirectory} is not a valid directory`);
       }
       rootDirectory = path_1.normalize(rootDirectory);
       rootDirectory = path_1.resolve(rootDirectory);
       for (let file of artifactFiles) {
-        if (!fs.existsSync(file)) {
+        if (!fs2.existsSync(file)) {
           throw new Error(`File ${file} does not exist`);
         }
-        if (!fs.lstatSync(file).isDirectory()) {
+        if (!fs2.lstatSync(file).isDirectory()) {
           file = path_1.normalize(file);
           file = path_1.resolve(file);
           if (!file.startsWith(rootDirectory)) {
@@ -3050,7 +3083,7 @@ var require_old = __commonJS({
   "../node_modules/fs.realpath/old.js"(exports2) {
     var pathModule = require("path");
     var isWindows = process.platform === "win32";
-    var fs = require("fs");
+    var fs2 = require("fs");
     var DEBUG = process.env.NODE_DEBUG && /fs/.test(process.env.NODE_DEBUG);
     function rethrow() {
       var callback;
@@ -3119,7 +3152,7 @@ var require_old = __commonJS({
         base = m[0];
         previous = "";
         if (isWindows && !knownHard[base]) {
-          fs.lstatSync(base);
+          fs2.lstatSync(base);
           knownHard[base] = true;
         }
       }
@@ -3138,7 +3171,7 @@ var require_old = __commonJS({
         if (cache && Object.prototype.hasOwnProperty.call(cache, base)) {
           resolvedLink = cache[base];
         } else {
-          var stat = fs.lstatSync(base);
+          var stat = fs2.lstatSync(base);
           if (!stat.isSymbolicLink()) {
             knownHard[base] = true;
             if (cache)
@@ -3153,8 +3186,8 @@ var require_old = __commonJS({
             }
           }
           if (linkTarget === null) {
-            fs.statSync(base);
-            linkTarget = fs.readlinkSync(base);
+            fs2.statSync(base);
+            linkTarget = fs2.readlinkSync(base);
           }
           resolvedLink = pathModule.resolve(previous, linkTarget);
           if (cache)
@@ -3191,7 +3224,7 @@ var require_old = __commonJS({
         base = m[0];
         previous = "";
         if (isWindows && !knownHard[base]) {
-          fs.lstat(base, function(err) {
+          fs2.lstat(base, function(err) {
             if (err)
               return cb(err);
             knownHard[base] = true;
@@ -3220,7 +3253,7 @@ var require_old = __commonJS({
         if (cache && Object.prototype.hasOwnProperty.call(cache, base)) {
           return gotResolvedLink(cache[base]);
         }
-        return fs.lstat(base, gotStat);
+        return fs2.lstat(base, gotStat);
       }
       __name(LOOP, "LOOP");
       function gotStat(err, stat) {
@@ -3238,10 +3271,10 @@ var require_old = __commonJS({
             return gotTarget(null, seenLinks[id], base);
           }
         }
-        fs.stat(base, function(err2) {
+        fs2.stat(base, function(err2) {
           if (err2)
             return cb(err2);
-          fs.readlink(base, function(err3, target) {
+          fs2.readlink(base, function(err3, target) {
             if (!isWindows)
               seenLinks[id] = target;
             gotTarget(err3, target);
@@ -3276,9 +3309,9 @@ var require_fs = __commonJS({
     realpath.realpathSync = realpathSync;
     realpath.monkeypatch = monkeypatch;
     realpath.unmonkeypatch = unmonkeypatch;
-    var fs = require("fs");
-    var origRealpath = fs.realpath;
-    var origRealpathSync = fs.realpathSync;
+    var fs2 = require("fs");
+    var origRealpath = fs2.realpath;
+    var origRealpathSync = fs2.realpathSync;
     var version2 = process.version;
     var ok = /^v[0-5]\./.test(version2);
     var old = require_old();
@@ -3319,13 +3352,13 @@ var require_fs = __commonJS({
     }
     __name(realpathSync, "realpathSync");
     function monkeypatch() {
-      fs.realpath = realpath;
-      fs.realpathSync = realpathSync;
+      fs2.realpath = realpath;
+      fs2.realpathSync = realpathSync;
     }
     __name(monkeypatch, "monkeypatch");
     function unmonkeypatch() {
-      fs.realpath = origRealpath;
-      fs.realpathSync = origRealpathSync;
+      fs2.realpath = origRealpath;
+      fs2.realpathSync = origRealpathSync;
     }
     __name(unmonkeypatch, "unmonkeypatch");
   }
@@ -4255,7 +4288,7 @@ var require_common = __commonJS({
       return Object.prototype.hasOwnProperty.call(obj, field);
     }
     __name(ownProp, "ownProp");
-    var fs = require("fs");
+    var fs2 = require("fs");
     var path = require("path");
     var minimatch = require_minimatch();
     var isAbsolute = require_path_is_absolute();
@@ -4313,7 +4346,7 @@ var require_common = __commonJS({
       self2.stat = !!options.stat;
       self2.noprocess = !!options.noprocess;
       self2.absolute = !!options.absolute;
-      self2.fs = options.fs || fs;
+      self2.fs = options.fs || fs2;
       self2.maxLength = options.maxLength || Infinity;
       self2.cache = options.cache || /* @__PURE__ */ Object.create(null);
       self2.statCache = options.statCache || /* @__PURE__ */ Object.create(null);
@@ -5497,7 +5530,7 @@ var require_rimraf = __commonJS({
   "../node_modules/rimraf/rimraf.js"(exports2, module2) {
     var assert = require("assert");
     var path = require("path");
-    var fs = require("fs");
+    var fs2 = require("fs");
     var glob = void 0;
     try {
       glob = require_glob();
@@ -5519,9 +5552,9 @@ var require_rimraf = __commonJS({
         "readdir"
       ];
       methods.forEach((m) => {
-        options[m] = options[m] || fs[m];
+        options[m] = options[m] || fs2[m];
         m = m + "Sync";
-        options[m] = options[m] || fs[m];
+        options[m] = options[m] || fs2[m];
       });
       options.maxBusyTries = options.maxBusyTries || 3;
       options.emfileWait = options.emfileWait || 1e3;
@@ -5776,11 +5809,11 @@ var require_rimraf = __commonJS({
 // ../node_modules/tmp/lib/tmp.js
 var require_tmp = __commonJS({
   "../node_modules/tmp/lib/tmp.js"(exports2, module2) {
-    var fs = require("fs");
+    var fs2 = require("fs");
     var os = require("os");
     var path = require("path");
     var crypto = require("crypto");
-    var _c = { fs: fs.constants, os: os.constants };
+    var _c = { fs: fs2.constants, os: os.constants };
     var rimraf = require_rimraf();
     var RANDOM_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     var TEMPLATE_PATTERN = /XXXXXX/;
@@ -5793,7 +5826,7 @@ var require_tmp = __commonJS({
     var FILE_MODE = 384;
     var EXIT = "exit";
     var _removeObjects = [];
-    var FN_RMDIR_SYNC = fs.rmdirSync.bind(fs);
+    var FN_RMDIR_SYNC = fs2.rmdirSync.bind(fs2);
     var FN_RIMRAF_SYNC = rimraf.sync;
     var _gracefulCleanup = false;
     function tmpName(options, callback) {
@@ -5807,7 +5840,7 @@ var require_tmp = __commonJS({
       (/* @__PURE__ */ __name(function _getUniqueName() {
         try {
           const name = _generateTmpName(opts);
-          fs.stat(name, function(err) {
+          fs2.stat(name, function(err) {
             if (!err) {
               if (tries-- > 0)
                 return _getUniqueName();
@@ -5828,7 +5861,7 @@ var require_tmp = __commonJS({
       do {
         const name = _generateTmpName(opts);
         try {
-          fs.statSync(name);
+          fs2.statSync(name);
         } catch (e) {
           return name;
         }
@@ -5841,11 +5874,11 @@ var require_tmp = __commonJS({
       tmpName(opts, /* @__PURE__ */ __name(function _tmpNameCreated(err, name) {
         if (err)
           return cb(err);
-        fs.open(name, CREATE_FLAGS, opts.mode || FILE_MODE, /* @__PURE__ */ __name(function _fileCreated(err2, fd) {
+        fs2.open(name, CREATE_FLAGS, opts.mode || FILE_MODE, /* @__PURE__ */ __name(function _fileCreated(err2, fd) {
           if (err2)
             return cb(err2);
           if (opts.discardDescriptor) {
-            return fs.close(fd, /* @__PURE__ */ __name(function _discardCallback(possibleErr) {
+            return fs2.close(fd, /* @__PURE__ */ __name(function _discardCallback(possibleErr) {
               return cb(possibleErr, name, void 0, _prepareTmpFileRemoveCallback(name, -1, opts, false));
             }, "_discardCallback"));
           } else {
@@ -5860,9 +5893,9 @@ var require_tmp = __commonJS({
       const args = _parseArguments(options), opts = args[0];
       const discardOrDetachDescriptor = opts.discardDescriptor || opts.detachDescriptor;
       const name = tmpNameSync(opts);
-      var fd = fs.openSync(name, CREATE_FLAGS, opts.mode || FILE_MODE);
+      var fd = fs2.openSync(name, CREATE_FLAGS, opts.mode || FILE_MODE);
       if (opts.discardDescriptor) {
-        fs.closeSync(fd);
+        fs2.closeSync(fd);
         fd = void 0;
       }
       return {
@@ -5877,7 +5910,7 @@ var require_tmp = __commonJS({
       tmpName(opts, /* @__PURE__ */ __name(function _tmpNameCreated(err, name) {
         if (err)
           return cb(err);
-        fs.mkdir(name, opts.mode || DIR_MODE, /* @__PURE__ */ __name(function _dirCreated(err2) {
+        fs2.mkdir(name, opts.mode || DIR_MODE, /* @__PURE__ */ __name(function _dirCreated(err2) {
           if (err2)
             return cb(err2);
           cb(null, name, _prepareTmpDirRemoveCallback(name, opts, false));
@@ -5888,7 +5921,7 @@ var require_tmp = __commonJS({
     function dirSync(options) {
       const args = _parseArguments(options), opts = args[0];
       const name = tmpNameSync(opts);
-      fs.mkdirSync(name, opts.mode || DIR_MODE);
+      fs2.mkdirSync(name, opts.mode || DIR_MODE);
       return {
         name,
         removeCallback: _prepareTmpDirRemoveCallback(name, opts, true)
@@ -5903,24 +5936,24 @@ var require_tmp = __commonJS({
         next();
       }, "_handler");
       if (0 <= fdPath[0])
-        fs.close(fdPath[0], function() {
-          fs.unlink(fdPath[1], _handler);
+        fs2.close(fdPath[0], function() {
+          fs2.unlink(fdPath[1], _handler);
         });
       else
-        fs.unlink(fdPath[1], _handler);
+        fs2.unlink(fdPath[1], _handler);
     }
     __name(_removeFileAsync, "_removeFileAsync");
     function _removeFileSync(fdPath) {
       let rethrownException = null;
       try {
         if (0 <= fdPath[0])
-          fs.closeSync(fdPath[0]);
+          fs2.closeSync(fdPath[0]);
       } catch (e) {
         if (!_isEBADF(e) && !_isENOENT(e))
           throw e;
       } finally {
         try {
-          fs.unlinkSync(fdPath[1]);
+          fs2.unlinkSync(fdPath[1]);
         } catch (e) {
           if (!_isENOENT(e))
             rethrownException = e;
@@ -5940,7 +5973,7 @@ var require_tmp = __commonJS({
     }
     __name(_prepareTmpFileRemoveCallback, "_prepareTmpFileRemoveCallback");
     function _prepareTmpDirRemoveCallback(name, opts, sync) {
-      const removeFunction = opts.unsafeCleanup ? rimraf : fs.rmdir.bind(fs);
+      const removeFunction = opts.unsafeCleanup ? rimraf : fs2.rmdir.bind(fs2);
       const removeFunctionSync = opts.unsafeCleanup ? FN_RIMRAF_SYNC : FN_RMDIR_SYNC;
       const removeCallbackSync = _prepareRemoveCallback(removeFunctionSync, name, sync);
       const removeCallback = _prepareRemoveCallback(removeFunction, name, sync, removeCallbackSync);
@@ -7001,10 +7034,10 @@ var require_upload_gzip = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createGZipFileInBuffer = exports2.createGZipFileOnDisk = void 0;
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var zlib = __importStar2(require("zlib"));
     var util_1 = require("util");
-    var stat = util_1.promisify(fs.stat);
+    var stat = util_1.promisify(fs2.stat);
     var gzipExemptFileExtensions = [
       ".gzip",
       ".zip",
@@ -7021,9 +7054,9 @@ var require_upload_gzip = __commonJS({
           }
         }
         return new Promise((resolve, reject) => {
-          const inputStream = fs.createReadStream(originalFilePath);
+          const inputStream = fs2.createReadStream(originalFilePath);
           const gzip = zlib.createGzip();
-          const outputStream = fs.createWriteStream(tempFilePath);
+          const outputStream = fs2.createWriteStream(tempFilePath);
           inputStream.pipe(gzip).pipe(outputStream);
           outputStream.on("finish", () => __awaiter2(this, void 0, void 0, function* () {
             const size = (yield stat(tempFilePath)).size;
@@ -7042,7 +7075,7 @@ var require_upload_gzip = __commonJS({
       return __awaiter2(this, void 0, void 0, function* () {
         return new Promise((resolve) => __awaiter2(this, void 0, void 0, function* () {
           var e_1, _a;
-          const inputStream = fs.createReadStream(originalFilePath);
+          const inputStream = fs2.createReadStream(originalFilePath);
           const gzip = zlib.createGzip();
           inputStream.pipe(gzip);
           const chunks = [];
@@ -7260,7 +7293,7 @@ var require_upload_http_client = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.UploadHttpClient = void 0;
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var core2 = __importStar2(require_core());
     var tmp = __importStar2(require_tmp_promise());
     var stream = __importStar2(require("stream"));
@@ -7274,7 +7307,7 @@ var require_upload_http_client = __commonJS({
     var http_manager_1 = require_http_manager();
     var upload_gzip_1 = require_upload_gzip();
     var requestUtils_1 = require_requestUtils();
-    var stat = util_1.promisify(fs.stat);
+    var stat = util_1.promisify(fs2.stat);
     var UploadHttpClient = class {
       constructor() {
         this.uploadHttpManager = new http_manager_1.HttpManager(config_variables_1.getUploadFileConcurrency(), "@actions/artifact-upload");
@@ -7393,7 +7426,7 @@ var require_upload_http_client = __commonJS({
             let openUploadStream;
             if (totalFileSize < buffer.byteLength) {
               core2.debug(`The gzip file created for ${parameters.file} did not help with reducing the size of the file. The original file will be uploaded as-is`);
-              openUploadStream = /* @__PURE__ */ __name(() => fs.createReadStream(parameters.file), "openUploadStream");
+              openUploadStream = /* @__PURE__ */ __name(() => fs2.createReadStream(parameters.file), "openUploadStream");
               isGzip = false;
               uploadFileSize = totalFileSize;
             } else {
@@ -7439,7 +7472,7 @@ var require_upload_http_client = __commonJS({
                 failedChunkSizes += chunkSize;
                 continue;
               }
-              const result = yield this.uploadChunk(httpClientIndex, parameters.resourceUrl, () => fs.createReadStream(uploadFilePath, {
+              const result = yield this.uploadChunk(httpClientIndex, parameters.resourceUrl, () => fs2.createReadStream(uploadFilePath, {
                 start: startChunkIndex,
                 end: endChunkIndex,
                 autoClose: false
@@ -7623,7 +7656,7 @@ var require_download_http_client = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DownloadHttpClient = void 0;
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var core2 = __importStar2(require_core());
     var zlib = __importStar2(require("zlib"));
     var utils_12 = require_utils2();
@@ -7696,7 +7729,7 @@ var require_download_http_client = __commonJS({
         return __awaiter2(this, void 0, void 0, function* () {
           let retryCount = 0;
           const retryLimit = config_variables_1.getRetryLimit();
-          let destinationStream = fs.createWriteStream(downloadPath);
+          let destinationStream = fs2.createWriteStream(downloadPath);
           const headers = utils_12.getDownloadHeaders("application/json", true, true);
           const makeDownloadRequest = /* @__PURE__ */ __name(() => __awaiter2(this, void 0, void 0, function* () {
             const client = this.downloadHttpManager.getClient(httpClientIndex);
@@ -7738,7 +7771,7 @@ var require_download_http_client = __commonJS({
               }
             });
             yield utils_12.rmFile(fileDownloadPath);
-            destinationStream = fs.createWriteStream(fileDownloadPath);
+            destinationStream = fs2.createWriteStream(fileDownloadPath);
           }), "resetDestinationStream");
           while (retryCount <= retryLimit) {
             let response;
@@ -9448,7 +9481,7 @@ var require_internal_globber = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DefaultGlobber = void 0;
     var core2 = __importStar2(require_core());
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var globOptionsHelper = __importStar2(require_internal_glob_options_helper());
     var path = __importStar2(require("path"));
     var patternHelper = __importStar2(require_internal_pattern_helper());
@@ -9502,7 +9535,7 @@ var require_internal_globber = __commonJS({
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
             core2.debug(`Search path '${searchPath}'`);
             try {
-              yield __await(fs.promises.lstat(searchPath));
+              yield __await(fs2.promises.lstat(searchPath));
             } catch (err) {
               if (err.code === "ENOENT") {
                 continue;
@@ -9532,7 +9565,7 @@ var require_internal_globber = __commonJS({
                 continue;
               }
               const childLevel = item.level + 1;
-              const childItems = (yield __await(fs.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path.join(item.path, x), childLevel));
+              const childItems = (yield __await(fs2.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path.join(item.path, x), childLevel));
               stack.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
               yield yield __await(item.path);
@@ -9564,7 +9597,7 @@ var require_internal_globber = __commonJS({
           let stats;
           if (options.followSymbolicLinks) {
             try {
-              stats = yield fs.promises.stat(item.path);
+              stats = yield fs2.promises.stat(item.path);
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
@@ -9576,10 +9609,10 @@ var require_internal_globber = __commonJS({
               throw err;
             }
           } else {
-            stats = yield fs.promises.lstat(item.path);
+            stats = yield fs2.promises.lstat(item.path);
           }
           if (stats.isDirectory() && options.followSymbolicLinks) {
-            const realPath = yield fs.promises.realpath(item.path);
+            const realPath = yield fs2.promises.realpath(item.path);
             while (traversalChain.length >= item.level) {
               traversalChain.pop();
             }
@@ -11109,7 +11142,7 @@ var require_cacheUtils = __commonJS({
     var exec = __importStar2(require_exec());
     var glob = __importStar2(require_glob2());
     var io2 = __importStar2(require_io());
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var path = __importStar2(require("path"));
     var semver = __importStar2(require_semver());
     var util = __importStar2(require("util"));
@@ -11140,7 +11173,7 @@ var require_cacheUtils = __commonJS({
     __name(createTempDirectory, "createTempDirectory");
     exports2.createTempDirectory = createTempDirectory;
     function getArchiveFileSizeInBytes(filePath) {
-      return fs.statSync(filePath).size;
+      return fs2.statSync(filePath).size;
     }
     __name(getArchiveFileSizeInBytes, "getArchiveFileSizeInBytes");
     exports2.getArchiveFileSizeInBytes = getArchiveFileSizeInBytes;
@@ -11182,7 +11215,7 @@ var require_cacheUtils = __commonJS({
     exports2.resolvePaths = resolvePaths;
     function unlinkFile(filePath) {
       return __awaiter2(this, void 0, void 0, function* () {
-        return util.promisify(fs.unlink)(filePath);
+        return util.promisify(fs2.unlink)(filePath);
       });
     }
     __name(unlinkFile, "unlinkFile");
@@ -11231,7 +11264,7 @@ var require_cacheUtils = __commonJS({
     exports2.getCacheFileName = getCacheFileName;
     function getGnuTarPathOnWindows() {
       return __awaiter2(this, void 0, void 0, function* () {
-        if (fs.existsSync(constants_1.GnuTarPathOnWindows)) {
+        if (fs2.existsSync(constants_1.GnuTarPathOnWindows)) {
           return constants_1.GnuTarPathOnWindows;
         }
         const versionOutput = yield getVersion("tar");
@@ -27962,7 +27995,7 @@ var require_form_data = __commonJS({
     var http = require("http");
     var https = require("https");
     var parseUrl = require("url").parse;
-    var fs = require("fs");
+    var fs2 = require("fs");
     var Stream = require("stream").Stream;
     var mime = require_mime_types();
     var asynckit = require_asynckit();
@@ -28028,7 +28061,7 @@ var require_form_data = __commonJS({
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
-          fs.stat(value.path, function(err, stat) {
+          fs2.stat(value.path, function(err, stat) {
             var fileSize;
             if (err) {
               callback(err);
@@ -37943,7 +37976,7 @@ var require_dist11 = __commonJS({
     require_dist9();
     var coreLro = require_dist10();
     var events = require("events");
-    var fs = require("fs");
+    var fs2 = require("fs");
     var util = require("util");
     function _interopNamespace(e) {
       if (e && e.__esModule)
@@ -37968,7 +38001,7 @@ var require_dist11 = __commonJS({
     __name(_interopNamespace, "_interopNamespace");
     var coreHttp__namespace = /* @__PURE__ */ _interopNamespace(coreHttp);
     var os__namespace = /* @__PURE__ */ _interopNamespace(os);
-    var fs__namespace = /* @__PURE__ */ _interopNamespace(fs);
+    var fs__namespace = /* @__PURE__ */ _interopNamespace(fs2);
     var util__namespace = /* @__PURE__ */ _interopNamespace(util);
     var BlobServiceProperties = {
       serializedName: "BlobServiceProperties",
@@ -57986,7 +58019,7 @@ var require_downloadUtils = __commonJS({
     var http_client_1 = require_lib();
     var storage_blob_1 = require_dist11();
     var buffer = __importStar2(require("buffer"));
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var stream = __importStar2(require("stream"));
     var util = __importStar2(require("util"));
     var utils = __importStar2(require_cacheUtils());
@@ -58065,7 +58098,7 @@ var require_downloadUtils = __commonJS({
     exports2.DownloadProgress = DownloadProgress;
     function downloadCacheHttpClient(archiveLocation, archivePath) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const writeStream = fs.createWriteStream(archivePath);
+        const writeStream = fs2.createWriteStream(archivePath);
         const httpClient = new http_client_1.HttpClient("actions/cache");
         const downloadResponse = yield (0, requestUtils_1.retryHttpClientResponse)("downloadCache", () => __awaiter2(this, void 0, void 0, function* () {
           return httpClient.get(archiveLocation);
@@ -58105,7 +58138,7 @@ var require_downloadUtils = __commonJS({
         } else {
           const maxSegmentSize = Math.min(134217728, buffer.constants.MAX_LENGTH);
           const downloadProgress = new DownloadProgress(contentLength);
-          const fd = fs.openSync(archivePath, "w");
+          const fd = fs2.openSync(archivePath, "w");
           try {
             downloadProgress.startDisplayTimer();
             const controller = new abort_controller_1.AbortController();
@@ -58123,12 +58156,12 @@ var require_downloadUtils = __commonJS({
                 controller.abort();
                 throw new Error("Aborting cache download as the download time exceeded the timeout.");
               } else if (Buffer.isBuffer(result)) {
-                fs.writeFileSync(fd, result);
+                fs2.writeFileSync(fd, result);
               }
             }
           } finally {
             downloadProgress.stopDisplayTimer();
-            fs.closeSync(fd);
+            fs2.closeSync(fd);
           }
         }
       });
@@ -58321,7 +58354,7 @@ var require_cacheHttpClient = __commonJS({
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
     var crypto = __importStar2(require("crypto"));
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var url_1 = require("url");
     var utils = __importStar2(require_cacheUtils());
     var downloadUtils_1 = require_downloadUtils();
@@ -58474,7 +58507,7 @@ Other caches with similar key:`);
       return __awaiter2(this, void 0, void 0, function* () {
         const fileSize = utils.getArchiveFileSizeInBytes(archivePath);
         const resourceUrl = getCacheApiUrl(`caches/${cacheId.toString()}`);
-        const fd = fs.openSync(archivePath, "r");
+        const fd = fs2.openSync(archivePath, "r");
         const uploadOptions = (0, options_1.getUploadOptions)(options);
         const concurrency = utils.assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
         const maxChunkSize = utils.assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
@@ -58488,7 +58521,7 @@ Other caches with similar key:`);
               const start = offset;
               const end = offset + chunkSize - 1;
               offset += maxChunkSize;
-              yield uploadChunk(httpClient, resourceUrl, () => fs.createReadStream(archivePath, {
+              yield uploadChunk(httpClient, resourceUrl, () => fs2.createReadStream(archivePath, {
                 fd,
                 start,
                 end,
@@ -58499,7 +58532,7 @@ Other caches with similar key:`);
             }
           })));
         } finally {
-          fs.closeSync(fd);
+          fs2.closeSync(fd);
         }
         return;
       });
@@ -62791,7 +62824,7 @@ var require_manifest = __commonJS({
     var core_1 = require_core();
     var os = require("os");
     var cp = require("child_process");
-    var fs = require("fs");
+    var fs2 = require("fs");
     function _findMatch(versionSpec, stable, candidates, archFilter) {
       return __awaiter2(this, void 0, void 0, function* () {
         const platFilter = os.platform();
@@ -62857,10 +62890,10 @@ var require_manifest = __commonJS({
       const lsbReleaseFile = "/etc/lsb-release";
       const osReleaseFile = "/etc/os-release";
       let contents = "";
-      if (fs.existsSync(lsbReleaseFile)) {
-        contents = fs.readFileSync(lsbReleaseFile).toString();
-      } else if (fs.existsSync(osReleaseFile)) {
-        contents = fs.readFileSync(osReleaseFile).toString();
+      if (fs2.existsSync(lsbReleaseFile)) {
+        contents = fs2.readFileSync(lsbReleaseFile).toString();
+      } else if (fs2.existsSync(osReleaseFile)) {
+        contents = fs2.readFileSync(osReleaseFile).toString();
       }
       return contents;
     }
@@ -63127,7 +63160,7 @@ var require_tool_cache = __commonJS({
     exports2.evaluateVersions = exports2.isExplicitVersion = exports2.findFromManifest = exports2.getManifestFromRepo = exports2.findAllVersions = exports2.find = exports2.cacheFile = exports2.cacheDir = exports2.extractZip = exports2.extractXar = exports2.extractTar = exports2.extract7z = exports2.downloadTool = exports2.HTTPError = void 0;
     var core2 = __importStar2(require_core());
     var io2 = __importStar2(require_io());
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var mm = __importStar2(require_manifest());
     var os = __importStar2(require("os"));
     var path = __importStar2(require("path"));
@@ -63177,7 +63210,7 @@ var require_tool_cache = __commonJS({
     exports2.downloadTool = downloadTool;
     function downloadToolAttempt(url, dest, auth, headers) {
       return __awaiter2(this, void 0, void 0, function* () {
-        if (fs.existsSync(dest)) {
+        if (fs2.existsSync(dest)) {
           throw new Error(`Destination file path ${dest} already exists`);
         }
         const http = new httpm.HttpClient(userAgent, [], {
@@ -63201,7 +63234,7 @@ var require_tool_cache = __commonJS({
         const readStream = responseMessageFactory();
         let succeeded = false;
         try {
-          yield pipeline(readStream, fs.createWriteStream(dest));
+          yield pipeline(readStream, fs2.createWriteStream(dest));
           core2.debug("download complete");
           succeeded = true;
           return dest;
@@ -63420,11 +63453,11 @@ var require_tool_cache = __commonJS({
         arch = arch || os.arch();
         core2.debug(`Caching tool ${tool} ${version2} ${arch}`);
         core2.debug(`source dir: ${sourceDir}`);
-        if (!fs.statSync(sourceDir).isDirectory()) {
+        if (!fs2.statSync(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
         const destPath = yield _createToolPath(tool, version2, arch);
-        for (const itemName of fs.readdirSync(sourceDir)) {
+        for (const itemName of fs2.readdirSync(sourceDir)) {
           const s = path.join(sourceDir, itemName);
           yield io2.cp(s, destPath, { recursive: true });
         }
@@ -63440,7 +63473,7 @@ var require_tool_cache = __commonJS({
         arch = arch || os.arch();
         core2.debug(`Caching tool ${tool} ${version2} ${arch}`);
         core2.debug(`source file: ${sourceFile}`);
-        if (!fs.statSync(sourceFile).isFile()) {
+        if (!fs2.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
         const destFolder = yield _createToolPath(tool, version2, arch);
@@ -63471,7 +63504,7 @@ var require_tool_cache = __commonJS({
         versionSpec = semver.clean(versionSpec) || "";
         const cachePath = path.join(_getCacheDirectory(), toolName, versionSpec, arch);
         core2.debug(`checking cache: ${cachePath}`);
-        if (fs.existsSync(cachePath) && fs.existsSync(`${cachePath}.complete`)) {
+        if (fs2.existsSync(cachePath) && fs2.existsSync(`${cachePath}.complete`)) {
           core2.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch}`);
           toolPath = cachePath;
         } else {
@@ -63486,12 +63519,12 @@ var require_tool_cache = __commonJS({
       const versions = [];
       arch = arch || os.arch();
       const toolPath = path.join(_getCacheDirectory(), toolName);
-      if (fs.existsSync(toolPath)) {
-        const children2 = fs.readdirSync(toolPath);
+      if (fs2.existsSync(toolPath)) {
+        const children2 = fs2.readdirSync(toolPath);
         for (const child of children2) {
           if (isExplicitVersion(child)) {
             const fullPath = path.join(toolPath, child, arch || "");
-            if (fs.existsSync(fullPath) && fs.existsSync(`${fullPath}.complete`)) {
+            if (fs2.existsSync(fullPath) && fs2.existsSync(`${fullPath}.complete`)) {
               versions.push(child);
             }
           }
@@ -63570,7 +63603,7 @@ var require_tool_cache = __commonJS({
     function _completeToolPath(tool, version2, arch) {
       const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version2) || version2, arch || "");
       const markerPath = `${folderPath}.complete`;
-      fs.writeFileSync(markerPath, "");
+      fs2.writeFileSync(markerPath, "");
       core2.debug("finished caching tool");
     }
     __name(_completeToolPath, "_completeToolPath");
@@ -63701,9 +63734,9 @@ var require_output = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.getProblemPlural = exports2.getSummary = exports2.publishOutput = void 0;
+    exports2.getProblemPlural = exports2.getSummary = exports2.publishOutput = exports2.getCoverageStats = void 0;
     var core2 = __importStar2(require_core());
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var utils_12 = require_utils8();
     var annotations_1 = require_annotations();
@@ -63730,6 +63763,32 @@ so that the action will upload the files as the job artifacts:
 \`\`\`
 `;
     var SUMMARY_PR_MODE = `\u{1F4A1} Qodana analysis was run in the pull request mode: only the changed files were checked`;
+    function wrapToDiffBlock(message) {
+      return `\`\`\`diff
+${message}
+\`\`\``;
+    }
+    __name(wrapToDiffBlock, "wrapToDiffBlock");
+    function coverageConclusion(totalCoverage, threshold) {
+      if (totalCoverage < threshold) {
+        return `\u274C FAILED, required line coverage needs to be more than ${threshold}%
+- ${totalCoverage}% lines covered`;
+      }
+      return `\u2705 PASSED, required line coverage needs to be more than ${threshold}%
++ ${totalCoverage}% lines covered`;
+    }
+    __name(coverageConclusion, "coverageConclusion");
+    function getCoverageStats(c, threshold) {
+      if (c.totalLines === 0) {
+        return "";
+      }
+      return wrapToDiffBlock(`@@ Code coverage @@
+${coverageConclusion(c.totalCoverage, threshold)}
+${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered
+# Calculated according to the filters of your coverage tool`);
+    }
+    __name(getCoverageStats, "getCoverageStats");
+    exports2.getCoverageStats = getCoverageStats;
     function publishOutput(failedByThreshold, resultsDir, useAnnotations, postComment, execute) {
       var _a, _b;
       return __awaiter2(this, void 0, void 0, function* () {
@@ -63740,22 +63799,23 @@ so that the action will upload the files as the job artifacts:
           const problems = (0, annotations_1.parseSarif)(`${resultsDir}/${qodana_12.QODANA_SARIF_NAME}`);
           let reportUrl = "";
           const reportUrlFile = `${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`;
-          if (fs.existsSync(reportUrlFile)) {
-            reportUrl = fs.readFileSync(`${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`, {
+          if (fs2.existsSync(reportUrlFile)) {
+            reportUrl = fs2.readFileSync(`${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`, {
               encoding: "utf8"
             });
           }
+          const coverageInfo = getCoverageStats((0, qodana_12.getCoverageFromSarif)(`${resultsDir}/${qodana_12.QODANA_SHORT_SARIF_NAME}`), qodana_12.COVERAGE_THRESHOLD);
           let licensesInfo = "";
           const licensesJson = `${resultsDir}/projectStructure/${qodana_12.QODANA_LICENSES_JSON}`;
-          if (fs.existsSync(licensesJson)) {
-            const licenses = JSON.parse(fs.readFileSync(licensesJson, { encoding: "utf8" }));
+          if (fs2.existsSync(licensesJson)) {
+            const licenses = JSON.parse(fs2.readFileSync(licensesJson, { encoding: "utf8" }));
             if (licenses.length > 0) {
-              licensesInfo = fs.readFileSync(`${resultsDir}/projectStructure/${qodana_12.QODANA_LICENSES_MD}`, { encoding: "utf8" });
+              licensesInfo = fs2.readFileSync(`${resultsDir}/projectStructure/${qodana_12.QODANA_LICENSES_MD}`, { encoding: "utf8" });
             }
           }
           const annotations = (_a = problems.annotations) !== null && _a !== void 0 ? _a : [];
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : QODANA_CHECK_NAME;
-          problems.summary = getSummary(toolName, annotations, licensesInfo, reportUrl, (0, utils_12.isPRMode)());
+          problems.summary = getSummary(toolName, annotations, coverageInfo, licensesInfo, reportUrl, (0, utils_12.isPRMode)());
           yield Promise.all([
             (0, utils_12.putReaction)(utils_12.ANALYSIS_FINISHED_REACTION, utils_12.ANALYSIS_STARTED_REACTION),
             (0, utils_12.postResultsToPRComments)(toolName, problems.summary, postComment),
@@ -63792,7 +63852,7 @@ ${body}
       return Array.from(problems.entries()).sort((a, b) => b[1] - a[1]).map(([title, count]) => `| \`${title}\` | ${level} | ${count} |`).join("\n");
     }
     __name(getRowsByLevel, "getRowsByLevel");
-    function getSummary(toolName, annotations, licensesInfo, reportUrl, prMode) {
+    function getSummary(toolName, annotations, coverageInfo, licensesInfo, reportUrl, prMode) {
       const contactBlock = wrapToToggleBlock("Contact Qodana team", SUMMARY_MISC);
       let licensesBlock = "";
       if (licensesInfo !== "") {
@@ -63802,6 +63862,10 @@ ${body}
       if (prMode) {
         prModeBlock = SUMMARY_PR_MODE;
       }
+      if (reportUrl !== "") {
+        const firstToolName = toolName.split(" ")[0];
+        toolName = toolName.replace(firstToolName, `[${firstToolName}](${reportUrl})`);
+      }
       if (annotations.length === 0) {
         return [
           `# ${toolName}`,
@@ -63809,6 +63873,7 @@ ${body}
           "**It seems all right \u{1F44C}**",
           "",
           "No new problems were found according to the checks applied",
+          coverageInfo,
           prModeBlock,
           getViewReportText(reportUrl),
           licensesBlock,
@@ -63828,6 +63893,7 @@ ${body}
           getRowsByLevel(annotations.filter((a) => a.annotation_level === annotations_1.ANNOTATION_NOTICE), "\u25FD\uFE0F Notice")
         ].filter((e) => e !== "").join("\n"),
         "",
+        coverageInfo,
         prModeBlock,
         getViewReportText(reportUrl),
         licensesBlock,
@@ -63914,7 +63980,7 @@ var require_annotations = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.toAnnotationProperties = exports2.getGitHubCheckConclusion = exports2.parseSarif = exports2.publishAnnotations = exports2.ANNOTATION_NOTICE = exports2.ANNOTATION_WARNING = exports2.ANNOTATION_FAILURE = void 0;
     var core2 = __importStar2(require_core());
-    var fs = __importStar2(require("fs"));
+    var fs2 = __importStar2(require("fs"));
     var utils_12 = require_utils8();
     var output_12 = require_output();
     function getQodanaHelpString() {
@@ -64010,7 +64076,7 @@ var require_annotations = __commonJS({
     __name(parseRules, "parseRules");
     function parseSarif(path) {
       var _a;
-      const sarif = JSON.parse(fs.readFileSync(path, { encoding: "utf8" }));
+      const sarif = JSON.parse(fs2.readFileSync(path, { encoding: "utf8" }));
       const run = sarif.runs[0];
       const rules = parseRules(run.tool);
       let title = "No new problems found by ";
