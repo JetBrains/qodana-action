@@ -2,10 +2,14 @@
 import * as core from '@actions/core'
 import * as fs from 'fs'
 import {
+  Coverage,
+  COVERAGE_THRESHOLD,
+  getCoverageFromSarif,
   QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD,
   QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME,
+  QODANA_SHORT_SARIF_NAME,
   VERSION
 } from '../../common/qodana'
 import {
@@ -48,6 +52,31 @@ so that the action will upload the files as the job artifacts:
 `
 const SUMMARY_PR_MODE = `💡 Qodana analysis was run in the pull request mode: only the changed files were checked`
 
+function wrapToDiffBlock(message: string): string {
+  return `\`\`\`diff
+${message}
+\`\`\``
+}
+
+function coverageConclusion(totalCoverage: number, threshold: number): string {
+  if (totalCoverage < threshold) {
+    return `❌ FAILED, required line coverage needs to be more than ${threshold}%
+- ${totalCoverage}% lines covered`
+  }
+  return `✅ PASSED, required line coverage needs to be more than ${threshold}%
++ ${totalCoverage}% lines covered`
+}
+
+export function getCoverageStats(c: Coverage, threshold: number): string {
+  if (c.totalLines === 0) {
+    return ''
+  }
+  return wrapToDiffBlock(`@@ Code coverage @@
+${coverageConclusion(c.totalCoverage, threshold)}
+${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered
+# Calculated according to the filters of your coverage tool`)
+}
+
 /**
  * Publish Qodana results to GitHub: comment, job summary, annotations.
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
@@ -75,7 +104,10 @@ export async function publishOutput(
         encoding: 'utf8'
       })
     }
-
+    const coverageInfo = getCoverageStats(
+      getCoverageFromSarif(`${resultsDir}/${QODANA_SHORT_SARIF_NAME}`),
+      COVERAGE_THRESHOLD
+    )
     let licensesInfo = ''
     const licensesJson = `${resultsDir}/projectStructure/${QODANA_LICENSES_JSON}`
     if (fs.existsSync(licensesJson)) {
@@ -89,11 +121,13 @@ export async function publishOutput(
         )
       }
     }
+
     const annotations: Annotation[] = problems.annotations ?? []
     const toolName = problems.title.split('found by ')[1] ?? QODANA_CHECK_NAME
     problems.summary = getSummary(
       toolName,
       annotations,
+      coverageInfo,
       licensesInfo,
       reportUrl,
       isPRMode()
@@ -158,6 +192,7 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
  * Generates action summary string of annotations.
  * @param toolName The name of the tool to generate the summary from.
  * @param annotations The annotations to generate the summary from.
+ * @param coverageInfo The coverage is a Markdown text to generate the summary from.
  * @param licensesInfo The licenses a Markdown text to generate the summary from.
  * @param reportUrl The URL to the Qodana report.
  * @param prMode Whether the analysis was run in the pull request mode.
@@ -165,6 +200,7 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
 export function getSummary(
   toolName: string,
   annotations: Annotation[],
+  coverageInfo: string,
   licensesInfo: string,
   reportUrl: string,
   prMode: boolean
@@ -178,6 +214,13 @@ export function getSummary(
   if (prMode) {
     prModeBlock = SUMMARY_PR_MODE
   }
+  if (reportUrl !== '') {
+    const firstToolName = toolName.split(' ')[0]
+    toolName = toolName.replace(
+      firstToolName,
+      `[${firstToolName}](${reportUrl})`
+    )
+  }
   if (annotations.length === 0) {
     return [
       `# ${toolName}`,
@@ -185,6 +228,7 @@ export function getSummary(
       '**It seems all right 👌**',
       '',
       'No new problems were found according to the checks applied',
+      coverageInfo,
       prModeBlock,
       getViewReportText(reportUrl),
       licensesBlock,
@@ -218,6 +262,7 @@ export function getSummary(
       .filter(e => e !== '')
       .join('\n'),
     '',
+    coverageInfo,
     prModeBlock,
     getViewReportText(reportUrl),
     licensesBlock,

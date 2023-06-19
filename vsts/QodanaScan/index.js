@@ -1,7 +1,9 @@
 "use strict";
+var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __esm = (fn, res) => function __init() {
   return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
@@ -21,6 +23,10 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // ../common/cli.json
@@ -42,17 +48,20 @@ var init_cli = __esm({
 // ../common/qodana.ts
 var qodana_exports = {};
 __export(qodana_exports, {
+  COVERAGE_THRESHOLD: () => COVERAGE_THRESHOLD,
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
   QODANA_LICENSES_JSON: () => QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD: () => QODANA_LICENSES_MD,
   QODANA_REPORT_URL_NAME: () => QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME: () => QODANA_SARIF_NAME,
+  QODANA_SHORT_SARIF_NAME: () => QODANA_SHORT_SARIF_NAME,
   QodanaExitCode: () => QodanaExitCode,
   SUPPORTED_ARCHS: () => SUPPORTED_ARCHS,
   SUPPORTED_PLATFORMS: () => SUPPORTED_PLATFORMS,
   VERSION: () => VERSION,
   extractArg: () => extractArg,
+  getCoverageFromSarif: () => getCoverageFromSarif,
   getProcessArchName: () => getProcessArchName,
   getProcessPlatformName: () => getProcessPlatformName,
   getQodanaPullArgs: () => getQodanaPullArgs,
@@ -136,30 +145,53 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
   }
   return cliArgs;
 }
+function getCoverageFromSarif(sarifPath) {
+  if (import_fs.default.existsSync(sarifPath)) {
+    const sarifContents = JSON.parse(
+      import_fs.default.readFileSync(sarifPath, { encoding: "utf8" })
+    );
+    if (sarifContents.runs[0].properties["coverage"]) {
+      return {
+        totalCoverage: sarifContents.runs[0].properties["coverage"]["totalCoverage"],
+        totalLines: sarifContents.runs[0].properties["coverage"]["totalLines"],
+        totalCoveredLines: sarifContents.runs[0].properties["coverage"]["totalCoveredLines"]
+      };
+    } else {
+      return {
+        totalCoverage: 0,
+        totalLines: 0,
+        totalCoveredLines: 0
+      };
+    }
+  }
+  throw new Error(`SARIF file not found: ${sarifPath}`);
+}
 function sha256sum(file) {
   const hash = (0, import_crypto.createHash)("sha256");
-  hash.update((0, import_fs.readFileSync)(file));
+  hash.update(import_fs.default.readFileSync(file));
   return hash.digest("hex");
 }
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
-var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, QodanaExitCode;
+var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
     init_cli();
     import_crypto = require("crypto");
-    import_fs = require("fs");
+    import_fs = __toESM(require("fs"));
     SUPPORTED_PLATFORMS = ["windows", "linux", "darwin"];
     SUPPORTED_ARCHS = ["x86_64", "arm64"];
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
+    QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
     QODANA_REPORT_URL_NAME = "qodana.cloud";
     QODANA_LICENSES_MD = "thirdPartySoftwareList.md";
     QODANA_LICENSES_JSON = "thirdPartySoftwareList.json";
     EXECUTABLE = "qodana";
     VERSION = version;
+    COVERAGE_THRESHOLD = 50;
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
       QodanaExitCode2[QodanaExitCode2["FailThreshold"] = 255] = "FailThreshold";
@@ -2505,7 +2537,7 @@ var require_HttpClient = __commonJS({
     var http = require("http");
     var https = require("https");
     var util = require_Util();
-    var fs;
+    var fs2;
     var tunnel;
     var HttpCodes;
     (function(HttpCodes2) {
@@ -2618,15 +2650,15 @@ var require_HttpClient = __commonJS({
           }
           this._certConfig = requestOptions.cert;
           if (this._certConfig) {
-            fs = require("fs");
-            if (this._certConfig.caFile && fs.existsSync(this._certConfig.caFile)) {
-              this._ca = fs.readFileSync(this._certConfig.caFile, "utf8");
+            fs2 = require("fs");
+            if (this._certConfig.caFile && fs2.existsSync(this._certConfig.caFile)) {
+              this._ca = fs2.readFileSync(this._certConfig.caFile, "utf8");
             }
-            if (this._certConfig.certFile && fs.existsSync(this._certConfig.certFile)) {
-              this._cert = fs.readFileSync(this._certConfig.certFile, "utf8");
+            if (this._certConfig.certFile && fs2.existsSync(this._certConfig.certFile)) {
+              this._cert = fs2.readFileSync(this._certConfig.certFile, "utf8");
             }
-            if (this._certConfig.keyFile && fs.existsSync(this._certConfig.keyFile)) {
-              this._key = fs.readFileSync(this._certConfig.keyFile, "utf8");
+            if (this._certConfig.keyFile && fs2.existsSync(this._certConfig.keyFile)) {
+              this._key = fs2.readFileSync(this._certConfig.keyFile, "utf8");
             }
           }
           if (requestOptions.allowRedirects != null) {
@@ -4125,7 +4157,7 @@ var require_tool = __commonJS({
     var path = require("path");
     var os = require("os");
     var process2 = require("process");
-    var fs = require("fs");
+    var fs2 = require("fs");
     var semver = require_semver();
     var tl2 = require("azure-pipelines-task-lib/task");
     var cmp = require_semver_compare();
@@ -4255,7 +4287,7 @@ var require_tool = __commonJS({
             tl2.mkdirP(path.dirname(destPath));
             console.log(tl2.loc("TOOL_LIB_Downloading", url));
             tl2.debug("destination " + destPath);
-            if (fs.existsSync(destPath)) {
+            if (fs2.existsSync(destPath)) {
               throw new Error("Destination file path already exists");
             }
             tl2.debug("downloading");
@@ -4273,7 +4305,7 @@ var require_tool = __commonJS({
               tl2.debug(`Content-Length header missing`);
             }
             tl2.debug("creating stream");
-            let file = fs.createWriteStream(destPath);
+            let file = fs2.createWriteStream(destPath);
             file.on("open", (fd) => __awaiter2(this, void 0, void 0, function* () {
               try {
                 let stream = response.message.pipe(file);
@@ -4317,7 +4349,7 @@ var require_tool = __commonJS({
       return parsedContentLength;
     }
     function _getFileSizeOnDisk(filePath) {
-      let fileStats = fs.statSync(filePath);
+      let fileStats = fs2.statSync(filePath);
       let fileSizeInBytes = fileStats.size;
       return fileSizeInBytes;
     }
@@ -4346,7 +4378,7 @@ var require_tool = __commonJS({
           throw new Error("sourceDir is not a directory");
         }
         let destPath = _createToolPath(tool, version2, arch);
-        for (let itemName of fs.readdirSync(sourceDir)) {
+        for (let itemName of fs2.readdirSync(sourceDir)) {
           let s = path.join(sourceDir, itemName);
           tl2.cp(s, destPath + "/", "-r");
         }

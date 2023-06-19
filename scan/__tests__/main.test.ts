@@ -1,13 +1,17 @@
 import {expect, test} from '@jest/globals'
 import {AnnotationProperties} from '@actions/core'
-import {getQodanaScanArgs, Inputs} from '../../common/qodana'
+import {
+  getCoverageFromSarif,
+  getQodanaScanArgs,
+  Inputs
+} from '../../common/qodana'
 import {
   Annotation,
   getGitHubCheckConclusion,
   parseSarif,
   toAnnotationProperties
 } from '../src/annotations'
-import {getSummary} from '../src/output'
+import {getSummary, getCoverageStats} from '../src/output'
 
 test('qodana scan command args', () => {
   const inputs = inputsDefaultFixture()
@@ -35,6 +39,7 @@ test('test typical summary output', () => {
   const result = getSummary(
     'Qodana for JS',
     annotationsDefaultFixture().reverse(), // reversed for testing the correct sorting in output
+    '',
     'There is no licenses information available',
     'https://example.com/report',
     true
@@ -48,9 +53,26 @@ test('test empty summary output', () => {
     outputEmptyFixture(),
     '',
     '',
+    '',
     false
   )
   expect(result).toEqual(markdownEmptySummaryFixture())
+})
+
+test('test passed coverage output', () => {
+  const result = getCoverageStats(
+    getCoverageFromSarif('__tests__/data/some.sarif.json'),
+    50
+  )
+  expect(result).toEqual(passedCoverageFixture())
+})
+
+test('test failed coverage output', () => {
+  const result = getCoverageStats(
+    getCoverageFromSarif('__tests__/data/empty.sarif.json'),
+    50
+  )
+  expect(result).toEqual(failedCoverageFixture())
 })
 
 test('check conversion from Checks API Annotations to actions/core AnnotationProperty', () => {
@@ -156,7 +178,7 @@ export function defaultDockerRunCommandFixture(): string[] {
 }
 
 export function markdownSummaryFixture(): string {
-  return `# Qodana for JS
+  return `# [Qodana](https://example.com/report) for JS
 
 **3 new problems** were found
 
@@ -165,6 +187,7 @@ export function markdownSummaryFixture(): string {
 | \`Control flow with empty body\` | 🔴 Failure | 1 |
 | \`Condition of 'if' expression is constant\` | 🔶 Warning | 1 |
 | \`Might be 'const'\` | ◽️ Notice | 1 |
+
 
 💡 Qodana analysis was run in the pull request mode: only the changed files were checked
 ☁️ [View the detailed Qodana report](https://example.com/report)
@@ -188,6 +211,7 @@ export function markdownEmptySummaryFixture(): string {
 **It seems all right 👌**
 
 No new problems were found according to the checks applied
+
 
 <details>
 <summary>View the detailed Qodana report</summary>
@@ -216,4 +240,24 @@ Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com
   - Or via our issue tracker: https://jb.gg/qodana-issue
   - Or share your feedback: https://jb.gg/qodana-discussions
 </details>`
+}
+
+function passedCoverageFixture(): string {
+  return `\`\`\`diff
+@@ Code coverage @@
+✅ PASSED, required line coverage needs to be more than 50%
++ 70% lines covered
+124 lines analyzed, 87 lines covered
+# Calculated according to the filters of your coverage tool
+\`\`\``
+}
+
+function failedCoverageFixture(): string {
+  return `\`\`\`diff
+@@ Code coverage @@
+❌ FAILED, required line coverage needs to be more than 50%
+- 0% lines covered
+100 lines analyzed, 0 lines covered
+# Calculated according to the filters of your coverage tool
+\`\`\``
 }
