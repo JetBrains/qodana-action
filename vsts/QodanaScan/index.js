@@ -1432,9 +1432,9 @@ var require_side_channel = __commonJS({
   }
 });
 
-// node_modules/qs/lib/formats.js
+// ../node_modules/qs/lib/formats.js
 var require_formats = __commonJS({
-  "node_modules/qs/lib/formats.js"(exports2, module2) {
+  "../node_modules/qs/lib/formats.js"(exports2, module2) {
     "use strict";
     var replace = String.prototype.replace;
     var percentTwenties = /%20/g;
@@ -1458,9 +1458,9 @@ var require_formats = __commonJS({
   }
 });
 
-// node_modules/qs/lib/utils.js
+// ../node_modules/qs/lib/utils.js
 var require_utils = __commonJS({
-  "node_modules/qs/lib/utils.js"(exports2, module2) {
+  "../node_modules/qs/lib/utils.js"(exports2, module2) {
     "use strict";
     var formats = require_formats();
     var has = Object.prototype.hasOwnProperty;
@@ -1657,9 +1657,9 @@ var require_utils = __commonJS({
   }
 });
 
-// node_modules/qs/lib/stringify.js
+// ../node_modules/qs/lib/stringify.js
 var require_stringify = __commonJS({
-  "node_modules/qs/lib/stringify.js"(exports2, module2) {
+  "../node_modules/qs/lib/stringify.js"(exports2, module2) {
     "use strict";
     var getSideChannel = require_side_channel();
     var utils = require_utils();
@@ -1913,9 +1913,9 @@ var require_stringify = __commonJS({
   }
 });
 
-// node_modules/qs/lib/parse.js
+// ../node_modules/qs/lib/parse.js
 var require_parse = __commonJS({
-  "node_modules/qs/lib/parse.js"(exports2, module2) {
+  "../node_modules/qs/lib/parse.js"(exports2, module2) {
     "use strict";
     var utils = require_utils();
     var has = Object.prototype.hasOwnProperty;
@@ -2114,9 +2114,9 @@ var require_parse = __commonJS({
   }
 });
 
-// node_modules/qs/lib/index.js
+// ../node_modules/qs/lib/index.js
 var require_lib = __commonJS({
-  "node_modules/qs/lib/index.js"(exports2, module2) {
+  "../node_modules/qs/lib/index.js"(exports2, module2) {
     "use strict";
     var stringify = require_stringify();
     var parse = require_parse();
@@ -2235,9 +2235,9 @@ var require_Util = __commonJS({
   }
 });
 
-// node_modules/tunnel/lib/tunnel.js
+// ../node_modules/tunnel/lib/tunnel.js
 var require_tunnel = __commonJS({
-  "node_modules/tunnel/lib/tunnel.js"(exports2) {
+  "../node_modules/tunnel/lib/tunnel.js"(exports2) {
     "use strict";
     var net = require("net");
     var tls = require("tls");
@@ -2465,9 +2465,9 @@ var require_tunnel = __commonJS({
   }
 });
 
-// node_modules/tunnel/index.js
+// ../node_modules/tunnel/index.js
 var require_tunnel2 = __commonJS({
-  "node_modules/tunnel/index.js"(exports2, module2) {
+  "../node_modules/tunnel/index.js"(exports2, module2) {
     module2.exports = require_tunnel();
   }
 });
