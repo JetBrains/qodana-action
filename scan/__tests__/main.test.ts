@@ -198,6 +198,15 @@ To be able to view the detailed Qodana report, you can either:
   3. Host [Qodana report at GitHub Pages](https://github.com/JetBrains/qodana-action/blob/3a8e25f5caad8d8b01c1435f1ef7b19fe8b039a0/README.md#github-pages)
   4. Inspect and use \`qodana.sarif.json\` (see [the Qodana SARIF format](https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Report+structure) for details)
 
+To get \`*.log\` files or any other Qodana artifacts, run the action with \`upload-result\` option set to \`true\`, 
+so that the action will upload the files as the job artifacts:
+\`\`\`yaml
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v2023.1.5
+        with:
+          upload-result: true
+\`\`\`
+
 </details>
 
 <details>

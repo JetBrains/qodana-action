@@ -63719,6 +63719,15 @@ var require_output = __commonJS({
   2. Use [GitHub Code Scanning with Qodana](https://github.com/jetbrains/qodana-action#github-code-scanning)
   3. Host [Qodana report at GitHub Pages](https://github.com/JetBrains/qodana-action/blob/3a8e25f5caad8d8b01c1435f1ef7b19fe8b039a0/README.md#github-pages)
   4. Inspect and use \`qodana.sarif.json\` (see [the Qodana SARIF format](https://www.jetbrains.com/help/qodana/qodana-sarif-output.html#Report+structure) for details)
+
+To get \`*.log\` files or any other Qodana artifacts, run the action with \`upload-result\` option set to \`true\`, 
+so that the action will upload the files as the job artifacts:
+\`\`\`yaml
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v${qodana_12.VERSION}
+        with:
+          upload-result: true
+\`\`\`
 `;
     var SUMMARY_PR_MODE = `\u{1F4A1} Qodana analysis was run in the pull request mode: only the changed files were checked`;
     function publishOutput(failedByThreshold, resultsDir, useAnnotations, postComment, execute) {
