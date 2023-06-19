@@ -33,7 +33,7 @@ const REACTIONS = [
   'rocket',
   'eyes'
 ] as const
-type Reaction = typeof REACTIONS[number]
+type Reaction = (typeof REACTIONS)[number]
 
 /**
  * The context for the action.
