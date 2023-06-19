@@ -84,7 +84,7 @@ jobs:
       - uses: actions/checkout@v3
       - run: npm ci && npm run build
 
-  qodana: # make sure the action works on a clean machine without building
+  qodana:
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -101,10 +101,11 @@ jobs:
       - uses: ./
         with:
           args: --print-problems,--log-level,debug
+          pr-mode: false
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
-  qodana-no-pr: # pr mode disabled and no cloud token
+  qodana-pr: # pr mode enabled and no cloud token
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -114,9 +115,10 @@ jobs:
       - uses: ./
         with:
           args: --print-problems,--log-level,debug,-l,jetbrains/qodana-js:latest
-          pr-mode: false
+          pr-mode: true
           use-annotations: false
           cache-default-branch-only: true
+          post-pr-comment: false
 
   azure-dev-release:
     runs-on: ubuntu-latest
