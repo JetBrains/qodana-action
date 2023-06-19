@@ -33,6 +33,12 @@ jobs:
           if [ "$(git diff --ignore-space-at-eol scan/dist/ | wc -l)" -gt "0" ]; then
             echo "Detected uncommitted changes after build.  See status below:"
             git diff
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add .
+            git commit -m ":bricks: Update \`scan/dist/index.js\`"
+            git push origin
+            git push -u origin HEAD
             exit 1
           fi
         id: diffscan
@@ -50,11 +56,17 @@ jobs:
           "0" ]; then
             echo "Detected uncommitted changes after build.  See status below:"
             git diff
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add .
+            git commit -m ":bricks: Update \`vsts/QodanaScan/index.js\`"
+            git push origin
+            git push -u origin HEAD
             exit 1
           fi
         id: diffvsts
       - uses: actions/upload-artifact@v2
-        if: '${{ failure() && steps.diffvsts.conclusion == ''failure'' }}'
+        if: ${{ failure() && steps.diffvsts.conclusion == 'failure' }}
         with:
           name: dist
           path: vsts/QodanaScan/
