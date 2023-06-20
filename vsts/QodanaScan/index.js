@@ -4632,11 +4632,10 @@ var require_utils2 = __commonJS({
         if (args.length === 0) {
           const inputs = getInputs();
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
-          args = [...args, "-e", `QODANA_BRANCH=${process.env.BUILD_SOURCEBRANCH}`];
         }
         return tl2.exec(qodana_12.EXECUTABLE, args, {
           ignoreReturnCode: true,
-          env: Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" })
+          env: Object.assign(Object.assign({}, process.env), { QODANA_BRANCH: process.env.BUILD_SOURCEBRANCH, NONINTERACTIVE: "1" })
         });
       });
     }
