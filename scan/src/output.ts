@@ -58,23 +58,36 @@ ${message}
 \`\`\``
 }
 
-function coverageConclusion(totalCoverage: number, threshold: number): string {
-  if (totalCoverage < threshold) {
-    return `❌ FAILED, required line coverage needs to be more than ${threshold}%
-- ${totalCoverage}% lines covered`
-  }
-  return `✅ PASSED, required line coverage needs to be more than ${threshold}%
-+ ${totalCoverage}% lines covered`
-}
-
 export function getCoverageStats(c: Coverage, threshold: number): string {
-  if (c.totalLines === 0) {
+  if (c.totalLines === 0 && c.totalCoveredLines === 0) {
     return ''
   }
-  return wrapToDiffBlock(`@@ Code coverage @@
-${coverageConclusion(c.totalCoverage, threshold)}
-${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered
-# Calculated according to the filters of your coverage tool`)
+
+  let stats = ''
+  if (c.totalLines !== 0) {
+    let conclusion = `${c.totalCoverage}% total lines covered`
+    if (c.totalCoverage < threshold) {
+      conclusion = `- ${conclusion}`
+    } else {
+      conclusion = `+ ${conclusion}`
+    }
+    stats += `${conclusion}
+${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered`
+  }
+
+  if (c.freshLines !== 0) {
+    stats += `
+! ${c.freshCoverage} fresh lines covered
+${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`
+  }
+
+  return wrapToDiffBlock(
+    [
+      `@@ Code coverage @@`,
+      `${stats}`,
+      `# Calculated according to the filters of your coverage tool`
+    ].join('\n')
+  )
 }
 
 /**

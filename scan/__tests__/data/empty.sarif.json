@@ -8042,7 +8042,10 @@
         "coverage": {
           "totalCoverage": 0,
           "totalLines": 100,
-          "totalCoveredLines": 0
+          "totalCoveredLines": 0,
+          "freshCoverage": 0,
+          "freshLines": 100,
+          "freshCoveredLines": 0
         }
       }
     }
