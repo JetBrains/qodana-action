@@ -57,6 +57,7 @@ export async function qodana(args: string[] = []): Promise<number> {
   if (args.length === 0) {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
+    args = [...args, '-e', `QODANA_BRANCH=${process.env.BUILD_SOURCEBRANCH}`]
   }
   return tl.exec(EXECUTABLE, args, {
     ignoreReturnCode: true,
