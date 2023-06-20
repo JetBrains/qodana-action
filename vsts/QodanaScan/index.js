@@ -152,15 +152,21 @@ function getCoverageFromSarif(sarifPath) {
     );
     if (sarifContents.runs[0].properties["coverage"]) {
       return {
-        totalCoverage: sarifContents.runs[0].properties["coverage"]["totalCoverage"],
-        totalLines: sarifContents.runs[0].properties["coverage"]["totalLines"],
-        totalCoveredLines: sarifContents.runs[0].properties["coverage"]["totalCoveredLines"]
+        totalCoverage: sarifContents.runs[0].properties["coverage"]["totalCoverage"] || 0,
+        totalLines: sarifContents.runs[0].properties["coverage"]["totalLines"] || 0,
+        totalCoveredLines: sarifContents.runs[0].properties["coverage"]["totalCoveredLines"] || 0,
+        freshCoverage: sarifContents.runs[0].properties["coverage"]["freshCoverage"] || 0,
+        freshLines: sarifContents.runs[0].properties["coverage"]["freshLines"] || 0,
+        freshCoveredLines: sarifContents.runs[0].properties["coverage"]["freshCoveredLines"] || 0
       };
     } else {
       return {
         totalCoverage: 0,
         totalLines: 0,
-        totalCoveredLines: 0
+        totalCoveredLines: 0,
+        freshCoverage: 0,
+        freshLines: 0,
+        freshCoveredLines: 0
       };
     }
   }

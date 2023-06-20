@@ -245,8 +245,7 @@ Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com
 function passedCoverageFixture(): string {
   return `\`\`\`diff
 @@ Code coverage @@
-✅ PASSED, required line coverage needs to be more than 50%
-+ 70% lines covered
++ 70% total lines covered
 124 lines analyzed, 87 lines covered
 # Calculated according to the filters of your coverage tool
 \`\`\``
@@ -255,8 +254,9 @@ function passedCoverageFixture(): string {
 function failedCoverageFixture(): string {
   return `\`\`\`diff
 @@ Code coverage @@
-❌ FAILED, required line coverage needs to be more than 50%
-- 0% lines covered
+- 0% total lines covered
+100 lines analyzed, 0 lines covered
+! 0 fresh lines covered
 100 lines analyzed, 0 lines covered
 # Calculated according to the filters of your coverage tool
 \`\`\``

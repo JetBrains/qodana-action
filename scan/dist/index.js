@@ -2884,15 +2884,21 @@ function getCoverageFromSarif(sarifPath) {
     );
     if (sarifContents.runs[0].properties["coverage"]) {
       return {
-        totalCoverage: sarifContents.runs[0].properties["coverage"]["totalCoverage"],
-        totalLines: sarifContents.runs[0].properties["coverage"]["totalLines"],
-        totalCoveredLines: sarifContents.runs[0].properties["coverage"]["totalCoveredLines"]
+        totalCoverage: sarifContents.runs[0].properties["coverage"]["totalCoverage"] || 0,
+        totalLines: sarifContents.runs[0].properties["coverage"]["totalLines"] || 0,
+        totalCoveredLines: sarifContents.runs[0].properties["coverage"]["totalCoveredLines"] || 0,
+        freshCoverage: sarifContents.runs[0].properties["coverage"]["freshCoverage"] || 0,
+        freshLines: sarifContents.runs[0].properties["coverage"]["freshLines"] || 0,
+        freshCoveredLines: sarifContents.runs[0].properties["coverage"]["freshCoveredLines"] || 0
       };
     } else {
       return {
         totalCoverage: 0,
         totalLines: 0,
-        totalCoveredLines: 0
+        totalCoveredLines: 0,
+        freshCoverage: 0,
+        freshLines: 0,
+        freshCoveredLines: 0
       };
     }
   }
@@ -63769,23 +63775,31 @@ ${message}
 \`\`\``;
     }
     __name(wrapToDiffBlock, "wrapToDiffBlock");
-    function coverageConclusion(totalCoverage, threshold) {
-      if (totalCoverage < threshold) {
-        return `\u274C FAILED, required line coverage needs to be more than ${threshold}%
-- ${totalCoverage}% lines covered`;
-      }
-      return `\u2705 PASSED, required line coverage needs to be more than ${threshold}%
-+ ${totalCoverage}% lines covered`;
-    }
-    __name(coverageConclusion, "coverageConclusion");
     function getCoverageStats(c, threshold) {
-      if (c.totalLines === 0) {
+      if (c.totalLines === 0 && c.totalCoveredLines === 0) {
         return "";
       }
-      return wrapToDiffBlock(`@@ Code coverage @@
-${coverageConclusion(c.totalCoverage, threshold)}
-${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered
-# Calculated according to the filters of your coverage tool`);
+      let stats = "";
+      if (c.totalLines !== 0) {
+        let conclusion = `${c.totalCoverage}% total lines covered`;
+        if (c.totalCoverage < threshold) {
+          conclusion = `- ${conclusion}`;
+        } else {
+          conclusion = `+ ${conclusion}`;
+        }
+        stats += `${conclusion}
+${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered`;
+      }
+      if (c.freshLines !== 0) {
+        stats += `
+! ${c.freshCoverage} fresh lines covered
+${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
+      }
+      return wrapToDiffBlock([
+        `@@ Code coverage @@`,
+        `${stats}`,
+        `# Calculated according to the filters of your coverage tool`
+      ].join("\n"));
     }
     __name(getCoverageStats, "getCoverageStats");
     exports2.getCoverageStats = getCoverageStats;
