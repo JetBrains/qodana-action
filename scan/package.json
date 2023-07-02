@@ -33,7 +33,7 @@
     "@types/node": "^20.3.1",
     "@typescript-eslint/parser": "latest",
     "axios": "^1.4.0",
-    "esbuild": "0.14.54",
+    "esbuild": "0.18.11",
     "eslint": "latest",
     "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-github": "latest",
