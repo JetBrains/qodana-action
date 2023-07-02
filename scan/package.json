@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts",
     "build": "tsc --build .",
-    "package": "./node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
+    "package": "../node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
     "test": "jest --config jest.config.js",
     "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2023.1/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"
   },

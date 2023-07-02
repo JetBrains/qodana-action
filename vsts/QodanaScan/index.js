@@ -24,6 +24,10 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
@@ -544,6 +548,7 @@ var require_get_intrinsic = __commonJS({
       "%encodeURIComponent%": encodeURIComponent,
       "%Error%": Error,
       "%eval%": eval,
+      // eslint-disable-line no-eval
       "%EvalError%": EvalError,
       "%Float32Array%": typeof Float32Array === "undefined" ? undefined2 : Float32Array,
       "%Float64Array%": typeof Float64Array === "undefined" ? undefined2 : Float64Array,
@@ -1396,6 +1401,7 @@ var require_side_channel = __commonJS({
         node.value = value;
       } else {
         objects.next = {
+          // eslint-disable-line no-param-reassign
           key,
           next: objects.next,
           value
@@ -1733,6 +1739,7 @@ var require_stringify = __commonJS({
       encodeValuesOnly: false,
       format: defaultFormat,
       formatter: formats.formatters[defaultFormat],
+      // deprecated
       indices: false,
       serializeDate: function serializeDate(date) {
         return toISO.call(date);
@@ -2122,6 +2129,7 @@ var require_parse = __commonJS({
         comma: typeof opts.comma === "boolean" ? opts.comma : defaults.comma,
         decoder: typeof opts.decoder === "function" ? opts.decoder : defaults.decoder,
         delimiter: typeof opts.delimiter === "string" || utils.isRegExp(opts.delimiter) ? opts.delimiter : defaults.delimiter,
+        // eslint-disable-next-line no-implicit-coercion, no-extra-parens
         depth: typeof opts.depth === "number" || opts.depth === false ? +opts.depth : defaults.depth,
         ignoreQueryPrefix: opts.ignoreQueryPrefix === true,
         interpretNumericEntities: typeof opts.interpretNumericEntities === "boolean" ? opts.interpretNumericEntities : defaults.interpretNumericEntities,
@@ -2711,6 +2719,11 @@ var require_HttpClient = __commonJS({
       sendStream(verb, requestUrl, stream, additionalHeaders) {
         return this.request(verb, requestUrl, stream, additionalHeaders);
       }
+      /**
+       * Makes a raw http request.
+       * All other methods such as get, post, patch, and request ultimately call this.
+       * Prefer get, del, post and patch
+       */
       request(verb, requestUrl, data, headers) {
         return __awaiter2(this, void 0, void 0, function* () {
           if (this._disposed) {
@@ -2773,12 +2786,20 @@ var require_HttpClient = __commonJS({
           return response;
         });
       }
+      /**
+       * Needs to be called if keepAlive is set to true in request options.
+       */
       dispose() {
         if (this._agent) {
           this._agent.destroy();
         }
         this._disposed = true;
       }
+      /**
+       * Raw request.
+       * @param info
+       * @param data
+       */
       requestRaw(info, data) {
         return new Promise((resolve, reject) => {
           let callbackForResult = function(err, res) {
@@ -2790,6 +2811,12 @@ var require_HttpClient = __commonJS({
           this.requestRawWithCallback(info, data, callbackForResult);
         });
       }
+      /**
+       * Raw request with callback.
+       * @param info
+       * @param data
+       * @param onResult
+       */
       requestRawWithCallback(info, data, onResult) {
         let socket;
         if (typeof data === "string") {
@@ -2997,7 +3024,8 @@ var require_semver = __commonJS({
     }
     exports2.SEMVER_SPEC_VERSION = "2.0.0";
     var MAX_LENGTH = 256;
-    var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
+    var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || /* istanbul ignore next */
+    9007199254740991;
     var MAX_SAFE_COMPONENT_LENGTH = 16;
     var re = exports2.re = [];
     var src = exports2.src = [];
@@ -4171,6 +4199,7 @@ var require_tool = __commonJS({
     var pkg = require(path.join(__dirname, "package.json"));
     var userAgent = "vsts-task-installer/" + pkg.version;
     var requestOptions = {
+      // ignoreSslError: true,
       proxy: tl2.getHttpProxyConfiguration(),
       cert: tl2.getHttpCertConfiguration(),
       allowRedirects: true,
@@ -4616,6 +4645,7 @@ var require_utils2 = __commonJS({
         uploadResult: tl2.getBoolInput("uploadResult", false) || false,
         uploadSarif: tl2.getBoolInput("uploadSarif", false) || true,
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
+        // Not used by the Azure task
         postComment: false,
         additionalCacheKey: "",
         primaryCacheKey: "",
@@ -4635,7 +4665,7 @@ var require_utils2 = __commonJS({
         }
         return tl2.exec(qodana_12.EXECUTABLE, args, {
           ignoreReturnCode: true,
-          env: Object.assign(Object.assign({}, process.env), { QODANA_BRANCH: process.env.BUILD_SOURCEBRANCH, NONINTERACTIVE: "1" })
+          env: Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" })
         });
       });
     }

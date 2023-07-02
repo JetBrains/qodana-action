@@ -62,7 +62,6 @@ export async function qodana(args: string[] = []): Promise<number> {
     ignoreReturnCode: true,
     env: {
       ...process.env,
-      QODANA_BRANCH: process.env.BUILD_SOURCEBRANCH,
       NONINTERACTIVE: '1'
     }
   })
