@@ -46,9 +46,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
+          fetch-depth: 0  # a full history is required for pull request analysis
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2023.1.6
+        uses: JetBrains/qodana-action@main
 ```
 
 Using this workflow, Qodana will run on the main branch, release branches, and on the pull requests coming to your
@@ -75,7 +76,7 @@ all you need to do is to specify the `QODANA_TOKEN` environment variable in the 
 
 ```yaml
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2023.1.6
+        uses: JetBrains/qodana-action@main
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 ```
@@ -155,7 +156,7 @@ qodana scan --show-report
 
 ```yaml
 - name: Qodana Scan
-  uses: JetBrains/qodana-action@v2023.1.6
+  uses: JetBrains/qodana-action@main
   with:
     args: --baseline,qodana.sarif.json
 ```
