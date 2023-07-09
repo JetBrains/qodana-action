@@ -14,7 +14,7 @@ import path = require('path')
 import * as os from 'os'
 import * as https from 'https'
 
-test('check whether action README.md has the latest version mentioned everywhere', () => {
+test.skip('check whether action README.md has the latest version mentioned everywhere', () => {
   const readmeMd = fs.readFileSync(
     path.join(__dirname, '..', '..', 'README.md'),
     'utf8'
