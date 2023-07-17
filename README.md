@@ -4,7 +4,7 @@
 [![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.jetbrains.qodana?color=green&label=Gradle%20Plugin%20Portal&logo=gradle)][gradle-plugin-page]
 [![Build](https://github.com/JetBrains/gradle-grammar-kit-plugin/workflows/Build/badge.svg)][gh:build]
 [![GitHub Discussions](https://img.shields.io/github/discussions/jetbrains/qodana)][jb:discussions]
-[![Twitter Follow](https://img.shields.io/badge/follow-%40QodanaEvolves-1DA1F2?logo=twitter)][jb:twitter]
+[![Twitter Follow](https://img.shields.io/badge/follow-%40Qodana-1DA1F2?logo=twitter)][jb:twitter]
 
 Gradle interface to run code inspections from IntelliJ IDEA.
 
@@ -218,7 +218,7 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
 [gradle-plugin-page]: https://plugins.gradle.org/plugin/org.jetbrains.qodana
 [jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
 [jb:discussions]: https://jb.gg/qodana-discussions
-[jb:twitter]: https://twitter.com/QodanaEvolves
+[jb:twitter]: https://twitter.com/Qodana
 [youtrack]: https://youtrack.jetbrains.com/issues/QD
 [youtrack-new-issue]: https://youtrack.jetbrains.com/newIssue?project=QD&c=Platform%20Gradle%20Plugin&c=Tool%20IntelliJ%20(Code%20Inspection)
 [youtrack]: https://youtrack.jetbrains.com/issues/QD

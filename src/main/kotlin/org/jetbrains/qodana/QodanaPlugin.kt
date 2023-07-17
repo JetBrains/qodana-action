@@ -108,6 +108,9 @@ class QodanaPlugin : Plugin<Project> {
                     jvmParameters.get().takeIf { it.isNotEmpty() }?.let {
                         "IDE_PROPERTIES_PROPERTY=${it.joinToString(" ")}"
                     },
+                    System.getenv("QODANA_TOKEN")?.let {
+                        "QODANA_TOKEN=$it"
+                    }
                 )
             })
             arguments.set(project.provider {
