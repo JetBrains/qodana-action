@@ -62,6 +62,14 @@ inputs:
     description: 'GitHub token to access the repository: post annotations, comments'
     required: false
     default: "${{ github.token }}"
+  push-fixes:
+    description: 'Push Qodana fixes to the repository, can be none, branch to the current branch, or a pull request'
+    required: false
+    default: "none"
+  commit-message:
+    description: 'Commit message for the commit with quick-fixes. Not used if `push-fixes` is set to `none`'
+    required: false
+    default: "🤖 Apply quick-fixes by Qodana"
 runs:
   using: 'node16'
   main: 'scan/dist/index.js'

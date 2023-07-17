@@ -4,7 +4,7 @@ bootstrap: npm ci && npm run build && npm run test && mkdir -p /data/coverage &&
 plugins:
 - id: com.intellij.grazie.pro
 profile:
-  name: empty
+  name: qodana.recommended
 exclude:
   - name: All
     paths:

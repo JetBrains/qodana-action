@@ -160,7 +160,9 @@ export function inputsDefaultFixture(): Inputs {
     useAnnotations: true,
     prMode: true,
     postComment: true,
-    githubToken: ''
+    githubToken: '',
+    pushFixes: 'none',
+    commitMessage: ''
   }
 }
 

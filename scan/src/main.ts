@@ -15,7 +15,8 @@ import {
   qodana,
   restoreCaches,
   uploadCaches,
-  uploadArtifacts
+  uploadArtifacts,
+  pushQuickFixes
 } from './utils'
 import {publishOutput} from './output'
 
@@ -57,12 +58,13 @@ async function main(): Promise<void> {
       restoreCachesPromise
     ])
     const reservedCacheKey = await restoreCachesPromise
-    const exitCode = await qodana()
+    const exitCode = await qodana(inputs)
     const canUploadCache =
       isNeedToUploadCache(inputs.useCaches, inputs.cacheDefaultBranchOnly) &&
       isExecutionSuccessful(exitCode)
 
     await Promise.all([
+      pushQuickFixes(),
       uploadArtifacts(
         inputs.resultsDir,
         inputs.artifactName,

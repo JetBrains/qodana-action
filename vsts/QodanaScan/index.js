@@ -4675,7 +4675,9 @@ var require_utils2 = __commonJS({
         useCaches: false,
         cacheDefaultBranchOnly: false,
         prMode: false,
-        githubToken: ""
+        githubToken: "",
+        pushFixes: "none",
+        commitMessage: ""
       };
     }
     exports2.getInputs = getInputs;
