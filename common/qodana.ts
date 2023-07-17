@@ -144,6 +144,8 @@ export function getQodanaScanArgs(
   return cliArgs
 }
 
+const PUSH_FIXES_TYPES = ['none', 'branch', 'pull-request']
+export type PushFixesType = (typeof PUSH_FIXES_TYPES)[number]
 /**
  * The context of the current run – described in action.yaml.
  */
@@ -162,6 +164,8 @@ export interface Inputs {
   prMode: boolean
   postComment: boolean
   githubToken: string
+  pushFixes: PushFixesType
+  commitMessage: string
 }
 
 /**

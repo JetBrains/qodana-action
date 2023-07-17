@@ -44,7 +44,9 @@ export function getInputs(): Inputs {
     useCaches: false,
     cacheDefaultBranchOnly: false,
     prMode: false,
-    githubToken: ''
+    githubToken: '',
+    pushFixes: 'none',
+    commitMessage: ''
   }
 }
 
