@@ -44,7 +44,8 @@ var init_cli = __esm({
       darwin_arm64: "722ffb66a23fa0d6d8aef4dabf8b1e520bab04c7c1232b5d0d1859e7113dc6a8",
       darwin_x86_64: "cc7bf6af28bc26cbe7f4ff76906a1a87e19321082003edf4c014f6bdd4874c95",
       windows_arm64: "33f4c30e92ca7cc2964b2614710b4622ca8bb252bbb55c704ae65ea41491f823",
-      linux_x86_64: "de0e745b917cefb943bf1943deaa019e3a5e8a990597cbee8931cb8442cf5f7e"
+      linux_x86_64: "de0e745b917cefb943bf1943deaa019e3a5e8a990597cbee8931cb8442cf5f7e",
+      darwin_all: ""
     };
   }
 });
@@ -86,10 +87,8 @@ function getQodanaSha256(arch, platform) {
       return checksum["linux_x86_64"];
     case "linux_arm64":
       return checksum["linux_arm64"];
-    case "darwin_x86_64":
-      return checksum["darwin_x86_64"];
-    case "darwin_arm64":
-      return checksum["darwin_arm64"];
+    case "darwin_all":
+      return checksum["darwin_all"];
     default:
       throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`);
   }
@@ -191,7 +190,7 @@ var init_qodana = __esm({
     init_cli();
     import_crypto = require("crypto");
     import_fs = __toESM(require("fs"));
-    SUPPORTED_PLATFORMS = ["windows", "linux", "darwin"];
+    SUPPORTED_PLATFORMS = ["windows", "linux"];
     SUPPORTED_ARCHS = ["x86_64", "arm64"];
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
@@ -2175,9 +2174,9 @@ var require_lib = __commonJS({
   }
 });
 
-// node_modules/typed-rest-client/Util.js
+// ../node_modules/typed-rest-client/Util.js
 var require_Util = __commonJS({
-  "node_modules/typed-rest-client/Util.js"(exports2) {
+  "../node_modules/typed-rest-client/Util.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       return new (P || (P = Promise))(function(resolve, reject) {
@@ -2518,9 +2517,9 @@ var require_tunnel2 = __commonJS({
   }
 });
 
-// node_modules/typed-rest-client/HttpClient.js
+// ../node_modules/typed-rest-client/HttpClient.js
 var require_HttpClient = __commonJS({
-  "node_modules/typed-rest-client/HttpClient.js"(exports2) {
+  "../node_modules/typed-rest-client/HttpClient.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       return new (P || (P = Promise))(function(resolve, reject) {
@@ -3007,9 +3006,9 @@ var require_HttpClient = __commonJS({
   }
 });
 
-// node_modules/azure-pipelines-tool-lib/node_modules/semver/semver.js
+// ../node_modules/azure-pipelines-tool-lib/node_modules/semver/semver.js
 var require_semver = __commonJS({
-  "node_modules/azure-pipelines-tool-lib/node_modules/semver/semver.js"(exports2, module2) {
+  "../node_modules/azure-pipelines-tool-lib/node_modules/semver/semver.js"(exports2, module2) {
     exports2 = module2.exports = SemVer;
     var debug;
     if (typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG)) {
@@ -3027,15 +3026,31 @@ var require_semver = __commonJS({
     var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || /* istanbul ignore next */
     9007199254740991;
     var MAX_SAFE_COMPONENT_LENGTH = 16;
+    var MAX_SAFE_BUILD_LENGTH = MAX_LENGTH - 6;
     var re = exports2.re = [];
+    var safeRe = exports2.safeRe = [];
     var src = exports2.src = [];
     var R = 0;
+    var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
+    var safeRegexReplacements = [
+      ["\\s", 1],
+      ["\\d", MAX_LENGTH],
+      [LETTERDASHNUMBER, MAX_SAFE_BUILD_LENGTH]
+    ];
+    function makeSafeRe(value) {
+      for (var i2 = 0; i2 < safeRegexReplacements.length; i2++) {
+        var token = safeRegexReplacements[i2][0];
+        var max = safeRegexReplacements[i2][1];
+        value = value.split(token + "*").join(token + "{0," + max + "}").split(token + "+").join(token + "{1," + max + "}");
+      }
+      return value;
+    }
     var NUMERICIDENTIFIER = R++;
     src[NUMERICIDENTIFIER] = "0|[1-9]\\d*";
     var NUMERICIDENTIFIERLOOSE = R++;
-    src[NUMERICIDENTIFIERLOOSE] = "[0-9]+";
+    src[NUMERICIDENTIFIERLOOSE] = "\\d+";
     var NONNUMERICIDENTIFIER = R++;
-    src[NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-][a-zA-Z0-9-]*";
+    src[NONNUMERICIDENTIFIER] = "\\d*[a-zA-Z-]" + LETTERDASHNUMBER + "*";
     var MAINVERSION = R++;
     src[MAINVERSION] = "(" + src[NUMERICIDENTIFIER] + ")\\.(" + src[NUMERICIDENTIFIER] + ")\\.(" + src[NUMERICIDENTIFIER] + ")";
     var MAINVERSIONLOOSE = R++;
@@ -3049,7 +3064,7 @@ var require_semver = __commonJS({
     var PRERELEASELOOSE = R++;
     src[PRERELEASELOOSE] = "(?:-?(" + src[PRERELEASEIDENTIFIERLOOSE] + "(?:\\." + src[PRERELEASEIDENTIFIERLOOSE] + ")*))";
     var BUILDIDENTIFIER = R++;
-    src[BUILDIDENTIFIER] = "[0-9A-Za-z-]+";
+    src[BUILDIDENTIFIER] = LETTERDASHNUMBER + "+";
     var BUILD = R++;
     src[BUILD] = "(?:\\+(" + src[BUILDIDENTIFIER] + "(?:\\." + src[BUILDIDENTIFIER] + ")*))";
     var FULL = R++;
@@ -3079,6 +3094,7 @@ var require_semver = __commonJS({
     var TILDETRIM = R++;
     src[TILDETRIM] = "(\\s*)" + src[LONETILDE] + "\\s+";
     re[TILDETRIM] = new RegExp(src[TILDETRIM], "g");
+    safeRe[TILDETRIM] = new RegExp(makeSafeRe(src[TILDETRIM]), "g");
     var tildeTrimReplace = "$1~";
     var TILDE = R++;
     src[TILDE] = "^" + src[LONETILDE] + src[XRANGEPLAIN] + "$";
@@ -3089,6 +3105,7 @@ var require_semver = __commonJS({
     var CARETTRIM = R++;
     src[CARETTRIM] = "(\\s*)" + src[LONECARET] + "\\s+";
     re[CARETTRIM] = new RegExp(src[CARETTRIM], "g");
+    safeRe[CARETTRIM] = new RegExp(makeSafeRe(src[CARETTRIM]), "g");
     var caretTrimReplace = "$1^";
     var CARET = R++;
     src[CARET] = "^" + src[LONECARET] + src[XRANGEPLAIN] + "$";
@@ -3101,6 +3118,7 @@ var require_semver = __commonJS({
     var COMPARATORTRIM = R++;
     src[COMPARATORTRIM] = "(\\s*)" + src[GTLT] + "\\s*(" + LOOSEPLAIN + "|" + src[XRANGEPLAIN] + ")";
     re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], "g");
+    safeRe[COMPARATORTRIM] = new RegExp(makeSafeRe(src[COMPARATORTRIM]), "g");
     var comparatorTrimReplace = "$1$2$3";
     var HYPHENRANGE = R++;
     src[HYPHENRANGE] = "^\\s*(" + src[XRANGEPLAIN] + ")\\s+-\\s+(" + src[XRANGEPLAIN] + ")\\s*$";
@@ -3112,6 +3130,7 @@ var require_semver = __commonJS({
       debug(i, src[i]);
       if (!re[i]) {
         re[i] = new RegExp(src[i]);
+        safeRe[i] = new RegExp(makeSafeRe(src[i]));
       }
     }
     var i;
@@ -3132,7 +3151,7 @@ var require_semver = __commonJS({
       if (version2.length > MAX_LENGTH) {
         return null;
       }
-      var r = options.loose ? re[LOOSE] : re[FULL];
+      var r = options.loose ? safeRe[LOOSE] : safeRe[FULL];
       if (!r.test(version2)) {
         return null;
       }
@@ -3178,7 +3197,7 @@ var require_semver = __commonJS({
       debug("SemVer", version2, options);
       this.options = options;
       this.loose = !!options.loose;
-      var m = version2.trim().match(options.loose ? re[LOOSE] : re[FULL]);
+      var m = version2.trim().match(options.loose ? safeRe[LOOSE] : safeRe[FULL]);
       if (!m) {
         throw new TypeError("Invalid Version: " + version2);
       }
@@ -3502,6 +3521,7 @@ var require_semver = __commonJS({
       if (!(this instanceof Comparator)) {
         return new Comparator(comp, options);
       }
+      comp = comp.trim().split(/\s+/).join(" ");
       debug("comparator", comp, options);
       this.options = options;
       this.loose = !!options.loose;
@@ -3515,7 +3535,7 @@ var require_semver = __commonJS({
     }
     var ANY = {};
     Comparator.prototype.parse = function(comp) {
-      var r = this.options.loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+      var r = this.options.loose ? safeRe[COMPARATORLOOSE] : safeRe[COMPARATOR];
       var m = comp.match(r);
       if (!m) {
         throw new TypeError("Invalid comparator: " + comp);
@@ -3593,14 +3613,14 @@ var require_semver = __commonJS({
       this.options = options;
       this.loose = !!options.loose;
       this.includePrerelease = !!options.includePrerelease;
-      this.raw = range;
-      this.set = range.split(/\s*\|\|\s*/).map(function(range2) {
+      this.raw = range.trim().split(/\s+/).join(" ");
+      this.set = this.raw.split("||").map(function(range2) {
         return this.parseRange(range2.trim());
       }, this).filter(function(c) {
         return c.length;
       });
       if (!this.set.length) {
-        throw new TypeError("Invalid SemVer Range: " + range);
+        throw new TypeError("Invalid SemVer Range: " + this.raw);
       }
       this.format();
     }
@@ -3615,16 +3635,14 @@ var require_semver = __commonJS({
     };
     Range.prototype.parseRange = function(range) {
       var loose = this.options.loose;
-      range = range.trim();
-      var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
+      var hr = loose ? safeRe[HYPHENRANGELOOSE] : safeRe[HYPHENRANGE];
       range = range.replace(hr, hyphenReplace);
       debug("hyphen replace", range);
-      range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace);
-      debug("comparator trim", range, re[COMPARATORTRIM]);
-      range = range.replace(re[TILDETRIM], tildeTrimReplace);
-      range = range.replace(re[CARETTRIM], caretTrimReplace);
-      range = range.split(/\s+/).join(" ");
-      var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+      range = range.replace(safeRe[COMPARATORTRIM], comparatorTrimReplace);
+      debug("comparator trim", range, safeRe[COMPARATORTRIM]);
+      range = range.replace(safeRe[TILDETRIM], tildeTrimReplace);
+      range = range.replace(safeRe[CARETTRIM], caretTrimReplace);
+      var compRe = loose ? safeRe[COMPARATORLOOSE] : safeRe[COMPARATOR];
       var set = range.split(" ").map(function(comp) {
         return parseComparator(comp, this.options);
       }, this).join(" ").split(/\s+/);
@@ -3681,7 +3699,7 @@ var require_semver = __commonJS({
       }).join(" ");
     }
     function replaceTilde(comp, options) {
-      var r = options.loose ? re[TILDELOOSE] : re[TILDE];
+      var r = options.loose ? safeRe[TILDELOOSE] : safeRe[TILDE];
       return comp.replace(r, function(_, M, m, p, pr) {
         debug("tilde", comp, _, M, m, p, pr);
         var ret;
@@ -3708,7 +3726,7 @@ var require_semver = __commonJS({
     }
     function replaceCaret(comp, options) {
       debug("caret", comp, options);
-      var r = options.loose ? re[CARETLOOSE] : re[CARET];
+      var r = options.loose ? safeRe[CARETLOOSE] : safeRe[CARET];
       return comp.replace(r, function(_, M, m, p, pr) {
         debug("caret", comp, _, M, m, p, pr);
         var ret;
@@ -3757,7 +3775,7 @@ var require_semver = __commonJS({
     }
     function replaceXRange(comp, options) {
       comp = comp.trim();
-      var r = options.loose ? re[XRANGELOOSE] : re[XRANGE];
+      var r = options.loose ? safeRe[XRANGELOOSE] : safeRe[XRANGE];
       return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
         debug("xRange", comp, ret, gtlt, M, m, p, pr);
         var xM = isX(M);
@@ -3808,7 +3826,7 @@ var require_semver = __commonJS({
     }
     function replaceStars(comp, options) {
       debug("replaceStars", comp, options);
-      return comp.trim().replace(re[STAR], "");
+      return comp.trim().replace(safeRe[STAR], "");
     }
     function hyphenReplace($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) {
       if (isX(fM)) {
@@ -4048,7 +4066,7 @@ var require_semver = __commonJS({
       if (typeof version2 !== "string") {
         return null;
       }
-      var match = version2.match(re[COERCE]);
+      var match = version2.match(safeRe[COERCE]);
       if (match == null) {
         return null;
       }
@@ -4057,9 +4075,9 @@ var require_semver = __commonJS({
   }
 });
 
-// node_modules/semver-compare/index.js
+// ../node_modules/semver-compare/index.js
 var require_semver_compare = __commonJS({
-  "node_modules/semver-compare/index.js"(exports2, module2) {
+  "../node_modules/semver-compare/index.js"(exports2, module2) {
     module2.exports = function cmp(a, b) {
       var pa = a.split(".");
       var pb = b.split(".");
@@ -4080,9 +4098,9 @@ var require_semver_compare = __commonJS({
   }
 });
 
-// node_modules/uuid/lib/rng.js
+// ../node_modules/azure-pipelines-tool-lib/node_modules/uuid/lib/rng.js
 var require_rng = __commonJS({
-  "node_modules/uuid/lib/rng.js"(exports2, module2) {
+  "../node_modules/azure-pipelines-tool-lib/node_modules/uuid/lib/rng.js"(exports2, module2) {
     var crypto = require("crypto");
     module2.exports = function nodeRNG() {
       return crypto.randomBytes(16);
@@ -4090,9 +4108,9 @@ var require_rng = __commonJS({
   }
 });
 
-// node_modules/uuid/lib/bytesToUuid.js
+// ../node_modules/azure-pipelines-tool-lib/node_modules/uuid/lib/bytesToUuid.js
 var require_bytesToUuid = __commonJS({
-  "node_modules/uuid/lib/bytesToUuid.js"(exports2, module2) {
+  "../node_modules/azure-pipelines-tool-lib/node_modules/uuid/lib/bytesToUuid.js"(exports2, module2) {
     var byteToHex = [];
     for (i = 0; i < 256; ++i) {
       byteToHex[i] = (i + 256).toString(16).substr(1);
@@ -4128,9 +4146,9 @@ var require_bytesToUuid = __commonJS({
   }
 });
 
-// node_modules/uuid/v4.js
+// ../node_modules/azure-pipelines-tool-lib/node_modules/uuid/v4.js
 var require_v4 = __commonJS({
-  "node_modules/uuid/v4.js"(exports2, module2) {
+  "../node_modules/azure-pipelines-tool-lib/node_modules/uuid/v4.js"(exports2, module2) {
     var rng = require_rng();
     var bytesToUuid = require_bytesToUuid();
     function v4(options, buf, offset) {
@@ -4154,9 +4172,9 @@ var require_v4 = __commonJS({
   }
 });
 
-// node_modules/azure-pipelines-tool-lib/tool.js
+// ../node_modules/azure-pipelines-tool-lib/tool.js
 var require_tool = __commonJS({
-  "node_modules/azure-pipelines-tool-lib/tool.js"(exports2) {
+  "../node_modules/azure-pipelines-tool-lib/tool.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
@@ -4340,34 +4358,38 @@ var require_tool = __commonJS({
               tl2.debug(`Content-Length header missing`);
             }
             tl2.debug("creating stream");
-            let file = fs2.createWriteStream(destPath);
+            const file = fs2.createWriteStream(destPath);
             file.on("open", (fd) => __awaiter2(this, void 0, void 0, function* () {
               try {
-                let stream = response.message.pipe(file);
-                stream.on("close", () => {
-                  tl2.debug("download complete");
-                  let fileSizeInBytes;
-                  try {
-                    fileSizeInBytes = _getFileSizeOnDisk(destPath);
-                  } catch (err) {
-                    fileSizeInBytes = NaN;
-                    tl2.warning(`Unable to check file size of ${destPath} due to error: ${err.Message}`);
-                  }
-                  if (!isNaN(fileSizeInBytes)) {
-                    tl2.debug(`Downloaded file size: ${fileSizeInBytes} bytes`);
-                  } else {
-                    tl2.debug(`File size on disk was not found`);
-                  }
-                  if (!isNaN(downloadedContentLength) && !isNaN(fileSizeInBytes) && fileSizeInBytes !== downloadedContentLength) {
-                    tl2.warning(`Content-Length (${downloadedContentLength} bytes) did not match downloaded file size (${fileSizeInBytes} bytes).`);
-                  }
-                  resolve(destPath);
-                });
+                response.message.on("error", (err) => {
+                  file.end();
+                  reject(err);
+                }).on("aborted", () => {
+                  file.end();
+                  reject(new Error("Aborted"));
+                }).pipe(file);
               } catch (err) {
                 reject(err);
               }
-            }));
-            file.on("error", (err) => {
+            })).on("close", () => {
+              tl2.debug("download complete");
+              let fileSizeInBytes;
+              try {
+                fileSizeInBytes = _getFileSizeOnDisk(destPath);
+              } catch (err) {
+                fileSizeInBytes = NaN;
+                tl2.warning(`Unable to check file size of ${destPath} due to error: ${err.Message}`);
+              }
+              if (!isNaN(fileSizeInBytes)) {
+                tl2.debug(`Downloaded file size: ${fileSizeInBytes} bytes`);
+              } else {
+                tl2.debug(`File size on disk was not found`);
+              }
+              if (!isNaN(downloadedContentLength) && !isNaN(fileSizeInBytes) && fileSizeInBytes !== downloadedContentLength) {
+                tl2.warning(`Content-Length (${downloadedContentLength} bytes) did not match downloaded file size (${fileSizeInBytes} bytes).`);
+              }
+              resolve(destPath);
+            }).on("error", (err) => {
               file.end();
               reject(err);
             });

@@ -3,7 +3,7 @@ import {checksum, version} from './cli.json'
 import {createHash} from 'crypto'
 import fs from 'fs'
 
-export const SUPPORTED_PLATFORMS = ['windows', 'linux', 'darwin']
+export const SUPPORTED_PLATFORMS = ['windows', 'linux']
 export const SUPPORTED_ARCHS = ['x86_64', 'arm64']
 export const FAIL_THRESHOLD_OUTPUT =
   'The number of problems exceeds the failThreshold'
@@ -27,10 +27,8 @@ export function getQodanaSha256(arch: string, platform: string): string {
       return checksum['linux_x86_64']
     case 'linux_arm64':
       return checksum['linux_arm64']
-    case 'darwin_x86_64':
-      return checksum['darwin_x86_64']
-    case 'darwin_arm64':
-      return checksum['darwin_arm64']
+    case 'darwin_all':
+      return checksum['darwin_all']
     default:
       throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`)
   }

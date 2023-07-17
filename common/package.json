@@ -7,7 +7,7 @@
     "url": "git+https://github.com/JetBrains/qodana-cli.git"
   },
   "scripts": {
-    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts"
+    "lint": "eslint --fix **/*.ts"
   },
   "files": [
     "qodana.ts",

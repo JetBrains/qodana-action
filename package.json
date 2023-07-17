@@ -12,7 +12,7 @@
     "build": "tsc -b common scan vsts --force",
     "test": "npm run -w scan test",
     "package": "npm run -w scan package && npm run -w vsts package",
-    "all": "npm run lint && npm run format-check && npm run build && npm run test"
+    "all": "npm run lint && npm run build && npm run test && npm run package"
   },
   "contributors": [
     {
@@ -34,11 +34,13 @@
     "vsts"
   ],
   "devDependencies": {
-    "typescript": "^5.1.6",
     "eslint": "latest",
     "eslint-plugin-github": "latest",
     "eslint-plugin-jest": "latest",
+    "eslint-plugin-prettier": "^5.0.0-alpha.1",
     "prettier": "3.0.0",
-    "ts-node": "^10.9.1"
+    "prettier-eslint": "^15.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
   }
 }
