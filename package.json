@@ -38,7 +38,7 @@
     "eslint": "latest",
     "eslint-plugin-github": "latest",
     "eslint-plugin-jest": "latest",
-    "prettier": "2.8.8",
+    "prettier": "3.0.0",
     "ts-node": "^10.9.1"
   }
 }
