@@ -69209,19 +69209,24 @@ Best,
           currentBranch = github.context.payload.pull_request.head.ref;
         }
         const newBranchName = `qodana/quick-fixes-${github.context.runId}`;
-        yield exec.getExecOutput("git", ["config", "user.name", "github-actions"]);
+        yield exec.getExecOutput("git", ["config", "user.name", "qodana-bot"]);
         yield exec.getExecOutput("git", [
           "config",
           "user.email",
-          "github-actions@github.com"
+          "qodana-support@jetbrains.com"
         ]);
         yield exec.getExecOutput("git", ["add", "."]);
         yield exec.getExecOutput("git", ["commit", "-m", title]);
-        yield exec.getExecOutput("git", ["branch", "qodana-fixes"]);
-        yield exec.getExecOutput("git", ["checkout", currentBranch]);
-        yield exec.getExecOutput("git", ["merge", "qodana-fixes"]);
+        if (getInputs().prMode) {
+          yield exec.getExecOutput("git", [
+            "pull",
+            "--rebase",
+            "origin",
+            currentBranch
+          ]);
+        }
         if (getInputs().pushFixes === "branch") {
-          yield exec.getExecOutput("git", ["push", "origin", currentBranch]);
+          yield exec.getExecOutput("git", ["push", "origin", github.context.ref]);
         } else if (getInputs().pushFixes === "pull-request") {
           const prBodyFile = path_1.default.join(os.tmpdir(), "pr-body.txt");
           fs2.writeFileSync(prBodyFile, prFixesBody(getJobUrl()));
