@@ -18,7 +18,7 @@ jobs:
           TAG_REF=${{ github.ref }}
           TAG_NAME=${TAG_REF:10} # Extract tag name from the ref string
           BRANCH_VERSION=${TAG_NAME:0:7} # Extract version without the patch level
-          BRANCH_NAME="v$BRANCH_VERSION"
+          BRANCH_NAME="$BRANCH_VERSION"
           
           echo "Detected tag: $TAG_NAME"
           echo "Checking for existing branch: $BRANCH_NAME"
