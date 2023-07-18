@@ -24,11 +24,11 @@ inputs:
   primary-cache-key:
     description: 'Set the primary cache key'
     required: false
-    default: "qodana-2023.1-${{ github.ref }}-${{ github.sha }}"
+    default: ""
   additional-cache-key:
     description: 'Set the additional cache key'
     required: false
-    default: "qodana-2023.1-${{ github.ref }}"
+    default: ""
   additional-cache-hash:
     description: 'Pass additional cache hash extension'
     required: false

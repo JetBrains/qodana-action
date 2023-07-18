@@ -54,10 +54,13 @@ export function getInputs(): Inputs {
       .map(arg => arg.trim()),
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
-    primaryCacheKey: core.getInput('primary-cache-key'),
+    primaryCacheKey:
+      core.getInput('primary-cache-key') ||
+      `qodana-${VERSION}-${process.env.GITHUB_REF}-${process.env.GITHUB_SHA}`,
     additionalCacheKey:
       core.getInput('additional-cache-key') ||
-      core.getInput('additional-cache-hash'),
+      core.getInput('additional-cache-hash') ||
+      `qodana-${VERSION}-${process.env.GITHUB_REF}}-`,
     cacheDefaultBranchOnly: core.getBooleanInput('cache-default-branch-only'),
     uploadResult: core.getBooleanInput('upload-result'),
     uploadSarif: false, // not used by the action
