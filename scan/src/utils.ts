@@ -130,20 +130,24 @@ export async function pushQuickFixes(): Promise<void> {
   }
   const newBranchName = `qodana/quick-fixes-${github.context.runId}`
 
-  await exec.getExecOutput('git', ['config', 'user.name', 'github-actions'])
+  await exec.getExecOutput('git', ['config', 'user.name', 'qodana-bot'])
   await exec.getExecOutput('git', [
     'config',
     'user.email',
-    'github-actions@github.com'
+    'qodana-support@jetbrains.com'
   ])
   await exec.getExecOutput('git', ['add', '.'])
   await exec.getExecOutput('git', ['commit', '-m', title])
-  await exec.getExecOutput('git', ['branch', 'qodana-fixes'])
-  await exec.getExecOutput('git', ['checkout', currentBranch])
-  await exec.getExecOutput('git', ['merge', 'qodana-fixes'])
-
+  if (getInputs().prMode) {
+    await exec.getExecOutput('git', [
+      'pull',
+      '--rebase',
+      'origin',
+      currentBranch
+    ])
+  }
   if (getInputs().pushFixes === 'branch') {
-    await exec.getExecOutput('git', ['push', 'origin', currentBranch])
+    await exec.getExecOutput('git', ['push', 'origin', github.context.ref])
   } else if (getInputs().pushFixes === 'pull-request') {
     const prBodyFile = path.join(os.tmpdir(), 'pr-body.txt')
     fs.writeFileSync(prBodyFile, prFixesBody(getJobUrl()))
