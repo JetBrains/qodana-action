@@ -53,9 +53,12 @@ var init_cli = __esm({
 // ../common/qodana.ts
 var qodana_exports = {};
 __export(qodana_exports, {
+  BRANCH: () => BRANCH,
   COVERAGE_THRESHOLD: () => COVERAGE_THRESHOLD,
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
+  NONE: () => NONE,
+  PULL_REQUEST: () => PULL_REQUEST,
   QODANA_LICENSES_JSON: () => QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD: () => QODANA_LICENSES_MD,
   QODANA_REPORT_URL_NAME: () => QODANA_REPORT_URL_NAME,
@@ -183,7 +186,7 @@ function sha256sum(file) {
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
-var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode;
+var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
@@ -206,6 +209,9 @@ var init_qodana = __esm({
       QodanaExitCode2[QodanaExitCode2["FailThreshold"] = 255] = "FailThreshold";
       return QodanaExitCode2;
     })(QodanaExitCode || {});
+    NONE = "none";
+    BRANCH = "branch";
+    PULL_REQUEST = "pull-request";
   }
 });
 

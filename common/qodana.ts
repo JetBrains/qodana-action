@@ -143,8 +143,10 @@ export function getQodanaScanArgs(
   }
   return cliArgs
 }
-
-const PUSH_FIXES_TYPES = ['none', 'branch', 'pull-request']
+export const NONE = 'none'
+export const BRANCH = 'branch'
+export const PULL_REQUEST = 'pull-request'
+const PUSH_FIXES_TYPES = [NONE, BRANCH, PULL_REQUEST]
 export type PushFixesType = (typeof PUSH_FIXES_TYPES)[number]
 /**
  * The context of the current run – described in action.yaml.
