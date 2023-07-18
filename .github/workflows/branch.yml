@@ -1,4 +1,4 @@
-name: Sync branches
+name: Sync branches main with latest
 
 on:
   push:
