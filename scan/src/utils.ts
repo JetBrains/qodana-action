@@ -124,7 +124,13 @@ export async function pushQuickFixes(
     await git(['reset', '--hard', `origin/${currentBranch}`])
     await git(['stash', 'apply', 'stash@{0}'])
   }
-  await git(['commit', '-m', commitMessage])
+  const exitCode = await git(['commit', '-m', commitMessage], {
+    ignoreReturnCode: true
+  })
+  if (exitCode !== 0) {
+    return
+  }
+
   await git(['pull', '--rebase', 'origin', currentBranch])
   if (mode === BRANCH) {
     await git(['push', 'origin', currentBranch])

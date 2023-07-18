@@ -69220,7 +69220,12 @@ var require_utils8 = __commonJS({
           yield git(["reset", "--hard", `origin/${currentBranch}`]);
           yield git(["stash", "apply", "stash@{0}"]);
         }
-        yield git(["commit", "-m", commitMessage]);
+        const exitCode = yield git(["commit", "-m", commitMessage], {
+          ignoreReturnCode: true
+        });
+        if (exitCode !== 0) {
+          return;
+        }
         yield git(["pull", "--rebase", "origin", currentBranch]);
         if (mode === qodana_12.BRANCH) {
           yield git(["push", "origin", currentBranch]);
