@@ -88,7 +88,7 @@ to
     - Or set the action `args` property with the quick-fix strategy to use: `--apply-fixes` or `--cleanup`
 2. Set `push-fixes` property to
     - `pull-request`: create a new branch with fixes and create a pull request to the original branch
-    - or `branch`: push fixes to the original branch
+    - or `branch`: push fixes to the original branch. Also, set `pr-mode` to `false`: currently, this mode is not supported for applying fixes.
 3. Set the correct permissions for the job (`contents: write`, `pull-requests: write`, `checks: write`)
     - If you use `pull-request` value for `push-fixes` property: [**allow GitHub Actions to create and approve pull requests**](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests)
 
@@ -98,13 +98,14 @@ Example configuration:
 - name: Qodana Scan
   uses: JetBrains/qodana-action@v2023.2
   with:
+    pr-mode: false
     args: --apply-fixes
     push-fixes: pull-request
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-> **Note:**
+> **Note**
 > Qodana could automatically modify not only the code, but also the configuration in `.idea`: if you do not wish to push these changes, add `.idea` to your `.gitignore` file.
 
 If you want to do different `git` operations in the same job, you can disable `push-fixes` and do the wanted operations manually

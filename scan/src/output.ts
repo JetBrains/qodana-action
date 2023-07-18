@@ -15,7 +15,6 @@ import {
 import {
   ANALYSIS_FINISHED_REACTION,
   ANALYSIS_STARTED_REACTION,
-  isPRMode,
   postResultsToPRComments,
   putReaction
 } from './utils'
@@ -97,6 +96,7 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param resultsDir The path to the results.
  * @param postComment whether to post a PR comment or not.
+ * @param isPrMode
  * @param execute whether to execute the promise or not.
  * @param useAnnotations whether to publish annotations or not.
  */
@@ -105,6 +105,7 @@ export async function publishOutput(
   resultsDir: string,
   useAnnotations: boolean,
   postComment: boolean,
+  isPrMode: boolean,
   execute: boolean
 ): Promise<void> {
   if (!execute) {
@@ -145,7 +146,7 @@ export async function publishOutput(
       coverageInfo,
       licensesInfo,
       reportUrl,
-      isPRMode()
+      isPrMode
     )
 
     await Promise.all([

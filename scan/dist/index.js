@@ -68725,7 +68725,7 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
     }
     __name(getCoverageStats, "getCoverageStats");
     exports2.getCoverageStats = getCoverageStats;
-    function publishOutput(failedByThreshold, resultsDir, useAnnotations, postComment, execute) {
+    function publishOutput(failedByThreshold, resultsDir, useAnnotations, postComment, isPrMode, execute) {
       var _a, _b;
       return __awaiter3(this, void 0, void 0, function* () {
         if (!execute) {
@@ -68751,7 +68751,7 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
           }
           const annotations = (_a = problems.annotations) !== null && _a !== void 0 ? _a : [];
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : QODANA_CHECK_NAME;
-          problems.summary = getSummary(toolName, annotations, coverageInfo, licensesInfo, reportUrl, (0, utils_12.isPRMode)());
+          problems.summary = getSummary(toolName, annotations, coverageInfo, licensesInfo, reportUrl, isPrMode);
           yield Promise.all([
             (0, utils_12.putReaction)(utils_12.ANALYSIS_FINISHED_REACTION, utils_12.ANALYSIS_STARTED_REACTION),
             (0, utils_12.postResultsToPRComments)(toolName, problems.summary, postComment),
@@ -69145,7 +69145,7 @@ var require_utils8 = __commonJS({
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.publishGitHubCheck = exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.postResultsToPRComments = exports2.getWorkflowRunUrl = exports2.isNeedToUploadCache = exports2.isPRMode = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadArtifacts = exports2.prepareAgent = exports2.pushQuickFixes = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
+    exports2.publishGitHubCheck = exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.postResultsToPRComments = exports2.getWorkflowRunUrl = exports2.isNeedToUploadCache = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadArtifacts = exports2.prepareAgent = exports2.pushQuickFixes = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
     var artifact = __importStar3(require_artifact_client2());
     var cache = __importStar3(require_cache());
     var core2 = __importStar3(require_core());
@@ -69166,8 +69166,8 @@ var require_utils8 = __commonJS({
         args: core2.getInput("args").split(",").map((arg) => arg.trim()),
         resultsDir: core2.getInput("results-dir"),
         cacheDir: core2.getInput("cache-dir"),
-        primaryCacheKey: core2.getInput("primary-cache-key") || `qodana-${qodana_12.VERSION}-${process.env.GITHUB_REF}-${process.env.GITHUB_SHA}`,
-        additionalCacheKey: core2.getInput("additional-cache-key") || core2.getInput("additional-cache-hash") || `qodana-${qodana_12.VERSION}-${process.env.GITHUB_REF}}-`,
+        primaryCacheKey: core2.getInput("primary-cache-key"),
+        additionalCacheKey: core2.getInput("additional-cache-key"),
         cacheDefaultBranchOnly: core2.getBooleanInput("cache-default-branch-only"),
         uploadResult: core2.getBooleanInput("upload-result"),
         uploadSarif: false,
@@ -69187,7 +69187,7 @@ var require_utils8 = __commonJS({
       return __awaiter3(this, void 0, void 0, function* () {
         if (args.length === 0) {
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
-          if (isPRMode() && github.context.payload.pull_request !== void 0) {
+          if (inputs.prMode && github.context.payload.pull_request !== void 0) {
             const pr = github.context.payload.pull_request;
             args.push("--commit", `CI${pr.base.sha}`);
           }
@@ -69214,12 +69214,6 @@ var require_utils8 = __commonJS({
         yield git(["config", "user.name", output_12.COMMIT_USER]);
         yield git(["config", "user.email", output_12.COMMIT_EMAIL]);
         yield git(["add", "."]);
-        if (isPRMode()) {
-          yield git(["stash"]);
-          yield git(["fetch", "origin", currentBranch]);
-          yield git(["reset", "--hard", `origin/${currentBranch}`]);
-          yield git(["stash", "apply", "stash@{0}"]);
-        }
         const exitCode = yield git(["commit", "-m", commitMessage], {
           ignoreReturnCode: true
         });
@@ -69329,11 +69323,6 @@ var require_utils8 = __commonJS({
     }
     __name(restoreCaches, "restoreCaches");
     exports2.restoreCaches = restoreCaches;
-    function isPRMode() {
-      return github.context.payload.pull_request !== void 0 && getInputs().prMode;
-    }
-    __name(isPRMode, "isPRMode");
-    exports2.isPRMode = isPRMode;
     function isNeedToUploadCache(useCaches, cacheDefaultBranchOnly) {
       var _a;
       if (!useCaches && cacheDefaultBranchOnly) {
@@ -69610,6 +69599,10 @@ function main() {
   return __awaiter2(this, void 0, void 0, function* () {
     try {
       const inputs = (0, utils_1.getInputs)();
+      if (inputs.pushFixes && inputs.prMode) {
+        inputs.pushFixes = qodana_1.NONE;
+        core.warning("push-fixes is currently not supported with pr-mode: true. Running Qodana with push-fixes: false.");
+      }
       yield io.mkdirP(inputs.resultsDir);
       yield io.mkdirP(inputs.cacheDir);
       const restoreCachesPromise = (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.primaryCacheKey, inputs.additionalCacheKey, inputs.useCaches);
@@ -69625,7 +69618,7 @@ function main() {
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage),
         (0, utils_1.uploadArtifacts)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
         (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.primaryCacheKey, reservedCacheKey, canUploadCache),
-        (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, inputs.resultsDir, inputs.useAnnotations, inputs.postComment, (0, qodana_1.isExecutionSuccessful)(exitCode))
+        (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, inputs.resultsDir, inputs.useAnnotations, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode))
       ]);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`);

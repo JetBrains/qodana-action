@@ -3,7 +3,8 @@ import * as io from '@actions/io'
 import {
   FAIL_THRESHOLD_OUTPUT,
   QodanaExitCode,
-  isExecutionSuccessful
+  isExecutionSuccessful,
+  NONE
 } from '../../common/qodana'
 import {
   ANALYSIS_FINISHED_REACTION,
@@ -43,6 +44,12 @@ function setFailed(message: string): void {
 async function main(): Promise<void> {
   try {
     const inputs = getInputs()
+    if (inputs.pushFixes && inputs.prMode) {
+      inputs.pushFixes = NONE
+      core.warning(
+        'push-fixes is currently not supported with pr-mode: true. Running Qodana with push-fixes: false.'
+      )
+    }
     await io.mkdirP(inputs.resultsDir)
     await io.mkdirP(inputs.cacheDir)
 
@@ -81,6 +88,7 @@ async function main(): Promise<void> {
         inputs.resultsDir,
         inputs.useAnnotations,
         inputs.postComment,
+        inputs.prMode,
         isExecutionSuccessful(exitCode)
       )
     ])

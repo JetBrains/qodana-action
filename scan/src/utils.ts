@@ -54,13 +54,8 @@ export function getInputs(): Inputs {
       .map(arg => arg.trim()),
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
-    primaryCacheKey:
-      core.getInput('primary-cache-key') ||
-      `qodana-${VERSION}-${process.env.GITHUB_REF}-${process.env.GITHUB_SHA}`,
-    additionalCacheKey:
-      core.getInput('additional-cache-key') ||
-      core.getInput('additional-cache-hash') ||
-      `qodana-${VERSION}-${process.env.GITHUB_REF}}-`,
+    primaryCacheKey: core.getInput('primary-cache-key'),
+    additionalCacheKey: core.getInput('additional-cache-key'),
     cacheDefaultBranchOnly: core.getBooleanInput('cache-default-branch-only'),
     uploadResult: core.getBooleanInput('upload-result'),
     uploadSarif: false, // not used by the action
@@ -86,7 +81,7 @@ export async function qodana(
 ): Promise<number> {
   if (args.length === 0) {
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
-    if (isPRMode() && github.context.payload.pull_request !== undefined) {
+    if (inputs.prMode && github.context.payload.pull_request !== undefined) {
       const pr = github.context.payload.pull_request
       args.push('--commit', `CI${pr.base.sha}`)
     }
@@ -117,13 +112,6 @@ export async function pushQuickFixes(
   await git(['config', 'user.name', COMMIT_USER])
   await git(['config', 'user.email', COMMIT_EMAIL])
   await git(['add', '.'])
-  if (isPRMode()) {
-    // temporary magic, to be fixed with local-changes
-    await git(['stash'])
-    await git(['fetch', 'origin', currentBranch])
-    await git(['reset', '--hard', `origin/${currentBranch}`])
-    await git(['stash', 'apply', 'stash@{0}'])
-  }
   const exitCode = await git(['commit', '-m', commitMessage], {
     ignoreReturnCode: true
   })
@@ -281,14 +269,6 @@ export async function restoreCaches(
     )
   }
   return ''
-}
-
-/**
- * Determines if the action is running in PR mode.
- * @returns {boolean} true if the action is running in PR mode, false otherwise.
- */
-export function isPRMode(): boolean {
-  return github.context.payload.pull_request !== undefined && getInputs().prMode
 }
 
 /**
