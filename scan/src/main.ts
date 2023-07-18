@@ -64,7 +64,7 @@ async function main(): Promise<void> {
       isExecutionSuccessful(exitCode)
 
     await Promise.all([
-      pushQuickFixes(),
+      pushQuickFixes(inputs.pushFixes, inputs.commitMessage),
       uploadArtifacts(
         inputs.resultsDir,
         inputs.artifactName,
