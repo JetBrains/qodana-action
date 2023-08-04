@@ -38,6 +38,9 @@ export function getQodanaSha256(arch: string, platform: string): string {
  * Returns the architecture name suitable for the published Qodana CLI archive name.
  */
 export function getProcessArchName(): string {
+  if (process.platform === 'darwin') {
+    return 'all'
+  }
   return process.arch === 'x64' ? 'x86_64' : 'arm64'
 }
 

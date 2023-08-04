@@ -8582,6 +8582,9 @@ function getQodanaSha256(arch, platform) {
   }
 }
 function getProcessArchName() {
+  if (process.platform === "darwin") {
+    return "all";
+  }
   return process.arch === "x64" ? "x86_64" : "arm64";
 }
 function getProcessPlatformName() {
