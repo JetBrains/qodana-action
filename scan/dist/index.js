@@ -8628,12 +8628,14 @@ function getQodanaPullArgs(args) {
 function getQodanaScanArgs(args, resultsDir, cacheDir) {
   const cliArgs = [
     "scan",
-    "--skip-pull",
     "--cache-dir",
     cacheDir,
     "--results-dir",
     resultsDir
   ];
+  if (!isNativeMode(args)) {
+    cliArgs.push("--skip-pull");
+  }
   if (args) {
     cliArgs.push(...args);
   }

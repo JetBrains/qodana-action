@@ -169,11 +169,11 @@ export function inputsDefaultFixture(): Inputs {
 export function defaultDockerRunCommandFixture(): string[] {
   return [
     'scan',
-    '--skip-pull',
     '--cache-dir',
     '${{ runner.temp }}/qodana-caches',
     '--results-dir',
     '${{ runner.temp }}/qodana-results',
+    '--skip-pull',
     '--baseline',
     'qodana.sarif.json'
   ]

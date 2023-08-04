@@ -136,12 +136,14 @@ export function getQodanaScanArgs(
 ): string[] {
   const cliArgs: string[] = [
     'scan',
-    '--skip-pull',
     '--cache-dir',
     cacheDir,
     '--results-dir',
     resultsDir
   ]
+  if (!isNativeMode(args)) {
+    cliArgs.push('--skip-pull')
+  }
   if (args) {
     cliArgs.push(...args)
   }
