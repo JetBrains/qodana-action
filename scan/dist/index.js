@@ -69600,7 +69600,7 @@ function main() {
   return __awaiter2(this, void 0, void 0, function* () {
     try {
       const inputs = (0, utils_1.getInputs)();
-      if (inputs.pushFixes && inputs.prMode && github.context.payload.pull_request !== void 0) {
+      if (inputs.pushFixes !== qodana_1.NONE && inputs.prMode && github.context.payload.pull_request !== void 0) {
         inputs.pushFixes = qodana_1.NONE;
         core.warning("push-fixes is currently not supported with pr-mode: true in pull requests. Running Qodana with push-fixes: false.");
       }

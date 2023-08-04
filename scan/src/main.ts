@@ -46,7 +46,7 @@ async function main(): Promise<void> {
   try {
     const inputs = getInputs()
     if (
-      inputs.pushFixes &&
+      inputs.pushFixes !== NONE &&
       inputs.prMode &&
       github.context.payload.pull_request !== undefined
     ) {
