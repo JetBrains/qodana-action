@@ -100,6 +100,10 @@ export function extractArg(
   return arg
 }
 
+export function isNativeMode(args: string[]): boolean {
+  return args.includes('--ide')
+}
+
 /**
  * Builds the `qodana pull` command arguments.
  * @returns The `qodana scan` command arguments.

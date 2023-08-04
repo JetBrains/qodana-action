@@ -8562,6 +8562,7 @@ __export(qodana_exports, {
   getQodanaSha256MismatchMessage: () => getQodanaSha256MismatchMessage,
   getQodanaUrl: () => getQodanaUrl,
   isExecutionSuccessful: () => isExecutionSuccessful,
+  isNativeMode: () => isNativeMode,
   sha256sum: () => sha256sum
 });
 function getQodanaSha256(arch, platform) {
@@ -8608,6 +8609,9 @@ function extractArg(argShort, argLong, args) {
     }
   }
   return arg;
+}
+function isNativeMode(args) {
+  return args.includes("--ide");
 }
 function getQodanaPullArgs(args) {
   const pullArgs = ["pull"];
@@ -8699,6 +8703,7 @@ var init_qodana = __esm({
     })(QodanaExitCode || {});
     __name(isExecutionSuccessful, "isExecutionSuccessful");
     __name(extractArg, "extractArg");
+    __name(isNativeMode, "isNativeMode");
     __name(getQodanaPullArgs, "getQodanaPullArgs");
     __name(getQodanaScanArgs, "getQodanaScanArgs");
     NONE = "none";
@@ -69250,10 +69255,12 @@ var require_utils8 = __commonJS({
           extractRoot = yield tc.extractTar(temp);
         }
         core2.addPath(yield tc.cacheDir(extractRoot, qodana_12.EXECUTABLE, qodana_12.VERSION));
-        const exitCode = yield qodana(getInputs(), (0, qodana_12.getQodanaPullArgs)(args));
-        if (exitCode !== 0) {
-          core2.setFailed(`qodana pull failed with exit code ${exitCode}`);
-          return;
+        if (!(0, qodana_12.isNativeMode)(args)) {
+          const exitCode = yield qodana(getInputs(), (0, qodana_12.getQodanaPullArgs)(args));
+          if (exitCode !== 0) {
+            core2.setFailed(`qodana pull failed with exit code ${exitCode}`);
+            return;
+          }
         }
       });
     }

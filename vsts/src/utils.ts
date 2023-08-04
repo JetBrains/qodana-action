@@ -12,7 +12,8 @@ import {
   getQodanaSha256,
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
-  sha256sum
+  sha256sum,
+  isNativeMode
 } from '../../common/qodana'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -89,9 +90,11 @@ export async function prepareAgent(args: string[]): Promise<void> {
     extractRoot = await tool.extractTar(temp)
   }
   tool.prependPath(await tool.cacheDir(extractRoot, EXECUTABLE, VERSION))
-  const pull = await qodana(getQodanaPullArgs(args))
-  if (pull !== 0) {
-    setFailed("Unable to run 'qodana pull'")
+  if (!isNativeMode(args)) {
+    const pull = await qodana(getQodanaPullArgs(args))
+    if (pull !== 0) {
+      setFailed("Unable to run 'qodana pull'")
+    }
   }
 }
 

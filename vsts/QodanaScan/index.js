@@ -78,6 +78,7 @@ __export(qodana_exports, {
   getQodanaSha256MismatchMessage: () => getQodanaSha256MismatchMessage,
   getQodanaUrl: () => getQodanaUrl,
   isExecutionSuccessful: () => isExecutionSuccessful,
+  isNativeMode: () => isNativeMode,
   sha256sum: () => sha256sum
 });
 function getQodanaSha256(arch, platform) {
@@ -124,6 +125,9 @@ function extractArg(argShort, argLong, args) {
     }
   }
   return arg;
+}
+function isNativeMode(args) {
+  return args.includes("--ide");
 }
 function getQodanaPullArgs(args) {
   const pullArgs = ["pull"];
@@ -4717,9 +4721,11 @@ var require_utils2 = __commonJS({
           extractRoot = yield tool.extractTar(temp);
         }
         tool.prependPath(yield tool.cacheDir(extractRoot, qodana_12.EXECUTABLE, qodana_12.VERSION));
-        const pull = yield qodana((0, qodana_12.getQodanaPullArgs)(args));
-        if (pull !== 0) {
-          setFailed("Unable to run 'qodana pull'");
+        if (!(0, qodana_12.isNativeMode)(args)) {
+          const pull = yield qodana((0, qodana_12.getQodanaPullArgs)(args));
+          if (pull !== 0) {
+            setFailed("Unable to run 'qodana pull'");
+          }
         }
       });
     }

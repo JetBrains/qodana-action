@@ -22,7 +22,8 @@ import {
   PushFixesType,
   NONE,
   PULL_REQUEST,
-  BRANCH
+  BRANCH,
+  isNativeMode
 } from '../../common/qodana'
 import path from 'path'
 import * as fs from 'fs'
@@ -157,10 +158,12 @@ export async function prepareAgent(args: string[]): Promise<void> {
     extractRoot = await tc.extractTar(temp)
   }
   core.addPath(await tc.cacheDir(extractRoot, EXECUTABLE, VERSION))
-  const exitCode = await qodana(getInputs(), getQodanaPullArgs(args))
-  if (exitCode !== 0) {
-    core.setFailed(`qodana pull failed with exit code ${exitCode}`)
-    return
+  if (!isNativeMode(args)) {
+    const exitCode = await qodana(getInputs(), getQodanaPullArgs(args))
+    if (exitCode !== 0) {
+      core.setFailed(`qodana pull failed with exit code ${exitCode}`)
+      return
+    }
   }
 }
 
