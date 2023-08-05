@@ -37,15 +37,15 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2023.2.5";
+    version = "2023.2.6";
     checksum = {
-      windows_x86_64: "f301d00d4814ebaf8eef0be044a641bb6d79b2445d2f84c0874cb9fd3eb078bb",
-      linux_arm64: "489c0175daffc68b3b86dd24746e229941636cc5c476c6a5f998e0e2b5a40643",
+      windows_x86_64: "6807d66481839c68c2ec0590112b88b070ed9ebd49967219a008c1f6a89f6210",
+      linux_arm64: "72d95ec82246f668ccab606c37784226440f374601fb70330836dc3d03ee0314",
       darwin_arm64: "722ffb66a23fa0d6d8aef4dabf8b1e520bab04c7c1232b5d0d1859e7113dc6a8",
       darwin_x86_64: "cc7bf6af28bc26cbe7f4ff76906a1a87e19321082003edf4c014f6bdd4874c95",
-      windows_arm64: "321fd42ae147f80b5ca0a83fdf4251698a8e8b84c489085645873a7a505654b9",
-      linux_x86_64: "f808df536b4fda735dea406b65ba5db07ba4d2641485c1c372f3595a2e3a571c",
-      darwin_all: "57924e8eedbe89cc669532160268a1e92210d4057599c413f9b01916c8a5aad0"
+      windows_arm64: "e61882592ced61ea6d3d96009f2341f4b07b58078cd3ba326608b8d92d867e09",
+      linux_x86_64: "268512c665881a4b02342419ca4973151ba5234ab5322a3e644b729bea0fa8ee",
+      darwin_all: "448d400841afebb43479b5845cc344cc80ed0c600fc898f9e1f6a2a86824a130"
     };
   }
 });
