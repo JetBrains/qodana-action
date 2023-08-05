@@ -1,6 +1,6 @@
 version: "1.0"
 linter: registry.jetbrains.team/p/sa/containers/qodana-js:latest
-bootstrap: npm ci && npm run build && npm run test && mkdir -p /data/coverage && mv scan/coverage/lcov.info /data/coverage && rm -rf scan/coverage
+bootstrap: npm ci && npm run build && npm run test && mkdir -p .qodana/coverage && mv scan/coverage/lcov.info .qodana/coverage && rm -rf scan/coverage
 plugins:
 - id: com.intellij.grazie.pro
 profile:
