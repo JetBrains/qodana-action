@@ -98,6 +98,12 @@ jobs:
           registry: registry.jetbrains.team
           username: e433d83e-ec9b-4023-98f0-7f181b32c0da
           password: ${{ secrets.SPACE_PASSWORD }}
+      - run: |
+          npm ci
+          npm run test 
+          mkdir -p .qodana/coverage 
+          mv scan/coverage/lcov.info .qodana/coverage 
+          rm -rf scan/coverage
       - uses: ./
         with:
           args: --print-problems,--log-level,debug
@@ -125,7 +131,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-latest
+#          - macos-latest
           - ubuntu-latest
           - windows-latest
     needs: [ lint ]
@@ -133,7 +139,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./
         with:
-          args: --ide,QDJS-EAP
+          args: --ide,QDJS
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_TESTS }}
 
   azure-dev-release:
     runs-on: ubuntu-latest
