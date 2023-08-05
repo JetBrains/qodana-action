@@ -10,7 +10,7 @@
   "version": {
     "Major": 2023,
     "Minor": 2,
-    "Patch": 5
+    "Patch": 6
   },
   "demands": [
     "RemoteDockerServerOS -equals linux"
