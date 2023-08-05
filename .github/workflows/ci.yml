@@ -140,6 +140,9 @@ jobs:
       - uses: ./
         with:
           args: --ide,QDJS
+          pr-mode: false
+          post-pr-comment: false
+          use-annotations: false
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_TESTS }}
 
