@@ -69618,6 +69618,20 @@ function main() {
       }
       yield io.mkdirP(inputs.resultsDir);
       yield io.mkdirP(inputs.cacheDir);
+      if ((0, qodana_1.isNativeMode)(inputs.args)) {
+        let cachePath;
+        switch (process.platform) {
+          case "darwin":
+            cachePath = "/Users/runner/Library/Caches/JetBrains/Qodana/";
+            break;
+          case "win32":
+            cachePath = "C:\\Users\\runner\\AppData\\Local\\JetBrains\\Qodana\\";
+            break;
+          default:
+            cachePath = "/home/runner/.cache/JetBrains/Qodana/";
+        }
+        yield io.mkdirP(cachePath);
+      }
       const restoreCachesPromise = (0, utils_1.restoreCaches)(inputs.cacheDir, inputs.primaryCacheKey, inputs.additionalCacheKey, inputs.useCaches);
       yield Promise.all([
         (0, utils_1.putReaction)(utils_1.ANALYSIS_STARTED_REACTION, utils_1.ANALYSIS_FINISHED_REACTION),

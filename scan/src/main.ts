@@ -5,7 +5,8 @@ import {
   FAIL_THRESHOLD_OUTPUT,
   QodanaExitCode,
   isExecutionSuccessful,
-  NONE
+  NONE,
+  isNativeMode
 } from '../../common/qodana'
 import {
   ANALYSIS_FINISHED_REACTION,
@@ -57,6 +58,22 @@ async function main(): Promise<void> {
     }
     await io.mkdirP(inputs.resultsDir)
     await io.mkdirP(inputs.cacheDir)
+
+    // TODO: remove me after CLI is updated
+    if (isNativeMode(inputs.args)) {
+      let cachePath: string
+      switch (process.platform) {
+        case 'darwin':
+          cachePath = '/Users/runner/Library/Caches/JetBrains/Qodana/'
+          break
+        case 'win32':
+          cachePath = 'C:\\Users\\runner\\AppData\\Local\\JetBrains\\Qodana\\'
+          break
+        default:
+          cachePath = '/home/runner/.cache/JetBrains/Qodana/'
+      }
+      await io.mkdirP(cachePath)
+    }
 
     const restoreCachesPromise = restoreCaches(
       inputs.cacheDir,
