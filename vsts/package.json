@@ -24,7 +24,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "azure-pipelines-task-lib": "^4.4.0",
-    "azure-pipelines-tasks-utility-common": "^3.198.1",
+    "azure-pipelines-tasks-utility-common": "^3.225.1",
     "azure-pipelines-tool-lib": "^2.0.4"
   },
   "devDependencies": {
