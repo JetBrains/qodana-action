@@ -35,7 +35,7 @@
     "axios": "^1.4.0",
     "esbuild": "0.18.19",
     "eslint": "latest",
-    "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-import-resolver-typescript": "^3.6.0",
     "eslint-plugin-github": "latest",
     "eslint-plugin-jest": "latest",
     "jest": "latest",
