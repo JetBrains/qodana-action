@@ -28,7 +28,7 @@
     "azure-pipelines-tool-lib": "^2.0.4"
   },
   "devDependencies": {
-    "@types/node": "^20.5.7",
+    "@types/node": "^20.5.9",
     "@typescript-eslint/parser": "^5.62.0",
     "esbuild": "0.19.2",
     "eslint": "^8.48.0",
