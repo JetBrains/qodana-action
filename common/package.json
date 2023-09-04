@@ -14,7 +14,7 @@
     "cli.json"
   ],
   "devDependencies": {
-    "@types/node": "^20.5.7",
+    "@types/node": "^20.5.9",
     "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^8.44.0",
     "eslint-plugin-github": "^4.9.2",
