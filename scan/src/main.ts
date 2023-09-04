@@ -52,7 +52,7 @@ async function main(): Promise<void> {
     ) {
       inputs.pushFixes = NONE
       core.warning(
-        'push-fixes is currently not supported with pr-mode: true in pull requests. Running Qodana with push-fixes: false.'
+        `push-fixes is currently not supported with pr-mode: true in pull requests. Running Qodana with push-fixes: ${inputs.pushFixes}.`
       )
     }
     await io.mkdirP(inputs.resultsDir)
