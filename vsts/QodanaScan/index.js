@@ -224,9 +224,9 @@ var init_qodana = __esm({
   }
 });
 
-// node_modules/azure-pipelines-tasks-utility-common/compressutility.js
+// ../node_modules/azure-pipelines-tasks-utility-common/compressutility.js
 var require_compressutility = __commonJS({
-  "node_modules/azure-pipelines-tasks-utility-common/compressutility.js"(exports2) {
+  "../node_modules/azure-pipelines-tasks-utility-common/compressutility.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createArchive = void 0;
