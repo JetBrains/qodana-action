@@ -19,7 +19,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set Node.js 16.x
         uses: actions/setup-node@v3.8.1
         with:
@@ -81,7 +81,7 @@ jobs:
           - windows-latest
     needs: [ lint ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: npm ci && npm run build
 
   qodana:
@@ -90,7 +90,7 @@ jobs:
       checks: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: docker/login-action@v2
@@ -117,7 +117,7 @@ jobs:
       checks: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./
         with:
           args: --print-problems,--log-level,debug,-l,jetbrains/qodana-js:2023.2-eap
@@ -136,7 +136,7 @@ jobs:
           - windows-latest
     needs: [ lint ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./
         with:
           args: --ide,QDJS
@@ -150,7 +150,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ lint, build, qodana ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
         id: filter
         with:
