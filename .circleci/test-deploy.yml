@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   qodana: jetbrains/qodana@dev:<<pipeline.git.revision>>
-  orb-tools: circleci/orb-tools@11.1
+  orb-tools: circleci/orb-tools@12.0
 
 filters: &filters
   tags:
@@ -14,7 +14,7 @@ jobs:
     steps:
       - checkout
       - qodana/scan:
-          args: "--print-problems --log-level debug -l jetbrains/qodana-js:latest"
+          args: "--print-problems --log-level debug -l jetbrains/qodana-js:latest --property=idea.headless.enable.statistics=false"
 
 workflows:
   test-deploy:
@@ -25,9 +25,9 @@ workflows:
           source_dir: orb
       - code-quality
       - orb-tools/publish:
-          orb-name: jetbrains/qodana
-          vcs-type: << pipeline.project.type >>
-          pub-type: production
+          orb_name: jetbrains/qodana
+          vcs_type: << pipeline.project.type >>
+          pub_type: production
           requires:
             - orb-tools/pack
             - code-quality
