@@ -13,11 +13,14 @@ workflows:
     jobs:
       - orb-tools/lint:
           filters: *filters
+          source_dir: orb
       - orb-tools/pack:
           filters: *filters
+          source_dir: orb
       - orb-tools/review:
           exclude: RC009
           filters: *filters
+          source_dir: orb
       - shellcheck/check:
           exclude: SC2148,SC2038,SC2086,SC2002,SC2016
           filters: *filters

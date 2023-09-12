@@ -9,24 +9,10 @@ jobs:
     name: Gradle Wrapper
     runs-on: ubuntu-latest
     steps:
-
       - name: Fetch Sources
         uses: actions/checkout@v3
-
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1.0.4
-
-  codeInspection:
-    name: Code Inspection
-    needs: gradleValidation
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Fetch Sources
-        uses: actions/checkout@v3
-
-      - name: Qodana Scan
-        uses: JetBrains/qodana-action@v5.0.2
 
   test:
     name: Test
@@ -45,20 +31,16 @@ jobs:
           - macos-latest
 
     steps:
-
       - name: Fetch Sources
-        uses: actions/checkout@v3
-
+        uses: actions/checkout@v4
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
           distribution: zulu
           java-version: 11
           cache: gradle
-
       - name: Run Linters and Test
         run: ./gradlew test -PtestGradleVersion="${{ matrix.gradleVersion }}"
-
       - name: Collect Test Results
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2

@@ -22,6 +22,7 @@ workflows:
       # Make sure to include "filters: *filters" in every test job you want to run as part of your deployment.
       - orb-tools/pack:
           filters: *filters
+          source_dir: orb
       - code-quality
       - orb-tools/publish:
           orb-name: jetbrains/qodana
