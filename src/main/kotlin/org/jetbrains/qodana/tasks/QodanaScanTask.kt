@@ -6,11 +6,11 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.qodana.Installer
-import org.jetbrains.qodana.QodanaPluginConstants
+import org.jetbrains.qodana.QodanaPluginConstants.QODANA_ENV
+import org.jetbrains.qodana.QodanaPluginConstants.QODANA_ENV_NAME
 import java.io.ByteArrayOutputStream
 import java.io.File
 
-@Suppress("MemberVisibilityCanBePrivate")
 open class QodanaScanTask : Exec() {
     /**
      * Root directory of the project to be analyzed.
@@ -50,15 +50,8 @@ open class QodanaScanTask : Exec() {
     @TaskAction
     override fun exec() {
         setArgs(getArguments())
-//        val gradleBuildProjectDir = System.getProperty("user.dir")
-//        val destinationFolder = File("$gradleBuildProjectDir/build/qodana")
-//        destinationFolder.mkdirs()
-//        val executable = File("${destinationFolder.absolutePath}/qodana")
-        
-        // get current project directory by default
-        
-        
         executable = Installer().setup(qodanaPath.get())
+        environment(QODANA_ENV, QODANA_ENV_NAME)
 
         ByteArrayOutputStream().use { os ->
             standardOutput = TeeOutputStream(System.out, os)
@@ -68,7 +61,7 @@ open class QodanaScanTask : Exec() {
             }.exceptionOrNull()?.let {
                 val message = os.toString().lines().find { line ->
                     line.startsWith("Inspection run is terminating")
-                } ?: "Qodana inspection finished with failure. Check logs and Qodana report for more details."
+                } ?: "Qodana finished with failure. Check logs and Qodana report for more details."
 
                 throw TaskExecutionException(this, GradleException(message, it))
             }
@@ -78,8 +71,6 @@ open class QodanaScanTask : Exec() {
     private fun getArguments(): List<String> {
         val args: MutableList<String> = mutableListOf(
             "scan",
-            "-e",
-            "QODANA_ENV=${QodanaPluginConstants.QODANA_ENV_NAME}",
             "--project-dir",
             projectDir.get().absolutePath,
             "--results-dir",

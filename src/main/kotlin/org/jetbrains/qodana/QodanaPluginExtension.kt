@@ -3,7 +3,6 @@ package org.jetbrains.qodana
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 

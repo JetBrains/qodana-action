@@ -64,7 +64,7 @@ class Installer {
         val website = URL(url)
         Channels.newChannel(website.openStream()).use { rbc ->
             FileOutputStream(executablePath).use { fos ->
-                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE)
+                fos.channel.transferFrom(rbc, 0, Long.MAX_VALUE)
                 setFilePermissions(executablePath)
             }
         }

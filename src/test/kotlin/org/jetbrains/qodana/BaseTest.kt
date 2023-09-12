@@ -14,7 +14,7 @@ open class BaseTest {
     private val gradleHome = System.getProperty("test.gradle.home")
     internal val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: gradleDefault
 
-    val dir: File = createTempDirectory("tmp").toFile()
+    private val dir: File = createTempDirectory("tmp").toFile()
     val root = adjustWindowsPath(dir.canonicalPath)
     val buildFile = file("build.gradle")
 
@@ -69,7 +69,7 @@ open class BaseTest {
         drop(start).takeWhile(String::isNotEmpty).map { it.substringBefore(' ') }
     }
 
-    fun adjustWindowsPath(s: String) = s.replace("\\", "/")
+    private fun adjustWindowsPath(s: String) = s.replace("\\", "/")
 
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517
