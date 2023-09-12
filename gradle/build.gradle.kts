@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "org.jetbrains.qodana"
-version = "0.1." + properties("buildNumber")
+version = "2023.2." + properties("buildNumber")
 
 repositories {
     mavenCentral()
@@ -54,15 +54,15 @@ fun configureTests(testTask: Test) {
 gradlePlugin {
     plugins.create("qodana") {
         id = "org.jetbrains.qodana"
-        displayName = "Gradle Qodana Plugin"
+        displayName = "Qodana for Gradle"
         implementationClass = "org.jetbrains.qodana.QodanaPlugin"
     }
 }
 
 pluginBundle {
-    website = "https://github.com/JetBrains/gradle-qodana-plugin"
-    vcsUrl = "https://github.com/JetBrains/gradle-qodana-plugin"
+    website = "https://jetbrains.com/qodana"
+    vcsUrl = "https://github.com/JetBrains/qodana-action"
 
-    description = "Gradle Qodana Plugin allows to run and configure Idea inspections for Gradle project."
+    description = "Qodana for Gradle plugin allows to run and configure Qodana analysis for Gradle projects."
     tags = listOf("qodana", "intellij", "idea", "inspections")
 }

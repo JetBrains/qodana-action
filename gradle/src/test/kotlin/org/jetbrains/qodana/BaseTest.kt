@@ -32,7 +32,6 @@ open class BaseTest {
             }
             
             qodana {
-                executable = "echo"
             }
         """)
     }
