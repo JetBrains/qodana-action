@@ -14,9 +14,9 @@ duplications, and imperfections.
 - Qodana Scan
     - [Usage](#usage)
     - [Configuration](#configuration)
-    - [Issue Tracker](#issue-tracker)
-- Qodana for Gradle
-    -  
+- [Qodana for Gradle](#qodana-for-gradle)
+    - [`qodanaScan` task](#qodanascan)
+- [Issue Tracker](#issue-tracker)
 
 <!-- tocstop -->
 [//]: # (title: GitHub Actions)
@@ -344,7 +344,7 @@ Properties available for configuration in the `qodana { }` top level configurati
 
 ### `qodanaScan`
 
-Starts Qodana in a Docker container in the project directory.
+Starts Qodana in the project directory.
 
 Task relies on the `qodana { }` extension configuration, however it is also controlled by provided `arguments`.
 

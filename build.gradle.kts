@@ -1,16 +1,20 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+@file:Suppress("UnstableApiUsage")
 
-fun properties(key: String) = project.findProperty(key)?.toString()
+import org.jetbrains.dokka.gradle.DokkaTask
+
+fun properties(key: String) = providers.gradleProperty(key)
+fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    kotlin("jvm") version "1.6.10"
-    id("com.gradle.plugin-publish") version "0.19.0"
+    alias(libs.plugins.pluginPublish)
+    alias(libs.plugins.dokka)
 }
 
-group = "org.jetbrains.qodana"
-version = "2023.2." + properties("buildNumber")
+group = properties("projectGroup").get()
+version = "${properties("majorVersion").get()}.${properties("buildNumber").get()}"
+description = properties("description").get()
 
 repositories {
     mavenCentral()
@@ -22,47 +26,57 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
-tasks {
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8.toString()
-        }
-    }
+kotlin {
+    jvmToolchain(11)
+}
 
+val dokkaHtml by tasks.getting(DokkaTask::class)
+
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn(dokkaHtml)
+    archiveClassifier = "javadoc"
+    from(dokkaHtml.outputDirectory)
+}
+
+val sourcesJar = tasks.register<Jar>("sourcesJar") {
+    archiveClassifier = "sources"
+    from(sourceSets.main.get().allSource)
+}
+
+artifacts {
+    archives(javadocJar)
+    archives(sourcesJar)
+}
+
+tasks {
     test {
-        configureTests(this)
+        val testGradleHome = layout.buildDirectory.asFile.get().resolve("testGradleHome")
+
+        doFirst {
+            testGradleHome.mkdir()
+        }
+
+        systemProperties["test.gradle.home"] = testGradleHome
+        systemProperties["test.gradle.default"] = properties("gradleVersion").get()
+        systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
+        systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
+        outputs.dir(testGradleHome)
     }
 
     wrapper {
-        gradleVersion = properties("gradleVersion")
-        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+        gradleVersion = properties("gradleVersion").get()
     }
-}
-
-fun configureTests(testTask: Test) {
-    val testGradleHomePath = "$buildDir/testGradleHome"
-    testTask.doFirst {
-        File(testGradleHomePath).mkdir()
-    }
-    testTask.systemProperties["test.gradle.home"] = testGradleHomePath
-    testTask.systemProperties["test.gradle.default"] = properties("gradleVersion")
-    testTask.systemProperties["test.gradle.version"] = properties("testGradleVersion")
-    testTask.systemProperties["test.gradle.arguments"] = properties("testGradleArguments")
-    testTask.outputs.dir(testGradleHomePath)
 }
 
 gradlePlugin {
+    website = properties("website")
+    vcsUrl = properties("vcsUrl")
+
     plugins.create("qodana") {
-        id = "org.jetbrains.qodana"
-        displayName = "Qodana for Gradle"
-        implementationClass = "org.jetbrains.qodana.QodanaPlugin"
+        id = properties("pluginId").get()
+        displayName = properties("name").get()
+        implementationClass = properties("pluginImplementationClass").get()
+        description = project.description
+        tags = properties("tags").map { it.split(',') }
     }
-}
-
-pluginBundle {
-    website = "https://jetbrains.com/qodana"
-    vcsUrl = "https://github.com/JetBrains/qodana-action"
-
-    description = "Qodana for Gradle plugin allows to run and configure Qodana analysis for Gradle projects."
-    tags = listOf("qodana", "intellij", "idea", "inspections")
 }
