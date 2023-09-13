@@ -1,0 +1,68 @@
+name: 'gradle'
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'gradle/**'
+      - 'src/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/gradle.yml'
+  push:
+    branches:
+      - main
+      - 'releases/*'
+    paths:
+      - 'gradle/**'
+      - 'src/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/gradle.yml'
+jobs:
+  gradleValidation:
+    name: gradle-wrapper
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1.0.4
+
+  gradle-test:
+    name: gradle-test
+    needs: gradleValidation
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        gradleVersion:
+          - 6.8
+          - 6.9.2
+          - 7.6.2
+          - 8.3
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+    steps:
+      - name: Fetch sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+          cache: gradle
+      - name: Run linters and test
+        run: ./gradlew test -PtestGradleVersion="${{ matrix.gradleVersion }}"
+      - name: Collect test results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.gradleVersion }}-${{ runner.os }}
+          path: ${{ github.workspace }}/build/reports/tests

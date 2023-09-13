@@ -1,5 +1,6 @@
 version: "1.0"
-linter: registry.jetbrains.team/p/sa/containers/qodana-js:latest
+projectJDK: 11
+linter: registry.jetbrains.team/p/sa/containers/qodana-jvm:latest
 bootstrap: npm ci
 profile:
   name: qodana.recommended
