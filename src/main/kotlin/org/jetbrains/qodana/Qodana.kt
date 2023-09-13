@@ -71,6 +71,9 @@ class Installer {
     }
 
     private fun setFilePermissions(file: File) {
+        if (getPlatformName() == "windows") {
+            return
+        }
         log.debug("Setting file permissions")
         val perms: MutableSet<PosixFilePermission> = HashSet()
         perms.add(PosixFilePermission.OWNER_READ)
