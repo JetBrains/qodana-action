@@ -2,30 +2,30 @@ name: 'node'
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - 'scan/**'
-      - 'vsts/**'
-      - 'common/**'
-      - 'action.yaml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig.json'
-      - 'tsconfig.base.json'
-      - '.github/workflows/ci.yml'
+    paths-ignore:
+      - 'orb/**'
+      - 'gradle/**'
+      - 'src/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/gradle.yml'
   push:
     branches:
       - main
       - 'releases/*'
-    paths:
-      - 'scan/**'
-      - 'vsts/**'
-      - 'common/**'
-      - 'action.yaml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig.json'
-      - 'tsconfig.base.json'
-      - '.github/workflows/ci.yml'
+    paths-ignore:
+      - 'orb/**'
+      - 'gradle/**'
+      - 'src/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/gradle.yml'
 jobs:
   lint:
     runs-on: ubuntu-latest

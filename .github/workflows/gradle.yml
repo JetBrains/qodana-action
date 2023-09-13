@@ -2,28 +2,32 @@ name: 'gradle'
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - 'gradle/**'
-      - 'src/**'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - 'gradle.properties'
-      - 'gradlew'
-      - 'gradlew.bat'
-      - '.github/workflows/gradle.yml'
+    paths-ignore:
+      - 'orb/**'
+      - 'scan/**'
+      - 'vsts/**'
+      - 'common/**'
+      - 'action.yaml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'tsconfig.base.json'
+      - '.github/workflows/node.yml'
   push:
     branches:
       - main
       - 'releases/*'
-    paths:
-      - 'gradle/**'
-      - 'src/**'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - 'gradle.properties'
-      - 'gradlew'
-      - 'gradlew.bat'
-      - '.github/workflows/gradle.yml'
+    paths-ignore:
+      - 'orb/**'
+      - 'scan/**'
+      - 'vsts/**'
+      - 'common/**'
+      - 'action.yaml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'tsconfig.base.json'
+      - '.github/workflows/node.yml'
 jobs:
   gradleValidation:
     name: gradle-wrapper
@@ -32,7 +36,7 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v3
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.4
+        uses: gradle/wrapper-validation-action@v1.1.0
 
   gradle-test:
     name: gradle-test
