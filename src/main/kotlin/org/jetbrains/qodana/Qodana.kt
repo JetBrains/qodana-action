@@ -26,7 +26,7 @@ class Installer {
         fun getVersion(): String = VERSION
 
         fun getArchName(): String {
-            val arch = System.getProperty("os.arch").toLowerCase()
+            val arch = System.getProperty("os.arch").lowercase()
             return when {
                 getPlatformName() == "darwin" -> "all"
                 arch.contains("x86_64") || arch.contains("amd64") -> "x86_64"
@@ -36,7 +36,7 @@ class Installer {
         }
 
         fun getPlatformName(): String {
-            val systemName = System.getProperty("os.name").toLowerCase()
+            val systemName = System.getProperty("os.name").lowercase()
             return when {
                 systemName.contains("windows") -> "windows"
                 systemName.contains("mac os x") || systemName.contains("darwin") || systemName.contains("osx") -> "darwin"

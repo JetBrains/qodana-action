@@ -31,7 +31,7 @@ class QodanaScanTaskTest : BaseTest() {
             $EXTENSION_NAME {
             }
             $QODANA_SCAN_TASK_NAME {
-                 arguments = ["--ide", "QDPYC", "--property=idea.headless.enable.statistics=false"]
+                 arguments = ["--ide", "QDPYC"]  // "--property=idea.headless.enable.statistics=false"]
             }
         """)
         } else {
