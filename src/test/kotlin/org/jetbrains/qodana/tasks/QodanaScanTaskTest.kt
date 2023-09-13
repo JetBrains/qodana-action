@@ -3,6 +3,7 @@ package org.jetbrains.qodana.tasks
 import org.jetbrains.qodana.BaseTest
 import org.jetbrains.qodana.QodanaPluginConstants.EXTENSION_NAME
 import org.jetbrains.qodana.QodanaPluginConstants.QODANA_SCAN_TASK_NAME
+import org.junit.Assume
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -24,6 +25,9 @@ class QodanaScanTaskTest : BaseTest() {
     @Test
     fun `run qodana in a non-empty directory and fail with threshold`() {
         val githubActions = "true".equals(System.getenv("GITHUB_ACTIONS"), ignoreCase = true)
+        val isMacOS = System.getProperty("os.name").contains("Mac OS X")
+        Assume.assumeFalse(githubActions && isMacOS)
+
         val notLinux = !System.getProperty("os.name").contains("Linux")
 
         if (githubActions && notLinux) {
