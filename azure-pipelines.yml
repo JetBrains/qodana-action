@@ -21,6 +21,6 @@ steps:
         "$(Build.Repository.Name)"
   - task: QodanaScan@2023
     inputs:
-      args: --log-level=debug,-l=jetbrains/qodana-js:latest,--property=idea.headless.enable.statistics=false
+      args: --log-level,debug,-l,jetbrains/qodana-js:latest,--property,idea.headless.enable.statistics=false
     env:
       QODANA_TOKEN: $(QODANA_TOKEN)
