@@ -15,12 +15,10 @@ steps:
   - task: Cache@2  # Not required, but Qodana will open projects with cache faster.
     inputs:
       key: '"$(Build.Repository.Name)" | "$(Build.SourceBranchName)" | "$(Build.SourceVersion)"'
-      path: '$(Agent.TempDirectory)/qodana/cache'
+      path: '$(Agent.TempDirectory)/qodana/jvm/cache'
       restoreKeys: |
         "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
         "$(Build.Repository.Name)"
   - task: QodanaScan@2023
     inputs:
-      args: --log-level,debug,-l,jetbrains/qodana-js:latest
-    env:
-      QODANA_TOKEN: $(QODANA_TOKEN)
+      args: --log-level,debug,-l,jetbrains/qodana-jvm-community:lates,--property,idea.headless.enable.statistics=false
