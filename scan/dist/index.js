@@ -72,7 +72,7 @@ var require_utils = __commonJS({
 var require_command = __commonJS({
   "../node_modules/@actions/core/lib/command.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -83,26 +83,26 @@ var require_command = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.issue = exports2.issueCommand = void 0;
-    var os = __importStar3(require("os"));
+    var os = __importStar5(require("os"));
     var utils_12 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
@@ -326,7 +326,7 @@ function stringToBytes(str) {
   }
   return bytes;
 }
-function v35_default(name, version4, hashfunc) {
+function v35_default(name, version3, hashfunc) {
   function generateUUID(value, namespace, buf, offset) {
     if (typeof value === "string") {
       value = stringToBytes(value);
@@ -341,7 +341,7 @@ function v35_default(name, version4, hashfunc) {
     bytes.set(namespace);
     bytes.set(value, namespace.length);
     bytes = hashfunc(bytes);
-    bytes[6] = bytes[6] & 15 | version4;
+    bytes[6] = bytes[6] & 15 | version3;
     bytes[8] = bytes[8] & 63 | 128;
     if (buf) {
       offset = offset || 0;
@@ -511,7 +511,7 @@ var init_esm_node = __esm({
 var require_file_command = __commonJS({
   "../node_modules/@actions/core/lib/file-command.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -522,27 +522,27 @@ var require_file_command = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.prepareKeyValueMessage = exports2.issueFileCommand = void 0;
-    var fs2 = __importStar3(require("fs"));
-    var os = __importStar3(require("os"));
+    var fs2 = __importStar5(require("fs"));
+    var os = __importStar5(require("os"));
     var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var utils_12 = require_utils();
     function issueFileCommand(command, message) {
@@ -594,7 +594,12 @@ var require_proxy = __commonJS({
         }
       })();
       if (proxyVar) {
-        return new URL(proxyVar);
+        try {
+          return new URL(proxyVar);
+        } catch (_a) {
+          if (!proxyVar.startsWith("http://") && !proxyVar.startsWith("https://"))
+            return new URL(`http://${proxyVar}`);
+        }
       } else {
         return void 0;
       }
@@ -897,7 +902,7 @@ var require_tunnel2 = __commonJS({
 var require_lib = __commonJS({
   "../node_modules/@actions/http-client/lib/index.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -908,24 +913,24 @@ var require_lib = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -958,10 +963,10 @@ var require_lib = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.HttpClient = exports2.isHttps = exports2.HttpClientResponse = exports2.HttpClientError = exports2.getProxyUrl = exports2.MediaTypes = exports2.Headers = exports2.HttpCodes = void 0;
-    var http = __importStar3(require("http"));
-    var https = __importStar3(require("https"));
-    var pm = __importStar3(require_proxy());
-    var tunnel = __importStar3(require_tunnel2());
+    var http = __importStar5(require("http"));
+    var https = __importStar5(require("https"));
+    var pm = __importStar5(require_proxy());
+    var tunnel = __importStar5(require_tunnel2());
     var HttpCodes;
     (function(HttpCodes2) {
       HttpCodes2[HttpCodes2["OK"] = 200] = "OK";
@@ -1042,14 +1047,27 @@ var require_lib = __commonJS({
         this.message = message;
       }
       readBody() {
-        return __awaiter3(this, void 0, void 0, function* () {
-          return new Promise((resolve) => __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
+          return new Promise((resolve) => __awaiter5(this, void 0, void 0, function* () {
             let output = Buffer.alloc(0);
             this.message.on("data", (chunk) => {
               output = Buffer.concat([output, chunk]);
             });
             this.message.on("end", () => {
               resolve(output.toString());
+            });
+          }));
+        });
+      }
+      readBodyBuffer() {
+        return __awaiter5(this, void 0, void 0, function* () {
+          return new Promise((resolve) => __awaiter5(this, void 0, void 0, function* () {
+            const chunks = [];
+            this.message.on("data", (chunk) => {
+              chunks.push(chunk);
+            });
+            this.message.on("end", () => {
+              resolve(Buffer.concat(chunks));
             });
           }));
         });
@@ -1104,42 +1122,42 @@ var require_lib = __commonJS({
         }
       }
       options(requestUrl, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("OPTIONS", requestUrl, null, additionalHeaders || {});
         });
       }
       get(requestUrl, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("GET", requestUrl, null, additionalHeaders || {});
         });
       }
       del(requestUrl, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("DELETE", requestUrl, null, additionalHeaders || {});
         });
       }
       post(requestUrl, data, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("POST", requestUrl, data, additionalHeaders || {});
         });
       }
       patch(requestUrl, data, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("PATCH", requestUrl, data, additionalHeaders || {});
         });
       }
       put(requestUrl, data, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("PUT", requestUrl, data, additionalHeaders || {});
         });
       }
       head(requestUrl, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request("HEAD", requestUrl, null, additionalHeaders || {});
         });
       }
       sendStream(verb, requestUrl, stream, additionalHeaders) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.request(verb, requestUrl, stream, additionalHeaders);
         });
       }
@@ -1148,14 +1166,14 @@ var require_lib = __commonJS({
        * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
        */
       getJson(requestUrl, additionalHeaders = {}) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
           const res = yield this.get(requestUrl, additionalHeaders);
           return this._processResponse(res, this.requestOptions);
         });
       }
       postJson(requestUrl, obj, additionalHeaders = {}) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const data = JSON.stringify(obj, null, 2);
           additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
           additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
@@ -1164,7 +1182,7 @@ var require_lib = __commonJS({
         });
       }
       putJson(requestUrl, obj, additionalHeaders = {}) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const data = JSON.stringify(obj, null, 2);
           additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
           additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
@@ -1173,7 +1191,7 @@ var require_lib = __commonJS({
         });
       }
       patchJson(requestUrl, obj, additionalHeaders = {}) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const data = JSON.stringify(obj, null, 2);
           additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
           additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
@@ -1187,7 +1205,7 @@ var require_lib = __commonJS({
        * Prefer get, del, post and patch
        */
       request(verb, requestUrl, data, headers) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           if (this._disposed) {
             throw new Error("Client has already been disposed.");
           }
@@ -1261,7 +1279,7 @@ var require_lib = __commonJS({
        * @param data
        */
       requestRaw(info, data) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
               if (err) {
@@ -1424,15 +1442,15 @@ var require_lib = __commonJS({
         return agent;
       }
       _performExponentialBackoff(retryNumber) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
           const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
           return new Promise((resolve) => setTimeout(() => resolve(), ms));
         });
       }
       _processResponse(res, options) {
-        return __awaiter3(this, void 0, void 0, function* () {
-          return new Promise((resolve, reject) => __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject) => __awaiter5(this, void 0, void 0, function* () {
             const statusCode = res.message.statusCode || 0;
             const response = {
               statusCode,
@@ -1495,7 +1513,7 @@ var require_lib = __commonJS({
 var require_auth = __commonJS({
   "../node_modules/@actions/http-client/lib/auth.js"(exports2) {
     "use strict";
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -1547,7 +1565,7 @@ var require_auth = __commonJS({
         return false;
       }
       handleAuthentication() {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           throw new Error("not implemented");
         });
       }
@@ -1573,7 +1591,7 @@ var require_auth = __commonJS({
         return false;
       }
       handleAuthentication() {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           throw new Error("not implemented");
         });
       }
@@ -1599,7 +1617,7 @@ var require_auth = __commonJS({
         return false;
       }
       handleAuthentication() {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           throw new Error("not implemented");
         });
       }
@@ -1612,7 +1630,7 @@ var require_auth = __commonJS({
 var require_oidc_utils = __commonJS({
   "../node_modules/@actions/core/lib/oidc-utils.js"(exports2) {
     "use strict";
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -1675,7 +1693,7 @@ var require_oidc_utils = __commonJS({
       }
       static getCall(id_token_url) {
         var _a;
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const httpclient = _OidcClient.createHttpClient();
           const res = yield httpclient.getJson(id_token_url).catch((error) => {
             throw new Error(`Failed to get ID Token. 
@@ -1692,7 +1710,7 @@ var require_oidc_utils = __commonJS({
         });
       }
       static getIDToken(audience) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           try {
             let id_token_url = _OidcClient.getIDTokenUrl();
             if (audience) {
@@ -1717,7 +1735,7 @@ var require_oidc_utils = __commonJS({
 var require_summary = __commonJS({
   "../node_modules/@actions/core/lib/summary.js"(exports2) {
     "use strict";
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -1769,7 +1787,7 @@ var require_summary = __commonJS({
        * @returns step summary file path
        */
       filePath() {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           if (this._filePath) {
             return this._filePath;
           }
@@ -1810,7 +1828,7 @@ var require_summary = __commonJS({
        * @returns {Promise<Summary>} summary instance
        */
       write(options) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const overwrite = !!(options === null || options === void 0 ? void 0 : options.overwrite);
           const filePath = yield this.filePath();
           const writeFunc = overwrite ? writeFile : appendFile;
@@ -1824,7 +1842,7 @@ var require_summary = __commonJS({
        * @returns {Summary} summary instance
        */
       clear() {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return this.emptyBuffer().write({ overwrite: true });
         });
       }
@@ -2018,7 +2036,7 @@ var require_summary = __commonJS({
 var require_path_utils = __commonJS({
   "../node_modules/@actions/core/lib/path-utils.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -2029,26 +2047,26 @@ var require_path_utils = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.toPlatformPath = exports2.toWin32Path = exports2.toPosixPath = void 0;
-    var path = __importStar3(require("path"));
+    var path = __importStar5(require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -2071,7 +2089,7 @@ var require_path_utils = __commonJS({
 var require_core = __commonJS({
   "../node_modules/@actions/core/lib/core.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -2082,24 +2100,24 @@ var require_core = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -2135,8 +2153,8 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_12 = require_utils();
-    var os = __importStar3(require("os"));
-    var path = __importStar3(require("path"));
+    var os = __importStar5(require("os"));
+    var path = __importStar5(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -2266,7 +2284,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     __name(endGroup, "endGroup");
     exports2.endGroup = endGroup;
     function group(name, fn) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         startGroup(name);
         let result;
         try {
@@ -2294,7 +2312,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     __name(getState, "getState");
     exports2.getState = getState;
     function getIDToken(aud) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return yield oidc_utils_1.OidcClient.getIDToken(aud);
       });
     }
@@ -2386,7 +2404,7 @@ var require_context = __commonJS({
 var require_utils2 = __commonJS({
   "node_modules/@actions/github/lib/internal/utils.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -2397,26 +2415,26 @@ var require_utils2 = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getApiBaseUrl = exports2.getProxyAgent = exports2.getAuthString = void 0;
-    var httpClient = __importStar3(require_lib());
+    var httpClient = __importStar5(require_lib());
     function getAuthString(token, options) {
       if (!token && !options.auth) {
         throw new Error("Parameter token or opts.auth is required");
@@ -2867,7 +2885,7 @@ var require_dist_node2 = __commonJS({
       });
     }
     __name(expand, "expand");
-    function parse3(options) {
+    function parse2(options) {
       let method = options.method.toUpperCase();
       let url = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
       let headers = Object.assign({}, options.headers);
@@ -2922,9 +2940,9 @@ var require_dist_node2 = __commonJS({
         request: options.request
       } : null);
     }
-    __name(parse3, "parse");
+    __name(parse2, "parse");
     function endpointWithDefaults(defaults, route, options) {
-      return parse3(merge(defaults, route, options));
+      return parse2(merge(defaults, route, options));
     }
     __name(endpointWithDefaults, "endpointWithDefaults");
     function withDefaults(oldDefaults, newDefaults) {
@@ -2934,7 +2952,7 @@ var require_dist_node2 = __commonJS({
         DEFAULTS: DEFAULTS2,
         defaults: withDefaults.bind(null, DEFAULTS2),
         merge: merge.bind(null, DEFAULTS2),
-        parse: parse3
+        parse: parse2
       });
     }
     __name(withDefaults, "withDefaults");
@@ -4594,8 +4612,8 @@ var require_URL = __commonJS({
     var utils = require_utils3();
     var Impl = require_URL_impl();
     var impl = utils.implSymbol;
-    function URL4(url) {
-      if (!this || this[impl] || !(this instanceof URL4)) {
+    function URL3(url) {
+      if (!this || this[impl] || !(this instanceof URL3)) {
         throw new TypeError("Failed to construct 'URL': Please use the 'new' operator, this DOM object constructor cannot be called as a function.");
       }
       if (arguments.length < 1) {
@@ -4611,8 +4629,8 @@ var require_URL = __commonJS({
       }
       module2.exports.setup(this, args);
     }
-    __name(URL4, "URL");
-    URL4.prototype.toJSON = /* @__PURE__ */ __name(function toJSON() {
+    __name(URL3, "URL");
+    URL3.prototype.toJSON = /* @__PURE__ */ __name(function toJSON() {
       if (!this || !module2.exports.is(this)) {
         throw new TypeError("Illegal invocation");
       }
@@ -4622,7 +4640,7 @@ var require_URL = __commonJS({
       }
       return this[impl].toJSON.apply(this[impl], args);
     }, "toJSON");
-    Object.defineProperty(URL4.prototype, "href", {
+    Object.defineProperty(URL3.prototype, "href", {
       get() {
         return this[impl].href;
       },
@@ -4633,20 +4651,20 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    URL4.prototype.toString = function() {
+    URL3.prototype.toString = function() {
       if (!this || !module2.exports.is(this)) {
         throw new TypeError("Illegal invocation");
       }
       return this.href;
     };
-    Object.defineProperty(URL4.prototype, "origin", {
+    Object.defineProperty(URL3.prototype, "origin", {
       get() {
         return this[impl].origin;
       },
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL4.prototype, "protocol", {
+    Object.defineProperty(URL3.prototype, "protocol", {
       get() {
         return this[impl].protocol;
       },
@@ -4657,7 +4675,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL4.prototype, "username", {
+    Object.defineProperty(URL3.prototype, "username", {
       get() {
         return this[impl].username;
       },
@@ -4668,7 +4686,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL4.prototype, "password", {
+    Object.defineProperty(URL3.prototype, "password", {
       get() {
         return this[impl].password;
       },
@@ -4679,7 +4697,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL4.prototype, "host", {
+    Object.defineProperty(URL3.prototype, "host", {
       get() {
         return this[impl].host;
       },
@@ -4690,7 +4708,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL4.prototype, "hostname", {
+    Object.defineProperty(URL3.prototype, "hostname", {
       get() {
         return this[impl].hostname;
       },
@@ -4701,7 +4719,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL4.prototype, "port", {
+    Object.defineProperty(URL3.prototype, "port", {
       get() {
         return this[impl].port;
       },
@@ -4712,7 +4730,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL4.prototype, "pathname", {
+    Object.defineProperty(URL3.prototype, "pathname", {
       get() {
         return this[impl].pathname;
       },
@@ -4723,7 +4741,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL4.prototype, "search", {
+    Object.defineProperty(URL3.prototype, "search", {
       get() {
         return this[impl].search;
       },
@@ -4734,7 +4752,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL4.prototype, "hash", {
+    Object.defineProperty(URL3.prototype, "hash", {
       get() {
         return this[impl].hash;
       },
@@ -4750,7 +4768,7 @@ var require_URL = __commonJS({
         return !!obj && obj[impl] instanceof Impl.implementation;
       },
       create(constructorArgs, privateData) {
-        let obj = Object.create(URL4.prototype);
+        let obj = Object.create(URL3.prototype);
         this.setup(obj, constructorArgs, privateData);
         return obj;
       },
@@ -4761,10 +4779,10 @@ var require_URL = __commonJS({
         obj[impl] = new Impl.implementation(constructorArgs, privateData);
         obj[impl][utils.wrapperSymbol] = obj;
       },
-      interface: URL4,
+      interface: URL3,
       expose: {
-        Window: { URL: URL4 },
-        Worker: { URL: URL4 }
+        Window: { URL: URL3 },
+        Worker: { URL: URL3 }
       }
     };
   }
@@ -5642,12 +5660,12 @@ var require_lib3 = __commonJS({
       configurable: true
     });
     var INTERNALS$2 = Symbol("Request internals");
-    var URL4 = Url.URL || whatwgUrl.URL;
+    var URL3 = Url.URL || whatwgUrl.URL;
     var parse_url = Url.parse;
     var format_url = Url.format;
     function parseURL(urlStr) {
       if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.exec(urlStr)) {
-        urlStr = new URL4(urlStr).toString();
+        urlStr = new URL3(urlStr).toString();
       }
       return parse_url(urlStr);
     }
@@ -7959,7 +7977,7 @@ var require_dist_node10 = __commonJS({
 var require_utils4 = __commonJS({
   "node_modules/@actions/github/lib/utils.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -7970,27 +7988,27 @@ var require_utils4 = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getOctokitOptions = exports2.GitHub = exports2.defaults = exports2.context = void 0;
-    var Context = __importStar3(require_context());
-    var Utils = __importStar3(require_utils2());
+    var Context = __importStar5(require_context());
+    var Utils = __importStar5(require_utils2());
     var core_1 = require_dist_node8();
     var plugin_rest_endpoint_methods_1 = require_dist_node9();
     var plugin_paginate_rest_1 = require_dist_node10();
@@ -8020,7 +8038,7 @@ var require_utils4 = __commonJS({
 var require_github = __commonJS({
   "node_modules/@actions/github/lib/github.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -8031,26 +8049,26 @@ var require_github = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getOctokit = exports2.context = void 0;
-    var Context = __importStar3(require_context());
+    var Context = __importStar5(require_context());
     var utils_12 = require_utils4();
     exports2.context = new Context.Context();
     function getOctokit(token, options, ...additionalPlugins) {
@@ -8066,7 +8084,7 @@ var require_github = __commonJS({
 var require_io_util = __commonJS({
   "../node_modules/@actions/io/lib/io-util.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -8077,24 +8095,24 @@ var require_io_util = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -8128,14 +8146,14 @@ var require_io_util = __commonJS({
     var _a;
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getCmdPath = exports2.tryGetExecutablePath = exports2.isRooted = exports2.isDirectory = exports2.exists = exports2.READONLY = exports2.UV_FS_O_EXLOCK = exports2.IS_WINDOWS = exports2.unlink = exports2.symlink = exports2.stat = exports2.rmdir = exports2.rm = exports2.rename = exports2.readlink = exports2.readdir = exports2.open = exports2.mkdir = exports2.lstat = exports2.copyFile = exports2.chmod = void 0;
-    var fs2 = __importStar3(require("fs"));
-    var path = __importStar3(require("path"));
+    var fs2 = __importStar5(require("fs"));
+    var path = __importStar5(require("path"));
     _a = fs2.promises, exports2.chmod = _a.chmod, exports2.copyFile = _a.copyFile, exports2.lstat = _a.lstat, exports2.mkdir = _a.mkdir, exports2.open = _a.open, exports2.readdir = _a.readdir, exports2.readlink = _a.readlink, exports2.rename = _a.rename, exports2.rm = _a.rm, exports2.rmdir = _a.rmdir, exports2.stat = _a.stat, exports2.symlink = _a.symlink, exports2.unlink = _a.unlink;
     exports2.IS_WINDOWS = process.platform === "win32";
     exports2.UV_FS_O_EXLOCK = 268435456;
     exports2.READONLY = fs2.constants.O_RDONLY;
     function exists(fsPath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         try {
           yield exports2.stat(fsPath);
         } catch (err) {
@@ -8150,7 +8168,7 @@ var require_io_util = __commonJS({
     __name(exists, "exists");
     exports2.exists = exists;
     function isDirectory(fsPath, useStat = false) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const stats = useStat ? yield exports2.stat(fsPath) : yield exports2.lstat(fsPath);
         return stats.isDirectory();
       });
@@ -8170,7 +8188,7 @@ var require_io_util = __commonJS({
     __name(isRooted, "isRooted");
     exports2.isRooted = isRooted;
     function tryGetExecutablePath(filePath, extensions) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         let stats = void 0;
         try {
           stats = yield exports2.stat(filePath);
@@ -8255,7 +8273,7 @@ var require_io_util = __commonJS({
 var require_io = __commonJS({
   "../node_modules/@actions/io/lib/io.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -8266,24 +8284,24 @@ var require_io = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -8317,10 +8335,10 @@ var require_io = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.findInPath = exports2.which = exports2.mkdirP = exports2.rmRF = exports2.mv = exports2.cp = void 0;
     var assert_1 = require("assert");
-    var path = __importStar3(require("path"));
-    var ioUtil = __importStar3(require_io_util());
+    var path = __importStar5(require("path"));
+    var ioUtil = __importStar5(require_io_util());
     function cp(source, dest, options = {}) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const { force, recursive, copySourceDirectory } = readCopyOptions(options);
         const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
         if (destStat && destStat.isFile() && !force) {
@@ -8348,7 +8366,7 @@ var require_io = __commonJS({
     __name(cp, "cp");
     exports2.cp = cp;
     function mv(source, dest, options = {}) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (yield ioUtil.exists(dest)) {
           let destExists = true;
           if (yield ioUtil.isDirectory(dest)) {
@@ -8370,7 +8388,7 @@ var require_io = __commonJS({
     __name(mv, "mv");
     exports2.mv = mv;
     function rmRF(inputPath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (ioUtil.IS_WINDOWS) {
           if (/[*"<>|]/.test(inputPath)) {
             throw new Error('File path must not contain `*`, `"`, `<`, `>` or `|` on Windows');
@@ -8391,7 +8409,7 @@ var require_io = __commonJS({
     __name(rmRF, "rmRF");
     exports2.rmRF = rmRF;
     function mkdirP(fsPath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         assert_1.ok(fsPath, "a path argument must be provided");
         yield ioUtil.mkdir(fsPath, { recursive: true });
       });
@@ -8399,7 +8417,7 @@ var require_io = __commonJS({
     __name(mkdirP, "mkdirP");
     exports2.mkdirP = mkdirP;
     function which(tool, check) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!tool) {
           throw new Error("parameter 'tool' is required");
         }
@@ -8424,7 +8442,7 @@ var require_io = __commonJS({
     __name(which, "which");
     exports2.which = which;
     function findInPath(tool) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!tool) {
           throw new Error("parameter 'tool' is required");
         }
@@ -8474,7 +8492,7 @@ var require_io = __commonJS({
     }
     __name(readCopyOptions, "readCopyOptions");
     function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (currentDepth >= 255)
           return;
         currentDepth++;
@@ -8495,7 +8513,7 @@ var require_io = __commonJS({
     }
     __name(cpDirRecursive, "cpDirRecursive");
     function copyFile(srcFile, destFile, force) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if ((yield ioUtil.lstat(srcFile)).isSymbolicLink()) {
           try {
             yield ioUtil.lstat(destFile);
@@ -8756,7 +8774,7 @@ Invalid characters include: ${Array.from(invalidArtifactNameCharacters.values())
 These characters are not allowed in the artifact name due to limitations with certain file systems such as NTFS. To maintain file system agnostic behavior, these characters are intentionally not allowed to prevent potential problems with downloads on different file systems.`);
         }
       }
-      core_1.info(`Artifact name is valid!`);
+      (0, core_1.info)(`Artifact name is valid!`);
     }
     __name(checkArtifactName, "checkArtifactName");
     exports2.checkArtifactName = checkArtifactName;
@@ -8784,37 +8802,41 @@ The following characters are not allowed in files that are uploaded due to limit
 var require_upload_specification = __commonJS({
   "../node_modules/@actions/artifact/lib/internal/upload-specification.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getUploadSpecification = void 0;
-    var fs2 = __importStar3(require("fs"));
+    var fs2 = __importStar5(require("fs"));
     var core_1 = require_core();
     var path_1 = require("path");
     var path_and_artifact_name_validation_1 = require_path_and_artifact_name_validation();
@@ -8823,29 +8845,29 @@ var require_upload_specification = __commonJS({
       if (!fs2.existsSync(rootDirectory)) {
         throw new Error(`Provided rootDirectory ${rootDirectory} does not exist`);
       }
-      if (!fs2.lstatSync(rootDirectory).isDirectory()) {
+      if (!fs2.statSync(rootDirectory).isDirectory()) {
         throw new Error(`Provided rootDirectory ${rootDirectory} is not a valid directory`);
       }
-      rootDirectory = path_1.normalize(rootDirectory);
-      rootDirectory = path_1.resolve(rootDirectory);
+      rootDirectory = (0, path_1.normalize)(rootDirectory);
+      rootDirectory = (0, path_1.resolve)(rootDirectory);
       for (let file of artifactFiles) {
         if (!fs2.existsSync(file)) {
           throw new Error(`File ${file} does not exist`);
         }
-        if (!fs2.lstatSync(file).isDirectory()) {
-          file = path_1.normalize(file);
-          file = path_1.resolve(file);
+        if (!fs2.statSync(file).isDirectory()) {
+          file = (0, path_1.normalize)(file);
+          file = (0, path_1.resolve)(file);
           if (!file.startsWith(rootDirectory)) {
             throw new Error(`The rootDirectory: ${rootDirectory} is not a parent directory of the file: ${file}`);
           }
           const uploadPath = file.replace(rootDirectory, "");
-          path_and_artifact_name_validation_1.checkArtifactFilePath(uploadPath);
+          (0, path_and_artifact_name_validation_1.checkArtifactFilePath)(uploadPath);
           specifications.push({
             absoluteFilePath: file,
-            uploadFilePath: path_1.join(artifactName, uploadPath)
+            uploadFilePath: (0, path_1.join)(artifactName, uploadPath)
           });
         } else {
-          core_1.debug(`Removing ${file} from rawSearchResults because it is a directory`);
+          (0, core_1.debug)(`Removing ${file} from rawSearchResults because it is a directory`);
         }
       }
       return specifications;
@@ -9089,8 +9111,8 @@ var require_fs = __commonJS({
     var fs2 = require("fs");
     var origRealpath = fs2.realpath;
     var origRealpathSync = fs2.realpathSync;
-    var version4 = process.version;
-    var ok = /^v[0-5]\./.test(version4);
+    var version3 = process.version;
+    var ok = /^v[0-5]\./.test(version3);
     var old = require_old();
     function newError(er) {
       return er && er.syscall === "realpath" && (er.code === "ELOOP" || er.code === "ENOMEM" || er.code === "ENAMETOOLONG");
@@ -9583,9 +9605,9 @@ var require_minimatch = __commonJS({
         throw new TypeError("pattern is too long");
       }
     }, "assertValidPattern");
-    Minimatch.prototype.parse = parse3;
+    Minimatch.prototype.parse = parse2;
     var SUBPARSE = {};
-    function parse3(pattern, isSub) {
+    function parse2(pattern, isSub) {
       assertValidPattern(pattern);
       var options = this.options;
       if (pattern === "**") {
@@ -9818,7 +9840,7 @@ var require_minimatch = __commonJS({
       regExp._src = re;
       return regExp;
     }
-    __name(parse3, "parse");
+    __name(parse2, "parse");
     minimatch.makeRe = function(pattern, options) {
       return new Minimatch(pattern, options || {}).makeRe();
     };
@@ -11509,7 +11531,7 @@ var require_tmp = __commonJS({
     var fs2 = require("fs");
     var os = require("os");
     var path = require("path");
-    var crypto7 = require("crypto");
+    var crypto4 = require("crypto");
     var _c = { fs: fs2.constants, os: os.constants };
     var rimraf = require_rimraf();
     var RANDOM_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -11712,9 +11734,9 @@ var require_tmp = __commonJS({
     function _randomChars(howMany) {
       let value = [], rnd = null;
       try {
-        rnd = crypto7.randomBytes(howMany);
+        rnd = crypto4.randomBytes(howMany);
       } catch (e) {
-        rnd = crypto7.pseudoRandomBytes(howMany);
+        rnd = crypto4.pseudoRandomBytes(howMany);
       }
       for (var i = 0; i < howMany; i++) {
         value.push(RANDOM_CHARS[rnd[i] % RANDOM_CHARS.length]);
@@ -11909,7 +11931,7 @@ var require_config_variables = __commonJS({
   "../node_modules/@actions/artifact/lib/internal/config-variables.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.getRetentionDays = exports2.getWorkSpaceDirectory = exports2.getWorkFlowRunId = exports2.getRuntimeUrl = exports2.getRuntimeToken = exports2.getDownloadFileConcurrency = exports2.getInitialRetryIntervalInMilliseconds = exports2.getRetryMultiplier = exports2.getRetryLimit = exports2.getUploadChunkSize = exports2.getUploadFileConcurrency = void 0;
+    exports2.isGhes = exports2.getRetentionDays = exports2.getWorkSpaceDirectory = exports2.getWorkFlowRunId = exports2.getRuntimeUrl = exports2.getRuntimeToken = exports2.getDownloadFileConcurrency = exports2.getInitialRetryIntervalInMilliseconds = exports2.getRetryMultiplier = exports2.getRetryLimit = exports2.getUploadChunkSize = exports2.getUploadFileConcurrency = void 0;
     function getUploadFileConcurrency() {
       return 2;
     }
@@ -11981,6 +12003,12 @@ var require_config_variables = __commonJS({
     }
     __name(getRetentionDays, "getRetentionDays");
     exports2.getRetentionDays = getRetentionDays;
+    function isGhes() {
+      const ghUrl = new URL(process.env["GITHUB_SERVER_URL"] || "https://github.com");
+      return ghUrl.hostname.toUpperCase() !== "GITHUB.COM";
+    }
+    __name(isGhes, "isGhes");
+    exports2.isGhes = isGhes;
   }
 });
 
@@ -12288,7 +12316,7 @@ var require_crc64 = __commonJS({
 var require_utils5 = __commonJS({
   "../node_modules/@actions/artifact/lib/internal/utils.js"(exports2) {
     "use strict";
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -12319,26 +12347,26 @@ var require_utils5 = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __importDefault2 = exports2 && exports2.__importDefault || function(mod) {
+    var __importDefault4 = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.digestForStream = exports2.sleep = exports2.getProperRetention = exports2.rmFile = exports2.getFileSize = exports2.createEmptyFilesForArtifact = exports2.createDirectoriesForArtifact = exports2.displayHttpDiagnostics = exports2.getArtifactUrl = exports2.createHttpClient = exports2.getUploadHeaders = exports2.getDownloadHeaders = exports2.getContentRange = exports2.tryGetRetryAfterValueTimeInMilliseconds = exports2.isThrottledStatusCode = exports2.isRetryableStatusCode = exports2.isForbiddenStatusCode = exports2.isSuccessStatusCode = exports2.getApiVersion = exports2.parseEnvNumber = exports2.getExponentialRetryTimeInMilliseconds = void 0;
-    var crypto_1 = __importDefault2(require("crypto"));
+    var crypto_1 = __importDefault4(require("crypto"));
     var fs_1 = require("fs");
     var core_1 = require_core();
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
     var config_variables_1 = require_config_variables();
-    var crc64_1 = __importDefault2(require_crc64());
+    var crc64_1 = __importDefault4(require_crc64());
     function getExponentialRetryTimeInMilliseconds(retryCount) {
       if (retryCount < 0) {
         throw new Error("RetryCount should not be negative");
       } else if (retryCount === 0) {
-        return config_variables_1.getInitialRetryIntervalInMilliseconds();
+        return (0, config_variables_1.getInitialRetryIntervalInMilliseconds)();
       }
-      const minTime = config_variables_1.getInitialRetryIntervalInMilliseconds() * config_variables_1.getRetryMultiplier() * retryCount;
-      const maxTime = minTime * config_variables_1.getRetryMultiplier();
+      const minTime = (0, config_variables_1.getInitialRetryIntervalInMilliseconds)() * (0, config_variables_1.getRetryMultiplier)() * retryCount;
+      const maxTime = minTime * (0, config_variables_1.getRetryMultiplier)();
       return Math.trunc(Math.random() * (maxTime - minTime) + minTime);
     }
     __name(getExponentialRetryTimeInMilliseconds, "getExponentialRetryTimeInMilliseconds");
@@ -12402,13 +12430,13 @@ var require_utils5 = __commonJS({
       if (headers["retry-after"]) {
         const retryTime = Number(headers["retry-after"]);
         if (!isNaN(retryTime)) {
-          core_1.info(`Retry-After header is present with a value of ${retryTime}`);
+          (0, core_1.info)(`Retry-After header is present with a value of ${retryTime}`);
           return retryTime * 1e3;
         }
-        core_1.info(`Returned retry-after header value: ${retryTime} is non-numeric and cannot be used`);
+        (0, core_1.info)(`Returned retry-after header value: ${retryTime} is non-numeric and cannot be used`);
         return void 0;
       }
-      core_1.info(`No retry-after header was found. Dumping all headers for diagnostic purposes`);
+      (0, core_1.info)(`No retry-after header was found. Dumping all headers for diagnostic purposes`);
       console.log(headers);
       return void 0;
     }
@@ -12468,20 +12496,20 @@ var require_utils5 = __commonJS({
     exports2.getUploadHeaders = getUploadHeaders;
     function createHttpClient(userAgent) {
       return new http_client_1.HttpClient(userAgent, [
-        new auth_1.BearerCredentialHandler(config_variables_1.getRuntimeToken())
+        new auth_1.BearerCredentialHandler((0, config_variables_1.getRuntimeToken)())
       ]);
     }
     __name(createHttpClient, "createHttpClient");
     exports2.createHttpClient = createHttpClient;
     function getArtifactUrl() {
-      const artifactUrl = `${config_variables_1.getRuntimeUrl()}_apis/pipelines/workflows/${config_variables_1.getWorkFlowRunId()}/artifacts?api-version=${getApiVersion()}`;
-      core_1.debug(`Artifact Url: ${artifactUrl}`);
+      const artifactUrl = `${(0, config_variables_1.getRuntimeUrl)()}_apis/pipelines/workflows/${(0, config_variables_1.getWorkFlowRunId)()}/artifacts?api-version=${getApiVersion()}`;
+      (0, core_1.debug)(`Artifact Url: ${artifactUrl}`);
       return artifactUrl;
     }
     __name(getArtifactUrl, "getArtifactUrl");
     exports2.getArtifactUrl = getArtifactUrl;
     function displayHttpDiagnostics(response) {
-      core_1.info(`##### Begin Diagnostic HTTP information #####
+      (0, core_1.info)(`##### Begin Diagnostic HTTP information #####
 Status Code: ${response.message.statusCode}
 Status Message: ${response.message.statusMessage}
 Header Information: ${JSON.stringify(response.message.headers, void 0, 2)}
@@ -12490,7 +12518,7 @@ Header Information: ${JSON.stringify(response.message.headers, void 0, 2)}
     __name(displayHttpDiagnostics, "displayHttpDiagnostics");
     exports2.displayHttpDiagnostics = displayHttpDiagnostics;
     function createDirectoriesForArtifact(directories) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         for (const directory of directories) {
           yield fs_1.promises.mkdir(directory, {
             recursive: true
@@ -12501,7 +12529,7 @@ Header Information: ${JSON.stringify(response.message.headers, void 0, 2)}
     __name(createDirectoriesForArtifact, "createDirectoriesForArtifact");
     exports2.createDirectoriesForArtifact = createDirectoriesForArtifact;
     function createEmptyFilesForArtifact(emptyFilesToCreate) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         for (const filePath of emptyFilesToCreate) {
           yield (yield fs_1.promises.open(filePath, "w")).close();
         }
@@ -12510,16 +12538,16 @@ Header Information: ${JSON.stringify(response.message.headers, void 0, 2)}
     __name(createEmptyFilesForArtifact, "createEmptyFilesForArtifact");
     exports2.createEmptyFilesForArtifact = createEmptyFilesForArtifact;
     function getFileSize(filePath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const stats = yield fs_1.promises.stat(filePath);
-        core_1.debug(`${filePath} size:(${stats.size}) blksize:(${stats.blksize}) blocks:(${stats.blocks})`);
+        (0, core_1.debug)(`${filePath} size:(${stats.size}) blksize:(${stats.blksize}) blocks:(${stats.blocks})`);
         return stats.size;
       });
     }
     __name(getFileSize, "getFileSize");
     exports2.getFileSize = getFileSize;
     function rmFile(filePath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         yield fs_1.promises.unlink(filePath);
       });
     }
@@ -12533,7 +12561,7 @@ Header Information: ${JSON.stringify(response.message.headers, void 0, 2)}
       if (retentionSetting) {
         const maxRetention = parseInt(retentionSetting);
         if (!isNaN(maxRetention) && maxRetention < retention) {
-          core_1.warning(`Retention days is greater than the max value allowed by the repository setting, reduce retention to ${maxRetention} days`);
+          (0, core_1.warning)(`Retention days is greater than the max value allowed by the repository setting, reduce retention to ${maxRetention} days`);
           retention = maxRetention;
         }
       }
@@ -12542,23 +12570,23 @@ Header Information: ${JSON.stringify(response.message.headers, void 0, 2)}
     __name(getProperRetention, "getProperRetention");
     exports2.getProperRetention = getProperRetention;
     function sleep(milliseconds) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return new Promise((resolve) => setTimeout(resolve, milliseconds));
       });
     }
     __name(sleep, "sleep");
     exports2.sleep = sleep;
     function digestForStream(stream) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
           const crc64 = new crc64_1.default();
-          const md53 = crypto_1.default.createHash("md5");
+          const md52 = crypto_1.default.createHash("md5");
           stream.on("data", (data) => {
             crc64.update(data);
-            md53.update(data);
+            md52.update(data);
           }).on("end", () => resolve({
             crc64: crc64.digest("base64"),
-            md5: md53.digest("base64")
+            md5: md52.digest("base64")
           })).on("error", reject);
         });
       });
@@ -12593,13 +12621,13 @@ var require_status_reporter = __commonJS({
       start() {
         this.totalFileStatus = setInterval(() => {
           const percentage = this.formatPercentage(this.processedCount, this.totalNumberOfFilesToProcess);
-          core_1.info(`Total file count: ${this.totalNumberOfFilesToProcess} ---- Processed file #${this.processedCount} (${percentage.slice(0, percentage.indexOf(".") + 2)}%)`);
+          (0, core_1.info)(`Total file count: ${this.totalNumberOfFilesToProcess} ---- Processed file #${this.processedCount} (${percentage.slice(0, percentage.indexOf(".") + 2)}%)`);
         }, this.displayFrequencyInMilliseconds);
       }
       // if there is a large file that is being uploaded in chunks, this is used to display extra information about the status of the upload
       updateLargeFileStatus(fileName, chunkStartIndex, chunkEndIndex, totalUploadFileSize) {
         const percentage = this.formatPercentage(chunkEndIndex, totalUploadFileSize);
-        core_1.info(`Uploaded ${fileName} (${percentage.slice(0, percentage.indexOf(".") + 2)}%) bytes ${chunkStartIndex}:${chunkEndIndex}`);
+        (0, core_1.info)(`Uploaded ${fileName} (${percentage.slice(0, percentage.indexOf(".") + 2)}%) bytes ${chunkStartIndex}:${chunkEndIndex}`);
       }
       stop() {
         if (this.totalFileStatus) {
@@ -12633,7 +12661,7 @@ var require_http_manager = __commonJS({
           throw new Error("There must be at least one client");
         }
         this.userAgent = userAgent;
-        this.clients = new Array(clientCount).fill(utils_12.createHttpClient(userAgent));
+        this.clients = new Array(clientCount).fill((0, utils_12.createHttpClient)(userAgent));
       }
       getClient(index) {
         return this.clients[index];
@@ -12642,7 +12670,7 @@ var require_http_manager = __commonJS({
       // for more information see: https://github.com/actions/http-client/blob/04e5ad73cd3fd1f5610a32116b0759eddf6570d2/index.ts#L292
       disposeAndReplaceClient(index) {
         this.clients[index].dispose();
-        this.clients[index] = utils_12.createHttpClient(this.userAgent);
+        this.clients[index] = (0, utils_12.createHttpClient)(this.userAgent);
       }
       disposeAndReplaceAllClients() {
         for (const [index] of this.clients.entries()) {
@@ -12658,35 +12686,39 @@ var require_http_manager = __commonJS({
 var require_upload_gzip = __commonJS({
   "../node_modules/@actions/artifact/lib/internal/upload-gzip.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -12717,7 +12749,7 @@ var require_upload_gzip = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __asyncValues2 = exports2 && exports2.__asyncValues || function(o) {
+    var __asyncValues4 = exports2 && exports2.__asyncValues || function(o) {
       if (!Symbol.asyncIterator)
         throw new TypeError("Symbol.asyncIterator is not defined.");
       var m = o[Symbol.asyncIterator], i;
@@ -12741,20 +12773,36 @@ var require_upload_gzip = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createGZipFileInBuffer = exports2.createGZipFileOnDisk = void 0;
-    var fs2 = __importStar3(require("fs"));
-    var zlib = __importStar3(require("zlib"));
+    var fs2 = __importStar5(require("fs"));
+    var zlib = __importStar5(require("zlib"));
     var util_1 = require("util");
-    var stat = util_1.promisify(fs2.stat);
+    var stat = (0, util_1.promisify)(fs2.stat);
     var gzipExemptFileExtensions = [
+      ".gz",
       ".gzip",
+      ".tgz",
+      ".taz",
+      ".Z",
+      ".taZ",
+      ".bz2",
+      ".tbz",
+      ".tbz2",
+      ".tz2",
+      ".lz",
+      ".lzma",
+      ".tlz",
+      ".lzo",
+      ".xz",
+      ".txz",
+      ".zst",
+      ".zstd",
+      ".tzst",
       ".zip",
-      ".tar.lz",
-      ".tar.gz",
-      ".tar.bz2",
       ".7z"
+      // 7ZIP
     ];
     function createGZipFileOnDisk(originalFilePath, tempFilePath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         for (const gzipExemptExtension of gzipExemptFileExtensions) {
           if (originalFilePath.endsWith(gzipExemptExtension)) {
             return Number.MAX_SAFE_INTEGER;
@@ -12765,13 +12813,13 @@ var require_upload_gzip = __commonJS({
           const gzip = zlib.createGzip();
           const outputStream = fs2.createWriteStream(tempFilePath);
           inputStream.pipe(gzip).pipe(outputStream);
-          outputStream.on("finish", () => __awaiter3(this, void 0, void 0, function* () {
+          outputStream.on("finish", () => __awaiter5(this, void 0, void 0, function* () {
             const size = (yield stat(tempFilePath)).size;
             resolve(size);
           }));
           outputStream.on("error", (error) => {
             console.log(error);
-            reject;
+            reject(error);
           });
         });
       });
@@ -12779,24 +12827,30 @@ var require_upload_gzip = __commonJS({
     __name(createGZipFileOnDisk, "createGZipFileOnDisk");
     exports2.createGZipFileOnDisk = createGZipFileOnDisk;
     function createGZipFileInBuffer(originalFilePath) {
-      return __awaiter3(this, void 0, void 0, function* () {
-        return new Promise((resolve) => __awaiter3(this, void 0, void 0, function* () {
-          var e_1, _a;
+      return __awaiter5(this, void 0, void 0, function* () {
+        return new Promise((resolve) => __awaiter5(this, void 0, void 0, function* () {
+          var _a, e_1, _b, _c;
           const inputStream = fs2.createReadStream(originalFilePath);
           const gzip = zlib.createGzip();
           inputStream.pipe(gzip);
           const chunks = [];
           try {
-            for (var gzip_1 = __asyncValues2(gzip), gzip_1_1; gzip_1_1 = yield gzip_1.next(), !gzip_1_1.done; ) {
-              const chunk = gzip_1_1.value;
-              chunks.push(chunk);
+            for (var _d = true, gzip_1 = __asyncValues4(gzip), gzip_1_1; gzip_1_1 = yield gzip_1.next(), _a = gzip_1_1.done, !_a; ) {
+              _c = gzip_1_1.value;
+              _d = false;
+              try {
+                const chunk = _c;
+                chunks.push(chunk);
+              } finally {
+                _d = true;
+              }
             }
           } catch (e_1_1) {
             e_1 = { error: e_1_1 };
           } finally {
             try {
-              if (gzip_1_1 && !gzip_1_1.done && (_a = gzip_1.return))
-                yield _a.call(gzip_1);
+              if (!_d && !_a && (_b = gzip_1.return))
+                yield _b.call(gzip_1);
             } finally {
               if (e_1)
                 throw e_1.error;
@@ -12815,35 +12869,39 @@ var require_upload_gzip = __commonJS({
 var require_requestUtils = __commonJS({
   "../node_modules/@actions/artifact/lib/internal/requestUtils.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -12877,10 +12935,10 @@ var require_requestUtils = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.retryHttpClientRequest = exports2.retry = void 0;
     var utils_12 = require_utils5();
-    var core2 = __importStar3(require_core());
+    var core2 = __importStar5(require_core());
     var config_variables_1 = require_config_variables();
     function retry(name, operation, customErrorMessages, maxAttempts) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         let response = void 0;
         let statusCode = void 0;
         let isRetryable = false;
@@ -12891,13 +12949,13 @@ var require_requestUtils = __commonJS({
           try {
             response = yield operation();
             statusCode = response.message.statusCode;
-            if (utils_12.isSuccessStatusCode(statusCode)) {
+            if ((0, utils_12.isSuccessStatusCode)(statusCode)) {
               return response;
             }
             if (statusCode) {
               customErrorInformation = customErrorMessages.get(statusCode);
             }
-            isRetryable = utils_12.isRetryableStatusCode(statusCode);
+            isRetryable = (0, utils_12.isRetryableStatusCode)(statusCode);
             errorMessage = `Artifact service responded with ${statusCode}`;
           } catch (error) {
             isRetryable = true;
@@ -12906,16 +12964,16 @@ var require_requestUtils = __commonJS({
           if (!isRetryable) {
             core2.info(`${name} - Error is not retryable`);
             if (response) {
-              utils_12.displayHttpDiagnostics(response);
+              (0, utils_12.displayHttpDiagnostics)(response);
             }
             break;
           }
           core2.info(`${name} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
-          yield utils_12.sleep(utils_12.getExponentialRetryTimeInMilliseconds(attempt));
+          yield (0, utils_12.sleep)((0, utils_12.getExponentialRetryTimeInMilliseconds)(attempt));
           attempt++;
         }
         if (response) {
-          utils_12.displayHttpDiagnostics(response);
+          (0, utils_12.displayHttpDiagnostics)(response);
         }
         if (customErrorInformation) {
           throw Error(`${name} failed: ${customErrorInformation}`);
@@ -12925,8 +12983,8 @@ var require_requestUtils = __commonJS({
     }
     __name(retry, "retry");
     exports2.retry = retry;
-    function retryHttpClientRequest(name, method, customErrorMessages = /* @__PURE__ */ new Map(), maxAttempts = config_variables_1.getRetryLimit()) {
-      return __awaiter3(this, void 0, void 0, function* () {
+    function retryHttpClientRequest(name, method, customErrorMessages = /* @__PURE__ */ new Map(), maxAttempts = (0, config_variables_1.getRetryLimit)()) {
+      return __awaiter5(this, void 0, void 0, function* () {
         return yield retry(name, method, customErrorMessages, maxAttempts);
       });
     }
@@ -12939,35 +12997,39 @@ var require_requestUtils = __commonJS({
 var require_upload_http_client = __commonJS({
   "../node_modules/@actions/artifact/lib/internal/upload-http-client.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -13000,10 +13062,10 @@ var require_upload_http_client = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.UploadHttpClient = void 0;
-    var fs2 = __importStar3(require("fs"));
-    var core2 = __importStar3(require_core());
-    var tmp = __importStar3(require_tmp_promise());
-    var stream = __importStar3(require("stream"));
+    var fs2 = __importStar5(require("fs"));
+    var core2 = __importStar5(require_core());
+    var tmp = __importStar5(require_tmp_promise());
+    var stream = __importStar5(require("stream"));
     var utils_12 = require_utils5();
     var config_variables_1 = require_config_variables();
     var util_1 = require("util");
@@ -13014,13 +13076,13 @@ var require_upload_http_client = __commonJS({
     var http_manager_1 = require_http_manager();
     var upload_gzip_1 = require_upload_gzip();
     var requestUtils_1 = require_requestUtils();
-    var stat = util_1.promisify(fs2.stat);
+    var stat = (0, util_1.promisify)(fs2.stat);
     var UploadHttpClient = class {
       static {
         __name(this, "UploadHttpClient");
       }
       constructor() {
-        this.uploadHttpManager = new http_manager_1.HttpManager(config_variables_1.getUploadFileConcurrency(), "@actions/artifact-upload");
+        this.uploadHttpManager = new http_manager_1.HttpManager((0, config_variables_1.getUploadFileConcurrency)(), "@actions/artifact-upload");
         this.statusReporter = new status_reporter_1.StatusReporter(1e4);
       }
       /**
@@ -13029,30 +13091,30 @@ var require_upload_http_client = __commonJS({
        * @returns The response from the Artifact Service if the file container was successfully created
        */
       createArtifactInFileContainer(artifactName, options) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const parameters = {
             Type: "actions_storage",
             Name: artifactName
           };
           if (options && options.retentionDays) {
-            const maxRetentionStr = config_variables_1.getRetentionDays();
-            parameters.RetentionDays = utils_12.getProperRetention(options.retentionDays, maxRetentionStr);
+            const maxRetentionStr = (0, config_variables_1.getRetentionDays)();
+            parameters.RetentionDays = (0, utils_12.getProperRetention)(options.retentionDays, maxRetentionStr);
           }
           const data = JSON.stringify(parameters, null, 2);
-          const artifactUrl = utils_12.getArtifactUrl();
+          const artifactUrl = (0, utils_12.getArtifactUrl)();
           const client = this.uploadHttpManager.getClient(0);
-          const headers = utils_12.getUploadHeaders("application/json", false);
+          const headers = (0, utils_12.getUploadHeaders)("application/json", false);
           const customErrorMessages = /* @__PURE__ */ new Map([
             [
               http_client_1.HttpCodes.Forbidden,
-              "Artifact storage quota has been hit. Unable to upload any new artifacts"
+              (0, config_variables_1.isGhes)() ? "Please reference [Enabling GitHub Actions for GitHub Enterprise Server](https://docs.github.com/en/enterprise-server@3.8/admin/github-actions/enabling-github-actions-for-github-enterprise-server) to ensure Actions storage is configured correctly." : "Artifact storage quota has been hit. Unable to upload any new artifacts"
             ],
             [
               http_client_1.HttpCodes.BadRequest,
               `The artifact name ${artifactName} is not valid. Request URL ${artifactUrl}`
             ]
           ]);
-          const response = yield requestUtils_1.retryHttpClientRequest("Create Artifact Container", () => __awaiter3(this, void 0, void 0, function* () {
+          const response = yield (0, requestUtils_1.retryHttpClientRequest)("Create Artifact Container", () => __awaiter5(this, void 0, void 0, function* () {
             return client.post(artifactUrl, data, headers);
           }), customErrorMessages);
           const body = yield response.readBody();
@@ -13066,9 +13128,9 @@ var require_upload_http_client = __commonJS({
        * @returns The size of all the files uploaded in bytes
        */
       uploadArtifactToFileContainer(uploadUrl, filesToUpload, options) {
-        return __awaiter3(this, void 0, void 0, function* () {
-          const FILE_CONCURRENCY = config_variables_1.getUploadFileConcurrency();
-          const MAX_CHUNK_SIZE = config_variables_1.getUploadChunkSize();
+        return __awaiter5(this, void 0, void 0, function* () {
+          const FILE_CONCURRENCY = (0, config_variables_1.getUploadFileConcurrency)();
+          const MAX_CHUNK_SIZE = (0, config_variables_1.getUploadChunkSize)();
           core2.debug(`File Concurrency: ${FILE_CONCURRENCY}, and Chunk Size: ${MAX_CHUNK_SIZE}`);
           const parameters = [];
           let continueOnError = true;
@@ -13096,7 +13158,7 @@ var require_upload_http_client = __commonJS({
           let abortPendingFileUploads = false;
           this.statusReporter.setTotalNumberOfFilesToProcess(filesToUpload.length);
           this.statusReporter.start();
-          yield Promise.all(parallelUploads.map((index) => __awaiter3(this, void 0, void 0, function* () {
+          yield Promise.all(parallelUploads.map((index) => __awaiter5(this, void 0, void 0, function* () {
             while (currentFile < filesToUpload.length) {
               const currentFileParameters = parameters[currentFile];
               currentFile += 1;
@@ -13139,7 +13201,7 @@ var require_upload_http_client = __commonJS({
        * @returns The size of the file that was uploaded in bytes along with any failed uploads
        */
       uploadFileAsync(httpClientIndex, parameters) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const fileStat = yield stat(parameters.file);
           const totalFileSize = fileStat.size;
           const isFIFO = fileStat.isFIFO();
@@ -13150,7 +13212,7 @@ var require_upload_http_client = __commonJS({
           let isGzip = true;
           if (!isFIFO && totalFileSize < 65536) {
             core2.debug(`${parameters.file} is less than 64k in size. Creating a gzip file in-memory to potentially reduce the upload size`);
-            const buffer = yield upload_gzip_1.createGZipFileInBuffer(parameters.file);
+            const buffer = yield (0, upload_gzip_1.createGZipFileInBuffer)(parameters.file);
             let openUploadStream;
             if (totalFileSize < buffer.byteLength) {
               core2.debug(`The gzip file created for ${parameters.file} did not help with reducing the size of the file. The original file will be uploaded as-is`);
@@ -13180,7 +13242,7 @@ var require_upload_http_client = __commonJS({
           } else {
             const tempFile = yield tmp.file();
             core2.debug(`${parameters.file} is greater than 64k in size. Creating a gzip file on-disk ${tempFile.path} to potentially reduce the upload size`);
-            uploadFileSize = yield upload_gzip_1.createGZipFileOnDisk(parameters.file, tempFile.path);
+            uploadFileSize = yield (0, upload_gzip_1.createGZipFileOnDisk)(parameters.file, tempFile.path);
             let uploadFilePath = tempFile.path;
             if (!isFIFO && totalFileSize < uploadFileSize) {
               core2.debug(`The gzip file created for ${parameters.file} did not help with reducing the size of the file. The original file will be uploaded as-is`);
@@ -13240,35 +13302,35 @@ var require_upload_http_client = __commonJS({
        * @returns if the chunk was successfully uploaded
        */
       uploadChunk(httpClientIndex, resourceUrl, openStream, start, end, uploadFileSize, isGzip, totalFileSize) {
-        return __awaiter3(this, void 0, void 0, function* () {
-          const digest = yield utils_12.digestForStream(openStream());
-          const headers = utils_12.getUploadHeaders("application/octet-stream", true, isGzip, totalFileSize, end - start + 1, utils_12.getContentRange(start, end, uploadFileSize), digest);
-          const uploadChunkRequest = /* @__PURE__ */ __name(() => __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
+          const digest = yield (0, utils_12.digestForStream)(openStream());
+          const headers = (0, utils_12.getUploadHeaders)("application/octet-stream", true, isGzip, totalFileSize, end - start + 1, (0, utils_12.getContentRange)(start, end, uploadFileSize), digest);
+          const uploadChunkRequest = /* @__PURE__ */ __name(() => __awaiter5(this, void 0, void 0, function* () {
             const client = this.uploadHttpManager.getClient(httpClientIndex);
             return yield client.sendStream("PUT", resourceUrl, openStream(), headers);
           }), "uploadChunkRequest");
           let retryCount = 0;
-          const retryLimit = config_variables_1.getRetryLimit();
+          const retryLimit = (0, config_variables_1.getRetryLimit)();
           const incrementAndCheckRetryLimit = /* @__PURE__ */ __name((response) => {
             retryCount++;
             if (retryCount > retryLimit) {
               if (response) {
-                utils_12.displayHttpDiagnostics(response);
+                (0, utils_12.displayHttpDiagnostics)(response);
               }
               core2.info(`Retry limit has been reached for chunk at offset ${start} to ${resourceUrl}`);
               return true;
             }
             return false;
           }, "incrementAndCheckRetryLimit");
-          const backOff = /* @__PURE__ */ __name((retryAfterValue) => __awaiter3(this, void 0, void 0, function* () {
+          const backOff = /* @__PURE__ */ __name((retryAfterValue) => __awaiter5(this, void 0, void 0, function* () {
             this.uploadHttpManager.disposeAndReplaceClient(httpClientIndex);
             if (retryAfterValue) {
               core2.info(`Backoff due to too many requests, retry #${retryCount}. Waiting for ${retryAfterValue} milliseconds before continuing the upload`);
-              yield utils_12.sleep(retryAfterValue);
+              yield (0, utils_12.sleep)(retryAfterValue);
             } else {
-              const backoffTime = utils_12.getExponentialRetryTimeInMilliseconds(retryCount);
+              const backoffTime = (0, utils_12.getExponentialRetryTimeInMilliseconds)(retryCount);
               core2.info(`Exponential backoff for retry #${retryCount}. Waiting for ${backoffTime} milliseconds before continuing the upload at offset ${start}`);
-              yield utils_12.sleep(backoffTime);
+              yield (0, utils_12.sleep)(backoffTime);
             }
             core2.info(`Finished backoff for retry #${retryCount}, continuing with upload`);
             return;
@@ -13287,17 +13349,17 @@ var require_upload_http_client = __commonJS({
               continue;
             }
             yield response.readBody();
-            if (utils_12.isSuccessStatusCode(response.message.statusCode)) {
+            if ((0, utils_12.isSuccessStatusCode)(response.message.statusCode)) {
               return true;
-            } else if (utils_12.isRetryableStatusCode(response.message.statusCode)) {
+            } else if ((0, utils_12.isRetryableStatusCode)(response.message.statusCode)) {
               core2.info(`A ${response.message.statusCode} status code has been received, will attempt to retry the upload`);
               if (incrementAndCheckRetryLimit(response)) {
                 return false;
               }
-              utils_12.isThrottledStatusCode(response.message.statusCode) ? yield backOff(utils_12.tryGetRetryAfterValueTimeInMilliseconds(response.message.headers)) : yield backOff();
+              (0, utils_12.isThrottledStatusCode)(response.message.statusCode) ? yield backOff((0, utils_12.tryGetRetryAfterValueTimeInMilliseconds)(response.message.headers)) : yield backOff();
             } else {
               core2.error(`Unexpected response. Unable to upload chunk to ${resourceUrl}`);
-              utils_12.displayHttpDiagnostics(response);
+              (0, utils_12.displayHttpDiagnostics)(response);
               return false;
             }
           }
@@ -13309,21 +13371,21 @@ var require_upload_http_client = __commonJS({
        * Updating the size indicates that we are done uploading all the contents of the artifact
        */
       patchArtifactSize(size, artifactName) {
-        return __awaiter3(this, void 0, void 0, function* () {
-          const resourceUrl = new url_1.URL(utils_12.getArtifactUrl());
+        return __awaiter5(this, void 0, void 0, function* () {
+          const resourceUrl = new url_1.URL((0, utils_12.getArtifactUrl)());
           resourceUrl.searchParams.append("artifactName", artifactName);
           const parameters = { Size: size };
           const data = JSON.stringify(parameters, null, 2);
           core2.debug(`URL is ${resourceUrl.toString()}`);
           const client = this.uploadHttpManager.getClient(0);
-          const headers = utils_12.getUploadHeaders("application/json", false);
+          const headers = (0, utils_12.getUploadHeaders)("application/json", false);
           const customErrorMessages = /* @__PURE__ */ new Map([
             [
               http_client_1.HttpCodes.NotFound,
               `An Artifact with the name ${artifactName} was not found`
             ]
           ]);
-          const response = yield requestUtils_1.retryHttpClientRequest("Finalize artifact upload", () => __awaiter3(this, void 0, void 0, function* () {
+          const response = yield (0, requestUtils_1.retryHttpClientRequest)("Finalize artifact upload", () => __awaiter5(this, void 0, void 0, function* () {
             return client.patch(resourceUrl.toString(), data, headers);
           }), customErrorMessages);
           yield response.readBody();
@@ -13339,35 +13401,39 @@ var require_upload_http_client = __commonJS({
 var require_download_http_client = __commonJS({
   "../node_modules/@actions/artifact/lib/internal/download-http-client.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -13400,9 +13466,9 @@ var require_download_http_client = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DownloadHttpClient = void 0;
-    var fs2 = __importStar3(require("fs"));
-    var core2 = __importStar3(require_core());
-    var zlib = __importStar3(require("zlib"));
+    var fs2 = __importStar5(require("fs"));
+    var core2 = __importStar5(require_core());
+    var zlib = __importStar5(require("zlib"));
     var utils_12 = require_utils5();
     var url_1 = require("url");
     var status_reporter_1 = require_status_reporter();
@@ -13415,18 +13481,18 @@ var require_download_http_client = __commonJS({
         __name(this, "DownloadHttpClient");
       }
       constructor() {
-        this.downloadHttpManager = new http_manager_1.HttpManager(config_variables_1.getDownloadFileConcurrency(), "@actions/artifact-download");
+        this.downloadHttpManager = new http_manager_1.HttpManager((0, config_variables_1.getDownloadFileConcurrency)(), "@actions/artifact-download");
         this.statusReporter = new status_reporter_1.StatusReporter(1e3);
       }
       /**
        * Gets a list of all artifacts that are in a specific container
        */
       listArtifacts() {
-        return __awaiter3(this, void 0, void 0, function* () {
-          const artifactUrl = utils_12.getArtifactUrl();
+        return __awaiter5(this, void 0, void 0, function* () {
+          const artifactUrl = (0, utils_12.getArtifactUrl)();
           const client = this.downloadHttpManager.getClient(0);
-          const headers = utils_12.getDownloadHeaders("application/json");
-          const response = yield requestUtils_1.retryHttpClientRequest("List Artifacts", () => __awaiter3(this, void 0, void 0, function* () {
+          const headers = (0, utils_12.getDownloadHeaders)("application/json");
+          const response = yield (0, requestUtils_1.retryHttpClientRequest)("List Artifacts", () => __awaiter5(this, void 0, void 0, function* () {
             return client.get(artifactUrl, headers);
           }));
           const body = yield response.readBody();
@@ -13439,12 +13505,12 @@ var require_download_http_client = __commonJS({
        * @param containerUrl the artifact container URL for the run
        */
       getContainerItems(artifactName, containerUrl) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const resourceUrl = new url_1.URL(containerUrl);
           resourceUrl.searchParams.append("itemPath", artifactName);
           const client = this.downloadHttpManager.getClient(0);
-          const headers = utils_12.getDownloadHeaders("application/json");
-          const response = yield requestUtils_1.retryHttpClientRequest("Get Container Items", () => __awaiter3(this, void 0, void 0, function* () {
+          const headers = (0, utils_12.getDownloadHeaders)("application/json");
+          const response = yield (0, requestUtils_1.retryHttpClientRequest)("Get Container Items", () => __awaiter5(this, void 0, void 0, function* () {
             return client.get(resourceUrl.toString(), headers);
           }));
           const body = yield response.readBody();
@@ -13456,8 +13522,8 @@ var require_download_http_client = __commonJS({
        * @param downloadItems information about what items to download and where to save them
        */
       downloadSingleArtifact(downloadItems) {
-        return __awaiter3(this, void 0, void 0, function* () {
-          const DOWNLOAD_CONCURRENCY = config_variables_1.getDownloadFileConcurrency();
+        return __awaiter5(this, void 0, void 0, function* () {
+          const DOWNLOAD_CONCURRENCY = (0, config_variables_1.getDownloadFileConcurrency)();
           core2.debug(`Download file concurrency is set to ${DOWNLOAD_CONCURRENCY}`);
           const parallelDownloads = [...new Array(DOWNLOAD_CONCURRENCY).keys()];
           let currentFile = 0;
@@ -13465,7 +13531,7 @@ var require_download_http_client = __commonJS({
           core2.info(`Total number of files that will be downloaded: ${downloadItems.length}`);
           this.statusReporter.setTotalNumberOfFilesToProcess(downloadItems.length);
           this.statusReporter.start();
-          yield Promise.all(parallelDownloads.map((index) => __awaiter3(this, void 0, void 0, function* () {
+          yield Promise.all(parallelDownloads.map((index) => __awaiter5(this, void 0, void 0, function* () {
             while (currentFile < downloadItems.length) {
               const currentFileToDownload = downloadItems[currentFile];
               currentFile += 1;
@@ -13491,19 +13557,19 @@ var require_download_http_client = __commonJS({
        * @param downloadPath destination location for the file being downloaded
        */
       downloadIndividualFile(httpClientIndex, artifactLocation, downloadPath) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           let retryCount = 0;
-          const retryLimit = config_variables_1.getRetryLimit();
+          const retryLimit = (0, config_variables_1.getRetryLimit)();
           let destinationStream = fs2.createWriteStream(downloadPath);
-          const headers = utils_12.getDownloadHeaders("application/json", true, true);
-          const makeDownloadRequest = /* @__PURE__ */ __name(() => __awaiter3(this, void 0, void 0, function* () {
+          const headers = (0, utils_12.getDownloadHeaders)("application/json", true, true);
+          const makeDownloadRequest = /* @__PURE__ */ __name(() => __awaiter5(this, void 0, void 0, function* () {
             const client = this.downloadHttpManager.getClient(httpClientIndex);
             return yield client.get(artifactLocation, headers);
           }), "makeDownloadRequest");
           const isGzip = /* @__PURE__ */ __name((incomingHeaders) => {
             return "content-encoding" in incomingHeaders && incomingHeaders["content-encoding"] === "gzip";
           }, "isGzip");
-          const backOff = /* @__PURE__ */ __name((retryAfterValue) => __awaiter3(this, void 0, void 0, function* () {
+          const backOff = /* @__PURE__ */ __name((retryAfterValue) => __awaiter5(this, void 0, void 0, function* () {
             retryCount++;
             if (retryCount > retryLimit) {
               return Promise.reject(new Error(`Retry limit has been reached. Unable to download ${artifactLocation}`));
@@ -13511,11 +13577,11 @@ var require_download_http_client = __commonJS({
               this.downloadHttpManager.disposeAndReplaceClient(httpClientIndex);
               if (retryAfterValue) {
                 core2.info(`Backoff due to too many requests, retry #${retryCount}. Waiting for ${retryAfterValue} milliseconds before continuing the download`);
-                yield utils_12.sleep(retryAfterValue);
+                yield (0, utils_12.sleep)(retryAfterValue);
               } else {
-                const backoffTime = utils_12.getExponentialRetryTimeInMilliseconds(retryCount);
+                const backoffTime = (0, utils_12.getExponentialRetryTimeInMilliseconds)(retryCount);
                 core2.info(`Exponential backoff for retry #${retryCount}. Waiting for ${backoffTime} milliseconds before continuing the download`);
-                yield utils_12.sleep(backoffTime);
+                yield (0, utils_12.sleep)(backoffTime);
               }
               core2.info(`Finished backoff for retry #${retryCount}, continuing with download`);
             }
@@ -13527,7 +13593,7 @@ var require_download_http_client = __commonJS({
             }
             return parseInt(expected) === received;
           }, "isAllBytesReceived");
-          const resetDestinationStream = /* @__PURE__ */ __name((fileDownloadPath) => __awaiter3(this, void 0, void 0, function* () {
+          const resetDestinationStream = /* @__PURE__ */ __name((fileDownloadPath) => __awaiter5(this, void 0, void 0, function* () {
             destinationStream.close();
             yield new Promise((resolve) => {
               destinationStream.on("close", resolve);
@@ -13535,7 +13601,7 @@ var require_download_http_client = __commonJS({
                 resolve();
               }
             });
-            yield utils_12.rmFile(fileDownloadPath);
+            yield (0, utils_12.rmFile)(fileDownloadPath);
             destinationStream = fs2.createWriteStream(fileDownloadPath);
           }), "resetDestinationStream");
           while (retryCount <= retryLimit) {
@@ -13549,11 +13615,11 @@ var require_download_http_client = __commonJS({
               continue;
             }
             let forceRetry = false;
-            if (utils_12.isSuccessStatusCode(response.message.statusCode)) {
+            if ((0, utils_12.isSuccessStatusCode)(response.message.statusCode)) {
               try {
                 const isGzipped = isGzip(response.message.headers);
                 yield this.pipeResponseToFile(response, destinationStream, isGzipped);
-                if (isGzipped || isAllBytesReceived(response.message.headers["content-length"], yield utils_12.getFileSize(downloadPath))) {
+                if (isGzipped || isAllBytesReceived(response.message.headers["content-length"], yield (0, utils_12.getFileSize)(downloadPath))) {
                   return;
                 } else {
                   forceRetry = true;
@@ -13562,12 +13628,12 @@ var require_download_http_client = __commonJS({
                 forceRetry = true;
               }
             }
-            if (forceRetry || utils_12.isRetryableStatusCode(response.message.statusCode)) {
+            if (forceRetry || (0, utils_12.isRetryableStatusCode)(response.message.statusCode)) {
               core2.info(`A ${response.message.statusCode} response code has been received while attempting to download an artifact`);
               resetDestinationStream(downloadPath);
-              utils_12.isThrottledStatusCode(response.message.statusCode) ? yield backOff(utils_12.tryGetRetryAfterValueTimeInMilliseconds(response.message.headers)) : yield backOff();
+              (0, utils_12.isThrottledStatusCode)(response.message.statusCode) ? yield backOff((0, utils_12.tryGetRetryAfterValueTimeInMilliseconds)(response.message.headers)) : yield backOff();
             } else {
-              utils_12.displayHttpDiagnostics(response);
+              (0, utils_12.displayHttpDiagnostics)(response);
               return Promise.reject(new Error(`Unexpected http ${response.message.statusCode} during download for ${artifactLocation}`));
             }
           }
@@ -13580,34 +13646,34 @@ var require_download_http_client = __commonJS({
        * @param isGzip a boolean denoting if the content is compressed using gzip and if we need to decode it
        */
       pipeResponseToFile(response, destinationStream, isGzip) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           yield new Promise((resolve, reject) => {
             if (isGzip) {
               const gunzip = zlib.createGunzip();
               response.message.on("error", (error) => {
-                core2.error(`An error occurred while attempting to read the response stream`);
+                core2.info(`An error occurred while attempting to read the response stream`);
                 gunzip.close();
                 destinationStream.close();
                 reject(error);
               }).pipe(gunzip).on("error", (error) => {
-                core2.error(`An error occurred while attempting to decompress the response stream`);
+                core2.info(`An error occurred while attempting to decompress the response stream`);
                 destinationStream.close();
                 reject(error);
               }).pipe(destinationStream).on("close", () => {
                 resolve();
               }).on("error", (error) => {
-                core2.error(`An error occurred while writing a downloaded file to ${destinationStream.path}`);
+                core2.info(`An error occurred while writing a downloaded file to ${destinationStream.path}`);
                 reject(error);
               });
             } else {
               response.message.on("error", (error) => {
-                core2.error(`An error occurred while attempting to read the response stream`);
+                core2.info(`An error occurred while attempting to read the response stream`);
                 destinationStream.close();
                 reject(error);
               }).pipe(destinationStream).on("close", () => {
                 resolve();
               }).on("error", (error) => {
-                core2.error(`An error occurred while writing a downloaded file to ${destinationStream.path}`);
+                core2.info(`An error occurred while writing a downloaded file to ${destinationStream.path}`);
                 reject(error);
               });
             }
@@ -13624,37 +13690,41 @@ var require_download_http_client = __commonJS({
 var require_download_specification = __commonJS({
   "../node_modules/@actions/artifact/lib/internal/download-specification.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getDownloadSpecification = void 0;
-    var path = __importStar3(require("path"));
+    var path = __importStar5(require("path"));
     function getDownloadSpecification(artifactName, artifactEntries, downloadPath, includeRootDirectory) {
       const directories = /* @__PURE__ */ new Set();
       const specifications = {
@@ -13692,35 +13762,39 @@ var require_download_specification = __commonJS({
 var require_artifact_client = __commonJS({
   "../node_modules/@actions/artifact/lib/internal/artifact-client.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
-          if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -13753,7 +13827,7 @@ var require_artifact_client = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DefaultArtifactClient = void 0;
-    var core2 = __importStar3(require_core());
+    var core2 = __importStar5(require_core());
     var upload_specification_1 = require_upload_specification();
     var upload_http_client_1 = require_upload_http_client();
     var utils_12 = require_utils5();
@@ -13776,11 +13850,11 @@ var require_artifact_client = __commonJS({
        * Uploads an artifact
        */
       uploadArtifact(name, files, rootDirectory, options) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           core2.info(`Starting artifact upload
 For more detailed logs during the artifact upload process, enable step-debugging: https://docs.github.com/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging#enabling-step-debug-logging`);
-          path_and_artifact_name_validation_1.checkArtifactName(name);
-          const uploadSpecification = upload_specification_1.getUploadSpecification(name, rootDirectory, files);
+          (0, path_and_artifact_name_validation_1.checkArtifactName)(name);
+          const uploadSpecification = (0, upload_specification_1.getUploadSpecification)(name, rootDirectory, files);
           const uploadResponse = {
             artifactName: name,
             artifactItems: [],
@@ -13820,7 +13894,7 @@ Note: The size of downloaded zips can differ significantly from the reported siz
         });
       }
       downloadArtifact(name, path, options) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const downloadHttpClient = new download_http_client_1.DownloadHttpClient();
           const artifacts = yield downloadHttpClient.listArtifacts();
           if (artifacts.count === 0) {
@@ -13834,17 +13908,17 @@ Note: The size of downloaded zips can differ significantly from the reported siz
           }
           const items = yield downloadHttpClient.getContainerItems(artifactToDownload.name, artifactToDownload.fileContainerResourceUrl);
           if (!path) {
-            path = config_variables_1.getWorkSpaceDirectory();
+            path = (0, config_variables_1.getWorkSpaceDirectory)();
           }
-          path = path_1.normalize(path);
-          path = path_1.resolve(path);
-          const downloadSpecification = download_specification_1.getDownloadSpecification(name, items.value, path, (options === null || options === void 0 ? void 0 : options.createArtifactFolder) || false);
+          path = (0, path_1.normalize)(path);
+          path = (0, path_1.resolve)(path);
+          const downloadSpecification = (0, download_specification_1.getDownloadSpecification)(name, items.value, path, (options === null || options === void 0 ? void 0 : options.createArtifactFolder) || false);
           if (downloadSpecification.filesToDownload.length === 0) {
             core2.info(`No downloadable files were found for the artifact: ${artifactToDownload.name}`);
           } else {
-            yield utils_12.createDirectoriesForArtifact(downloadSpecification.directoryStructure);
-            core2.info("Directory structure has been setup for the artifact");
-            yield utils_12.createEmptyFilesForArtifact(downloadSpecification.emptyFilesToCreate);
+            yield (0, utils_12.createDirectoriesForArtifact)(downloadSpecification.directoryStructure);
+            core2.info("Directory structure has been set up for the artifact");
+            yield (0, utils_12.createEmptyFilesForArtifact)(downloadSpecification.emptyFilesToCreate);
             yield downloadHttpClient.downloadSingleArtifact(downloadSpecification.filesToDownload);
           }
           return {
@@ -13854,7 +13928,7 @@ Note: The size of downloaded zips can differ significantly from the reported siz
         });
       }
       downloadAllArtifacts(path) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const downloadHttpClient = new download_http_client_1.DownloadHttpClient();
           const response = [];
           const artifacts = yield downloadHttpClient.listArtifacts();
@@ -13863,22 +13937,22 @@ Note: The size of downloaded zips can differ significantly from the reported siz
             return response;
           }
           if (!path) {
-            path = config_variables_1.getWorkSpaceDirectory();
+            path = (0, config_variables_1.getWorkSpaceDirectory)();
           }
-          path = path_1.normalize(path);
-          path = path_1.resolve(path);
+          path = (0, path_1.normalize)(path);
+          path = (0, path_1.resolve)(path);
           let downloadedArtifacts = 0;
           while (downloadedArtifacts < artifacts.count) {
             const currentArtifactToDownload = artifacts.value[downloadedArtifacts];
             downloadedArtifacts += 1;
             core2.info(`starting download of artifact ${currentArtifactToDownload.name} : ${downloadedArtifacts}/${artifacts.count}`);
             const items = yield downloadHttpClient.getContainerItems(currentArtifactToDownload.name, currentArtifactToDownload.fileContainerResourceUrl);
-            const downloadSpecification = download_specification_1.getDownloadSpecification(currentArtifactToDownload.name, items.value, path, true);
+            const downloadSpecification = (0, download_specification_1.getDownloadSpecification)(currentArtifactToDownload.name, items.value, path, true);
             if (downloadSpecification.filesToDownload.length === 0) {
               core2.info(`No downloadable files were found for any artifact ${currentArtifactToDownload.name}`);
             } else {
-              yield utils_12.createDirectoriesForArtifact(downloadSpecification.directoryStructure);
-              yield utils_12.createEmptyFilesForArtifact(downloadSpecification.emptyFilesToCreate);
+              yield (0, utils_12.createDirectoriesForArtifact)(downloadSpecification.directoryStructure);
+              yield (0, utils_12.createEmptyFilesForArtifact)(downloadSpecification.emptyFilesToCreate);
               yield downloadHttpClient.downloadSingleArtifact(downloadSpecification.filesToDownload);
             }
             response.push({
@@ -13913,7 +13987,7 @@ var require_artifact_client2 = __commonJS({
 var require_toolrunner = __commonJS({
   "../node_modules/@actions/exec/lib/toolrunner.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -13924,24 +13998,24 @@ var require_toolrunner = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -13974,12 +14048,12 @@ var require_toolrunner = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.argStringToArray = exports2.ToolRunner = void 0;
-    var os = __importStar3(require("os"));
-    var events = __importStar3(require("events"));
-    var child = __importStar3(require("child_process"));
-    var path = __importStar3(require("path"));
-    var io2 = __importStar3(require_io());
-    var ioUtil = __importStar3(require_io_util());
+    var os = __importStar5(require("os"));
+    var events = __importStar5(require("events"));
+    var child = __importStar5(require("child_process"));
+    var path = __importStar5(require("path"));
+    var io2 = __importStar5(require_io());
+    var ioUtil = __importStar5(require_io_util());
     var timers_1 = require("timers");
     var IS_WINDOWS = process.platform === "win32";
     var ToolRunner = class extends events.EventEmitter {
@@ -14193,12 +14267,12 @@ var require_toolrunner = __commonJS({
        * @returns   number
        */
       exec() {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
             this.toolPath = path.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
           this.toolPath = yield io2.which(this.toolPath, true);
-          return new Promise((resolve, reject) => __awaiter3(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject) => __awaiter5(this, void 0, void 0, function* () {
             this._debug(`exec tool: ${this.toolPath}`);
             this._debug("arguments:");
             for (const arg of this.args) {
@@ -14414,7 +14488,7 @@ var require_toolrunner = __commonJS({
 var require_exec = __commonJS({
   "../node_modules/@actions/exec/lib/exec.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -14425,24 +14499,24 @@ var require_exec = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -14476,9 +14550,9 @@ var require_exec = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getExecOutput = exports2.exec = void 0;
     var string_decoder_1 = require("string_decoder");
-    var tr = __importStar3(require_toolrunner());
+    var tr = __importStar5(require_toolrunner());
     function exec(commandLine, args, options) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
           throw new Error(`Parameter 'commandLine' cannot be null or empty.`);
@@ -14493,7 +14567,7 @@ var require_exec = __commonJS({
     exports2.exec = exec;
     function getExecOutput(commandLine, args, options) {
       var _a, _b;
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         let stdout = "";
         let stderr = "";
         const stdoutDecoder = new string_decoder_1.StringDecoder("utf8");
@@ -14528,11 +14602,11 @@ var require_exec = __commonJS({
   }
 });
 
-// node_modules/@actions/glob/lib/internal-glob-options-helper.js
+// ../node_modules/@actions/glob/lib/internal-glob-options-helper.js
 var require_internal_glob_options_helper = __commonJS({
-  "node_modules/@actions/glob/lib/internal-glob-options-helper.js"(exports2) {
+  "../node_modules/@actions/glob/lib/internal-glob-options-helper.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -14543,26 +14617,26 @@ var require_internal_glob_options_helper = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getOptions = void 0;
-    var core2 = __importStar3(require_core());
+    var core2 = __importStar5(require_core());
     function getOptions(copy) {
       const result = {
         followSymbolicLinks: true,
@@ -14590,11 +14664,11 @@ var require_internal_glob_options_helper = __commonJS({
   }
 });
 
-// node_modules/@actions/glob/lib/internal-path-helper.js
+// ../node_modules/@actions/glob/lib/internal-path-helper.js
 var require_internal_path_helper = __commonJS({
-  "node_modules/@actions/glob/lib/internal-path-helper.js"(exports2) {
+  "../node_modules/@actions/glob/lib/internal-path-helper.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -14605,30 +14679,30 @@ var require_internal_path_helper = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __importDefault2 = exports2 && exports2.__importDefault || function(mod) {
+    var __importDefault4 = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.safeTrimTrailingSeparator = exports2.normalizeSeparators = exports2.hasRoot = exports2.hasAbsoluteRoot = exports2.ensureAbsoluteRoot = exports2.dirname = void 0;
-    var path = __importStar3(require("path"));
-    var assert_1 = __importDefault2(require("assert"));
+    var path = __importStar5(require("path"));
+    var assert_1 = __importDefault4(require("assert"));
     var IS_WINDOWS = process.platform === "win32";
     function dirname(p) {
       p = safeTrimTrailingSeparator(p);
@@ -14732,9 +14806,9 @@ var require_internal_path_helper = __commonJS({
   }
 });
 
-// node_modules/@actions/glob/lib/internal-match-kind.js
+// ../node_modules/@actions/glob/lib/internal-match-kind.js
 var require_internal_match_kind = __commonJS({
-  "node_modules/@actions/glob/lib/internal-match-kind.js"(exports2) {
+  "../node_modules/@actions/glob/lib/internal-match-kind.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.MatchKind = void 0;
@@ -14748,11 +14822,11 @@ var require_internal_match_kind = __commonJS({
   }
 });
 
-// node_modules/@actions/glob/lib/internal-pattern-helper.js
+// ../node_modules/@actions/glob/lib/internal-pattern-helper.js
 var require_internal_pattern_helper = __commonJS({
-  "node_modules/@actions/glob/lib/internal-pattern-helper.js"(exports2) {
+  "../node_modules/@actions/glob/lib/internal-pattern-helper.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -14763,26 +14837,26 @@ var require_internal_pattern_helper = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.partialMatch = exports2.match = exports2.getSearchPaths = void 0;
-    var pathHelper = __importStar3(require_internal_path_helper());
+    var pathHelper = __importStar5(require_internal_path_helper());
     var internal_match_kind_1 = require_internal_match_kind();
     var IS_WINDOWS = process.platform === "win32";
     function getSearchPaths(patterns) {
@@ -14839,11 +14913,11 @@ var require_internal_pattern_helper = __commonJS({
   }
 });
 
-// node_modules/@actions/glob/lib/internal-path.js
+// ../node_modules/@actions/glob/lib/internal-path.js
 var require_internal_path = __commonJS({
-  "node_modules/@actions/glob/lib/internal-path.js"(exports2) {
+  "../node_modules/@actions/glob/lib/internal-path.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -14854,31 +14928,31 @@ var require_internal_path = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __importDefault2 = exports2 && exports2.__importDefault || function(mod) {
+    var __importDefault4 = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.Path = void 0;
-    var path = __importStar3(require("path"));
-    var pathHelper = __importStar3(require_internal_path_helper());
-    var assert_1 = __importDefault2(require("assert"));
+    var path = __importStar5(require("path"));
+    var pathHelper = __importStar5(require_internal_path_helper());
+    var assert_1 = __importDefault4(require("assert"));
     var IS_WINDOWS = process.platform === "win32";
     var Path = class {
       static {
@@ -14944,11 +15018,11 @@ var require_internal_path = __commonJS({
   }
 });
 
-// node_modules/@actions/glob/lib/internal-pattern.js
+// ../node_modules/@actions/glob/lib/internal-pattern.js
 var require_internal_pattern = __commonJS({
-  "node_modules/@actions/glob/lib/internal-pattern.js"(exports2) {
+  "../node_modules/@actions/glob/lib/internal-pattern.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -14959,32 +15033,32 @@ var require_internal_pattern = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __importDefault2 = exports2 && exports2.__importDefault || function(mod) {
+    var __importDefault4 = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.Pattern = void 0;
-    var os = __importStar3(require("os"));
-    var path = __importStar3(require("path"));
-    var pathHelper = __importStar3(require_internal_path_helper());
-    var assert_1 = __importDefault2(require("assert"));
+    var os = __importStar5(require("os"));
+    var path = __importStar5(require("path"));
+    var pathHelper = __importStar5(require_internal_path_helper());
+    var assert_1 = __importDefault4(require("assert"));
     var minimatch_1 = require_minimatch();
     var internal_match_kind_1 = require_internal_match_kind();
     var internal_path_1 = require_internal_path();
@@ -15153,9 +15227,9 @@ var require_internal_pattern = __commonJS({
   }
 });
 
-// node_modules/@actions/glob/lib/internal-search-state.js
+// ../node_modules/@actions/glob/lib/internal-search-state.js
 var require_internal_search_state = __commonJS({
-  "node_modules/@actions/glob/lib/internal-search-state.js"(exports2) {
+  "../node_modules/@actions/glob/lib/internal-search-state.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.SearchState = void 0;
@@ -15172,11 +15246,11 @@ var require_internal_search_state = __commonJS({
   }
 });
 
-// node_modules/@actions/glob/lib/internal-globber.js
+// ../node_modules/@actions/glob/lib/internal-globber.js
 var require_internal_globber = __commonJS({
-  "node_modules/@actions/glob/lib/internal-globber.js"(exports2) {
+  "../node_modules/@actions/glob/lib/internal-globber.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -15187,24 +15261,24 @@ var require_internal_globber = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -15235,7 +15309,7 @@ var require_internal_globber = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __asyncValues2 = exports2 && exports2.__asyncValues || function(o) {
+    var __asyncValues4 = exports2 && exports2.__asyncValues || function(o) {
       if (!Symbol.asyncIterator)
         throw new TypeError("Symbol.asyncIterator is not defined.");
       var m = o[Symbol.asyncIterator], i;
@@ -15257,10 +15331,10 @@ var require_internal_globber = __commonJS({
       }
       __name(settle, "settle");
     };
-    var __await2 = exports2 && exports2.__await || function(v) {
-      return this instanceof __await2 ? (this.v = v, this) : new __await2(v);
+    var __await4 = exports2 && exports2.__await || function(v) {
+      return this instanceof __await4 ? (this.v = v, this) : new __await4(v);
     };
-    var __asyncGenerator2 = exports2 && exports2.__asyncGenerator || function(thisArg, _arguments, generator) {
+    var __asyncGenerator4 = exports2 && exports2.__asyncGenerator || function(thisArg, _arguments, generator) {
       if (!Symbol.asyncIterator)
         throw new TypeError("Symbol.asyncIterator is not defined.");
       var g = generator.apply(thisArg, _arguments || []), i, q = [];
@@ -15285,7 +15359,7 @@ var require_internal_globber = __commonJS({
       }
       __name(resume, "resume");
       function step(r) {
-        r.value instanceof __await2 ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+        r.value instanceof __await4 ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
       }
       __name(step, "step");
       function fulfill(value) {
@@ -15304,11 +15378,11 @@ var require_internal_globber = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DefaultGlobber = void 0;
-    var core2 = __importStar3(require_core());
-    var fs2 = __importStar3(require("fs"));
-    var globOptionsHelper = __importStar3(require_internal_glob_options_helper());
-    var path = __importStar3(require("path"));
-    var patternHelper = __importStar3(require_internal_pattern_helper());
+    var core2 = __importStar5(require_core());
+    var fs2 = __importStar5(require("fs"));
+    var globOptionsHelper = __importStar5(require_internal_glob_options_helper());
+    var path = __importStar5(require("path"));
+    var patternHelper = __importStar5(require_internal_pattern_helper());
     var internal_match_kind_1 = require_internal_match_kind();
     var internal_pattern_1 = require_internal_pattern();
     var internal_search_state_1 = require_internal_search_state();
@@ -15327,10 +15401,10 @@ var require_internal_globber = __commonJS({
       }
       glob() {
         var e_1, _a;
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const result = [];
           try {
-            for (var _b = __asyncValues2(this.globGenerator()), _c; _c = yield _b.next(), !_c.done; ) {
+            for (var _b = __asyncValues4(this.globGenerator()), _c; _c = yield _b.next(), !_c.done; ) {
               const itemPath = _c.value;
               result.push(itemPath);
             }
@@ -15349,7 +15423,7 @@ var require_internal_globber = __commonJS({
         });
       }
       globGenerator() {
-        return __asyncGenerator2(this, arguments, /* @__PURE__ */ __name(function* globGenerator_1() {
+        return __asyncGenerator4(this, arguments, /* @__PURE__ */ __name(function* globGenerator_1() {
           const options = globOptionsHelper.getOptions(this.options);
           const patterns = [];
           for (const pattern of this.patterns) {
@@ -15362,7 +15436,7 @@ var require_internal_globber = __commonJS({
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
             core2.debug(`Search path '${searchPath}'`);
             try {
-              yield __await2(fs2.promises.lstat(searchPath));
+              yield __await4(fs2.promises.lstat(searchPath));
             } catch (err) {
               if (err.code === "ENOENT") {
                 continue;
@@ -15379,7 +15453,7 @@ var require_internal_globber = __commonJS({
             if (!match && !partialMatch) {
               continue;
             }
-            const stats = yield __await2(
+            const stats = yield __await4(
               _DefaultGlobber.stat(item, options, traversalChain)
               // Broken symlink, or symlink cycle detected, or no longer exists
             );
@@ -15388,15 +15462,15 @@ var require_internal_globber = __commonJS({
             }
             if (stats.isDirectory()) {
               if (match & internal_match_kind_1.MatchKind.Directory) {
-                yield yield __await2(item.path);
+                yield yield __await4(item.path);
               } else if (!partialMatch) {
                 continue;
               }
               const childLevel = item.level + 1;
-              const childItems = (yield __await2(fs2.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path.join(item.path, x), childLevel));
+              const childItems = (yield __await4(fs2.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path.join(item.path, x), childLevel));
               stack.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
-              yield yield __await2(item.path);
+              yield yield __await4(item.path);
             }
           }
         }, "globGenerator_1"));
@@ -15405,7 +15479,7 @@ var require_internal_globber = __commonJS({
        * Constructs a DefaultGlobber
        */
       static create(patterns, options) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           const result = new _DefaultGlobber(options);
           if (IS_WINDOWS) {
             patterns = patterns.replace(/\r\n/g, "\n");
@@ -15424,7 +15498,7 @@ var require_internal_globber = __commonJS({
         });
       }
       static stat(item, options, traversalChain) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           let stats;
           if (options.followSymbolicLinks) {
             try {
@@ -15461,11 +15535,11 @@ var require_internal_globber = __commonJS({
   }
 });
 
-// node_modules/@actions/glob/lib/glob.js
+// ../node_modules/@actions/glob/lib/glob.js
 var require_glob2 = __commonJS({
-  "node_modules/@actions/glob/lib/glob.js"(exports2) {
+  "../node_modules/@actions/glob/lib/glob.js"(exports2) {
     "use strict";
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -15500,7 +15574,7 @@ var require_glob2 = __commonJS({
     exports2.create = void 0;
     var internal_globber_1 = require_internal_globber();
     function create(patterns, options) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return yield internal_globber_1.DefaultGlobber.create(patterns, options);
       });
     }
@@ -15509,9 +15583,9 @@ var require_glob2 = __commonJS({
   }
 });
 
-// node_modules/semver/semver.js
+// ../node_modules/@actions/cache/node_modules/semver/semver.js
 var require_semver = __commonJS({
-  "node_modules/semver/semver.js"(exports2, module2) {
+  "../node_modules/@actions/cache/node_modules/semver/semver.js"(exports2, module2) {
     exports2 = module2.exports = SemVer;
     var debug;
     if (typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG)) {
@@ -15648,77 +15722,77 @@ var require_semver = __commonJS({
       }
     }
     var i;
-    exports2.parse = parse3;
-    function parse3(version4, options) {
+    exports2.parse = parse2;
+    function parse2(version3, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version4 instanceof SemVer) {
-        return version4;
+      if (version3 instanceof SemVer) {
+        return version3;
       }
-      if (typeof version4 !== "string") {
+      if (typeof version3 !== "string") {
         return null;
       }
-      if (version4.length > MAX_LENGTH) {
+      if (version3.length > MAX_LENGTH) {
         return null;
       }
       var r = options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL];
-      if (!r.test(version4)) {
+      if (!r.test(version3)) {
         return null;
       }
       try {
-        return new SemVer(version4, options);
+        return new SemVer(version3, options);
       } catch (er) {
         return null;
       }
     }
-    __name(parse3, "parse");
+    __name(parse2, "parse");
     exports2.valid = valid;
-    function valid(version4, options) {
-      var v = parse3(version4, options);
+    function valid(version3, options) {
+      var v = parse2(version3, options);
       return v ? v.version : null;
     }
     __name(valid, "valid");
     exports2.clean = clean;
-    function clean(version4, options) {
-      var s = parse3(version4.trim().replace(/^[=v]+/, ""), options);
+    function clean(version3, options) {
+      var s = parse2(version3.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     }
     __name(clean, "clean");
     exports2.SemVer = SemVer;
-    function SemVer(version4, options) {
+    function SemVer(version3, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version4 instanceof SemVer) {
-        if (version4.loose === options.loose) {
-          return version4;
+      if (version3 instanceof SemVer) {
+        if (version3.loose === options.loose) {
+          return version3;
         } else {
-          version4 = version4.version;
+          version3 = version3.version;
         }
-      } else if (typeof version4 !== "string") {
-        throw new TypeError("Invalid Version: " + version4);
+      } else if (typeof version3 !== "string") {
+        throw new TypeError("Invalid Version: " + version3);
       }
-      if (version4.length > MAX_LENGTH) {
+      if (version3.length > MAX_LENGTH) {
         throw new TypeError("version is longer than " + MAX_LENGTH + " characters");
       }
       if (!(this instanceof SemVer)) {
-        return new SemVer(version4, options);
+        return new SemVer(version3, options);
       }
-      debug("SemVer", version4, options);
+      debug("SemVer", version3, options);
       this.options = options;
       this.loose = !!options.loose;
-      var m = version4.trim().match(options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL]);
+      var m = version3.trim().match(options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL]);
       if (!m) {
-        throw new TypeError("Invalid Version: " + version4);
+        throw new TypeError("Invalid Version: " + version3);
       }
-      this.raw = version4;
+      this.raw = version3;
       this.major = +m[1];
       this.minor = +m[2];
       this.patch = +m[3];
@@ -15902,13 +15976,13 @@ var require_semver = __commonJS({
       return this;
     };
     exports2.inc = inc;
-    function inc(version4, release, loose, identifier) {
+    function inc(version3, release, loose, identifier) {
       if (typeof loose === "string") {
         identifier = loose;
         loose = void 0;
       }
       try {
-        return new SemVer(version4, loose).inc(release, identifier).version;
+        return new SemVer(version3, loose).inc(release, identifier).version;
       } catch (er) {
         return null;
       }
@@ -15919,16 +15993,16 @@ var require_semver = __commonJS({
       if (eq(version1, version22)) {
         return null;
       } else {
-        var v13 = parse3(version1);
-        var v2 = parse3(version22);
+        var v12 = parse2(version1);
+        var v2 = parse2(version22);
         var prefix = "";
-        if (v13.prerelease.length || v2.prerelease.length) {
+        if (v12.prerelease.length || v2.prerelease.length) {
           prefix = "pre";
           var defaultResult = "prerelease";
         }
-        for (var key in v13) {
+        for (var key in v12) {
           if (key === "major" || key === "minor" || key === "patch") {
-            if (v13[key] !== v2[key]) {
+            if (v12[key] !== v2[key]) {
               return prefix + key;
             }
           }
@@ -16120,19 +16194,19 @@ var require_semver = __commonJS({
     Comparator.prototype.toString = function() {
       return this.value;
     };
-    Comparator.prototype.test = function(version4) {
-      debug("Comparator.test", version4, this.options.loose);
-      if (this.semver === ANY || version4 === ANY) {
+    Comparator.prototype.test = function(version3) {
+      debug("Comparator.test", version3, this.options.loose);
+      if (this.semver === ANY || version3 === ANY) {
         return true;
       }
-      if (typeof version4 === "string") {
+      if (typeof version3 === "string") {
         try {
-          version4 = new SemVer(version4, this.options);
+          version3 = new SemVer(version3, this.options);
         } catch (er) {
           return false;
         }
       }
-      return cmp(version4, this.operator, this.semver, this.options);
+      return cmp(version3, this.operator, this.semver, this.options);
     };
     Comparator.prototype.intersects = function(comp, options) {
       if (!(comp instanceof Comparator)) {
@@ -16455,31 +16529,31 @@ var require_semver = __commonJS({
       return (from + " " + to).trim();
     }
     __name(hyphenReplace, "hyphenReplace");
-    Range.prototype.test = function(version4) {
-      if (!version4) {
+    Range.prototype.test = function(version3) {
+      if (!version3) {
         return false;
       }
-      if (typeof version4 === "string") {
+      if (typeof version3 === "string") {
         try {
-          version4 = new SemVer(version4, this.options);
+          version3 = new SemVer(version3, this.options);
         } catch (er) {
           return false;
         }
       }
       for (var i2 = 0; i2 < this.set.length; i2++) {
-        if (testSet(this.set[i2], version4, this.options)) {
+        if (testSet(this.set[i2], version3, this.options)) {
           return true;
         }
       }
       return false;
     };
-    function testSet(set, version4, options) {
+    function testSet(set, version3, options) {
       for (var i2 = 0; i2 < set.length; i2++) {
-        if (!set[i2].test(version4)) {
+        if (!set[i2].test(version3)) {
           return false;
         }
       }
-      if (version4.prerelease.length && !options.includePrerelease) {
+      if (version3.prerelease.length && !options.includePrerelease) {
         for (i2 = 0; i2 < set.length; i2++) {
           debug(set[i2].semver);
           if (set[i2].semver === ANY) {
@@ -16487,7 +16561,7 @@ var require_semver = __commonJS({
           }
           if (set[i2].semver.prerelease.length > 0) {
             var allowed = set[i2].semver;
-            if (allowed.major === version4.major && allowed.minor === version4.minor && allowed.patch === version4.patch) {
+            if (allowed.major === version3.major && allowed.minor === version3.minor && allowed.patch === version3.patch) {
               return true;
             }
           }
@@ -16498,13 +16572,13 @@ var require_semver = __commonJS({
     }
     __name(testSet, "testSet");
     exports2.satisfies = satisfies;
-    function satisfies(version4, range, options) {
+    function satisfies(version3, range, options) {
       try {
         range = new Range(range, options);
       } catch (er) {
         return false;
       }
-      return range.test(version4);
+      return range.test(version3);
     }
     __name(satisfies, "satisfies");
     exports2.maxSatisfying = maxSatisfying;
@@ -16601,18 +16675,18 @@ var require_semver = __commonJS({
     }
     __name(validRange, "validRange");
     exports2.ltr = ltr;
-    function ltr(version4, range, options) {
-      return outside(version4, range, "<", options);
+    function ltr(version3, range, options) {
+      return outside(version3, range, "<", options);
     }
     __name(ltr, "ltr");
     exports2.gtr = gtr;
-    function gtr(version4, range, options) {
-      return outside(version4, range, ">", options);
+    function gtr(version3, range, options) {
+      return outside(version3, range, ">", options);
     }
     __name(gtr, "gtr");
     exports2.outside = outside;
-    function outside(version4, range, hilo, options) {
-      version4 = new SemVer(version4, options);
+    function outside(version3, range, hilo, options) {
+      version3 = new SemVer(version3, options);
       range = new Range(range, options);
       var gtfn, ltefn, ltfn, comp, ecomp;
       switch (hilo) {
@@ -16633,7 +16707,7 @@ var require_semver = __commonJS({
         default:
           throw new TypeError('Must provide a hilo val of "<" or ">"');
       }
-      if (satisfies(version4, range, options)) {
+      if (satisfies(version3, range, options)) {
         return false;
       }
       for (var i2 = 0; i2 < range.set.length; ++i2) {
@@ -16655,9 +16729,9 @@ var require_semver = __commonJS({
         if (high.operator === comp || high.operator === ecomp) {
           return false;
         }
-        if ((!low.operator || low.operator === comp) && ltefn(version4, low.semver)) {
+        if ((!low.operator || low.operator === comp) && ltefn(version3, low.semver)) {
           return false;
-        } else if (low.operator === ecomp && ltfn(version4, low.semver)) {
+        } else if (low.operator === ecomp && ltfn(version3, low.semver)) {
           return false;
         }
       }
@@ -16665,8 +16739,8 @@ var require_semver = __commonJS({
     }
     __name(outside, "outside");
     exports2.prerelease = prerelease;
-    function prerelease(version4, options) {
-      var parsed = parse3(version4, options);
+    function prerelease(version3, options) {
+      var parsed = parse2(version3, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     }
     __name(prerelease, "prerelease");
@@ -16678,23 +16752,23 @@ var require_semver = __commonJS({
     }
     __name(intersects, "intersects");
     exports2.coerce = coerce;
-    function coerce(version4, options) {
-      if (version4 instanceof SemVer) {
-        return version4;
+    function coerce(version3, options) {
+      if (version3 instanceof SemVer) {
+        return version3;
       }
-      if (typeof version4 === "number") {
-        version4 = String(version4);
+      if (typeof version3 === "number") {
+        version3 = String(version3);
       }
-      if (typeof version4 !== "string") {
+      if (typeof version3 !== "string") {
         return null;
       }
       options = options || {};
       var match = null;
       if (!options.rtl) {
-        match = version4.match(safeRe[t.COERCE]);
+        match = version3.match(safeRe[t.COERCE]);
       } else {
         var next;
-        while ((next = safeRe[t.COERCERTL].exec(version4)) && (!match || match.index + match[0].length !== version4.length)) {
+        while ((next = safeRe[t.COERCERTL].exec(version3)) && (!match || match.index + match[0].length !== version3.length)) {
           if (!match || next.index + next[0].length !== match.index + match[0].length) {
             match = next;
           }
@@ -16705,33 +16779,33 @@ var require_semver = __commonJS({
       if (match === null) {
         return null;
       }
-      return parse3(match[2] + "." + (match[3] || "0") + "." + (match[4] || "0"), options);
+      return parse2(match[2] + "." + (match[3] || "0") + "." + (match[4] || "0"), options);
     }
     __name(coerce, "coerce");
   }
 });
 
-// node_modules/uuid/lib/rng.js
+// ../node_modules/@actions/cache/node_modules/uuid/lib/rng.js
 var require_rng = __commonJS({
-  "node_modules/uuid/lib/rng.js"(exports2, module2) {
-    var crypto7 = require("crypto");
+  "../node_modules/@actions/cache/node_modules/uuid/lib/rng.js"(exports2, module2) {
+    var crypto4 = require("crypto");
     module2.exports = /* @__PURE__ */ __name(function nodeRNG() {
-      return crypto7.randomBytes(16);
+      return crypto4.randomBytes(16);
     }, "nodeRNG");
   }
 });
 
-// node_modules/uuid/lib/bytesToUuid.js
+// ../node_modules/@actions/cache/node_modules/uuid/lib/bytesToUuid.js
 var require_bytesToUuid = __commonJS({
-  "node_modules/uuid/lib/bytesToUuid.js"(exports2, module2) {
-    var byteToHex3 = [];
+  "../node_modules/@actions/cache/node_modules/uuid/lib/bytesToUuid.js"(exports2, module2) {
+    var byteToHex2 = [];
     for (i = 0; i < 256; ++i) {
-      byteToHex3[i] = (i + 256).toString(16).substr(1);
+      byteToHex2[i] = (i + 256).toString(16).substr(1);
     }
     var i;
     function bytesToUuid(buf, offset) {
       var i2 = offset || 0;
-      var bth = byteToHex3;
+      var bth = byteToHex2;
       return [
         bth[buf[i2++]],
         bth[buf[i2++]],
@@ -16760,25 +16834,25 @@ var require_bytesToUuid = __commonJS({
   }
 });
 
-// node_modules/uuid/v1.js
+// ../node_modules/@actions/cache/node_modules/uuid/v1.js
 var require_v1 = __commonJS({
-  "node_modules/uuid/v1.js"(exports2, module2) {
-    var rng3 = require_rng();
+  "../node_modules/@actions/cache/node_modules/uuid/v1.js"(exports2, module2) {
+    var rng2 = require_rng();
     var bytesToUuid = require_bytesToUuid();
-    var _nodeId3;
-    var _clockseq3;
-    var _lastMSecs3 = 0;
-    var _lastNSecs3 = 0;
-    function v13(options, buf, offset) {
+    var _nodeId2;
+    var _clockseq2;
+    var _lastMSecs2 = 0;
+    var _lastNSecs2 = 0;
+    function v12(options, buf, offset) {
       var i = buf && offset || 0;
       var b = buf || [];
       options = options || {};
-      var node = options.node || _nodeId3;
-      var clockseq = options.clockseq !== void 0 ? options.clockseq : _clockseq3;
+      var node = options.node || _nodeId2;
+      var clockseq = options.clockseq !== void 0 ? options.clockseq : _clockseq2;
       if (node == null || clockseq == null) {
-        var seedBytes = rng3();
+        var seedBytes = rng2();
         if (node == null) {
-          node = _nodeId3 = [
+          node = _nodeId2 = [
             seedBytes[0] | 1,
             seedBytes[1],
             seedBytes[2],
@@ -16788,24 +16862,24 @@ var require_v1 = __commonJS({
           ];
         }
         if (clockseq == null) {
-          clockseq = _clockseq3 = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
+          clockseq = _clockseq2 = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
         }
       }
       var msecs = options.msecs !== void 0 ? options.msecs : (/* @__PURE__ */ new Date()).getTime();
-      var nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs3 + 1;
-      var dt = msecs - _lastMSecs3 + (nsecs - _lastNSecs3) / 1e4;
+      var nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs2 + 1;
+      var dt = msecs - _lastMSecs2 + (nsecs - _lastNSecs2) / 1e4;
       if (dt < 0 && options.clockseq === void 0) {
         clockseq = clockseq + 1 & 16383;
       }
-      if ((dt < 0 || msecs > _lastMSecs3) && options.nsecs === void 0) {
+      if ((dt < 0 || msecs > _lastMSecs2) && options.nsecs === void 0) {
         nsecs = 0;
       }
       if (nsecs >= 1e4) {
         throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
       }
-      _lastMSecs3 = msecs;
-      _lastNSecs3 = nsecs;
-      _clockseq3 = clockseq;
+      _lastMSecs2 = msecs;
+      _lastNSecs2 = nsecs;
+      _clockseq2 = clockseq;
       msecs += 122192928e5;
       var tl = ((msecs & 268435455) * 1e4 + nsecs) % 4294967296;
       b[i++] = tl >>> 24 & 255;
@@ -16824,24 +16898,24 @@ var require_v1 = __commonJS({
       }
       return buf ? buf : bytesToUuid(b);
     }
-    __name(v13, "v1");
-    module2.exports = v13;
+    __name(v12, "v1");
+    module2.exports = v12;
   }
 });
 
-// node_modules/uuid/v4.js
+// ../node_modules/@actions/cache/node_modules/uuid/v4.js
 var require_v4 = __commonJS({
-  "node_modules/uuid/v4.js"(exports2, module2) {
-    var rng3 = require_rng();
+  "../node_modules/@actions/cache/node_modules/uuid/v4.js"(exports2, module2) {
+    var rng2 = require_rng();
     var bytesToUuid = require_bytesToUuid();
-    function v43(options, buf, offset) {
+    function v42(options, buf, offset) {
       var i = buf && offset || 0;
       if (typeof options == "string") {
         buf = options === "binary" ? new Array(16) : null;
         options = null;
       }
       options = options || {};
-      var rnds = options.random || (options.rng || rng3)();
+      var rnds = options.random || (options.rng || rng2)();
       rnds[6] = rnds[6] & 15 | 64;
       rnds[8] = rnds[8] & 63 | 128;
       if (buf) {
@@ -16851,26 +16925,26 @@ var require_v4 = __commonJS({
       }
       return buf || bytesToUuid(rnds);
     }
-    __name(v43, "v4");
-    module2.exports = v43;
+    __name(v42, "v4");
+    module2.exports = v42;
   }
 });
 
-// node_modules/uuid/index.js
+// ../node_modules/@actions/cache/node_modules/uuid/index.js
 var require_uuid = __commonJS({
-  "node_modules/uuid/index.js"(exports2, module2) {
-    var v13 = require_v1();
-    var v43 = require_v4();
-    var uuid = v43;
-    uuid.v1 = v13;
-    uuid.v4 = v43;
+  "../node_modules/@actions/cache/node_modules/uuid/index.js"(exports2, module2) {
+    var v12 = require_v1();
+    var v42 = require_v4();
+    var uuid = v42;
+    uuid.v1 = v12;
+    uuid.v4 = v42;
     module2.exports = uuid;
   }
 });
 
-// node_modules/@actions/cache/lib/internal/constants.js
+// ../node_modules/@actions/cache/lib/internal/constants.js
 var require_constants = __commonJS({
-  "node_modules/@actions/cache/lib/internal/constants.js"(exports2) {
+  "../node_modules/@actions/cache/lib/internal/constants.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ManifestFilename = exports2.TarFilename = exports2.SystemTarPathOnWindows = exports2.GnuTarPathOnWindows = exports2.SocketTimeout = exports2.DefaultRetryDelay = exports2.DefaultRetryAttempts = exports2.ArchiveToolType = exports2.CompressionMethod = exports2.CacheFilename = void 0;
@@ -16900,11 +16974,11 @@ var require_constants = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/lib/internal/cacheUtils.js
+// ../node_modules/@actions/cache/lib/internal/cacheUtils.js
 var require_cacheUtils = __commonJS({
-  "node_modules/@actions/cache/lib/internal/cacheUtils.js"(exports2) {
+  "../node_modules/@actions/cache/lib/internal/cacheUtils.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -16919,24 +16993,24 @@ var require_cacheUtils = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -16967,7 +17041,7 @@ var require_cacheUtils = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __asyncValues2 = exports2 && exports2.__asyncValues || function(o) {
+    var __asyncValues4 = exports2 && exports2.__asyncValues || function(o) {
       if (!Symbol.asyncIterator)
         throw new TypeError("Symbol.asyncIterator is not defined.");
       var m = o[Symbol.asyncIterator], i;
@@ -16991,18 +17065,18 @@ var require_cacheUtils = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isGhes = exports2.assertDefined = exports2.getGnuTarPathOnWindows = exports2.getCacheFileName = exports2.getCompressionMethod = exports2.unlinkFile = exports2.resolvePaths = exports2.getArchiveFileSizeInBytes = exports2.createTempDirectory = void 0;
-    var core2 = __importStar3(require_core());
-    var exec = __importStar3(require_exec());
-    var glob = __importStar3(require_glob2());
-    var io2 = __importStar3(require_io());
-    var fs2 = __importStar3(require("fs"));
-    var path = __importStar3(require("path"));
-    var semver = __importStar3(require_semver());
-    var util = __importStar3(require("util"));
+    var core2 = __importStar5(require_core());
+    var exec = __importStar5(require_exec());
+    var glob = __importStar5(require_glob2());
+    var io2 = __importStar5(require_io());
+    var fs2 = __importStar5(require("fs"));
+    var path = __importStar5(require("path"));
+    var semver = __importStar5(require_semver());
+    var util = __importStar5(require("util"));
     var uuid_1 = require_uuid();
     var constants_1 = require_constants();
     function createTempDirectory() {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const IS_WINDOWS = process.platform === "win32";
         let tempDirectory = process.env["RUNNER_TEMP"] || "";
         if (!tempDirectory) {
@@ -17031,31 +17105,37 @@ var require_cacheUtils = __commonJS({
     __name(getArchiveFileSizeInBytes, "getArchiveFileSizeInBytes");
     exports2.getArchiveFileSizeInBytes = getArchiveFileSizeInBytes;
     function resolvePaths(patterns) {
-      var e_1, _a;
-      var _b;
-      return __awaiter3(this, void 0, void 0, function* () {
+      var _a, e_1, _b, _c;
+      var _d;
+      return __awaiter5(this, void 0, void 0, function* () {
         const paths = [];
-        const workspace = (_b = process.env["GITHUB_WORKSPACE"]) !== null && _b !== void 0 ? _b : process.cwd();
+        const workspace = (_d = process.env["GITHUB_WORKSPACE"]) !== null && _d !== void 0 ? _d : process.cwd();
         const globber = yield glob.create(patterns.join("\n"), {
           implicitDescendants: false
         });
         try {
-          for (var _c = __asyncValues2(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done; ) {
-            const file = _d.value;
-            const relativeFile = path.relative(workspace, file).replace(new RegExp(`\\${path.sep}`, "g"), "/");
-            core2.debug(`Matched: ${relativeFile}`);
-            if (relativeFile === "") {
-              paths.push(".");
-            } else {
-              paths.push(`${relativeFile}`);
+          for (var _e = true, _f = __asyncValues4(globber.globGenerator()), _g; _g = yield _f.next(), _a = _g.done, !_a; ) {
+            _c = _g.value;
+            _e = false;
+            try {
+              const file = _c;
+              const relativeFile = path.relative(workspace, file).replace(new RegExp(`\\${path.sep}`, "g"), "/");
+              core2.debug(`Matched: ${relativeFile}`);
+              if (relativeFile === "") {
+                paths.push(".");
+              } else {
+                paths.push(`${relativeFile}`);
+              }
+            } finally {
+              _e = true;
             }
           }
         } catch (e_1_1) {
           e_1 = { error: e_1_1 };
         } finally {
           try {
-            if (_d && !_d.done && (_a = _c.return))
-              yield _a.call(_c);
+            if (!_e && !_a && (_b = _f.return))
+              yield _b.call(_f);
           } finally {
             if (e_1)
               throw e_1.error;
@@ -17067,14 +17147,14 @@ var require_cacheUtils = __commonJS({
     __name(resolvePaths, "resolvePaths");
     exports2.resolvePaths = resolvePaths;
     function unlinkFile(filePath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return util.promisify(fs2.unlink)(filePath);
       });
     }
     __name(unlinkFile, "unlinkFile");
     exports2.unlinkFile = unlinkFile;
     function getVersion(app, additionalArgs = []) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         let versionOutput = "";
         additionalArgs.push("--version");
         core2.debug(`Checking ${app} ${additionalArgs.join(" ")}`);
@@ -17097,10 +17177,10 @@ var require_cacheUtils = __commonJS({
     }
     __name(getVersion, "getVersion");
     function getCompressionMethod() {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const versionOutput = yield getVersion("zstd", ["--quiet"]);
-        const version4 = semver.clean(versionOutput);
-        core2.debug(`zstd version: ${version4}`);
+        const version3 = semver.clean(versionOutput);
+        core2.debug(`zstd version: ${version3}`);
         if (versionOutput === "") {
           return constants_1.CompressionMethod.Gzip;
         } else {
@@ -17116,7 +17196,7 @@ var require_cacheUtils = __commonJS({
     __name(getCacheFileName, "getCacheFileName");
     exports2.getCacheFileName = getCacheFileName;
     function getGnuTarPathOnWindows() {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (fs2.existsSync(constants_1.GnuTarPathOnWindows)) {
           return constants_1.GnuTarPathOnWindows;
         }
@@ -17143,354 +17223,10 @@ var require_cacheUtils = __commonJS({
   }
 });
 
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/rng.js
-function rng2() {
-  if (poolPtr2 > rnds8Pool2.length - 16) {
-    import_crypto5.default.randomFillSync(rnds8Pool2);
-    poolPtr2 = 0;
-  }
-  return rnds8Pool2.slice(poolPtr2, poolPtr2 += 16);
-}
-var import_crypto5, rnds8Pool2, poolPtr2;
-var init_rng2 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/rng.js"() {
-    import_crypto5 = __toESM(require("crypto"));
-    rnds8Pool2 = new Uint8Array(256);
-    poolPtr2 = rnds8Pool2.length;
-    __name(rng2, "rng");
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/regex.js
-var regex_default2;
-var init_regex2 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/regex.js"() {
-    regex_default2 = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/validate.js
-function validate2(uuid) {
-  return typeof uuid === "string" && regex_default2.test(uuid);
-}
-var validate_default2;
-var init_validate2 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/validate.js"() {
-    init_regex2();
-    __name(validate2, "validate");
-    validate_default2 = validate2;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/stringify.js
-function stringify2(arr, offset = 0) {
-  const uuid = (byteToHex2[arr[offset + 0]] + byteToHex2[arr[offset + 1]] + byteToHex2[arr[offset + 2]] + byteToHex2[arr[offset + 3]] + "-" + byteToHex2[arr[offset + 4]] + byteToHex2[arr[offset + 5]] + "-" + byteToHex2[arr[offset + 6]] + byteToHex2[arr[offset + 7]] + "-" + byteToHex2[arr[offset + 8]] + byteToHex2[arr[offset + 9]] + "-" + byteToHex2[arr[offset + 10]] + byteToHex2[arr[offset + 11]] + byteToHex2[arr[offset + 12]] + byteToHex2[arr[offset + 13]] + byteToHex2[arr[offset + 14]] + byteToHex2[arr[offset + 15]]).toLowerCase();
-  if (!validate_default2(uuid)) {
-    throw TypeError("Stringified UUID is invalid");
-  }
-  return uuid;
-}
-var byteToHex2, stringify_default2;
-var init_stringify2 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/stringify.js"() {
-    init_validate2();
-    byteToHex2 = [];
-    for (let i = 0; i < 256; ++i) {
-      byteToHex2.push((i + 256).toString(16).substr(1));
-    }
-    __name(stringify2, "stringify");
-    stringify_default2 = stringify2;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v1.js
-function v12(options, buf, offset) {
-  let i = buf && offset || 0;
-  const b = buf || new Array(16);
-  options = options || {};
-  let node = options.node || _nodeId2;
-  let clockseq = options.clockseq !== void 0 ? options.clockseq : _clockseq2;
-  if (node == null || clockseq == null) {
-    const seedBytes = options.random || (options.rng || rng2)();
-    if (node == null) {
-      node = _nodeId2 = [seedBytes[0] | 1, seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]];
-    }
-    if (clockseq == null) {
-      clockseq = _clockseq2 = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
-    }
-  }
-  let msecs = options.msecs !== void 0 ? options.msecs : Date.now();
-  let nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs2 + 1;
-  const dt = msecs - _lastMSecs2 + (nsecs - _lastNSecs2) / 1e4;
-  if (dt < 0 && options.clockseq === void 0) {
-    clockseq = clockseq + 1 & 16383;
-  }
-  if ((dt < 0 || msecs > _lastMSecs2) && options.nsecs === void 0) {
-    nsecs = 0;
-  }
-  if (nsecs >= 1e4) {
-    throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
-  }
-  _lastMSecs2 = msecs;
-  _lastNSecs2 = nsecs;
-  _clockseq2 = clockseq;
-  msecs += 122192928e5;
-  const tl = ((msecs & 268435455) * 1e4 + nsecs) % 4294967296;
-  b[i++] = tl >>> 24 & 255;
-  b[i++] = tl >>> 16 & 255;
-  b[i++] = tl >>> 8 & 255;
-  b[i++] = tl & 255;
-  const tmh = msecs / 4294967296 * 1e4 & 268435455;
-  b[i++] = tmh >>> 8 & 255;
-  b[i++] = tmh & 255;
-  b[i++] = tmh >>> 24 & 15 | 16;
-  b[i++] = tmh >>> 16 & 255;
-  b[i++] = clockseq >>> 8 | 128;
-  b[i++] = clockseq & 255;
-  for (let n = 0; n < 6; ++n) {
-    b[i + n] = node[n];
-  }
-  return buf || stringify_default2(b);
-}
-var _nodeId2, _clockseq2, _lastMSecs2, _lastNSecs2, v1_default2;
-var init_v12 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v1.js"() {
-    init_rng2();
-    init_stringify2();
-    _lastMSecs2 = 0;
-    _lastNSecs2 = 0;
-    __name(v12, "v1");
-    v1_default2 = v12;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/parse.js
-function parse2(uuid) {
-  if (!validate_default2(uuid)) {
-    throw TypeError("Invalid UUID");
-  }
-  let v;
-  const arr = new Uint8Array(16);
-  arr[0] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
-  arr[1] = v >>> 16 & 255;
-  arr[2] = v >>> 8 & 255;
-  arr[3] = v & 255;
-  arr[4] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
-  arr[5] = v & 255;
-  arr[6] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
-  arr[7] = v & 255;
-  arr[8] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
-  arr[9] = v & 255;
-  arr[10] = (v = parseInt(uuid.slice(24, 36), 16)) / 1099511627776 & 255;
-  arr[11] = v / 4294967296 & 255;
-  arr[12] = v >>> 24 & 255;
-  arr[13] = v >>> 16 & 255;
-  arr[14] = v >>> 8 & 255;
-  arr[15] = v & 255;
-  return arr;
-}
-var parse_default2;
-var init_parse2 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/parse.js"() {
-    init_validate2();
-    __name(parse2, "parse");
-    parse_default2 = parse2;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v35.js
-function stringToBytes2(str) {
-  str = unescape(encodeURIComponent(str));
-  const bytes = [];
-  for (let i = 0; i < str.length; ++i) {
-    bytes.push(str.charCodeAt(i));
-  }
-  return bytes;
-}
-function v35_default2(name, version4, hashfunc) {
-  function generateUUID(value, namespace, buf, offset) {
-    if (typeof value === "string") {
-      value = stringToBytes2(value);
-    }
-    if (typeof namespace === "string") {
-      namespace = parse_default2(namespace);
-    }
-    if (namespace.length !== 16) {
-      throw TypeError("Namespace must be array-like (16 iterable integer values, 0-255)");
-    }
-    let bytes = new Uint8Array(16 + value.length);
-    bytes.set(namespace);
-    bytes.set(value, namespace.length);
-    bytes = hashfunc(bytes);
-    bytes[6] = bytes[6] & 15 | version4;
-    bytes[8] = bytes[8] & 63 | 128;
-    if (buf) {
-      offset = offset || 0;
-      for (let i = 0; i < 16; ++i) {
-        buf[offset + i] = bytes[i];
-      }
-      return buf;
-    }
-    return stringify_default2(bytes);
-  }
-  __name(generateUUID, "generateUUID");
-  try {
-    generateUUID.name = name;
-  } catch (err) {
-  }
-  generateUUID.DNS = DNS2;
-  generateUUID.URL = URL3;
-  return generateUUID;
-}
-var DNS2, URL3;
-var init_v352 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v35.js"() {
-    init_stringify2();
-    init_parse2();
-    __name(stringToBytes2, "stringToBytes");
-    DNS2 = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
-    URL3 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
-    __name(v35_default2, "default");
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/md5.js
-function md52(bytes) {
-  if (Array.isArray(bytes)) {
-    bytes = Buffer.from(bytes);
-  } else if (typeof bytes === "string") {
-    bytes = Buffer.from(bytes, "utf8");
-  }
-  return import_crypto6.default.createHash("md5").update(bytes).digest();
-}
-var import_crypto6, md5_default2;
-var init_md52 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/md5.js"() {
-    import_crypto6 = __toESM(require("crypto"));
-    __name(md52, "md5");
-    md5_default2 = md52;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v3.js
-var v32, v3_default2;
-var init_v32 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v3.js"() {
-    init_v352();
-    init_md52();
-    v32 = v35_default2("v3", 48, md5_default2);
-    v3_default2 = v32;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v4.js
-function v42(options, buf, offset) {
-  options = options || {};
-  const rnds = options.random || (options.rng || rng2)();
-  rnds[6] = rnds[6] & 15 | 64;
-  rnds[8] = rnds[8] & 63 | 128;
-  if (buf) {
-    offset = offset || 0;
-    for (let i = 0; i < 16; ++i) {
-      buf[offset + i] = rnds[i];
-    }
-    return buf;
-  }
-  return stringify_default2(rnds);
-}
-var v4_default2;
-var init_v42 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v4.js"() {
-    init_rng2();
-    init_stringify2();
-    __name(v42, "v4");
-    v4_default2 = v42;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/sha1.js
-function sha12(bytes) {
-  if (Array.isArray(bytes)) {
-    bytes = Buffer.from(bytes);
-  } else if (typeof bytes === "string") {
-    bytes = Buffer.from(bytes, "utf8");
-  }
-  return import_crypto7.default.createHash("sha1").update(bytes).digest();
-}
-var import_crypto7, sha1_default2;
-var init_sha12 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/sha1.js"() {
-    import_crypto7 = __toESM(require("crypto"));
-    __name(sha12, "sha1");
-    sha1_default2 = sha12;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v5.js
-var v52, v5_default2;
-var init_v52 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/v5.js"() {
-    init_v352();
-    init_sha12();
-    v52 = v35_default2("v5", 80, sha1_default2);
-    v5_default2 = v52;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/nil.js
-var nil_default2;
-var init_nil2 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/nil.js"() {
-    nil_default2 = "00000000-0000-0000-0000-000000000000";
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/version.js
-function version3(uuid) {
-  if (!validate_default2(uuid)) {
-    throw TypeError("Invalid UUID");
-  }
-  return parseInt(uuid.substr(14, 1), 16);
-}
-var version_default2;
-var init_version2 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/version.js"() {
-    init_validate2();
-    __name(version3, "version");
-    version_default2 = version3;
-  }
-});
-
-// node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/index.js
-var esm_node_exports2 = {};
-__export(esm_node_exports2, {
-  NIL: () => nil_default2,
-  parse: () => parse_default2,
-  stringify: () => stringify_default2,
-  v1: () => v1_default2,
-  v3: () => v3_default2,
-  v4: () => v4_default2,
-  v5: () => v5_default2,
-  validate: () => validate_default2,
-  version: () => version_default2
-});
-var init_esm_node2 = __esm({
-  "node_modules/@azure/core-http/node_modules/uuid/dist/esm-node/index.js"() {
-    init_v12();
-    init_v32();
-    init_v42();
-    init_v52();
-    init_nil2();
-    init_version2();
-    init_validate2();
-    init_stringify2();
-    init_parse2();
-  }
-});
-
-// node_modules/tslib/tslib.es6.mjs
+// ../node_modules/@azure/core-http/node_modules/tslib/tslib.es6.mjs
 var tslib_es6_exports = {};
 __export(tslib_es6_exports, {
+  __addDisposableResource: () => __addDisposableResource,
   __assign: () => __assign,
   __asyncDelegator: () => __asyncDelegator,
   __asyncGenerator: () => __asyncGenerator,
@@ -17502,6 +17238,7 @@ __export(tslib_es6_exports, {
   __classPrivateFieldSet: () => __classPrivateFieldSet,
   __createBinding: () => __createBinding,
   __decorate: () => __decorate,
+  __disposeResources: () => __disposeResources,
   __esDecorate: () => __esDecorate,
   __exportStar: () => __exportStar,
   __extends: () => __extends,
@@ -17921,9 +17658,58 @@ function __classPrivateFieldIn(state, receiver) {
     throw new TypeError("Cannot use 'in' operator on non-object");
   return typeof state === "function" ? receiver === state : state.has(receiver);
 }
-var extendStatics, __assign, __createBinding, __setModuleDefault, tslib_es6_default;
+function __addDisposableResource(env, value, async) {
+  if (value !== null && value !== void 0) {
+    if (typeof value !== "object" && typeof value !== "function")
+      throw new TypeError("Object expected.");
+    var dispose;
+    if (async) {
+      if (!Symbol.asyncDispose)
+        throw new TypeError("Symbol.asyncDispose is not defined.");
+      dispose = value[Symbol.asyncDispose];
+    }
+    if (dispose === void 0) {
+      if (!Symbol.dispose)
+        throw new TypeError("Symbol.dispose is not defined.");
+      dispose = value[Symbol.dispose];
+    }
+    if (typeof dispose !== "function")
+      throw new TypeError("Object not disposable.");
+    env.stack.push({ value, dispose, async });
+  } else if (async) {
+    env.stack.push({ async: true });
+  }
+  return value;
+}
+function __disposeResources(env) {
+  function fail(e) {
+    env.error = env.hasError ? new _SuppressedError(e, env.error, "An error was suppressed during disposal.") : e;
+    env.hasError = true;
+  }
+  __name(fail, "fail");
+  function next() {
+    while (env.stack.length) {
+      var rec = env.stack.pop();
+      try {
+        var result = rec.dispose && rec.dispose.call(rec.value);
+        if (rec.async)
+          return Promise.resolve(result).then(next, function(e) {
+            fail(e);
+            return next();
+          });
+      } catch (e) {
+        fail(e);
+      }
+    }
+    if (env.hasError)
+      throw env.error;
+  }
+  __name(next, "next");
+  return next();
+}
+var extendStatics, __assign, __createBinding, __setModuleDefault, _SuppressedError, tslib_es6_default;
 var init_tslib_es6 = __esm({
-  "node_modules/tslib/tslib.es6.mjs"() {
+  "../node_modules/@azure/core-http/node_modules/tslib/tslib.es6.mjs"() {
     extendStatics = /* @__PURE__ */ __name(function(d, b) {
       extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
         d2.__proto__ = b2;
@@ -17936,7 +17722,7 @@ var init_tslib_es6 = __esm({
     }, "extendStatics");
     __name(__extends, "__extends");
     __assign = /* @__PURE__ */ __name(function() {
-      __assign = Object.assign || /* @__PURE__ */ __name(function __assign2(t) {
+      __assign = Object.assign || /* @__PURE__ */ __name(function __assign4(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
           s = arguments[i];
           for (var p in s)
@@ -17993,6 +17779,12 @@ var init_tslib_es6 = __esm({
     __name(__classPrivateFieldGet, "__classPrivateFieldGet");
     __name(__classPrivateFieldSet, "__classPrivateFieldSet");
     __name(__classPrivateFieldIn, "__classPrivateFieldIn");
+    __name(__addDisposableResource, "__addDisposableResource");
+    _SuppressedError = typeof SuppressedError === "function" ? SuppressedError : function(error, suppressed, message) {
+      var e = new Error(message);
+      return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+    };
+    __name(__disposeResources, "__disposeResources");
     tslib_es6_default = {
       __extends,
       __assign,
@@ -18018,7 +17810,9 @@ var init_tslib_es6 = __esm({
       __importDefault,
       __classPrivateFieldGet,
       __classPrivateFieldSet,
-      __classPrivateFieldIn
+      __classPrivateFieldIn,
+      __addDisposableResource,
+      __disposeResources
     };
   }
 });
@@ -18181,7 +17975,7 @@ var require_XMLDOMImplementation = __commonJS({
         function XMLDOMImplementation2() {
         }
         __name(XMLDOMImplementation2, "XMLDOMImplementation");
-        XMLDOMImplementation2.prototype.hasFeature = function(feature, version4) {
+        XMLDOMImplementation2.prototype.hasFeature = function(feature, version3) {
           return true;
         };
         XMLDOMImplementation2.prototype.createDocumentType = function(qualifiedName, publicId, systemId) {
@@ -18193,7 +17987,7 @@ var require_XMLDOMImplementation = __commonJS({
         XMLDOMImplementation2.prototype.createHTMLDocument = function(title) {
           throw new Error("This DOM method is not implemented.");
         };
-        XMLDOMImplementation2.prototype.getFeature = function(feature, version4) {
+        XMLDOMImplementation2.prototype.getFeature = function(feature, version3) {
           throw new Error("This DOM method is not implemented.");
         };
         return XMLDOMImplementation2;
@@ -18945,17 +18739,17 @@ var require_XMLDeclaration = __commonJS({
       NodeType = require_NodeType();
       module2.exports = XMLDeclaration = function(superClass) {
         extend(XMLDeclaration2, superClass);
-        function XMLDeclaration2(parent, version4, encoding, standalone) {
+        function XMLDeclaration2(parent, version3, encoding, standalone) {
           var ref;
           XMLDeclaration2.__super__.constructor.call(this, parent);
-          if (isObject(version4)) {
-            ref = version4, version4 = ref.version, encoding = ref.encoding, standalone = ref.standalone;
+          if (isObject(version3)) {
+            ref = version3, version3 = ref.version, encoding = ref.encoding, standalone = ref.standalone;
           }
-          if (!version4) {
-            version4 = "1.0";
+          if (!version3) {
+            version3 = "1.0";
           }
           this.type = NodeType.Declaration;
-          this.version = this.stringify.xmlVersion(version4);
+          this.version = this.stringify.xmlVersion(version3);
           if (encoding != null) {
             this.encoding = this.stringify.xmlEncoding(encoding);
           }
@@ -20042,10 +19836,10 @@ var require_XMLNode = __commonJS({
           Array.prototype.push.apply(this.parent.children, removed);
           return this;
         };
-        XMLNode2.prototype.declaration = function(version4, encoding, standalone) {
+        XMLNode2.prototype.declaration = function(version3, encoding, standalone) {
           var doc, xmldec;
           doc = this.document();
-          xmldec = new XMLDeclaration(doc, version4, encoding, standalone);
+          xmldec = new XMLDeclaration(doc, version3, encoding, standalone);
           if (doc.children.length === 0) {
             doc.children.unshift(xmldec);
           } else if (doc.children[0].type === NodeType.Declaration) {
@@ -20169,8 +19963,8 @@ var require_XMLNode = __commonJS({
         XMLNode2.prototype.doc = function() {
           return this.document();
         };
-        XMLNode2.prototype.dec = function(version4, encoding, standalone) {
-          return this.declaration(version4, encoding, standalone);
+        XMLNode2.prototype.dec = function(version3, encoding, standalone) {
+          return this.declaration(version3, encoding, standalone);
         };
         XMLNode2.prototype.e = function(name, attributes, text) {
           return this.element(name, attributes, text);
@@ -20217,7 +20011,7 @@ var require_XMLNode = __commonJS({
         XMLNode2.prototype.normalize = function() {
           throw new Error("This DOM method is not implemented." + this.debugInfo());
         };
-        XMLNode2.prototype.isSupported = function(feature, version4) {
+        XMLNode2.prototype.isSupported = function(feature, version3) {
           return true;
         };
         XMLNode2.prototype.hasAttributes = function() {
@@ -20273,7 +20067,7 @@ var require_XMLNode = __commonJS({
           }
           return true;
         };
-        XMLNode2.prototype.getFeature = function(feature, version4) {
+        XMLNode2.prototype.getFeature = function(feature, version3) {
           throw new Error("This DOM method is not implemented." + this.debugInfo());
         };
         XMLNode2.prototype.setUserData = function(key, data, handler) {
@@ -21485,13 +21279,13 @@ var require_XMLDocumentCB = __commonJS({
           }
           return this;
         };
-        XMLDocumentCB2.prototype.declaration = function(version4, encoding, standalone) {
+        XMLDocumentCB2.prototype.declaration = function(version3, encoding, standalone) {
           var node;
           this.openCurrent();
           if (this.documentStarted) {
             throw new Error("declaration() must be the first node.");
           }
-          node = new XMLDeclaration(this, version4, encoding, standalone);
+          node = new XMLDeclaration(this, version3, encoding, standalone);
           this.onData(this.writer.declaration(node, this.writerOptions, this.currentLevel + 1), this.currentLevel + 1);
           return this;
         };
@@ -21663,8 +21457,8 @@ var require_XMLDocumentCB = __commonJS({
         XMLDocumentCB2.prototype.ins = function(target, value) {
           return this.instruction(target, value);
         };
-        XMLDocumentCB2.prototype.dec = function(version4, encoding, standalone) {
-          return this.declaration(version4, encoding, standalone);
+        XMLDocumentCB2.prototype.dec = function(version3, encoding, standalone) {
+          return this.declaration(version3, encoding, standalone);
         };
         XMLDocumentCB2.prototype.dtd = function(root, pubID, sysID) {
           return this.doctype(root, pubID, sysID);
@@ -24178,7 +23972,7 @@ var require_dist2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var abortController = require_dist();
-    var crypto7 = require("crypto");
+    var crypto4 = require("crypto");
     function createAbortablePromise(buildPromise, options) {
       const { cleanupBeforeAbort, abortSignal, abortErrorMsg } = options !== null && options !== void 0 ? options : {};
       return new Promise((resolve, reject) => {
@@ -24267,11 +24061,11 @@ var require_dist2 = __commonJS({
     __name(getErrorMessage, "getErrorMessage");
     async function computeSha256Hmac(key, stringToSign, encoding) {
       const decodedKey = Buffer.from(key, "base64");
-      return crypto7.createHmac("sha256", decodedKey).update(stringToSign).digest(encoding);
+      return crypto4.createHmac("sha256", decodedKey).update(stringToSign).digest(encoding);
     }
     __name(computeSha256Hmac, "computeSha256Hmac");
     async function computeSha256Hash(content, encoding) {
-      return crypto7.createHash("sha256").update(content).digest(encoding);
+      return crypto4.createHash("sha256").update(content).digest(encoding);
     }
     __name(computeSha256Hash, "computeSha256Hash");
     function isDefined(thing) {
@@ -24313,7 +24107,7 @@ var require_dist2 = __commonJS({
     }
     __name(generateUUID, "generateUUID");
     var _a$1;
-    var uuidFunction = typeof ((_a$1 = globalThis === null || globalThis === void 0 ? void 0 : globalThis.crypto) === null || _a$1 === void 0 ? void 0 : _a$1.randomUUID) === "function" ? globalThis.crypto.randomUUID.bind(globalThis.crypto) : crypto7.randomUUID;
+    var uuidFunction = typeof ((_a$1 = globalThis === null || globalThis === void 0 ? void 0 : globalThis.crypto) === null || _a$1 === void 0 ? void 0 : _a$1.randomUUID) === "function" ? globalThis.crypto.randomUUID.bind(globalThis.crypto) : crypto4.randomUUID;
     if (!uuidFunction) {
       uuidFunction = generateUUID;
     }
@@ -24400,9 +24194,9 @@ var require_dist2 = __commonJS({
   }
 });
 
-// node_modules/@azure/logger/dist/index.js
+// ../node_modules/@azure/logger/dist/index.js
 var require_dist3 = __commonJS({
-  "node_modules/@azure/logger/dist/index.js"(exports2) {
+  "../node_modules/@azure/logger/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var os = require("os");
@@ -33855,9 +33649,9 @@ var require_asynckit = __commonJS({
   }
 });
 
-// node_modules/@azure/core-http/node_modules/form-data/lib/populate.js
+// ../node_modules/@azure/core-http/node_modules/form-data/lib/populate.js
 var require_populate = __commonJS({
-  "node_modules/@azure/core-http/node_modules/form-data/lib/populate.js"(exports2, module2) {
+  "../node_modules/@azure/core-http/node_modules/form-data/lib/populate.js"(exports2, module2) {
     module2.exports = function(dst, src) {
       Object.keys(src).forEach(function(prop) {
         dst[prop] = dst[prop] || src[prop];
@@ -33867,9 +33661,9 @@ var require_populate = __commonJS({
   }
 });
 
-// node_modules/@azure/core-http/node_modules/form-data/lib/form_data.js
+// ../node_modules/@azure/core-http/node_modules/form-data/lib/form_data.js
 var require_form_data = __commonJS({
-  "node_modules/@azure/core-http/node_modules/form-data/lib/form_data.js"(exports2, module2) {
+  "../node_modules/@azure/core-http/node_modules/form-data/lib/form_data.js"(exports2, module2) {
     var CombinedStream = require_combined_stream();
     var util = require("util");
     var path = require("path");
@@ -34183,9 +33977,9 @@ var require_form_data = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/platform/node/globalThis.js
+// ../node_modules/@opentelemetry/api/build/src/platform/node/globalThis.js
 var require_globalThis = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/platform/node/globalThis.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/platform/node/globalThis.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2._globalThis = void 0;
@@ -34193,11 +33987,11 @@ var require_globalThis = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/platform/node/index.js
+// ../node_modules/@opentelemetry/api/build/src/platform/node/index.js
 var require_node = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/platform/node/index.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/platform/node/index.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -34208,21 +34002,21 @@ var require_node = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __exportStar2 = exports2 && exports2.__exportStar || function(m, exports3) {
+    var __exportStar4 = exports2 && exports2.__exportStar || function(m, exports3) {
       for (var p in m)
         if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports3, p))
-          __createBinding3(exports3, m, p);
+          __createBinding5(exports3, m, p);
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    __exportStar2(require_globalThis(), exports2);
+    __exportStar4(require_globalThis(), exports2);
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/platform/index.js
+// ../node_modules/@opentelemetry/api/build/src/platform/index.js
 var require_platform = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/platform/index.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/platform/index.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -34233,29 +34027,29 @@ var require_platform = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __exportStar2 = exports2 && exports2.__exportStar || function(m, exports3) {
+    var __exportStar4 = exports2 && exports2.__exportStar || function(m, exports3) {
       for (var p in m)
         if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports3, p))
-          __createBinding3(exports3, m, p);
+          __createBinding5(exports3, m, p);
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    __exportStar2(require_node(), exports2);
+    __exportStar4(require_node(), exports2);
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/version.js
+// ../node_modules/@opentelemetry/api/build/src/version.js
 var require_version = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/version.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/version.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.VERSION = void 0;
-    exports2.VERSION = "1.4.1";
+    exports2.VERSION = "1.6.0";
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/internal/semver.js
+// ../node_modules/@opentelemetry/api/build/src/internal/semver.js
 var require_semver2 = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/internal/semver.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/internal/semver.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isCompatible = exports2._makeCompatibilityCheck = void 0;
@@ -34330,9 +34124,9 @@ var require_semver2 = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/internal/global-utils.js
+// ../node_modules/@opentelemetry/api/build/src/internal/global-utils.js
 var require_global_utils = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/internal/global-utils.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/internal/global-utils.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.unregisterGlobal = exports2.getGlobal = exports2.registerGlobal = void 0;
@@ -34385,9 +34179,9 @@ var require_global_utils = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/diag/ComponentLogger.js
+// ../node_modules/@opentelemetry/api/build/src/diag/ComponentLogger.js
 var require_ComponentLogger = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/diag/ComponentLogger.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/diag/ComponentLogger.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DiagComponentLogger = void 0;
@@ -34428,9 +34222,9 @@ var require_ComponentLogger = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/diag/types.js
+// ../node_modules/@opentelemetry/api/build/src/diag/types.js
 var require_types = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/diag/types.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/diag/types.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DiagLogLevel = void 0;
@@ -34447,9 +34241,9 @@ var require_types = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/diag/internal/logLevelLogger.js
+// ../node_modules/@opentelemetry/api/build/src/diag/internal/logLevelLogger.js
 var require_logLevelLogger = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/diag/internal/logLevelLogger.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/diag/internal/logLevelLogger.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createLogLevelDiagLogger = void 0;
@@ -34483,9 +34277,9 @@ var require_logLevelLogger = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/api/diag.js
+// ../node_modules/@opentelemetry/api/build/src/api/diag.js
 var require_diag = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/api/diag.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/api/diag.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DiagAPI = void 0;
@@ -34559,9 +34353,9 @@ var require_diag = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/baggage/internal/baggage-impl.js
+// ../node_modules/@opentelemetry/api/build/src/baggage/internal/baggage-impl.js
 var require_baggage_impl = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/baggage/internal/baggage-impl.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/baggage/internal/baggage-impl.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.BaggageImpl = void 0;
@@ -34607,9 +34401,9 @@ var require_baggage_impl = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/baggage/internal/symbol.js
+// ../node_modules/@opentelemetry/api/build/src/baggage/internal/symbol.js
 var require_symbol = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/baggage/internal/symbol.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/baggage/internal/symbol.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.baggageEntryMetadataSymbol = void 0;
@@ -34617,9 +34411,9 @@ var require_symbol = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/baggage/utils.js
+// ../node_modules/@opentelemetry/api/build/src/baggage/utils.js
 var require_utils6 = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/baggage/utils.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/baggage/utils.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.baggageEntryMetadataFromString = exports2.createBaggage = void 0;
@@ -34649,9 +34443,9 @@ var require_utils6 = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/context/context.js
+// ../node_modules/@opentelemetry/api/build/src/context/context.js
 var require_context2 = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/context/context.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/context/context.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ROOT_CONTEXT = exports2.createContextKey = void 0;
@@ -34689,9 +34483,9 @@ var require_context2 = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/diag/consoleLogger.js
+// ../node_modules/@opentelemetry/api/build/src/diag/consoleLogger.js
 var require_consoleLogger = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/diag/consoleLogger.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/diag/consoleLogger.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DiagConsoleLogger = void 0;
@@ -34730,9 +34524,9 @@ var require_consoleLogger = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/metrics/NoopMeter.js
+// ../node_modules/@opentelemetry/api/build/src/metrics/NoopMeter.js
 var require_NoopMeter = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/metrics/NoopMeter.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/metrics/NoopMeter.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createNoopMeter = exports2.NOOP_OBSERVABLE_UP_DOWN_COUNTER_METRIC = exports2.NOOP_OBSERVABLE_GAUGE_METRIC = exports2.NOOP_OBSERVABLE_COUNTER_METRIC = exports2.NOOP_UP_DOWN_COUNTER_METRIC = exports2.NOOP_HISTOGRAM_METRIC = exports2.NOOP_COUNTER_METRIC = exports2.NOOP_METER = exports2.NoopObservableUpDownCounterMetric = exports2.NoopObservableGaugeMetric = exports2.NoopObservableCounterMetric = exports2.NoopObservableMetric = exports2.NoopHistogramMetric = exports2.NoopUpDownCounterMetric = exports2.NoopCounterMetric = exports2.NoopMetric = exports2.NoopMeter = void 0;
@@ -34863,9 +34657,9 @@ var require_NoopMeter = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/metrics/Metric.js
+// ../node_modules/@opentelemetry/api/build/src/metrics/Metric.js
 var require_Metric = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/metrics/Metric.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/metrics/Metric.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ValueType = void 0;
@@ -34877,9 +34671,9 @@ var require_Metric = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/propagation/TextMapPropagator.js
+// ../node_modules/@opentelemetry/api/build/src/propagation/TextMapPropagator.js
 var require_TextMapPropagator = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/propagation/TextMapPropagator.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/propagation/TextMapPropagator.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.defaultTextMapSetter = exports2.defaultTextMapGetter = void 0;
@@ -34908,9 +34702,9 @@ var require_TextMapPropagator = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js
+// ../node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js
 var require_NoopContextManager = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/context/NoopContextManager.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NoopContextManager = void 0;
@@ -34939,9 +34733,9 @@ var require_NoopContextManager = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/api/context.js
+// ../node_modules/@opentelemetry/api/build/src/api/context.js
 var require_context3 = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/api/context.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/api/context.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ContextAPI = void 0;
@@ -35011,9 +34805,9 @@ var require_context3 = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/trace_flags.js
+// ../node_modules/@opentelemetry/api/build/src/trace/trace_flags.js
 var require_trace_flags = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/trace_flags.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/trace_flags.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.TraceFlags = void 0;
@@ -35025,9 +34819,9 @@ var require_trace_flags = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/invalid-span-constants.js
+// ../node_modules/@opentelemetry/api/build/src/trace/invalid-span-constants.js
 var require_invalid_span_constants = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/invalid-span-constants.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/invalid-span-constants.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.INVALID_SPAN_CONTEXT = exports2.INVALID_TRACEID = exports2.INVALID_SPANID = void 0;
@@ -35042,9 +34836,9 @@ var require_invalid_span_constants = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/NonRecordingSpan.js
+// ../node_modules/@opentelemetry/api/build/src/trace/NonRecordingSpan.js
 var require_NonRecordingSpan = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/NonRecordingSpan.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/NonRecordingSpan.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NonRecordingSpan = void 0;
@@ -35095,9 +34889,9 @@ var require_NonRecordingSpan = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/context-utils.js
+// ../node_modules/@opentelemetry/api/build/src/trace/context-utils.js
 var require_context_utils = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/context-utils.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/context-utils.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getSpanContext = exports2.setSpanContext = exports2.deleteSpan = exports2.setSpan = exports2.getActiveSpan = exports2.getSpan = void 0;
@@ -35139,9 +34933,9 @@ var require_context_utils = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/spancontext-utils.js
+// ../node_modules/@opentelemetry/api/build/src/trace/spancontext-utils.js
 var require_spancontext_utils = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/spancontext-utils.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/spancontext-utils.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.wrapSpanContext = exports2.isSpanContextValid = exports2.isValidSpanId = exports2.isValidTraceId = void 0;
@@ -35172,9 +34966,9 @@ var require_spancontext_utils = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/NoopTracer.js
+// ../node_modules/@opentelemetry/api/build/src/trace/NoopTracer.js
 var require_NoopTracer = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/NoopTracer.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/NoopTracer.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NoopTracer = void 0;
@@ -35230,9 +35024,9 @@ var require_NoopTracer = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/ProxyTracer.js
+// ../node_modules/@opentelemetry/api/build/src/trace/ProxyTracer.js
 var require_ProxyTracer = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/ProxyTracer.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/ProxyTracer.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ProxyTracer = void 0;
@@ -35242,10 +35036,10 @@ var require_ProxyTracer = __commonJS({
       static {
         __name(this, "ProxyTracer");
       }
-      constructor(_provider, name, version4, options) {
+      constructor(_provider, name, version3, options) {
         this._provider = _provider;
         this.name = name;
-        this.version = version4;
+        this.version = version3;
         this.options = options;
       }
       startSpan(name, options, context) {
@@ -35275,9 +35069,9 @@ var require_ProxyTracer = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/NoopTracerProvider.js
+// ../node_modules/@opentelemetry/api/build/src/trace/NoopTracerProvider.js
 var require_NoopTracerProvider = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/NoopTracerProvider.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/NoopTracerProvider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NoopTracerProvider = void 0;
@@ -35294,9 +35088,9 @@ var require_NoopTracerProvider = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/ProxyTracerProvider.js
+// ../node_modules/@opentelemetry/api/build/src/trace/ProxyTracerProvider.js
 var require_ProxyTracerProvider = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/ProxyTracerProvider.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/ProxyTracerProvider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ProxyTracerProvider = void 0;
@@ -35310,9 +35104,9 @@ var require_ProxyTracerProvider = __commonJS({
       /**
        * Get a {@link ProxyTracer}
        */
-      getTracer(name, version4, options) {
+      getTracer(name, version3, options) {
         var _a;
-        return (_a = this.getDelegateTracer(name, version4, options)) !== null && _a !== void 0 ? _a : new ProxyTracer_1.ProxyTracer(this, name, version4, options);
+        return (_a = this.getDelegateTracer(name, version3, options)) !== null && _a !== void 0 ? _a : new ProxyTracer_1.ProxyTracer(this, name, version3, options);
       }
       getDelegate() {
         var _a;
@@ -35324,18 +35118,18 @@ var require_ProxyTracerProvider = __commonJS({
       setDelegate(delegate) {
         this._delegate = delegate;
       }
-      getDelegateTracer(name, version4, options) {
+      getDelegateTracer(name, version3, options) {
         var _a;
-        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version4, options);
+        return (_a = this._delegate) === null || _a === void 0 ? void 0 : _a.getTracer(name, version3, options);
       }
     };
     exports2.ProxyTracerProvider = ProxyTracerProvider;
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/SamplingResult.js
+// ../node_modules/@opentelemetry/api/build/src/trace/SamplingResult.js
 var require_SamplingResult = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/SamplingResult.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/SamplingResult.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.SamplingDecision = void 0;
@@ -35348,9 +35142,9 @@ var require_SamplingResult = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/span_kind.js
+// ../node_modules/@opentelemetry/api/build/src/trace/span_kind.js
 var require_span_kind = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/span_kind.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/span_kind.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.SpanKind = void 0;
@@ -35365,9 +35159,9 @@ var require_span_kind = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/status.js
+// ../node_modules/@opentelemetry/api/build/src/trace/status.js
 var require_status = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/status.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/status.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.SpanStatusCode = void 0;
@@ -35380,9 +35174,9 @@ var require_status = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-validators.js
+// ../node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-validators.js
 var require_tracestate_validators = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-validators.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-validators.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateValue = exports2.validateKey = void 0;
@@ -35405,9 +35199,9 @@ var require_tracestate_validators = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-impl.js
+// ../node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-impl.js
 var require_tracestate_impl = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-impl.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/internal/tracestate-impl.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.TraceStateImpl = void 0;
@@ -35480,9 +35274,9 @@ var require_tracestate_impl = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace/internal/utils.js
+// ../node_modules/@opentelemetry/api/build/src/trace/internal/utils.js
 var require_utils7 = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace/internal/utils.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace/internal/utils.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createTraceState = void 0;
@@ -35495,9 +35289,9 @@ var require_utils7 = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/context-api.js
+// ../node_modules/@opentelemetry/api/build/src/context-api.js
 var require_context_api = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/context-api.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/context-api.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.context = void 0;
@@ -35506,9 +35300,9 @@ var require_context_api = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/diag-api.js
+// ../node_modules/@opentelemetry/api/build/src/diag-api.js
 var require_diag_api = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/diag-api.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/diag-api.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.diag = void 0;
@@ -35517,9 +35311,9 @@ var require_diag_api = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/metrics/NoopMeterProvider.js
+// ../node_modules/@opentelemetry/api/build/src/metrics/NoopMeterProvider.js
 var require_NoopMeterProvider = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/metrics/NoopMeterProvider.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/metrics/NoopMeterProvider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NOOP_METER_PROVIDER = exports2.NoopMeterProvider = void 0;
@@ -35537,9 +35331,9 @@ var require_NoopMeterProvider = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/api/metrics.js
+// ../node_modules/@opentelemetry/api/build/src/api/metrics.js
 var require_metrics = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/api/metrics.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/api/metrics.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.MetricsAPI = void 0;
@@ -35577,8 +35371,8 @@ var require_metrics = __commonJS({
       /**
        * Returns a meter from the global meter provider.
        */
-      getMeter(name, version4, options) {
-        return this.getMeterProvider().getMeter(name, version4, options);
+      getMeter(name, version3, options) {
+        return this.getMeterProvider().getMeter(name, version3, options);
       }
       /** Remove the global meter provider */
       disable() {
@@ -35589,9 +35383,9 @@ var require_metrics = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/metrics-api.js
+// ../node_modules/@opentelemetry/api/build/src/metrics-api.js
 var require_metrics_api = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/metrics-api.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/metrics-api.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.metrics = void 0;
@@ -35600,9 +35394,9 @@ var require_metrics_api = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/propagation/NoopTextMapPropagator.js
+// ../node_modules/@opentelemetry/api/build/src/propagation/NoopTextMapPropagator.js
 var require_NoopTextMapPropagator = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/propagation/NoopTextMapPropagator.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/propagation/NoopTextMapPropagator.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NoopTextMapPropagator = void 0;
@@ -35625,9 +35419,9 @@ var require_NoopTextMapPropagator = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/baggage/context-helpers.js
+// ../node_modules/@opentelemetry/api/build/src/baggage/context-helpers.js
 var require_context_helpers = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/baggage/context-helpers.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/baggage/context-helpers.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.deleteBaggage = exports2.setBaggage = exports2.getActiveBaggage = exports2.getBaggage = void 0;
@@ -35657,9 +35451,9 @@ var require_context_helpers = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/api/propagation.js
+// ../node_modules/@opentelemetry/api/build/src/api/propagation.js
 var require_propagation = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/api/propagation.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/api/propagation.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.PropagationAPI = void 0;
@@ -35736,9 +35530,9 @@ var require_propagation = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/propagation-api.js
+// ../node_modules/@opentelemetry/api/build/src/propagation-api.js
 var require_propagation_api = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/propagation-api.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/propagation-api.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.propagation = void 0;
@@ -35747,9 +35541,9 @@ var require_propagation_api = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/api/trace.js
+// ../node_modules/@opentelemetry/api/build/src/api/trace.js
 var require_trace = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/api/trace.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/api/trace.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.TraceAPI = void 0;
@@ -35803,8 +35597,8 @@ var require_trace = __commonJS({
       /**
        * Returns a tracer from the global tracer provider.
        */
-      getTracer(name, version4) {
-        return this.getTracerProvider().getTracer(name, version4);
+      getTracer(name, version3) {
+        return this.getTracerProvider().getTracer(name, version3);
       }
       /** Remove the global tracer provider */
       disable() {
@@ -35816,9 +35610,9 @@ var require_trace = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/trace-api.js
+// ../node_modules/@opentelemetry/api/build/src/trace-api.js
 var require_trace_api = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/trace-api.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/trace-api.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.trace = void 0;
@@ -35827,9 +35621,9 @@ var require_trace_api = __commonJS({
   }
 });
 
-// node_modules/@opentelemetry/api/build/src/index.js
+// ../node_modules/@opentelemetry/api/build/src/index.js
 var require_src = __commonJS({
-  "node_modules/@opentelemetry/api/build/src/index.js"(exports2) {
+  "../node_modules/@opentelemetry/api/build/src/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.trace = exports2.propagation = exports2.metrics = exports2.diag = exports2.context = exports2.INVALID_SPAN_CONTEXT = exports2.INVALID_TRACEID = exports2.INVALID_SPANID = exports2.isValidSpanId = exports2.isValidTraceId = exports2.isSpanContextValid = exports2.createTraceState = exports2.TraceFlags = exports2.SpanStatusCode = exports2.SpanKind = exports2.SamplingDecision = exports2.ProxyTracerProvider = exports2.ProxyTracer = exports2.defaultTextMapSetter = exports2.defaultTextMapGetter = exports2.ValueType = exports2.createNoopMeter = exports2.DiagLogLevel = exports2.DiagConsoleLogger = exports2.ROOT_CONTEXT = exports2.createContextKey = exports2.baggageEntryMetadataFromString = void 0;
@@ -35945,9 +35739,9 @@ var require_src = __commonJS({
   }
 });
 
-// node_modules/@azure/core-tracing/dist/index.js
+// ../node_modules/@azure/core-tracing/dist/index.js
 var require_dist5 = __commonJS({
-  "node_modules/@azure/core-tracing/dist/index.js"(exports2) {
+  "../node_modules/@azure/core-tracing/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var api = require_src();
@@ -35978,8 +35772,8 @@ var require_dist5 = __commonJS({
       return api.trace.isSpanContextValid(context2);
     }
     __name(isSpanContextValid, "isSpanContextValid");
-    function getTracer(name, version4) {
-      return api.trace.getTracer(name || "azure/core-tracing", version4);
+    function getTracer(name, version3) {
+      return api.trace.getTracer(name || "azure/core-tracing", version3);
     }
     __name(getTracer, "getTracer");
     var context = api.context;
@@ -36034,8 +35828,8 @@ var require_dist5 = __commonJS({
       if (parts.length !== 4) {
         return;
       }
-      const [version4, traceId, spanId, traceOptions] = parts;
-      if (version4 !== VERSION2) {
+      const [version3, traceId, spanId, traceOptions] = parts;
+      if (version3 !== VERSION2) {
         return;
       }
       const traceFlags = parseInt(traceOptions, 16);
@@ -36077,12 +35871,12 @@ var require_dist5 = __commonJS({
   }
 });
 
-// node_modules/@azure/core-http/dist/index.js
+// ../node_modules/@azure/core-http/dist/index.js
 var require_dist6 = __commonJS({
-  "node_modules/@azure/core-http/dist/index.js"(exports2) {
+  "../node_modules/@azure/core-http/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var uuid = (init_esm_node2(), __toCommonJS(esm_node_exports2));
+    var uuid = (init_esm_node(), __toCommonJS(esm_node_exports));
     var util = require("util");
     var tslib = (init_tslib_es6(), __toCommonJS(tslib_es6_exports));
     var xml2js = require_xml2js();
@@ -36284,7 +36078,7 @@ var require_dist6 = __commonJS({
       /**
        * The core-http version
        */
-      coreHttpVersion: "3.0.2",
+      coreHttpVersion: "3.0.3",
       /**
        * Specifies HTTP.
        */
@@ -38644,7 +38438,7 @@ var require_dist6 = __commonJS({
         includeRoot: (_b = options.includeRoot) !== null && _b !== void 0 ? _b : false,
         xmlCharKey: (_c = options.xmlCharKey) !== null && _c !== void 0 ? _c : XML_CHARKEY
       };
-      return parse3(jsonContentTypes, xmlContentTypes, response, updatedOptions).then((parsedResponse) => {
+      return parse2(jsonContentTypes, xmlContentTypes, response, updatedOptions).then((parsedResponse) => {
         if (!shouldDeserializeResponse(parsedResponse)) {
           return parsedResponse;
         }
@@ -38738,7 +38532,7 @@ var require_dist6 = __commonJS({
       return { error, shouldReturnResponse: false };
     }
     __name(handleErrorResponse, "handleErrorResponse");
-    function parse3(jsonContentTypes, xmlContentTypes, operationResponse, opts) {
+    function parse2(jsonContentTypes, xmlContentTypes, operationResponse, opts) {
       var _a;
       const errorHandler = /* @__PURE__ */ __name((err) => {
         const msg = `Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`;
@@ -38765,7 +38559,7 @@ var require_dist6 = __commonJS({
       }
       return Promise.resolve(operationResponse);
     }
-    __name(parse3, "parse");
+    __name(parse2, "parse");
     var DefaultKeepAliveOptions = {
       enable: true
     };
@@ -40575,12 +40369,1200 @@ var require_dist6 = __commonJS({
   }
 });
 
-// node_modules/@azure/core-paging/dist/index.js
+// ../node_modules/@azure/storage-blob/node_modules/tslib/tslib.es6.mjs
+var tslib_es6_exports2 = {};
+__export(tslib_es6_exports2, {
+  __addDisposableResource: () => __addDisposableResource2,
+  __assign: () => __assign2,
+  __asyncDelegator: () => __asyncDelegator2,
+  __asyncGenerator: () => __asyncGenerator2,
+  __asyncValues: () => __asyncValues2,
+  __await: () => __await2,
+  __awaiter: () => __awaiter2,
+  __classPrivateFieldGet: () => __classPrivateFieldGet2,
+  __classPrivateFieldIn: () => __classPrivateFieldIn2,
+  __classPrivateFieldSet: () => __classPrivateFieldSet2,
+  __createBinding: () => __createBinding2,
+  __decorate: () => __decorate2,
+  __disposeResources: () => __disposeResources2,
+  __esDecorate: () => __esDecorate2,
+  __exportStar: () => __exportStar2,
+  __extends: () => __extends2,
+  __generator: () => __generator2,
+  __importDefault: () => __importDefault2,
+  __importStar: () => __importStar2,
+  __makeTemplateObject: () => __makeTemplateObject2,
+  __metadata: () => __metadata2,
+  __param: () => __param2,
+  __propKey: () => __propKey2,
+  __read: () => __read2,
+  __rest: () => __rest2,
+  __runInitializers: () => __runInitializers2,
+  __setFunctionName: () => __setFunctionName2,
+  __spread: () => __spread2,
+  __spreadArray: () => __spreadArray2,
+  __spreadArrays: () => __spreadArrays2,
+  __values: () => __values3,
+  default: () => tslib_es6_default2
+});
+function __extends2(d, b) {
+  if (typeof b !== "function" && b !== null)
+    throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+  extendStatics2(d, b);
+  function __() {
+    this.constructor = d;
+  }
+  __name(__, "__");
+  d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+function __rest2(s, e) {
+  var t = {};
+  for (var p in s)
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+  if (s != null && typeof Object.getOwnPropertySymbols === "function")
+    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+        t[p[i]] = s[p[i]];
+    }
+  return t;
+}
+function __decorate2(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+function __param2(paramIndex, decorator) {
+  return function(target, key) {
+    decorator(target, key, paramIndex);
+  };
+}
+function __esDecorate2(ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
+  function accept(f) {
+    if (f !== void 0 && typeof f !== "function")
+      throw new TypeError("Function expected");
+    return f;
+  }
+  __name(accept, "accept");
+  var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
+  var target = !descriptorIn && ctor ? contextIn["static"] ? ctor : ctor.prototype : null;
+  var descriptor = descriptorIn || (target ? Object.getOwnPropertyDescriptor(target, contextIn.name) : {});
+  var _, done = false;
+  for (var i = decorators.length - 1; i >= 0; i--) {
+    var context = {};
+    for (var p in contextIn)
+      context[p] = p === "access" ? {} : contextIn[p];
+    for (var p in contextIn.access)
+      context.access[p] = contextIn.access[p];
+    context.addInitializer = function(f) {
+      if (done)
+        throw new TypeError("Cannot add initializers after decoration has completed");
+      extraInitializers.push(accept(f || null));
+    };
+    var result = (0, decorators[i])(kind === "accessor" ? { get: descriptor.get, set: descriptor.set } : descriptor[key], context);
+    if (kind === "accessor") {
+      if (result === void 0)
+        continue;
+      if (result === null || typeof result !== "object")
+        throw new TypeError("Object expected");
+      if (_ = accept(result.get))
+        descriptor.get = _;
+      if (_ = accept(result.set))
+        descriptor.set = _;
+      if (_ = accept(result.init))
+        initializers.unshift(_);
+    } else if (_ = accept(result)) {
+      if (kind === "field")
+        initializers.unshift(_);
+      else
+        descriptor[key] = _;
+    }
+  }
+  if (target)
+    Object.defineProperty(target, contextIn.name, descriptor);
+  done = true;
+}
+function __runInitializers2(thisArg, initializers, value) {
+  var useValue = arguments.length > 2;
+  for (var i = 0; i < initializers.length; i++) {
+    value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+  }
+  return useValue ? value : void 0;
+}
+function __propKey2(x) {
+  return typeof x === "symbol" ? x : "".concat(x);
+}
+function __setFunctionName2(f, name, prefix) {
+  if (typeof name === "symbol")
+    name = name.description ? "[".concat(name.description, "]") : "";
+  return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
+}
+function __metadata2(metadataKey, metadataValue) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+    return Reflect.metadata(metadataKey, metadataValue);
+}
+function __awaiter2(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve) {
+      resolve(value);
+    });
+  }
+  __name(adopt, "adopt");
+  return new (P || (P = Promise))(function(resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    __name(fulfilled, "fulfilled");
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    __name(rejected, "rejected");
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    __name(step, "step");
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+}
+function __generator2(thisArg, body) {
+  var _ = { label: 0, sent: function() {
+    if (t[0] & 1)
+      throw t[1];
+    return t[1];
+  }, trys: [], ops: [] }, f, y, t, g;
+  return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() {
+    return this;
+  }), g;
+  function verb(n) {
+    return function(v) {
+      return step([n, v]);
+    };
+  }
+  __name(verb, "verb");
+  function step(op) {
+    if (f)
+      throw new TypeError("Generator is already executing.");
+    while (g && (g = 0, op[0] && (_ = 0)), _)
+      try {
+        if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)
+          return t;
+        if (y = 0, t)
+          op = [op[0] & 2, t.value];
+        switch (op[0]) {
+          case 0:
+          case 1:
+            t = op;
+            break;
+          case 4:
+            _.label++;
+            return { value: op[1], done: false };
+          case 5:
+            _.label++;
+            y = op[1];
+            op = [0];
+            continue;
+          case 7:
+            op = _.ops.pop();
+            _.trys.pop();
+            continue;
+          default:
+            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+              _ = 0;
+              continue;
+            }
+            if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+              _.label = op[1];
+              break;
+            }
+            if (op[0] === 6 && _.label < t[1]) {
+              _.label = t[1];
+              t = op;
+              break;
+            }
+            if (t && _.label < t[2]) {
+              _.label = t[2];
+              _.ops.push(op);
+              break;
+            }
+            if (t[2])
+              _.ops.pop();
+            _.trys.pop();
+            continue;
+        }
+        op = body.call(thisArg, _);
+      } catch (e) {
+        op = [6, e];
+        y = 0;
+      } finally {
+        f = t = 0;
+      }
+    if (op[0] & 5)
+      throw op[1];
+    return { value: op[0] ? op[1] : void 0, done: true };
+  }
+  __name(step, "step");
+}
+function __exportStar2(m, o) {
+  for (var p in m)
+    if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p))
+      __createBinding2(o, m, p);
+}
+function __values3(o) {
+  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+  if (m)
+    return m.call(o);
+  if (o && typeof o.length === "number")
+    return {
+      next: function() {
+        if (o && i >= o.length)
+          o = void 0;
+        return { value: o && o[i++], done: !o };
+      }
+    };
+  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+function __read2(o, n) {
+  var m = typeof Symbol === "function" && o[Symbol.iterator];
+  if (!m)
+    return o;
+  var i = m.call(o), r, ar = [], e;
+  try {
+    while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
+      ar.push(r.value);
+  } catch (error) {
+    e = { error };
+  } finally {
+    try {
+      if (r && !r.done && (m = i["return"]))
+        m.call(i);
+    } finally {
+      if (e)
+        throw e.error;
+    }
+  }
+  return ar;
+}
+function __spread2() {
+  for (var ar = [], i = 0; i < arguments.length; i++)
+    ar = ar.concat(__read2(arguments[i]));
+  return ar;
+}
+function __spreadArrays2() {
+  for (var s = 0, i = 0, il = arguments.length; i < il; i++)
+    s += arguments[i].length;
+  for (var r = Array(s), k = 0, i = 0; i < il; i++)
+    for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+      r[k] = a[j];
+  return r;
+}
+function __spreadArray2(to, from, pack) {
+  if (pack || arguments.length === 2)
+    for (var i = 0, l = from.length, ar; i < l; i++) {
+      if (ar || !(i in from)) {
+        if (!ar)
+          ar = Array.prototype.slice.call(from, 0, i);
+        ar[i] = from[i];
+      }
+    }
+  return to.concat(ar || Array.prototype.slice.call(from));
+}
+function __await2(v) {
+  return this instanceof __await2 ? (this.v = v, this) : new __await2(v);
+}
+function __asyncGenerator2(thisArg, _arguments, generator) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var g = generator.apply(thisArg, _arguments || []), i, q = [];
+  return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i;
+  function verb(n) {
+    if (g[n])
+      i[n] = function(v) {
+        return new Promise(function(a, b) {
+          q.push([n, v, a, b]) > 1 || resume(n, v);
+        });
+      };
+  }
+  __name(verb, "verb");
+  function resume(n, v) {
+    try {
+      step(g[n](v));
+    } catch (e) {
+      settle(q[0][3], e);
+    }
+  }
+  __name(resume, "resume");
+  function step(r) {
+    r.value instanceof __await2 ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+  }
+  __name(step, "step");
+  function fulfill(value) {
+    resume("next", value);
+  }
+  __name(fulfill, "fulfill");
+  function reject(value) {
+    resume("throw", value);
+  }
+  __name(reject, "reject");
+  function settle(f, v) {
+    if (f(v), q.shift(), q.length)
+      resume(q[0][0], q[0][1]);
+  }
+  __name(settle, "settle");
+}
+function __asyncDelegator2(o) {
+  var i, p;
+  return i = {}, verb("next"), verb("throw", function(e) {
+    throw e;
+  }), verb("return"), i[Symbol.iterator] = function() {
+    return this;
+  }, i;
+  function verb(n, f) {
+    i[n] = o[n] ? function(v) {
+      return (p = !p) ? { value: __await2(o[n](v)), done: false } : f ? f(v) : v;
+    } : f;
+  }
+  __name(verb, "verb");
+}
+function __asyncValues2(o) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var m = o[Symbol.asyncIterator], i;
+  return m ? m.call(o) : (o = typeof __values3 === "function" ? __values3(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i);
+  function verb(n) {
+    i[n] = o[n] && function(v) {
+      return new Promise(function(resolve, reject) {
+        v = o[n](v), settle(resolve, reject, v.done, v.value);
+      });
+    };
+  }
+  __name(verb, "verb");
+  function settle(resolve, reject, d, v) {
+    Promise.resolve(v).then(function(v2) {
+      resolve({ value: v2, done: d });
+    }, reject);
+  }
+  __name(settle, "settle");
+}
+function __makeTemplateObject2(cooked, raw) {
+  if (Object.defineProperty) {
+    Object.defineProperty(cooked, "raw", { value: raw });
+  } else {
+    cooked.raw = raw;
+  }
+  return cooked;
+}
+function __importStar2(mod) {
+  if (mod && mod.__esModule)
+    return mod;
+  var result = {};
+  if (mod != null) {
+    for (var k in mod)
+      if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+        __createBinding2(result, mod, k);
+  }
+  __setModuleDefault2(result, mod);
+  return result;
+}
+function __importDefault2(mod) {
+  return mod && mod.__esModule ? mod : { default: mod };
+}
+function __classPrivateFieldGet2(receiver, state, kind, f) {
+  if (kind === "a" && !f)
+    throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+}
+function __classPrivateFieldSet2(receiver, state, value, kind, f) {
+  if (kind === "m")
+    throw new TypeError("Private method is not writable");
+  if (kind === "a" && !f)
+    throw new TypeError("Private accessor was defined without a setter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+}
+function __classPrivateFieldIn2(state, receiver) {
+  if (receiver === null || typeof receiver !== "object" && typeof receiver !== "function")
+    throw new TypeError("Cannot use 'in' operator on non-object");
+  return typeof state === "function" ? receiver === state : state.has(receiver);
+}
+function __addDisposableResource2(env, value, async) {
+  if (value !== null && value !== void 0) {
+    if (typeof value !== "object" && typeof value !== "function")
+      throw new TypeError("Object expected.");
+    var dispose;
+    if (async) {
+      if (!Symbol.asyncDispose)
+        throw new TypeError("Symbol.asyncDispose is not defined.");
+      dispose = value[Symbol.asyncDispose];
+    }
+    if (dispose === void 0) {
+      if (!Symbol.dispose)
+        throw new TypeError("Symbol.dispose is not defined.");
+      dispose = value[Symbol.dispose];
+    }
+    if (typeof dispose !== "function")
+      throw new TypeError("Object not disposable.");
+    env.stack.push({ value, dispose, async });
+  } else if (async) {
+    env.stack.push({ async: true });
+  }
+  return value;
+}
+function __disposeResources2(env) {
+  function fail(e) {
+    env.error = env.hasError ? new _SuppressedError2(e, env.error, "An error was suppressed during disposal.") : e;
+    env.hasError = true;
+  }
+  __name(fail, "fail");
+  function next() {
+    while (env.stack.length) {
+      var rec = env.stack.pop();
+      try {
+        var result = rec.dispose && rec.dispose.call(rec.value);
+        if (rec.async)
+          return Promise.resolve(result).then(next, function(e) {
+            fail(e);
+            return next();
+          });
+      } catch (e) {
+        fail(e);
+      }
+    }
+    if (env.hasError)
+      throw env.error;
+  }
+  __name(next, "next");
+  return next();
+}
+var extendStatics2, __assign2, __createBinding2, __setModuleDefault2, _SuppressedError2, tslib_es6_default2;
+var init_tslib_es62 = __esm({
+  "../node_modules/@azure/storage-blob/node_modules/tslib/tslib.es6.mjs"() {
+    extendStatics2 = /* @__PURE__ */ __name(function(d, b) {
+      extendStatics2 = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
+        d2.__proto__ = b2;
+      } || function(d2, b2) {
+        for (var p in b2)
+          if (Object.prototype.hasOwnProperty.call(b2, p))
+            d2[p] = b2[p];
+      };
+      return extendStatics2(d, b);
+    }, "extendStatics");
+    __name(__extends2, "__extends");
+    __assign2 = /* @__PURE__ */ __name(function() {
+      __assign2 = Object.assign || /* @__PURE__ */ __name(function __assign4(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+          s = arguments[i];
+          for (var p in s)
+            if (Object.prototype.hasOwnProperty.call(s, p))
+              t[p] = s[p];
+        }
+        return t;
+      }, "__assign");
+      return __assign2.apply(this, arguments);
+    }, "__assign");
+    __name(__rest2, "__rest");
+    __name(__decorate2, "__decorate");
+    __name(__param2, "__param");
+    __name(__esDecorate2, "__esDecorate");
+    __name(__runInitializers2, "__runInitializers");
+    __name(__propKey2, "__propKey");
+    __name(__setFunctionName2, "__setFunctionName");
+    __name(__metadata2, "__metadata");
+    __name(__awaiter2, "__awaiter");
+    __name(__generator2, "__generator");
+    __createBinding2 = Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    };
+    __name(__exportStar2, "__exportStar");
+    __name(__values3, "__values");
+    __name(__read2, "__read");
+    __name(__spread2, "__spread");
+    __name(__spreadArrays2, "__spreadArrays");
+    __name(__spreadArray2, "__spreadArray");
+    __name(__await2, "__await");
+    __name(__asyncGenerator2, "__asyncGenerator");
+    __name(__asyncDelegator2, "__asyncDelegator");
+    __name(__asyncValues2, "__asyncValues");
+    __name(__makeTemplateObject2, "__makeTemplateObject");
+    __setModuleDefault2 = Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    };
+    __name(__importStar2, "__importStar");
+    __name(__importDefault2, "__importDefault");
+    __name(__classPrivateFieldGet2, "__classPrivateFieldGet");
+    __name(__classPrivateFieldSet2, "__classPrivateFieldSet");
+    __name(__classPrivateFieldIn2, "__classPrivateFieldIn");
+    __name(__addDisposableResource2, "__addDisposableResource");
+    _SuppressedError2 = typeof SuppressedError === "function" ? SuppressedError : function(error, suppressed, message) {
+      var e = new Error(message);
+      return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+    };
+    __name(__disposeResources2, "__disposeResources");
+    tslib_es6_default2 = {
+      __extends: __extends2,
+      __assign: __assign2,
+      __rest: __rest2,
+      __decorate: __decorate2,
+      __param: __param2,
+      __metadata: __metadata2,
+      __awaiter: __awaiter2,
+      __generator: __generator2,
+      __createBinding: __createBinding2,
+      __exportStar: __exportStar2,
+      __values: __values3,
+      __read: __read2,
+      __spread: __spread2,
+      __spreadArrays: __spreadArrays2,
+      __spreadArray: __spreadArray2,
+      __await: __await2,
+      __asyncGenerator: __asyncGenerator2,
+      __asyncDelegator: __asyncDelegator2,
+      __asyncValues: __asyncValues2,
+      __makeTemplateObject: __makeTemplateObject2,
+      __importStar: __importStar2,
+      __importDefault: __importDefault2,
+      __classPrivateFieldGet: __classPrivateFieldGet2,
+      __classPrivateFieldSet: __classPrivateFieldSet2,
+      __classPrivateFieldIn: __classPrivateFieldIn2,
+      __addDisposableResource: __addDisposableResource2,
+      __disposeResources: __disposeResources2
+    };
+  }
+});
+
+// ../node_modules/@azure/core-paging/node_modules/tslib/tslib.es6.mjs
+var tslib_es6_exports3 = {};
+__export(tslib_es6_exports3, {
+  __addDisposableResource: () => __addDisposableResource3,
+  __assign: () => __assign3,
+  __asyncDelegator: () => __asyncDelegator3,
+  __asyncGenerator: () => __asyncGenerator3,
+  __asyncValues: () => __asyncValues3,
+  __await: () => __await3,
+  __awaiter: () => __awaiter3,
+  __classPrivateFieldGet: () => __classPrivateFieldGet3,
+  __classPrivateFieldIn: () => __classPrivateFieldIn3,
+  __classPrivateFieldSet: () => __classPrivateFieldSet3,
+  __createBinding: () => __createBinding3,
+  __decorate: () => __decorate3,
+  __disposeResources: () => __disposeResources3,
+  __esDecorate: () => __esDecorate3,
+  __exportStar: () => __exportStar3,
+  __extends: () => __extends3,
+  __generator: () => __generator3,
+  __importDefault: () => __importDefault3,
+  __importStar: () => __importStar3,
+  __makeTemplateObject: () => __makeTemplateObject3,
+  __metadata: () => __metadata3,
+  __param: () => __param3,
+  __propKey: () => __propKey3,
+  __read: () => __read3,
+  __rest: () => __rest3,
+  __runInitializers: () => __runInitializers3,
+  __setFunctionName: () => __setFunctionName3,
+  __spread: () => __spread3,
+  __spreadArray: () => __spreadArray3,
+  __spreadArrays: () => __spreadArrays3,
+  __values: () => __values4,
+  default: () => tslib_es6_default3
+});
+function __extends3(d, b) {
+  if (typeof b !== "function" && b !== null)
+    throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+  extendStatics3(d, b);
+  function __() {
+    this.constructor = d;
+  }
+  __name(__, "__");
+  d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+function __rest3(s, e) {
+  var t = {};
+  for (var p in s)
+    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+  if (s != null && typeof Object.getOwnPropertySymbols === "function")
+    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+        t[p[i]] = s[p[i]];
+    }
+  return t;
+}
+function __decorate3(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+function __param3(paramIndex, decorator) {
+  return function(target, key) {
+    decorator(target, key, paramIndex);
+  };
+}
+function __esDecorate3(ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
+  function accept(f) {
+    if (f !== void 0 && typeof f !== "function")
+      throw new TypeError("Function expected");
+    return f;
+  }
+  __name(accept, "accept");
+  var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
+  var target = !descriptorIn && ctor ? contextIn["static"] ? ctor : ctor.prototype : null;
+  var descriptor = descriptorIn || (target ? Object.getOwnPropertyDescriptor(target, contextIn.name) : {});
+  var _, done = false;
+  for (var i = decorators.length - 1; i >= 0; i--) {
+    var context = {};
+    for (var p in contextIn)
+      context[p] = p === "access" ? {} : contextIn[p];
+    for (var p in contextIn.access)
+      context.access[p] = contextIn.access[p];
+    context.addInitializer = function(f) {
+      if (done)
+        throw new TypeError("Cannot add initializers after decoration has completed");
+      extraInitializers.push(accept(f || null));
+    };
+    var result = (0, decorators[i])(kind === "accessor" ? { get: descriptor.get, set: descriptor.set } : descriptor[key], context);
+    if (kind === "accessor") {
+      if (result === void 0)
+        continue;
+      if (result === null || typeof result !== "object")
+        throw new TypeError("Object expected");
+      if (_ = accept(result.get))
+        descriptor.get = _;
+      if (_ = accept(result.set))
+        descriptor.set = _;
+      if (_ = accept(result.init))
+        initializers.unshift(_);
+    } else if (_ = accept(result)) {
+      if (kind === "field")
+        initializers.unshift(_);
+      else
+        descriptor[key] = _;
+    }
+  }
+  if (target)
+    Object.defineProperty(target, contextIn.name, descriptor);
+  done = true;
+}
+function __runInitializers3(thisArg, initializers, value) {
+  var useValue = arguments.length > 2;
+  for (var i = 0; i < initializers.length; i++) {
+    value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+  }
+  return useValue ? value : void 0;
+}
+function __propKey3(x) {
+  return typeof x === "symbol" ? x : "".concat(x);
+}
+function __setFunctionName3(f, name, prefix) {
+  if (typeof name === "symbol")
+    name = name.description ? "[".concat(name.description, "]") : "";
+  return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
+}
+function __metadata3(metadataKey, metadataValue) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+    return Reflect.metadata(metadataKey, metadataValue);
+}
+function __awaiter3(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve) {
+      resolve(value);
+    });
+  }
+  __name(adopt, "adopt");
+  return new (P || (P = Promise))(function(resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    __name(fulfilled, "fulfilled");
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    __name(rejected, "rejected");
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    __name(step, "step");
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+}
+function __generator3(thisArg, body) {
+  var _ = { label: 0, sent: function() {
+    if (t[0] & 1)
+      throw t[1];
+    return t[1];
+  }, trys: [], ops: [] }, f, y, t, g;
+  return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() {
+    return this;
+  }), g;
+  function verb(n) {
+    return function(v) {
+      return step([n, v]);
+    };
+  }
+  __name(verb, "verb");
+  function step(op) {
+    if (f)
+      throw new TypeError("Generator is already executing.");
+    while (g && (g = 0, op[0] && (_ = 0)), _)
+      try {
+        if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)
+          return t;
+        if (y = 0, t)
+          op = [op[0] & 2, t.value];
+        switch (op[0]) {
+          case 0:
+          case 1:
+            t = op;
+            break;
+          case 4:
+            _.label++;
+            return { value: op[1], done: false };
+          case 5:
+            _.label++;
+            y = op[1];
+            op = [0];
+            continue;
+          case 7:
+            op = _.ops.pop();
+            _.trys.pop();
+            continue;
+          default:
+            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+              _ = 0;
+              continue;
+            }
+            if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+              _.label = op[1];
+              break;
+            }
+            if (op[0] === 6 && _.label < t[1]) {
+              _.label = t[1];
+              t = op;
+              break;
+            }
+            if (t && _.label < t[2]) {
+              _.label = t[2];
+              _.ops.push(op);
+              break;
+            }
+            if (t[2])
+              _.ops.pop();
+            _.trys.pop();
+            continue;
+        }
+        op = body.call(thisArg, _);
+      } catch (e) {
+        op = [6, e];
+        y = 0;
+      } finally {
+        f = t = 0;
+      }
+    if (op[0] & 5)
+      throw op[1];
+    return { value: op[0] ? op[1] : void 0, done: true };
+  }
+  __name(step, "step");
+}
+function __exportStar3(m, o) {
+  for (var p in m)
+    if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p))
+      __createBinding3(o, m, p);
+}
+function __values4(o) {
+  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+  if (m)
+    return m.call(o);
+  if (o && typeof o.length === "number")
+    return {
+      next: function() {
+        if (o && i >= o.length)
+          o = void 0;
+        return { value: o && o[i++], done: !o };
+      }
+    };
+  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+function __read3(o, n) {
+  var m = typeof Symbol === "function" && o[Symbol.iterator];
+  if (!m)
+    return o;
+  var i = m.call(o), r, ar = [], e;
+  try {
+    while ((n === void 0 || n-- > 0) && !(r = i.next()).done)
+      ar.push(r.value);
+  } catch (error) {
+    e = { error };
+  } finally {
+    try {
+      if (r && !r.done && (m = i["return"]))
+        m.call(i);
+    } finally {
+      if (e)
+        throw e.error;
+    }
+  }
+  return ar;
+}
+function __spread3() {
+  for (var ar = [], i = 0; i < arguments.length; i++)
+    ar = ar.concat(__read3(arguments[i]));
+  return ar;
+}
+function __spreadArrays3() {
+  for (var s = 0, i = 0, il = arguments.length; i < il; i++)
+    s += arguments[i].length;
+  for (var r = Array(s), k = 0, i = 0; i < il; i++)
+    for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+      r[k] = a[j];
+  return r;
+}
+function __spreadArray3(to, from, pack) {
+  if (pack || arguments.length === 2)
+    for (var i = 0, l = from.length, ar; i < l; i++) {
+      if (ar || !(i in from)) {
+        if (!ar)
+          ar = Array.prototype.slice.call(from, 0, i);
+        ar[i] = from[i];
+      }
+    }
+  return to.concat(ar || Array.prototype.slice.call(from));
+}
+function __await3(v) {
+  return this instanceof __await3 ? (this.v = v, this) : new __await3(v);
+}
+function __asyncGenerator3(thisArg, _arguments, generator) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var g = generator.apply(thisArg, _arguments || []), i, q = [];
+  return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i;
+  function verb(n) {
+    if (g[n])
+      i[n] = function(v) {
+        return new Promise(function(a, b) {
+          q.push([n, v, a, b]) > 1 || resume(n, v);
+        });
+      };
+  }
+  __name(verb, "verb");
+  function resume(n, v) {
+    try {
+      step(g[n](v));
+    } catch (e) {
+      settle(q[0][3], e);
+    }
+  }
+  __name(resume, "resume");
+  function step(r) {
+    r.value instanceof __await3 ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+  }
+  __name(step, "step");
+  function fulfill(value) {
+    resume("next", value);
+  }
+  __name(fulfill, "fulfill");
+  function reject(value) {
+    resume("throw", value);
+  }
+  __name(reject, "reject");
+  function settle(f, v) {
+    if (f(v), q.shift(), q.length)
+      resume(q[0][0], q[0][1]);
+  }
+  __name(settle, "settle");
+}
+function __asyncDelegator3(o) {
+  var i, p;
+  return i = {}, verb("next"), verb("throw", function(e) {
+    throw e;
+  }), verb("return"), i[Symbol.iterator] = function() {
+    return this;
+  }, i;
+  function verb(n, f) {
+    i[n] = o[n] ? function(v) {
+      return (p = !p) ? { value: __await3(o[n](v)), done: false } : f ? f(v) : v;
+    } : f;
+  }
+  __name(verb, "verb");
+}
+function __asyncValues3(o) {
+  if (!Symbol.asyncIterator)
+    throw new TypeError("Symbol.asyncIterator is not defined.");
+  var m = o[Symbol.asyncIterator], i;
+  return m ? m.call(o) : (o = typeof __values4 === "function" ? __values4(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i);
+  function verb(n) {
+    i[n] = o[n] && function(v) {
+      return new Promise(function(resolve, reject) {
+        v = o[n](v), settle(resolve, reject, v.done, v.value);
+      });
+    };
+  }
+  __name(verb, "verb");
+  function settle(resolve, reject, d, v) {
+    Promise.resolve(v).then(function(v2) {
+      resolve({ value: v2, done: d });
+    }, reject);
+  }
+  __name(settle, "settle");
+}
+function __makeTemplateObject3(cooked, raw) {
+  if (Object.defineProperty) {
+    Object.defineProperty(cooked, "raw", { value: raw });
+  } else {
+    cooked.raw = raw;
+  }
+  return cooked;
+}
+function __importStar3(mod) {
+  if (mod && mod.__esModule)
+    return mod;
+  var result = {};
+  if (mod != null) {
+    for (var k in mod)
+      if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+        __createBinding3(result, mod, k);
+  }
+  __setModuleDefault3(result, mod);
+  return result;
+}
+function __importDefault3(mod) {
+  return mod && mod.__esModule ? mod : { default: mod };
+}
+function __classPrivateFieldGet3(receiver, state, kind, f) {
+  if (kind === "a" && !f)
+    throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+}
+function __classPrivateFieldSet3(receiver, state, value, kind, f) {
+  if (kind === "m")
+    throw new TypeError("Private method is not writable");
+  if (kind === "a" && !f)
+    throw new TypeError("Private accessor was defined without a setter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+}
+function __classPrivateFieldIn3(state, receiver) {
+  if (receiver === null || typeof receiver !== "object" && typeof receiver !== "function")
+    throw new TypeError("Cannot use 'in' operator on non-object");
+  return typeof state === "function" ? receiver === state : state.has(receiver);
+}
+function __addDisposableResource3(env, value, async) {
+  if (value !== null && value !== void 0) {
+    if (typeof value !== "object" && typeof value !== "function")
+      throw new TypeError("Object expected.");
+    var dispose;
+    if (async) {
+      if (!Symbol.asyncDispose)
+        throw new TypeError("Symbol.asyncDispose is not defined.");
+      dispose = value[Symbol.asyncDispose];
+    }
+    if (dispose === void 0) {
+      if (!Symbol.dispose)
+        throw new TypeError("Symbol.dispose is not defined.");
+      dispose = value[Symbol.dispose];
+    }
+    if (typeof dispose !== "function")
+      throw new TypeError("Object not disposable.");
+    env.stack.push({ value, dispose, async });
+  } else if (async) {
+    env.stack.push({ async: true });
+  }
+  return value;
+}
+function __disposeResources3(env) {
+  function fail(e) {
+    env.error = env.hasError ? new _SuppressedError3(e, env.error, "An error was suppressed during disposal.") : e;
+    env.hasError = true;
+  }
+  __name(fail, "fail");
+  function next() {
+    while (env.stack.length) {
+      var rec = env.stack.pop();
+      try {
+        var result = rec.dispose && rec.dispose.call(rec.value);
+        if (rec.async)
+          return Promise.resolve(result).then(next, function(e) {
+            fail(e);
+            return next();
+          });
+      } catch (e) {
+        fail(e);
+      }
+    }
+    if (env.hasError)
+      throw env.error;
+  }
+  __name(next, "next");
+  return next();
+}
+var extendStatics3, __assign3, __createBinding3, __setModuleDefault3, _SuppressedError3, tslib_es6_default3;
+var init_tslib_es63 = __esm({
+  "../node_modules/@azure/core-paging/node_modules/tslib/tslib.es6.mjs"() {
+    extendStatics3 = /* @__PURE__ */ __name(function(d, b) {
+      extendStatics3 = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
+        d2.__proto__ = b2;
+      } || function(d2, b2) {
+        for (var p in b2)
+          if (Object.prototype.hasOwnProperty.call(b2, p))
+            d2[p] = b2[p];
+      };
+      return extendStatics3(d, b);
+    }, "extendStatics");
+    __name(__extends3, "__extends");
+    __assign3 = /* @__PURE__ */ __name(function() {
+      __assign3 = Object.assign || /* @__PURE__ */ __name(function __assign4(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+          s = arguments[i];
+          for (var p in s)
+            if (Object.prototype.hasOwnProperty.call(s, p))
+              t[p] = s[p];
+        }
+        return t;
+      }, "__assign");
+      return __assign3.apply(this, arguments);
+    }, "__assign");
+    __name(__rest3, "__rest");
+    __name(__decorate3, "__decorate");
+    __name(__param3, "__param");
+    __name(__esDecorate3, "__esDecorate");
+    __name(__runInitializers3, "__runInitializers");
+    __name(__propKey3, "__propKey");
+    __name(__setFunctionName3, "__setFunctionName");
+    __name(__metadata3, "__metadata");
+    __name(__awaiter3, "__awaiter");
+    __name(__generator3, "__generator");
+    __createBinding3 = Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    };
+    __name(__exportStar3, "__exportStar");
+    __name(__values4, "__values");
+    __name(__read3, "__read");
+    __name(__spread3, "__spread");
+    __name(__spreadArrays3, "__spreadArrays");
+    __name(__spreadArray3, "__spreadArray");
+    __name(__await3, "__await");
+    __name(__asyncGenerator3, "__asyncGenerator");
+    __name(__asyncDelegator3, "__asyncDelegator");
+    __name(__asyncValues3, "__asyncValues");
+    __name(__makeTemplateObject3, "__makeTemplateObject");
+    __setModuleDefault3 = Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    };
+    __name(__importStar3, "__importStar");
+    __name(__importDefault3, "__importDefault");
+    __name(__classPrivateFieldGet3, "__classPrivateFieldGet");
+    __name(__classPrivateFieldSet3, "__classPrivateFieldSet");
+    __name(__classPrivateFieldIn3, "__classPrivateFieldIn");
+    __name(__addDisposableResource3, "__addDisposableResource");
+    _SuppressedError3 = typeof SuppressedError === "function" ? SuppressedError : function(error, suppressed, message) {
+      var e = new Error(message);
+      return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+    };
+    __name(__disposeResources3, "__disposeResources");
+    tslib_es6_default3 = {
+      __extends: __extends3,
+      __assign: __assign3,
+      __rest: __rest3,
+      __decorate: __decorate3,
+      __param: __param3,
+      __metadata: __metadata3,
+      __awaiter: __awaiter3,
+      __generator: __generator3,
+      __createBinding: __createBinding3,
+      __exportStar: __exportStar3,
+      __values: __values4,
+      __read: __read3,
+      __spread: __spread3,
+      __spreadArrays: __spreadArrays3,
+      __spreadArray: __spreadArray3,
+      __await: __await3,
+      __asyncGenerator: __asyncGenerator3,
+      __asyncDelegator: __asyncDelegator3,
+      __asyncValues: __asyncValues3,
+      __makeTemplateObject: __makeTemplateObject3,
+      __importStar: __importStar3,
+      __importDefault: __importDefault3,
+      __classPrivateFieldGet: __classPrivateFieldGet3,
+      __classPrivateFieldSet: __classPrivateFieldSet3,
+      __classPrivateFieldIn: __classPrivateFieldIn3,
+      __addDisposableResource: __addDisposableResource3,
+      __disposeResources: __disposeResources3
+    };
+  }
+});
+
+// ../node_modules/@azure/core-paging/dist/index.js
 var require_dist7 = __commonJS({
-  "node_modules/@azure/core-paging/dist/index.js"(exports2) {
+  "../node_modules/@azure/core-paging/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var tslib = (init_tslib_es6(), __toCommonJS(tslib_es6_exports));
+    var tslib = (init_tslib_es63(), __toCommonJS(tslib_es6_exports3));
     function getPagedAsyncIterator(pagedResult) {
       var _a;
       const iter = getItemAsyncIterator(pagedResult);
@@ -40674,9 +41656,9 @@ var require_dist7 = __commonJS({
   }
 });
 
-// node_modules/@azure/core-lro/dist/index.js
+// ../node_modules/@azure/core-lro/dist/index.js
 var require_dist8 = __commonJS({
-  "node_modules/@azure/core-lro/dist/index.js"(exports2) {
+  "../node_modules/@azure/core-lro/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var logger$1 = require_dist3();
@@ -40865,6 +41847,7 @@ var require_dist8 = __commonJS({
     }
     __name(getAzureAsyncOperationHeader, "getAzureAsyncOperationHeader");
     function findResourceLocation(inputs) {
+      var _a;
       const { location, requestMethod, requestPath, resourceLocationConfig } = inputs;
       switch (requestMethod) {
         case "PUT": {
@@ -40873,21 +41856,28 @@ var require_dist8 = __commonJS({
         case "DELETE": {
           return void 0;
         }
+        case "PATCH": {
+          return (_a = getDefault()) !== null && _a !== void 0 ? _a : requestPath;
+        }
         default: {
-          switch (resourceLocationConfig) {
-            case "azure-async-operation": {
-              return void 0;
-            }
-            case "original-uri": {
-              return requestPath;
-            }
-            case "location":
-            default: {
-              return location;
-            }
+          return getDefault();
+        }
+      }
+      function getDefault() {
+        switch (resourceLocationConfig) {
+          case "azure-async-operation": {
+            return void 0;
+          }
+          case "original-uri": {
+            return requestPath;
+          }
+          case "location":
+          default: {
+            return location;
           }
         }
       }
+      __name(getDefault, "getDefault");
     }
     __name(findResourceLocation, "findResourceLocation");
     function inferLroMode(inputs) {
@@ -41718,18 +42708,18 @@ var require_dist8 = __commonJS({
   }
 });
 
-// node_modules/@azure/storage-blob/dist/index.js
+// ../node_modules/@azure/storage-blob/dist/index.js
 var require_dist9 = __commonJS({
-  "node_modules/@azure/storage-blob/dist/index.js"(exports2) {
+  "../node_modules/@azure/storage-blob/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var coreHttp = require_dist6();
-    var tslib = (init_tslib_es6(), __toCommonJS(tslib_es6_exports));
+    var tslib = (init_tslib_es62(), __toCommonJS(tslib_es6_exports2));
     var coreTracing = require_dist5();
     var logger$1 = require_dist3();
     var abortController = require_dist();
     var os = require("os");
-    var crypto7 = require("crypto");
+    var crypto4 = require("crypto");
     var stream = require("stream");
     require_dist7();
     var coreLro = require_dist8();
@@ -43051,7 +44041,8 @@ var require_dist9 = __commonJS({
               name: "Enum",
               allowedValues: [
                 "rehydrate-pending-to-hot",
-                "rehydrate-pending-to-cool"
+                "rehydrate-pending-to-cool",
+                "rehydrate-pending-to-cold"
               ]
             }
           },
@@ -50209,10 +51200,10 @@ var require_dist9 = __commonJS({
         }
       }
     };
-    var version4 = {
+    var version3 = {
       parameterPath: "version",
       mapper: {
-        defaultValue: "2022-11-02",
+        defaultValue: "2023-08-03",
         isConstant: true,
         serializedName: "x-ms-version",
         type: {
@@ -51873,7 +52864,7 @@ var require_dist9 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version4,
+        version3,
         requestId
       ],
       isXML: true,
@@ -51901,7 +52892,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1
       ],
@@ -51928,7 +52919,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1
       ],
@@ -51958,7 +52949,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1
       ],
@@ -51988,7 +52979,7 @@ var require_dist9 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version4,
+        version3,
         requestId
       ],
       isXML: true,
@@ -52010,7 +53001,7 @@ var require_dist9 = __commonJS({
       },
       queryParameters: [comp, restype1],
       urlParameters: [url],
-      headerParameters: [version4, accept1],
+      headerParameters: [version3, accept1],
       isXML: true,
       serializer: xmlSerializer$5
     };
@@ -52036,7 +53027,7 @@ var require_dist9 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version4,
+        version3,
         requestId,
         contentLength,
         multipartContentType
@@ -52068,7 +53059,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1
       ],
@@ -52322,7 +53313,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, restype2],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         metadata,
@@ -52348,7 +53339,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, restype2],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId
@@ -52371,7 +53362,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, restype2],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -52400,7 +53391,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         metadata,
@@ -52441,7 +53432,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId
@@ -52471,7 +53462,7 @@ var require_dist9 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version4,
+        version3,
         requestId,
         access,
         leaseId,
@@ -52502,7 +53493,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         deletedContainerName,
@@ -52530,7 +53521,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         sourceContainerName,
@@ -52565,7 +53556,7 @@ var require_dist9 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version4,
+        version3,
         requestId,
         contentLength,
         multipartContentType
@@ -52598,7 +53589,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1
       ],
@@ -52624,7 +53615,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -52655,7 +53646,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -52685,7 +53676,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -52715,7 +53706,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -52745,7 +53736,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -52781,7 +53772,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1
       ],
@@ -52813,7 +53804,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1
       ],
@@ -52834,7 +53825,7 @@ var require_dist9 = __commonJS({
       },
       queryParameters: [comp, restype1],
       urlParameters: [url],
-      headerParameters: [version4, accept1],
+      headerParameters: [version3, accept1],
       isXML: true,
       serializer: xmlSerializer$4
     };
@@ -53180,7 +54171,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -53218,7 +54209,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -53254,7 +54245,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -53283,7 +54274,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp8],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1
       ],
@@ -53305,7 +54296,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp11],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         expiryOptions,
@@ -53329,7 +54320,7 @@ var require_dist9 = __commonJS({
       queryParameters: [comp, timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -53363,7 +54354,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp12],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifUnmodifiedSince,
@@ -53388,7 +54379,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp12],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1
       ],
@@ -53410,7 +54401,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp13],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         legalHold
@@ -53433,7 +54424,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp6],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         metadata,
@@ -53466,7 +54457,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -53496,7 +54487,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -53525,7 +54516,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -53554,7 +54545,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -53584,7 +54575,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp10],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -53613,7 +54604,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp14],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         metadata,
@@ -53646,7 +54637,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         metadata,
@@ -53688,7 +54679,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         metadata,
@@ -53736,7 +54727,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -53768,7 +54759,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -53793,7 +54784,7 @@ var require_dist9 = __commonJS({
       },
       queryParameters: [comp, restype1],
       urlParameters: [url],
-      headerParameters: [version4, accept1],
+      headerParameters: [version3, accept1],
       isXML: true,
       serializer: xmlSerializer$3
     };
@@ -53830,7 +54821,7 @@ var require_dist9 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version4,
+        version3,
         requestId,
         leaseId,
         ifModifiedSince,
@@ -53868,7 +54859,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -53899,7 +54890,7 @@ var require_dist9 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version4,
+        version3,
         requestId,
         leaseId,
         ifTags,
@@ -54078,7 +55069,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         contentLength,
@@ -54127,7 +55118,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp19],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         contentLength,
         leaseId,
@@ -54168,7 +55159,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp19],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         contentLength,
@@ -54206,7 +55197,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp19],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         contentLength,
@@ -54260,7 +55251,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -54297,7 +55288,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -54327,7 +55318,7 @@ var require_dist9 = __commonJS({
       queryParameters: [comp, timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -54360,7 +55351,7 @@ var require_dist9 = __commonJS({
       queryParameters: [comp, timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -54390,7 +55381,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp21],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         ifModifiedSince,
@@ -54496,7 +55487,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         contentLength,
@@ -54542,7 +55533,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp22],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         contentLength,
         leaseId,
@@ -54580,7 +55571,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp22],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         contentLength,
@@ -54625,7 +55616,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds, comp23],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -54783,7 +55774,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         contentLength,
         metadata,
@@ -54832,7 +55823,7 @@ var require_dist9 = __commonJS({
       queryParameters: [timeoutInSeconds],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         contentLength,
@@ -54891,7 +55882,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         contentLength,
         leaseId,
@@ -54926,7 +55917,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         contentLength,
@@ -54966,7 +55957,7 @@ var require_dist9 = __commonJS({
       headerParameters: [
         contentType,
         accept,
-        version4,
+        version3,
         requestId,
         metadata,
         leaseId,
@@ -55019,7 +56010,7 @@ var require_dist9 = __commonJS({
       ],
       urlParameters: [url],
       headerParameters: [
-        version4,
+        version3,
         requestId,
         accept1,
         leaseId,
@@ -55029,8 +56020,8 @@ var require_dist9 = __commonJS({
       serializer: xmlSerializer
     };
     var logger = logger$1.createClientLogger("storage-blob");
-    var SDK_VERSION = "12.14.0";
-    var SERVICE_VERSION = "2022-11-02";
+    var SDK_VERSION = "12.16.0";
+    var SERVICE_VERSION = "2023-08-03";
     var BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES = 256 * 1024 * 1024;
     var BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES = 4e3 * 1024 * 1024;
     var BLOCK_BLOB_MAX_BLOCKS = 5e4;
@@ -55317,7 +56308,10 @@ var require_dist9 = __commonJS({
         };
       } else {
         const accountSas = getValueInConnString(connectionString, "SharedAccessSignature");
-        const accountName = getAccountNameFromUrl(blobEndpoint);
+        let accountName = getValueInConnString(connectionString, "AccountName");
+        if (!accountName) {
+          accountName = getAccountNameFromUrl(blobEndpoint);
+        }
         if (!blobEndpoint) {
           throw new Error("Invalid BlobEndpoint in the provided SAS Connection String");
         } else if (!accountSas) {
@@ -55500,7 +56494,7 @@ var require_dist9 = __commonJS({
         return false;
       }
       const host = parsedUrl.getHost() + (parsedUrl.getPort() === void 0 ? "" : ":" + parsedUrl.getPort());
-      return /^.*:.*:.*$|^localhost(:[0-9]+)?$|^(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])){3}(:[0-9]+)?$/.test(host) || parsedUrl.getPort() !== void 0 && PathStylePorts.includes(parsedUrl.getPort());
+      return /^.*:.*:.*$|^(localhost|host.docker.internal)(:[0-9]+)?$|^(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])){3}(:[0-9]+)?$/.test(host) || parsedUrl.getPort() !== void 0 && PathStylePorts.includes(parsedUrl.getPort());
     }
     __name(isIpEndpointStyle, "isIpEndpointStyle");
     function toBlobTagsString(tags2) {
@@ -55655,9 +56649,7 @@ var require_dist9 = __commonJS({
       var _a;
       return Object.assign(Object.assign({}, internalResponse), { segment: {
         blobPrefixes: (_a = internalResponse.segment.blobPrefixes) === null || _a === void 0 ? void 0 : _a.map((blobPrefixInternal) => {
-          const blobPrefix = {
-            name: BlobNameToString(blobPrefixInternal.name)
-          };
+          const blobPrefix = Object.assign(Object.assign({}, blobPrefixInternal), { name: BlobNameToString(blobPrefixInternal.name) });
           return blobPrefix;
         }),
         blobItems: internalResponse.segment.blobItems.map((blobItemInteral) => {
@@ -56467,11 +57459,11 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
        * @param stringToSign -
        */
       computeHMACSHA256(stringToSign) {
-        return crypto7.createHmac("sha256", this.accountKey).update(stringToSign, "utf8").digest("base64");
+        return crypto4.createHmac("sha256", this.accountKey).update(stringToSign, "utf8").digest("base64");
       }
     };
     var packageName = "azure-storage-blob";
-    var packageVersion = "12.14.0";
+    var packageVersion = "12.16.0";
     var StorageClientContext = class extends coreHttp__namespace.ServiceClient {
       static {
         __name(this, "StorageClientContext");
@@ -56497,7 +57489,7 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
         this.requestContentType = "application/json; charset=utf-8";
         this.baseUri = options.endpoint || "{url}";
         this.url = url2;
-        this.version = options.version || "2022-11-02";
+        this.version = options.version || "2023-08-03";
       }
     };
     var StorageClient = class {
@@ -56888,7 +57880,7 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
        * @param stringToSign -
        */
       computeHMACSHA256(stringToSign) {
-        return crypto7.createHmac("sha256", this.key).update(stringToSign, "utf8").digest("base64");
+        return crypto4.createHmac("sha256", this.key).update(stringToSign, "utf8").digest("base64");
       }
     };
     function ipRangeToString(ipRange) {
@@ -56904,8 +57896,8 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
       static {
         __name(this, "SASQueryParameters");
       }
-      constructor(version5, signature, permissionsOrOptions, services, resourceTypes, protocol, startsOn, expiresOn2, ipRange, identifier, resource, cacheControl, contentDisposition, contentEncoding, contentLanguage, contentType2, userDelegationKey, preauthorizedAgentObjectId, correlationId, encryptionScope2) {
-        this.version = version5;
+      constructor(version4, signature, permissionsOrOptions, services, resourceTypes, protocol, startsOn, expiresOn2, ipRange, identifier, resource, cacheControl, contentDisposition, contentEncoding, contentLanguage, contentType2, userDelegationKey, preauthorizedAgentObjectId, correlationId, encryptionScope2) {
+        this.version = version4;
         this.signature = signature;
         if (permissionsOrOptions !== void 0 && typeof permissionsOrOptions !== "string") {
           this.permissions = permissionsOrOptions.permissions;
@@ -57108,7 +58100,7 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
       }
     };
     function generateBlobSASQueryParameters(blobSASSignatureValues, sharedKeyCredentialOrUserDelegationKey, accountName) {
-      const version5 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
+      const version4 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
       const sharedKeyCredential = sharedKeyCredentialOrUserDelegationKey instanceof StorageSharedKeyCredential ? sharedKeyCredentialOrUserDelegationKey : void 0;
       let userDelegationKeyCredential;
       if (sharedKeyCredential === void 0 && accountName !== void 0) {
@@ -57117,25 +58109,25 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
       if (sharedKeyCredential === void 0 && userDelegationKeyCredential === void 0) {
         throw TypeError("Invalid sharedKeyCredential, userDelegationKey or accountName.");
       }
-      if (version5 >= "2020-12-06") {
+      if (version4 >= "2020-12-06") {
         if (sharedKeyCredential !== void 0) {
           return generateBlobSASQueryParameters20201206(blobSASSignatureValues, sharedKeyCredential);
         } else {
           return generateBlobSASQueryParametersUDK20201206(blobSASSignatureValues, userDelegationKeyCredential);
         }
       }
-      if (version5 >= "2018-11-09") {
+      if (version4 >= "2018-11-09") {
         if (sharedKeyCredential !== void 0) {
           return generateBlobSASQueryParameters20181109(blobSASSignatureValues, sharedKeyCredential);
         } else {
-          if (version5 >= "2020-02-10") {
+          if (version4 >= "2020-02-10") {
             return generateBlobSASQueryParametersUDK20200210(blobSASSignatureValues, userDelegationKeyCredential);
           } else {
             return generateBlobSASQueryParametersUDK20181109(blobSASSignatureValues, userDelegationKeyCredential);
           }
         }
       }
-      if (version5 >= "2015-04-05") {
+      if (version4 >= "2015-04-05") {
         if (sharedKeyCredential !== void 0) {
           return generateBlobSASQueryParameters20150405(blobSASSignatureValues, sharedKeyCredential);
         } else {
@@ -57438,44 +58430,44 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
     }
     __name(getCanonicalName, "getCanonicalName");
     function SASSignatureValuesSanityCheckAndAutofill(blobSASSignatureValues) {
-      const version5 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
-      if (blobSASSignatureValues.snapshotTime && version5 < "2018-11-09") {
+      const version4 = blobSASSignatureValues.version ? blobSASSignatureValues.version : SERVICE_VERSION;
+      if (blobSASSignatureValues.snapshotTime && version4 < "2018-11-09") {
         throw RangeError("'version' must be >= '2018-11-09' when providing 'snapshotTime'.");
       }
       if (blobSASSignatureValues.blobName === void 0 && blobSASSignatureValues.snapshotTime) {
         throw RangeError("Must provide 'blobName' when providing 'snapshotTime'.");
       }
-      if (blobSASSignatureValues.versionId && version5 < "2019-10-10") {
+      if (blobSASSignatureValues.versionId && version4 < "2019-10-10") {
         throw RangeError("'version' must be >= '2019-10-10' when providing 'versionId'.");
       }
       if (blobSASSignatureValues.blobName === void 0 && blobSASSignatureValues.versionId) {
         throw RangeError("Must provide 'blobName' when providing 'versionId'.");
       }
-      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.setImmutabilityPolicy && version5 < "2020-08-04") {
+      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.setImmutabilityPolicy && version4 < "2020-08-04") {
         throw RangeError("'version' must be >= '2020-08-04' when provided 'i' permission.");
       }
-      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.deleteVersion && version5 < "2019-10-10") {
+      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.deleteVersion && version4 < "2019-10-10") {
         throw RangeError("'version' must be >= '2019-10-10' when providing 'x' permission.");
       }
-      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.permanentDelete && version5 < "2019-10-10") {
+      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.permanentDelete && version4 < "2019-10-10") {
         throw RangeError("'version' must be >= '2019-10-10' when providing 'y' permission.");
       }
-      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.tag && version5 < "2019-12-12") {
+      if (blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.tag && version4 < "2019-12-12") {
         throw RangeError("'version' must be >= '2019-12-12' when providing 't' permission.");
       }
-      if (version5 < "2020-02-10" && blobSASSignatureValues.permissions && (blobSASSignatureValues.permissions.move || blobSASSignatureValues.permissions.execute)) {
+      if (version4 < "2020-02-10" && blobSASSignatureValues.permissions && (blobSASSignatureValues.permissions.move || blobSASSignatureValues.permissions.execute)) {
         throw RangeError("'version' must be >= '2020-02-10' when providing the 'm' or 'e' permission.");
       }
-      if (version5 < "2021-04-10" && blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.filterByTags) {
+      if (version4 < "2021-04-10" && blobSASSignatureValues.permissions && blobSASSignatureValues.permissions.filterByTags) {
         throw RangeError("'version' must be >= '2021-04-10' when providing the 'f' permission.");
       }
-      if (version5 < "2020-02-10" && (blobSASSignatureValues.preauthorizedAgentObjectId || blobSASSignatureValues.correlationId)) {
+      if (version4 < "2020-02-10" && (blobSASSignatureValues.preauthorizedAgentObjectId || blobSASSignatureValues.correlationId)) {
         throw RangeError("'version' must be >= '2020-02-10' when providing 'preauthorizedAgentObjectId' or 'correlationId'.");
       }
-      if (blobSASSignatureValues.encryptionScope && version5 < "2020-12-06") {
+      if (blobSASSignatureValues.encryptionScope && version4 < "2020-12-06") {
         throw RangeError("'version' must be >= '2020-12-06' when provided 'encryptionScope' in SAS.");
       }
-      blobSASSignatureValues.version = version5;
+      blobSASSignatureValues.version = version4;
       return blobSASSignatureValues;
     }
     __name(SASSignatureValuesSanityCheckAndAutofill, "SASSignatureValuesSanityCheckAndAutofill");
@@ -63378,9 +64370,7 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
             const blobItem = Object.assign(Object.assign({}, blobItemInteral), { name: BlobNameToString(blobItemInteral.name), tags: toTags(blobItemInteral.blobTags), objectReplicationSourceProperties: parseObjectReplicationRecord(blobItemInteral.objectReplicationMetadata) });
             return blobItem;
           }), blobPrefixes: (_a = response.segment.blobPrefixes) === null || _a === void 0 ? void 0 : _a.map((blobPrefixInternal) => {
-            const blobPrefix = {
-              name: BlobNameToString(blobPrefixInternal.name)
-            };
+            const blobPrefix = Object.assign(Object.assign({}, blobPrefixInternal), { name: BlobNameToString(blobPrefixInternal.name) });
             return blobPrefix;
           }) }) });
           return wrappedResponse;
@@ -64315,30 +65305,30 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
       }
     };
     function generateAccountSASQueryParameters(accountSASSignatureValues, sharedKeyCredential) {
-      const version5 = accountSASSignatureValues.version ? accountSASSignatureValues.version : SERVICE_VERSION;
-      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.setImmutabilityPolicy && version5 < "2020-08-04") {
+      const version4 = accountSASSignatureValues.version ? accountSASSignatureValues.version : SERVICE_VERSION;
+      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.setImmutabilityPolicy && version4 < "2020-08-04") {
         throw RangeError("'version' must be >= '2020-08-04' when provided 'i' permission.");
       }
-      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.deleteVersion && version5 < "2019-10-10") {
+      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.deleteVersion && version4 < "2019-10-10") {
         throw RangeError("'version' must be >= '2019-10-10' when provided 'x' permission.");
       }
-      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.permanentDelete && version5 < "2019-10-10") {
+      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.permanentDelete && version4 < "2019-10-10") {
         throw RangeError("'version' must be >= '2019-10-10' when provided 'y' permission.");
       }
-      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.tag && version5 < "2019-12-12") {
+      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.tag && version4 < "2019-12-12") {
         throw RangeError("'version' must be >= '2019-12-12' when provided 't' permission.");
       }
-      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.filter && version5 < "2019-12-12") {
+      if (accountSASSignatureValues.permissions && accountSASSignatureValues.permissions.filter && version4 < "2019-12-12") {
         throw RangeError("'version' must be >= '2019-12-12' when provided 'f' permission.");
       }
-      if (accountSASSignatureValues.encryptionScope && version5 < "2020-12-06") {
+      if (accountSASSignatureValues.encryptionScope && version4 < "2020-12-06") {
         throw RangeError("'version' must be >= '2020-12-06' when provided 'encryptionScope' in SAS.");
       }
       const parsedPermissions = AccountSASPermissions.parse(accountSASSignatureValues.permissions.toString());
       const parsedServices = AccountSASServices.parse(accountSASSignatureValues.services).toString();
       const parsedResourceTypes = AccountSASResourceTypes.parse(accountSASSignatureValues.resourceTypes).toString();
       let stringToSign;
-      if (version5 >= "2020-12-06") {
+      if (version4 >= "2020-12-06") {
         stringToSign = [
           sharedKeyCredential.accountName,
           parsedPermissions,
@@ -64348,7 +65338,7 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
           truncatedISO8061Date(accountSASSignatureValues.expiresOn, false),
           accountSASSignatureValues.ipRange ? ipRangeToString(accountSASSignatureValues.ipRange) : "",
           accountSASSignatureValues.protocol ? accountSASSignatureValues.protocol : "",
-          version5,
+          version4,
           accountSASSignatureValues.encryptionScope ? accountSASSignatureValues.encryptionScope : "",
           ""
           // Account SAS requires an additional newline character
@@ -64363,13 +65353,13 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
           truncatedISO8061Date(accountSASSignatureValues.expiresOn, false),
           accountSASSignatureValues.ipRange ? ipRangeToString(accountSASSignatureValues.ipRange) : "",
           accountSASSignatureValues.protocol ? accountSASSignatureValues.protocol : "",
-          version5,
+          version4,
           ""
           // Account SAS requires an additional newline character
         ].join("\n");
       }
       const signature = sharedKeyCredential.computeHMACSHA256(stringToSign);
-      return new SASQueryParameters(version5, signature, parsedPermissions.toString(), parsedServices, parsedResourceTypes, accountSASSignatureValues.protocol, accountSASSignatureValues.startsOn, accountSASSignatureValues.expiresOn, accountSASSignatureValues.ipRange, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, accountSASSignatureValues.encryptionScope);
+      return new SASQueryParameters(version4, signature, parsedPermissions.toString(), parsedServices, parsedResourceTypes, accountSASSignatureValues.protocol, accountSASSignatureValues.startsOn, accountSASSignatureValues.expiresOn, accountSASSignatureValues.ipRange, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, void 0, accountSASSignatureValues.encryptionScope);
     }
     __name(generateAccountSASQueryParameters, "generateAccountSASQueryParameters");
     var BlobServiceClient = class _BlobServiceClient extends StorageClient {
@@ -65182,11 +66172,11 @@ ${key}:${decodeURIComponent(lowercaseQueries[key])}`;
   }
 });
 
-// node_modules/@actions/cache/lib/internal/requestUtils.js
+// ../node_modules/@actions/cache/lib/internal/requestUtils.js
 var require_requestUtils2 = __commonJS({
-  "node_modules/@actions/cache/lib/internal/requestUtils.js"(exports2) {
+  "../node_modules/@actions/cache/lib/internal/requestUtils.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -65201,24 +66191,24 @@ var require_requestUtils2 = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -65251,7 +66241,7 @@ var require_requestUtils2 = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.retryHttpClientResponse = exports2.retryTypedResponse = exports2.retry = exports2.isRetryableStatusCode = exports2.isServerErrorStatusCode = exports2.isSuccessStatusCode = void 0;
-    var core2 = __importStar3(require_core());
+    var core2 = __importStar5(require_core());
     var http_client_1 = require_lib();
     var constants_1 = require_constants();
     function isSuccessStatusCode(statusCode) {
@@ -65284,13 +66274,13 @@ var require_requestUtils2 = __commonJS({
     __name(isRetryableStatusCode, "isRetryableStatusCode");
     exports2.isRetryableStatusCode = isRetryableStatusCode;
     function sleep(milliseconds) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return new Promise((resolve) => setTimeout(resolve, milliseconds));
       });
     }
     __name(sleep, "sleep");
     function retry(name, method, getStatusCode, maxAttempts = constants_1.DefaultRetryAttempts, delay = constants_1.DefaultRetryDelay, onError = void 0) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         let errorMessage = "";
         let attempt = 1;
         while (attempt <= maxAttempts) {
@@ -65330,7 +66320,7 @@ var require_requestUtils2 = __commonJS({
     __name(retry, "retry");
     exports2.retry = retry;
     function retryTypedResponse(name, method, maxAttempts = constants_1.DefaultRetryAttempts, delay = constants_1.DefaultRetryDelay) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return yield retry(
           name,
           method,
@@ -65357,7 +66347,7 @@ var require_requestUtils2 = __commonJS({
     __name(retryTypedResponse, "retryTypedResponse");
     exports2.retryTypedResponse = retryTypedResponse;
     function retryHttpClientResponse(name, method, maxAttempts = constants_1.DefaultRetryAttempts, delay = constants_1.DefaultRetryDelay) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return yield retry(name, method, (response) => response.message.statusCode, maxAttempts, delay);
       });
     }
@@ -65366,11 +66356,11 @@ var require_requestUtils2 = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/lib/internal/downloadUtils.js
+// ../node_modules/@actions/cache/lib/internal/downloadUtils.js
 var require_downloadUtils = __commonJS({
-  "node_modules/@actions/cache/lib/internal/downloadUtils.js"(exports2) {
+  "../node_modules/@actions/cache/lib/internal/downloadUtils.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -65385,24 +66375,24 @@ var require_downloadUtils = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -65434,20 +66424,20 @@ var require_downloadUtils = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.downloadCacheStorageSDK = exports2.downloadCacheHttpClient = exports2.DownloadProgress = void 0;
-    var core2 = __importStar3(require_core());
+    exports2.downloadCacheStorageSDK = exports2.downloadCacheHttpClientConcurrent = exports2.downloadCacheHttpClient = exports2.DownloadProgress = void 0;
+    var core2 = __importStar5(require_core());
     var http_client_1 = require_lib();
     var storage_blob_1 = require_dist9();
-    var buffer = __importStar3(require("buffer"));
-    var fs2 = __importStar3(require("fs"));
-    var stream = __importStar3(require("stream"));
-    var util = __importStar3(require("util"));
-    var utils = __importStar3(require_cacheUtils());
+    var buffer = __importStar5(require("buffer"));
+    var fs2 = __importStar5(require("fs"));
+    var stream = __importStar5(require("stream"));
+    var util = __importStar5(require("util"));
+    var utils = __importStar5(require_cacheUtils());
     var constants_1 = require_constants();
     var requestUtils_1 = require_requestUtils2();
     var abort_controller_1 = require_dist();
     function pipeResponseToStream(response, output) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const pipeline = util.promisify(stream.pipeline);
         yield pipeline(response.message, output);
       });
@@ -65553,10 +66543,10 @@ var require_downloadUtils = __commonJS({
     };
     exports2.DownloadProgress = DownloadProgress;
     function downloadCacheHttpClient(archiveLocation, archivePath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const writeStream = fs2.createWriteStream(archivePath);
         const httpClient = new http_client_1.HttpClient("actions/cache");
-        const downloadResponse = yield (0, requestUtils_1.retryHttpClientResponse)("downloadCache", () => __awaiter3(this, void 0, void 0, function* () {
+        const downloadResponse = yield (0, requestUtils_1.retryHttpClientResponse)("downloadCache", () => __awaiter5(this, void 0, void 0, function* () {
           return httpClient.get(archiveLocation);
         }));
         downloadResponse.message.socket.setTimeout(constants_1.SocketTimeout, () => {
@@ -65578,9 +66568,114 @@ var require_downloadUtils = __commonJS({
     }
     __name(downloadCacheHttpClient, "downloadCacheHttpClient");
     exports2.downloadCacheHttpClient = downloadCacheHttpClient;
+    function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options) {
+      var _a;
+      return __awaiter5(this, void 0, void 0, function* () {
+        const archiveDescriptor = yield fs2.promises.open(archivePath, "w");
+        const httpClient = new http_client_1.HttpClient("actions/cache", void 0, {
+          socketTimeout: options.timeoutInMs,
+          keepAlive: true
+        });
+        try {
+          const res = yield (0, requestUtils_1.retryHttpClientResponse)("downloadCacheMetadata", () => __awaiter5(this, void 0, void 0, function* () {
+            return yield httpClient.request("HEAD", archiveLocation, null, {});
+          }));
+          const lengthHeader = res.message.headers["content-length"];
+          if (lengthHeader === void 0 || lengthHeader === null) {
+            throw new Error("Content-Length not found on blob response");
+          }
+          const length = parseInt(lengthHeader);
+          if (Number.isNaN(length)) {
+            throw new Error(`Could not interpret Content-Length: ${length}`);
+          }
+          const downloads = [];
+          const blockSize = 4 * 1024 * 1024;
+          for (let offset = 0; offset < length; offset += blockSize) {
+            const count = Math.min(blockSize, length - offset);
+            downloads.push({
+              offset,
+              promiseGetter: () => __awaiter5(this, void 0, void 0, function* () {
+                return yield downloadSegmentRetry(httpClient, archiveLocation, offset, count);
+              })
+            });
+          }
+          downloads.reverse();
+          let actives = 0;
+          let bytesDownloaded = 0;
+          const progress = new DownloadProgress(length);
+          progress.startDisplayTimer();
+          const progressFn = progress.onProgress();
+          const activeDownloads = [];
+          let nextDownload;
+          const waitAndWrite = /* @__PURE__ */ __name(() => __awaiter5(this, void 0, void 0, function* () {
+            const segment = yield Promise.race(Object.values(activeDownloads));
+            yield archiveDescriptor.write(segment.buffer, 0, segment.count, segment.offset);
+            actives--;
+            delete activeDownloads[segment.offset];
+            bytesDownloaded += segment.count;
+            progressFn({ loadedBytes: bytesDownloaded });
+          }), "waitAndWrite");
+          while (nextDownload = downloads.pop()) {
+            activeDownloads[nextDownload.offset] = nextDownload.promiseGetter();
+            actives++;
+            if (actives >= ((_a = options.downloadConcurrency) !== null && _a !== void 0 ? _a : 10)) {
+              yield waitAndWrite();
+            }
+          }
+          while (actives > 0) {
+            yield waitAndWrite();
+          }
+        } finally {
+          httpClient.dispose();
+          yield archiveDescriptor.close();
+        }
+      });
+    }
+    __name(downloadCacheHttpClientConcurrent, "downloadCacheHttpClientConcurrent");
+    exports2.downloadCacheHttpClientConcurrent = downloadCacheHttpClientConcurrent;
+    function downloadSegmentRetry(httpClient, archiveLocation, offset, count) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        const retries = 5;
+        let failures = 0;
+        while (true) {
+          try {
+            const timeout = 3e4;
+            const result = yield promiseWithTimeout(timeout, downloadSegment(httpClient, archiveLocation, offset, count));
+            if (typeof result === "string") {
+              throw new Error("downloadSegmentRetry failed due to timeout");
+            }
+            return result;
+          } catch (err) {
+            if (failures >= retries) {
+              throw err;
+            }
+            failures++;
+          }
+        }
+      });
+    }
+    __name(downloadSegmentRetry, "downloadSegmentRetry");
+    function downloadSegment(httpClient, archiveLocation, offset, count) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        const partRes = yield (0, requestUtils_1.retryHttpClientResponse)("downloadCachePart", () => __awaiter5(this, void 0, void 0, function* () {
+          return yield httpClient.get(archiveLocation, {
+            Range: `bytes=${offset}-${offset + count - 1}`
+          });
+        }));
+        if (!partRes.readBodyBuffer) {
+          throw new Error("Expected HttpClientResponse to implement readBodyBuffer");
+        }
+        return {
+          offset,
+          count,
+          buffer: yield partRes.readBodyBuffer()
+        };
+      });
+    }
+    __name(downloadSegment, "downloadSegment");
     function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
       var _a;
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const client = new storage_blob_1.BlockBlobClient(archiveLocation, void 0, {
           retryOptions: {
             // Override the timeout used when downloading each 4 MB chunk
@@ -65626,7 +66721,7 @@ var require_downloadUtils = __commonJS({
     }
     __name(downloadCacheStorageSDK, "downloadCacheStorageSDK");
     exports2.downloadCacheStorageSDK = downloadCacheStorageSDK;
-    var promiseWithTimeout = /* @__PURE__ */ __name((timeoutMs, promise) => __awaiter3(void 0, void 0, void 0, function* () {
+    var promiseWithTimeout = /* @__PURE__ */ __name((timeoutMs, promise) => __awaiter5(void 0, void 0, void 0, function* () {
       let timeoutHandle;
       const timeoutPromise = new Promise((resolve) => {
         timeoutHandle = setTimeout(() => resolve("timeout"), timeoutMs);
@@ -65639,11 +66734,11 @@ var require_downloadUtils = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/lib/options.js
+// ../node_modules/@actions/cache/lib/options.js
 var require_options = __commonJS({
-  "node_modules/@actions/cache/lib/options.js"(exports2) {
+  "../node_modules/@actions/cache/lib/options.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -65658,26 +66753,26 @@ var require_options = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getDownloadOptions = exports2.getUploadOptions = void 0;
-    var core2 = __importStar3(require_core());
+    var core2 = __importStar5(require_core());
     function getUploadOptions(copy) {
       const result = {
         uploadConcurrency: 4,
@@ -65699,7 +66794,8 @@ var require_options = __commonJS({
     exports2.getUploadOptions = getUploadOptions;
     function getDownloadOptions(copy) {
       const result = {
-        useAzureSdk: true,
+        useAzureSdk: false,
+        concurrentBlobDownloads: true,
         downloadConcurrency: 8,
         timeoutInMs: 3e4,
         segmentTimeoutInMs: 6e5,
@@ -65708,6 +66804,9 @@ var require_options = __commonJS({
       if (copy) {
         if (typeof copy.useAzureSdk === "boolean") {
           result.useAzureSdk = copy.useAzureSdk;
+        }
+        if (typeof copy.concurrentBlobDownloads === "boolean") {
+          result.concurrentBlobDownloads = copy.concurrentBlobDownloads;
         }
         if (typeof copy.downloadConcurrency === "number") {
           result.downloadConcurrency = copy.downloadConcurrency;
@@ -65739,11 +66838,11 @@ var require_options = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/lib/internal/cacheHttpClient.js
+// ../node_modules/@actions/cache/lib/internal/cacheHttpClient.js
 var require_cacheHttpClient = __commonJS({
-  "node_modules/@actions/cache/lib/internal/cacheHttpClient.js"(exports2) {
+  "../node_modules/@actions/cache/lib/internal/cacheHttpClient.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -65758,24 +66857,24 @@ var require_cacheHttpClient = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -65808,13 +66907,13 @@ var require_cacheHttpClient = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.saveCache = exports2.reserveCache = exports2.downloadCache = exports2.getCacheEntry = exports2.getCacheVersion = void 0;
-    var core2 = __importStar3(require_core());
+    var core2 = __importStar5(require_core());
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
-    var crypto7 = __importStar3(require("crypto"));
-    var fs2 = __importStar3(require("fs"));
+    var crypto4 = __importStar5(require("crypto"));
+    var fs2 = __importStar5(require("fs"));
     var url_1 = require("url");
-    var utils = __importStar3(require_cacheUtils());
+    var utils = __importStar5(require_cacheUtils());
     var downloadUtils_1 = require_downloadUtils();
     var options_1 = require_options();
     var requestUtils_1 = require_requestUtils2();
@@ -65857,21 +66956,21 @@ var require_cacheHttpClient = __commonJS({
         components.push("windows-only");
       }
       components.push(versionSalt);
-      return crypto7.createHash("sha256").update(components.join("|")).digest("hex");
+      return crypto4.createHash("sha256").update(components.join("|")).digest("hex");
     }
     __name(getCacheVersion, "getCacheVersion");
     exports2.getCacheVersion = getCacheVersion;
     function getCacheEntry(keys, paths, options) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version4 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
-        const resource = `cache?keys=${encodeURIComponent(keys.join(","))}&version=${version4}`;
-        const response = yield (0, requestUtils_1.retryTypedResponse)("getCacheEntry", () => __awaiter3(this, void 0, void 0, function* () {
+        const version3 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
+        const resource = `cache?keys=${encodeURIComponent(keys.join(","))}&version=${version3}`;
+        const response = yield (0, requestUtils_1.retryTypedResponse)("getCacheEntry", () => __awaiter5(this, void 0, void 0, function* () {
           return httpClient.getJson(getCacheApiUrl(resource));
         }));
         if (response.statusCode === 204) {
           if (core2.isDebug()) {
-            yield printCachesListForDiagnostics(keys[0], httpClient, version4);
+            yield printCachesListForDiagnostics(keys[0], httpClient, version3);
           }
           return null;
         }
@@ -65891,17 +66990,17 @@ var require_cacheHttpClient = __commonJS({
     }
     __name(getCacheEntry, "getCacheEntry");
     exports2.getCacheEntry = getCacheEntry;
-    function printCachesListForDiagnostics(key, httpClient, version4) {
-      return __awaiter3(this, void 0, void 0, function* () {
+    function printCachesListForDiagnostics(key, httpClient, version3) {
+      return __awaiter5(this, void 0, void 0, function* () {
         const resource = `caches?key=${encodeURIComponent(key)}`;
-        const response = yield (0, requestUtils_1.retryTypedResponse)("listCache", () => __awaiter3(this, void 0, void 0, function* () {
+        const response = yield (0, requestUtils_1.retryTypedResponse)("listCache", () => __awaiter5(this, void 0, void 0, function* () {
           return httpClient.getJson(getCacheApiUrl(resource));
         }));
         if (response.statusCode === 200) {
           const cacheListResult = response.result;
           const totalCount = cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.totalCount;
           if (totalCount && totalCount > 0) {
-            core2.debug(`No matching cache found for cache key '${key}', version '${version4} and scope ${process.env["GITHUB_REF"]}. There exist one or more cache(s) with similar key but they have different version or scope. See more info on cache matching here: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#matching-a-cache-key 
+            core2.debug(`No matching cache found for cache key '${key}', version '${version3} and scope ${process.env["GITHUB_REF"]}. There exist one or more cache(s) with similar key but they have different version or scope. See more info on cache matching here: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#matching-a-cache-key 
 Other caches with similar key:`);
             for (const cacheEntry of (cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.artifactCaches) || []) {
               core2.debug(`Cache Key: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheKey}, Cache Version: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheVersion}, Cache Scope: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.scope}, Cache Created: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.creationTime}`);
@@ -65912,11 +67011,17 @@ Other caches with similar key:`);
     }
     __name(printCachesListForDiagnostics, "printCachesListForDiagnostics");
     function downloadCache(archiveLocation, archivePath, options) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const archiveUrl = new url_1.URL(archiveLocation);
         const downloadOptions = (0, options_1.getDownloadOptions)(options);
-        if (downloadOptions.useAzureSdk && archiveUrl.hostname.endsWith(".blob.core.windows.net")) {
-          yield (0, downloadUtils_1.downloadCacheStorageSDK)(archiveLocation, archivePath, downloadOptions);
+        if (archiveUrl.hostname.endsWith(".blob.core.windows.net")) {
+          if (downloadOptions.useAzureSdk) {
+            yield (0, downloadUtils_1.downloadCacheStorageSDK)(archiveLocation, archivePath, downloadOptions);
+          } else if (downloadOptions.concurrentBlobDownloads) {
+            yield (0, downloadUtils_1.downloadCacheHttpClientConcurrent)(archiveLocation, archivePath, downloadOptions);
+          } else {
+            yield (0, downloadUtils_1.downloadCacheHttpClient)(archiveLocation, archivePath);
+          }
         } else {
           yield (0, downloadUtils_1.downloadCacheHttpClient)(archiveLocation, archivePath);
         }
@@ -65925,15 +67030,15 @@ Other caches with similar key:`);
     __name(downloadCache, "downloadCache");
     exports2.downloadCache = downloadCache;
     function reserveCache(key, paths, options) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
-        const version4 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
+        const version3 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
         const reserveCacheRequest = {
           key,
-          version: version4,
+          version: version3,
           cacheSize: options === null || options === void 0 ? void 0 : options.cacheSize
         };
-        const response = yield (0, requestUtils_1.retryTypedResponse)("reserveCache", () => __awaiter3(this, void 0, void 0, function* () {
+        const response = yield (0, requestUtils_1.retryTypedResponse)("reserveCache", () => __awaiter5(this, void 0, void 0, function* () {
           return httpClient.postJson(getCacheApiUrl("caches"), reserveCacheRequest);
         }));
         return response;
@@ -65946,13 +67051,13 @@ Other caches with similar key:`);
     }
     __name(getContentRange, "getContentRange");
     function uploadChunk(httpClient, resourceUrl, openStream, start, end) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         core2.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
         const additionalHeaders = {
           "Content-Type": "application/octet-stream",
           "Content-Range": getContentRange(start, end)
         };
-        const uploadChunkResponse = yield (0, requestUtils_1.retryHttpClientResponse)(`uploadChunk (start: ${start}, end: ${end})`, () => __awaiter3(this, void 0, void 0, function* () {
+        const uploadChunkResponse = yield (0, requestUtils_1.retryHttpClientResponse)(`uploadChunk (start: ${start}, end: ${end})`, () => __awaiter5(this, void 0, void 0, function* () {
           return httpClient.sendStream("PATCH", resourceUrl, openStream(), additionalHeaders);
         }));
         if (!(0, requestUtils_1.isSuccessStatusCode)(uploadChunkResponse.message.statusCode)) {
@@ -65962,7 +67067,7 @@ Other caches with similar key:`);
     }
     __name(uploadChunk, "uploadChunk");
     function uploadFile(httpClient, cacheId, archivePath, options) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const fileSize = utils.getArchiveFileSizeInBytes(archivePath);
         const resourceUrl = getCacheApiUrl(`caches/${cacheId.toString()}`);
         const fd = fs2.openSync(archivePath, "r");
@@ -65973,7 +67078,7 @@ Other caches with similar key:`);
         core2.debug("Awaiting all uploads");
         let offset = 0;
         try {
-          yield Promise.all(parallelUploads.map(() => __awaiter3(this, void 0, void 0, function* () {
+          yield Promise.all(parallelUploads.map(() => __awaiter5(this, void 0, void 0, function* () {
             while (offset < fileSize) {
               const chunkSize = Math.min(fileSize - offset, maxChunkSize);
               const start = offset;
@@ -65997,16 +67102,16 @@ Other caches with similar key:`);
     }
     __name(uploadFile, "uploadFile");
     function commitCache(httpClient, cacheId, filesize) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const commitCacheRequest = { size: filesize };
-        return yield (0, requestUtils_1.retryTypedResponse)("commitCache", () => __awaiter3(this, void 0, void 0, function* () {
+        return yield (0, requestUtils_1.retryTypedResponse)("commitCache", () => __awaiter5(this, void 0, void 0, function* () {
           return httpClient.postJson(getCacheApiUrl(`caches/${cacheId.toString()}`), commitCacheRequest);
         }));
       });
     }
     __name(commitCache, "commitCache");
     function saveCache(cacheId, archivePath, options) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
         core2.debug("Upload cache");
         yield uploadFile(httpClient, cacheId, archivePath, options);
@@ -66025,11 +67130,11 @@ Other caches with similar key:`);
   }
 });
 
-// node_modules/@actions/cache/lib/internal/tar.js
+// ../node_modules/@actions/cache/lib/internal/tar.js
 var require_tar = __commonJS({
-  "node_modules/@actions/cache/lib/internal/tar.js"(exports2) {
+  "../node_modules/@actions/cache/lib/internal/tar.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -66044,24 +67149,24 @@ var require_tar = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -66095,14 +67200,14 @@ var require_tar = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.createTar = exports2.extractTar = exports2.listTar = void 0;
     var exec_1 = require_exec();
-    var io2 = __importStar3(require_io());
+    var io2 = __importStar5(require_io());
     var fs_1 = require("fs");
-    var path = __importStar3(require("path"));
-    var utils = __importStar3(require_cacheUtils());
+    var path = __importStar5(require("path"));
+    var utils = __importStar5(require_cacheUtils());
     var constants_1 = require_constants();
     var IS_WINDOWS = process.platform === "win32";
     function getTarPath() {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         switch (process.platform) {
           case "win32": {
             const gnuTar = yield utils.getGnuTarPathOnWindows();
@@ -66136,7 +67241,7 @@ var require_tar = __commonJS({
     }
     __name(getTarPath, "getTarPath");
     function getTarArgs(tarPath, compressionMethod, type, archivePath = "") {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const args = [`"${tarPath.path}"`];
         const cacheFileName = utils.getCacheFileName(compressionMethod);
         const tarFile = "cache.tar";
@@ -66168,7 +67273,7 @@ var require_tar = __commonJS({
     }
     __name(getTarArgs, "getTarArgs");
     function getCommands(compressionMethod, type, archivePath = "") {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         let args;
         const tarPath = yield getTarPath();
         const tarArgs = yield getTarArgs(tarPath, compressionMethod, type, archivePath);
@@ -66192,7 +67297,7 @@ var require_tar = __commonJS({
     }
     __name(getWorkingDirectory, "getWorkingDirectory");
     function getDecompressionProgram(tarPath, compressionMethod, archivePath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
         switch (compressionMethod) {
           case constants_1.CompressionMethod.Zstd:
@@ -66217,7 +67322,7 @@ var require_tar = __commonJS({
     }
     __name(getDecompressionProgram, "getDecompressionProgram");
     function getCompressionProgram(tarPath, compressionMethod) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const cacheFileName = utils.getCacheFileName(compressionMethod);
         const BSD_TAR_ZSTD = tarPath.type === constants_1.ArchiveToolType.BSD && compressionMethod !== constants_1.CompressionMethod.Gzip && IS_WINDOWS;
         switch (compressionMethod) {
@@ -66243,7 +67348,7 @@ var require_tar = __commonJS({
     }
     __name(getCompressionProgram, "getCompressionProgram");
     function execCommands(commands, cwd) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         for (const command of commands) {
           try {
             yield (0, exec_1.exec)(command, void 0, {
@@ -66258,7 +67363,7 @@ var require_tar = __commonJS({
     }
     __name(execCommands, "execCommands");
     function listTar(archivePath, compressionMethod) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const commands = yield getCommands(compressionMethod, "list", archivePath);
         yield execCommands(commands);
       });
@@ -66266,7 +67371,7 @@ var require_tar = __commonJS({
     __name(listTar, "listTar");
     exports2.listTar = listTar;
     function extractTar(archivePath, compressionMethod) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const workingDirectory = getWorkingDirectory();
         yield io2.mkdirP(workingDirectory);
         const commands = yield getCommands(compressionMethod, "extract", archivePath);
@@ -66276,7 +67381,7 @@ var require_tar = __commonJS({
     __name(extractTar, "extractTar");
     exports2.extractTar = extractTar;
     function createTar(archiveFolder, sourceDirectories, compressionMethod) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         (0, fs_1.writeFileSync)(path.join(archiveFolder, constants_1.ManifestFilename), sourceDirectories.join("\n"));
         const commands = yield getCommands(compressionMethod, "create");
         yield execCommands(commands, archiveFolder);
@@ -66287,11 +67392,11 @@ var require_tar = __commonJS({
   }
 });
 
-// node_modules/@actions/cache/lib/cache.js
+// ../node_modules/@actions/cache/lib/cache.js
 var require_cache = __commonJS({
-  "node_modules/@actions/cache/lib/cache.js"(exports2) {
+  "../node_modules/@actions/cache/lib/cache.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -66306,24 +67411,24 @@ var require_cache = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -66356,10 +67461,10 @@ var require_cache = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.saveCache = exports2.restoreCache = exports2.isFeatureAvailable = exports2.ReserveCacheError = exports2.ValidationError = void 0;
-    var core2 = __importStar3(require_core());
-    var path = __importStar3(require("path"));
-    var utils = __importStar3(require_cacheUtils());
-    var cacheHttpClient = __importStar3(require_cacheHttpClient());
+    var core2 = __importStar5(require_core());
+    var path = __importStar5(require("path"));
+    var utils = __importStar5(require_cacheUtils());
+    var cacheHttpClient = __importStar5(require_cacheHttpClient());
     var tar_1 = require_tar();
     var ValidationError = class _ValidationError extends Error {
       static {
@@ -66405,7 +67510,7 @@ var require_cache = __commonJS({
     __name(isFeatureAvailable, "isFeatureAvailable");
     exports2.isFeatureAvailable = isFeatureAvailable;
     function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         checkPaths(paths);
         restoreKeys = restoreKeys || [];
         const keys = [primaryKey, ...restoreKeys];
@@ -66463,7 +67568,7 @@ var require_cache = __commonJS({
     exports2.restoreCache = restoreCache;
     function saveCache(paths, key, options, enableCrossOsArchive = false) {
       var _a, _b, _c, _d, _e;
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(key);
         const compressionMethod = yield utils.getCompressionMethod();
@@ -66666,77 +67771,77 @@ var require_semver3 = __commonJS({
       }
     }
     var i;
-    exports2.parse = parse3;
-    function parse3(version4, options) {
+    exports2.parse = parse2;
+    function parse2(version3, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version4 instanceof SemVer) {
-        return version4;
+      if (version3 instanceof SemVer) {
+        return version3;
       }
-      if (typeof version4 !== "string") {
+      if (typeof version3 !== "string") {
         return null;
       }
-      if (version4.length > MAX_LENGTH) {
+      if (version3.length > MAX_LENGTH) {
         return null;
       }
       var r = options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL];
-      if (!r.test(version4)) {
+      if (!r.test(version3)) {
         return null;
       }
       try {
-        return new SemVer(version4, options);
+        return new SemVer(version3, options);
       } catch (er) {
         return null;
       }
     }
-    __name(parse3, "parse");
+    __name(parse2, "parse");
     exports2.valid = valid;
-    function valid(version4, options) {
-      var v = parse3(version4, options);
+    function valid(version3, options) {
+      var v = parse2(version3, options);
       return v ? v.version : null;
     }
     __name(valid, "valid");
     exports2.clean = clean;
-    function clean(version4, options) {
-      var s = parse3(version4.trim().replace(/^[=v]+/, ""), options);
+    function clean(version3, options) {
+      var s = parse2(version3.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     }
     __name(clean, "clean");
     exports2.SemVer = SemVer;
-    function SemVer(version4, options) {
+    function SemVer(version3, options) {
       if (!options || typeof options !== "object") {
         options = {
           loose: !!options,
           includePrerelease: false
         };
       }
-      if (version4 instanceof SemVer) {
-        if (version4.loose === options.loose) {
-          return version4;
+      if (version3 instanceof SemVer) {
+        if (version3.loose === options.loose) {
+          return version3;
         } else {
-          version4 = version4.version;
+          version3 = version3.version;
         }
-      } else if (typeof version4 !== "string") {
-        throw new TypeError("Invalid Version: " + version4);
+      } else if (typeof version3 !== "string") {
+        throw new TypeError("Invalid Version: " + version3);
       }
-      if (version4.length > MAX_LENGTH) {
+      if (version3.length > MAX_LENGTH) {
         throw new TypeError("version is longer than " + MAX_LENGTH + " characters");
       }
       if (!(this instanceof SemVer)) {
-        return new SemVer(version4, options);
+        return new SemVer(version3, options);
       }
-      debug("SemVer", version4, options);
+      debug("SemVer", version3, options);
       this.options = options;
       this.loose = !!options.loose;
-      var m = version4.trim().match(options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL]);
+      var m = version3.trim().match(options.loose ? safeRe[t.LOOSE] : safeRe[t.FULL]);
       if (!m) {
-        throw new TypeError("Invalid Version: " + version4);
+        throw new TypeError("Invalid Version: " + version3);
       }
-      this.raw = version4;
+      this.raw = version3;
       this.major = +m[1];
       this.minor = +m[2];
       this.patch = +m[3];
@@ -66920,13 +68025,13 @@ var require_semver3 = __commonJS({
       return this;
     };
     exports2.inc = inc;
-    function inc(version4, release, loose, identifier) {
+    function inc(version3, release, loose, identifier) {
       if (typeof loose === "string") {
         identifier = loose;
         loose = void 0;
       }
       try {
-        return new SemVer(version4, loose).inc(release, identifier).version;
+        return new SemVer(version3, loose).inc(release, identifier).version;
       } catch (er) {
         return null;
       }
@@ -66937,16 +68042,16 @@ var require_semver3 = __commonJS({
       if (eq(version1, version22)) {
         return null;
       } else {
-        var v13 = parse3(version1);
-        var v2 = parse3(version22);
+        var v12 = parse2(version1);
+        var v2 = parse2(version22);
         var prefix = "";
-        if (v13.prerelease.length || v2.prerelease.length) {
+        if (v12.prerelease.length || v2.prerelease.length) {
           prefix = "pre";
           var defaultResult = "prerelease";
         }
-        for (var key in v13) {
+        for (var key in v12) {
           if (key === "major" || key === "minor" || key === "patch") {
-            if (v13[key] !== v2[key]) {
+            if (v12[key] !== v2[key]) {
               return prefix + key;
             }
           }
@@ -67138,19 +68243,19 @@ var require_semver3 = __commonJS({
     Comparator.prototype.toString = function() {
       return this.value;
     };
-    Comparator.prototype.test = function(version4) {
-      debug("Comparator.test", version4, this.options.loose);
-      if (this.semver === ANY || version4 === ANY) {
+    Comparator.prototype.test = function(version3) {
+      debug("Comparator.test", version3, this.options.loose);
+      if (this.semver === ANY || version3 === ANY) {
         return true;
       }
-      if (typeof version4 === "string") {
+      if (typeof version3 === "string") {
         try {
-          version4 = new SemVer(version4, this.options);
+          version3 = new SemVer(version3, this.options);
         } catch (er) {
           return false;
         }
       }
-      return cmp(version4, this.operator, this.semver, this.options);
+      return cmp(version3, this.operator, this.semver, this.options);
     };
     Comparator.prototype.intersects = function(comp, options) {
       if (!(comp instanceof Comparator)) {
@@ -67473,31 +68578,31 @@ var require_semver3 = __commonJS({
       return (from + " " + to).trim();
     }
     __name(hyphenReplace, "hyphenReplace");
-    Range.prototype.test = function(version4) {
-      if (!version4) {
+    Range.prototype.test = function(version3) {
+      if (!version3) {
         return false;
       }
-      if (typeof version4 === "string") {
+      if (typeof version3 === "string") {
         try {
-          version4 = new SemVer(version4, this.options);
+          version3 = new SemVer(version3, this.options);
         } catch (er) {
           return false;
         }
       }
       for (var i2 = 0; i2 < this.set.length; i2++) {
-        if (testSet(this.set[i2], version4, this.options)) {
+        if (testSet(this.set[i2], version3, this.options)) {
           return true;
         }
       }
       return false;
     };
-    function testSet(set, version4, options) {
+    function testSet(set, version3, options) {
       for (var i2 = 0; i2 < set.length; i2++) {
-        if (!set[i2].test(version4)) {
+        if (!set[i2].test(version3)) {
           return false;
         }
       }
-      if (version4.prerelease.length && !options.includePrerelease) {
+      if (version3.prerelease.length && !options.includePrerelease) {
         for (i2 = 0; i2 < set.length; i2++) {
           debug(set[i2].semver);
           if (set[i2].semver === ANY) {
@@ -67505,7 +68610,7 @@ var require_semver3 = __commonJS({
           }
           if (set[i2].semver.prerelease.length > 0) {
             var allowed = set[i2].semver;
-            if (allowed.major === version4.major && allowed.minor === version4.minor && allowed.patch === version4.patch) {
+            if (allowed.major === version3.major && allowed.minor === version3.minor && allowed.patch === version3.patch) {
               return true;
             }
           }
@@ -67516,13 +68621,13 @@ var require_semver3 = __commonJS({
     }
     __name(testSet, "testSet");
     exports2.satisfies = satisfies;
-    function satisfies(version4, range, options) {
+    function satisfies(version3, range, options) {
       try {
         range = new Range(range, options);
       } catch (er) {
         return false;
       }
-      return range.test(version4);
+      return range.test(version3);
     }
     __name(satisfies, "satisfies");
     exports2.maxSatisfying = maxSatisfying;
@@ -67619,18 +68724,18 @@ var require_semver3 = __commonJS({
     }
     __name(validRange, "validRange");
     exports2.ltr = ltr;
-    function ltr(version4, range, options) {
-      return outside(version4, range, "<", options);
+    function ltr(version3, range, options) {
+      return outside(version3, range, "<", options);
     }
     __name(ltr, "ltr");
     exports2.gtr = gtr;
-    function gtr(version4, range, options) {
-      return outside(version4, range, ">", options);
+    function gtr(version3, range, options) {
+      return outside(version3, range, ">", options);
     }
     __name(gtr, "gtr");
     exports2.outside = outside;
-    function outside(version4, range, hilo, options) {
-      version4 = new SemVer(version4, options);
+    function outside(version3, range, hilo, options) {
+      version3 = new SemVer(version3, options);
       range = new Range(range, options);
       var gtfn, ltefn, ltfn, comp, ecomp;
       switch (hilo) {
@@ -67651,7 +68756,7 @@ var require_semver3 = __commonJS({
         default:
           throw new TypeError('Must provide a hilo val of "<" or ">"');
       }
-      if (satisfies(version4, range, options)) {
+      if (satisfies(version3, range, options)) {
         return false;
       }
       for (var i2 = 0; i2 < range.set.length; ++i2) {
@@ -67673,9 +68778,9 @@ var require_semver3 = __commonJS({
         if (high.operator === comp || high.operator === ecomp) {
           return false;
         }
-        if ((!low.operator || low.operator === comp) && ltefn(version4, low.semver)) {
+        if ((!low.operator || low.operator === comp) && ltefn(version3, low.semver)) {
           return false;
-        } else if (low.operator === ecomp && ltfn(version4, low.semver)) {
+        } else if (low.operator === ecomp && ltfn(version3, low.semver)) {
           return false;
         }
       }
@@ -67683,8 +68788,8 @@ var require_semver3 = __commonJS({
     }
     __name(outside, "outside");
     exports2.prerelease = prerelease;
-    function prerelease(version4, options) {
-      var parsed = parse3(version4, options);
+    function prerelease(version3, options) {
+      var parsed = parse2(version3, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     }
     __name(prerelease, "prerelease");
@@ -67696,23 +68801,23 @@ var require_semver3 = __commonJS({
     }
     __name(intersects, "intersects");
     exports2.coerce = coerce;
-    function coerce(version4, options) {
-      if (version4 instanceof SemVer) {
-        return version4;
+    function coerce(version3, options) {
+      if (version3 instanceof SemVer) {
+        return version3;
       }
-      if (typeof version4 === "number") {
-        version4 = String(version4);
+      if (typeof version3 === "number") {
+        version3 = String(version3);
       }
-      if (typeof version4 !== "string") {
+      if (typeof version3 !== "string") {
         return null;
       }
       options = options || {};
       var match = null;
       if (!options.rtl) {
-        match = version4.match(safeRe[t.COERCE]);
+        match = version3.match(safeRe[t.COERCE]);
       } else {
         var next;
-        while ((next = safeRe[t.COERCERTL].exec(version4)) && (!match || match.index + match[0].length !== version4.length)) {
+        while ((next = safeRe[t.COERCERTL].exec(version3)) && (!match || match.index + match[0].length !== version3.length)) {
           if (!match || next.index + next[0].length !== match.index + match[0].length) {
             match = next;
           }
@@ -67723,7 +68828,7 @@ var require_semver3 = __commonJS({
       if (match === null) {
         return null;
       }
-      return parse3(match[2] + "." + (match[3] || "0") + "." + (match[4] || "0"), options);
+      return parse2(match[2] + "." + (match[3] || "0") + "." + (match[4] || "0"), options);
     }
     __name(coerce, "coerce");
   }
@@ -67733,7 +68838,7 @@ var require_semver3 = __commonJS({
 var require_manifest = __commonJS({
   "../node_modules/@actions/tool-cache/lib/manifest.js"(exports2, module2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -67744,24 +68849,24 @@ var require_manifest = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -67794,21 +68899,21 @@ var require_manifest = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2._readLinuxVersionFile = exports2._getOsVersion = exports2._findMatch = void 0;
-    var semver = __importStar3(require_semver3());
+    var semver = __importStar5(require_semver3());
     var core_1 = require_core();
     var os = require("os");
     var cp = require("child_process");
     var fs2 = require("fs");
     function _findMatch(versionSpec, stable, candidates, archFilter) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const platFilter = os.platform();
         let result;
         let match;
         let file;
         for (const candidate of candidates) {
-          const version4 = candidate.version;
-          core_1.debug(`check ${version4} satisfies ${versionSpec}`);
-          if (semver.satisfies(version4, versionSpec) && (!stable || candidate.stable === stable)) {
+          const version3 = candidate.version;
+          core_1.debug(`check ${version3} satisfies ${versionSpec}`);
+          if (semver.satisfies(version3, versionSpec) && (!stable || candidate.stable === stable)) {
             file = candidate.files.find((item) => {
               core_1.debug(`${item.arch}===${archFilter} && ${item.platform}===${platFilter}`);
               let chk = item.arch === archFilter && item.platform === platFilter;
@@ -67840,9 +68945,9 @@ var require_manifest = __commonJS({
     exports2._findMatch = _findMatch;
     function _getOsVersion() {
       const plat = os.platform();
-      let version4 = "";
+      let version3 = "";
       if (plat === "darwin") {
-        version4 = cp.execSync("sw_vers -productVersion").toString();
+        version3 = cp.execSync("sw_vers -productVersion").toString();
       } else if (plat === "linux") {
         const lsbContents = module2.exports._readLinuxVersionFile();
         if (lsbContents) {
@@ -67850,13 +68955,13 @@ var require_manifest = __commonJS({
           for (const line of lines) {
             const parts = line.split("=");
             if (parts.length === 2 && (parts[0].trim() === "VERSION_ID" || parts[0].trim() === "DISTRIB_RELEASE")) {
-              version4 = parts[1].trim().replace(/^"/, "").replace(/"$/, "");
+              version3 = parts[1].trim().replace(/^"/, "").replace(/"$/, "");
               break;
             }
           }
         }
       }
-      return version4;
+      return version3;
     }
     __name(_getOsVersion, "_getOsVersion");
     exports2._getOsVersion = _getOsVersion;
@@ -67879,9 +68984,9 @@ var require_manifest = __commonJS({
 // ../node_modules/@actions/tool-cache/node_modules/uuid/lib/rng.js
 var require_rng2 = __commonJS({
   "../node_modules/@actions/tool-cache/node_modules/uuid/lib/rng.js"(exports2, module2) {
-    var crypto7 = require("crypto");
+    var crypto4 = require("crypto");
     module2.exports = /* @__PURE__ */ __name(function nodeRNG() {
-      return crypto7.randomBytes(16);
+      return crypto4.randomBytes(16);
     }, "nodeRNG");
   }
 });
@@ -67889,14 +68994,14 @@ var require_rng2 = __commonJS({
 // ../node_modules/@actions/tool-cache/node_modules/uuid/lib/bytesToUuid.js
 var require_bytesToUuid2 = __commonJS({
   "../node_modules/@actions/tool-cache/node_modules/uuid/lib/bytesToUuid.js"(exports2, module2) {
-    var byteToHex3 = [];
+    var byteToHex2 = [];
     for (i = 0; i < 256; ++i) {
-      byteToHex3[i] = (i + 256).toString(16).substr(1);
+      byteToHex2[i] = (i + 256).toString(16).substr(1);
     }
     var i;
     function bytesToUuid(buf, offset) {
       var i2 = offset || 0;
-      var bth = byteToHex3;
+      var bth = byteToHex2;
       return [
         bth[buf[i2++]],
         bth[buf[i2++]],
@@ -67928,16 +69033,16 @@ var require_bytesToUuid2 = __commonJS({
 // ../node_modules/@actions/tool-cache/node_modules/uuid/v4.js
 var require_v42 = __commonJS({
   "../node_modules/@actions/tool-cache/node_modules/uuid/v4.js"(exports2, module2) {
-    var rng3 = require_rng2();
+    var rng2 = require_rng2();
     var bytesToUuid = require_bytesToUuid2();
-    function v43(options, buf, offset) {
+    function v42(options, buf, offset) {
       var i = buf && offset || 0;
       if (typeof options == "string") {
         buf = options === "binary" ? new Array(16) : null;
         options = null;
       }
       options = options || {};
-      var rnds = options.random || (options.rng || rng3)();
+      var rnds = options.random || (options.rng || rng2)();
       rnds[6] = rnds[6] & 15 | 64;
       rnds[8] = rnds[8] & 63 | 128;
       if (buf) {
@@ -67947,8 +69052,8 @@ var require_v42 = __commonJS({
       }
       return buf || bytesToUuid(rnds);
     }
-    __name(v43, "v4");
-    module2.exports = v43;
+    __name(v42, "v4");
+    module2.exports = v42;
   }
 });
 
@@ -67956,7 +69061,7 @@ var require_v42 = __commonJS({
 var require_retry_helper = __commonJS({
   "../node_modules/@actions/tool-cache/lib/retry-helper.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -67967,24 +69072,24 @@ var require_retry_helper = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -68017,7 +69122,7 @@ var require_retry_helper = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.RetryHelper = void 0;
-    var core2 = __importStar3(require_core());
+    var core2 = __importStar5(require_core());
     var RetryHelper = class {
       static {
         __name(this, "RetryHelper");
@@ -68034,7 +69139,7 @@ var require_retry_helper = __commonJS({
         }
       }
       execute(action, isRetryable) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           let attempt = 1;
           while (attempt < this.maxAttempts) {
             try {
@@ -68057,7 +69162,7 @@ var require_retry_helper = __commonJS({
         return Math.floor(Math.random() * (this.maxSeconds - this.minSeconds + 1)) + this.minSeconds;
       }
       sleep(seconds) {
-        return __awaiter3(this, void 0, void 0, function* () {
+        return __awaiter5(this, void 0, void 0, function* () {
           return new Promise((resolve) => setTimeout(resolve, seconds * 1e3));
         });
       }
@@ -68070,7 +69175,7 @@ var require_retry_helper = __commonJS({
 var require_tool_cache = __commonJS({
   "../node_modules/@actions/tool-cache/lib/tool-cache.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       Object.defineProperty(o, k2, { enumerable: true, get: function() {
@@ -68081,24 +69186,24 @@ var require_tool_cache = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -68129,23 +69234,23 @@ var require_tool_cache = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __importDefault2 = exports2 && exports2.__importDefault || function(mod) {
+    var __importDefault4 = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.evaluateVersions = exports2.isExplicitVersion = exports2.findFromManifest = exports2.getManifestFromRepo = exports2.findAllVersions = exports2.find = exports2.cacheFile = exports2.cacheDir = exports2.extractZip = exports2.extractXar = exports2.extractTar = exports2.extract7z = exports2.downloadTool = exports2.HTTPError = void 0;
-    var core2 = __importStar3(require_core());
-    var io2 = __importStar3(require_io());
-    var fs2 = __importStar3(require("fs"));
-    var mm = __importStar3(require_manifest());
-    var os = __importStar3(require("os"));
-    var path = __importStar3(require("path"));
-    var httpm = __importStar3(require_lib());
-    var semver = __importStar3(require_semver3());
-    var stream = __importStar3(require("stream"));
-    var util = __importStar3(require("util"));
+    var core2 = __importStar5(require_core());
+    var io2 = __importStar5(require_io());
+    var fs2 = __importStar5(require("fs"));
+    var mm = __importStar5(require_manifest());
+    var os = __importStar5(require("os"));
+    var path = __importStar5(require("path"));
+    var httpm = __importStar5(require_lib());
+    var semver = __importStar5(require_semver3());
+    var stream = __importStar5(require("stream"));
+    var util = __importStar5(require("util"));
     var assert_1 = require("assert");
-    var v4_1 = __importDefault2(require_v42());
+    var v4_1 = __importDefault4(require_v42());
     var exec_1 = require_exec();
     var retry_helper_1 = require_retry_helper();
     var HTTPError = class extends Error {
@@ -68163,7 +69268,7 @@ var require_tool_cache = __commonJS({
     var IS_MAC = process.platform === "darwin";
     var userAgent = "actions/tool-cache";
     function downloadTool(url, dest, auth, headers) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         dest = dest || path.join(_getTempDirectory(), v4_1.default());
         yield io2.mkdirP(path.dirname(dest));
         core2.debug(`Downloading ${url}`);
@@ -68172,7 +69277,7 @@ var require_tool_cache = __commonJS({
         const minSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MIN_SECONDS", 10);
         const maxSeconds = _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MAX_SECONDS", 20);
         const retryHelper = new retry_helper_1.RetryHelper(maxAttempts, minSeconds, maxSeconds);
-        return yield retryHelper.execute(() => __awaiter3(this, void 0, void 0, function* () {
+        return yield retryHelper.execute(() => __awaiter5(this, void 0, void 0, function* () {
           return yield downloadToolAttempt(url, dest || "", auth, headers);
         }), (err) => {
           if (err instanceof HTTPError && err.httpStatusCode) {
@@ -68187,7 +69292,7 @@ var require_tool_cache = __commonJS({
     __name(downloadTool, "downloadTool");
     exports2.downloadTool = downloadTool;
     function downloadToolAttempt(url, dest, auth, headers) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (fs2.existsSync(dest)) {
           throw new Error(`Destination file path ${dest} already exists`);
         }
@@ -68230,7 +69335,7 @@ var require_tool_cache = __commonJS({
     }
     __name(downloadToolAttempt, "downloadToolAttempt");
     function extract7z(file, dest, _7zPath) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         assert_1.ok(IS_WINDOWS, "extract7z() not supported on current OS");
         assert_1.ok(file, 'parameter "file" is required');
         dest = yield _createExtractFolder(dest);
@@ -68284,7 +69389,7 @@ var require_tool_cache = __commonJS({
     __name(extract7z, "extract7z");
     exports2.extract7z = extract7z;
     function extractTar(file, dest, flags = "xz") {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!file) {
           throw new Error("parameter 'file' is required");
         }
@@ -68329,7 +69434,7 @@ var require_tool_cache = __commonJS({
     __name(extractTar, "extractTar");
     exports2.extractTar = extractTar;
     function extractXar(file, dest, flags = []) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         assert_1.ok(IS_MAC, "extractXar() not supported on current OS");
         assert_1.ok(file, 'parameter "file" is required');
         dest = yield _createExtractFolder(dest);
@@ -68351,7 +69456,7 @@ var require_tool_cache = __commonJS({
     __name(extractXar, "extractXar");
     exports2.extractXar = extractXar;
     function extractZip(file, dest) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!file) {
           throw new Error("parameter 'file' is required");
         }
@@ -68367,7 +69472,7 @@ var require_tool_cache = __commonJS({
     __name(extractZip, "extractZip");
     exports2.extractZip = extractZip;
     function extractZipWin(file, dest) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const escapedFile = file.replace(/'/g, "''").replace(/"|\n|\r/g, "");
         const escapedDest = dest.replace(/'/g, "''").replace(/"|\n|\r/g, "");
         const pwshPath = yield io2.which("pwsh", false);
@@ -68414,7 +69519,7 @@ var require_tool_cache = __commonJS({
     }
     __name(extractZipWin, "extractZipWin");
     function extractZipNix(file, dest) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const unzipPath = yield io2.which("unzip", true);
         const args = [file];
         if (!core2.isDebug()) {
@@ -68425,40 +69530,40 @@ var require_tool_cache = __commonJS({
       });
     }
     __name(extractZipNix, "extractZipNix");
-    function cacheDir(sourceDir, tool, version4, arch) {
-      return __awaiter3(this, void 0, void 0, function* () {
-        version4 = semver.clean(version4) || version4;
+    function cacheDir(sourceDir, tool, version3, arch) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        version3 = semver.clean(version3) || version3;
         arch = arch || os.arch();
-        core2.debug(`Caching tool ${tool} ${version4} ${arch}`);
+        core2.debug(`Caching tool ${tool} ${version3} ${arch}`);
         core2.debug(`source dir: ${sourceDir}`);
         if (!fs2.statSync(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
         }
-        const destPath = yield _createToolPath(tool, version4, arch);
+        const destPath = yield _createToolPath(tool, version3, arch);
         for (const itemName of fs2.readdirSync(sourceDir)) {
           const s = path.join(sourceDir, itemName);
           yield io2.cp(s, destPath, { recursive: true });
         }
-        _completeToolPath(tool, version4, arch);
+        _completeToolPath(tool, version3, arch);
         return destPath;
       });
     }
     __name(cacheDir, "cacheDir");
     exports2.cacheDir = cacheDir;
-    function cacheFile(sourceFile, targetFile, tool, version4, arch) {
-      return __awaiter3(this, void 0, void 0, function* () {
-        version4 = semver.clean(version4) || version4;
+    function cacheFile(sourceFile, targetFile, tool, version3, arch) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        version3 = semver.clean(version3) || version3;
         arch = arch || os.arch();
-        core2.debug(`Caching tool ${tool} ${version4} ${arch}`);
+        core2.debug(`Caching tool ${tool} ${version3} ${arch}`);
         core2.debug(`source file: ${sourceFile}`);
         if (!fs2.statSync(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
         }
-        const destFolder = yield _createToolPath(tool, version4, arch);
+        const destFolder = yield _createToolPath(tool, version3, arch);
         const destPath = path.join(destFolder, targetFile);
         core2.debug(`destination file ${destPath}`);
         yield io2.cp(sourceFile, destPath);
-        _completeToolPath(tool, version4, arch);
+        _completeToolPath(tool, version3, arch);
         return destFolder;
       });
     }
@@ -68513,7 +69618,7 @@ var require_tool_cache = __commonJS({
     __name(findAllVersions, "findAllVersions");
     exports2.findAllVersions = findAllVersions;
     function getManifestFromRepo(owner, repo, auth, branch = "master") {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         let releases = [];
         const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}`;
         const http = new httpm.HttpClient("tool-cache");
@@ -68549,7 +69654,7 @@ var require_tool_cache = __commonJS({
     __name(getManifestFromRepo, "getManifestFromRepo");
     exports2.getManifestFromRepo = getManifestFromRepo;
     function findFromManifest(versionSpec, stable, manifest, archFilter = os.arch()) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const match = yield mm._findMatch(versionSpec, stable, manifest, archFilter);
         return match;
       });
@@ -68557,7 +69662,7 @@ var require_tool_cache = __commonJS({
     __name(findFromManifest, "findFromManifest");
     exports2.findFromManifest = findFromManifest;
     function _createExtractFolder(dest) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!dest) {
           dest = path.join(_getTempDirectory(), v4_1.default());
         }
@@ -68566,9 +69671,9 @@ var require_tool_cache = __commonJS({
       });
     }
     __name(_createExtractFolder, "_createExtractFolder");
-    function _createToolPath(tool, version4, arch) {
-      return __awaiter3(this, void 0, void 0, function* () {
-        const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version4) || version4, arch || "");
+    function _createToolPath(tool, version3, arch) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch || "");
         core2.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
         yield io2.rmRF(folderPath);
@@ -68578,8 +69683,8 @@ var require_tool_cache = __commonJS({
       });
     }
     __name(_createToolPath, "_createToolPath");
-    function _completeToolPath(tool, version4, arch) {
-      const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version4) || version4, arch || "");
+    function _completeToolPath(tool, version3, arch) {
+      const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version3) || version3, arch || "");
       const markerPath = `${folderPath}.complete`;
       fs2.writeFileSync(markerPath, "");
       core2.debug("finished caching tool");
@@ -68595,7 +69700,7 @@ var require_tool_cache = __commonJS({
     __name(isExplicitVersion, "isExplicitVersion");
     exports2.isExplicitVersion = isExplicitVersion;
     function evaluateVersions(versions, versionSpec) {
-      let version4 = "";
+      let version3 = "";
       core2.debug(`evaluating ${versions.length} versions`);
       versions = versions.sort((a, b) => {
         if (semver.gt(a, b)) {
@@ -68607,16 +69712,16 @@ var require_tool_cache = __commonJS({
         const potential = versions[i];
         const satisfied = semver.satisfies(potential, versionSpec);
         if (satisfied) {
-          version4 = potential;
+          version3 = potential;
           break;
         }
       }
-      if (version4) {
-        core2.debug(`matched: ${version4}`);
+      if (version3) {
+        core2.debug(`matched: ${version3}`);
       } else {
         core2.debug("match not found");
       }
-      return version4;
+      return version3;
     }
     __name(evaluateVersions, "evaluateVersions");
     exports2.evaluateVersions = evaluateVersions;
@@ -68648,7 +69753,7 @@ var require_tool_cache = __commonJS({
 var require_output = __commonJS({
   "lib/output.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -68663,24 +69768,24 @@ var require_output = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -68713,8 +69818,8 @@ var require_output = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.prFixesBody = exports2.getProblemPlural = exports2.getSummary = exports2.publishOutput = exports2.getCoverageStats = exports2.COMMIT_EMAIL = exports2.COMMIT_USER = void 0;
-    var core2 = __importStar3(require_core());
-    var fs2 = __importStar3(require("fs"));
+    var core2 = __importStar5(require_core());
+    var fs2 = __importStar5(require("fs"));
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var utils_12 = require_utils8();
     var annotations_1 = require_annotations();
@@ -68779,7 +69884,7 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
     exports2.getCoverageStats = getCoverageStats;
     function publishOutput(failedByThreshold, resultsDir, useAnnotations, postComment, isPrMode, execute) {
       var _a, _b;
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!execute) {
           return;
         }
@@ -68917,7 +70022,7 @@ Best,
 var require_annotations = __commonJS({
   "lib/annotations.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -68932,24 +70037,24 @@ var require_annotations = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -68982,8 +70087,8 @@ var require_annotations = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.toAnnotationProperties = exports2.getGitHubCheckConclusion = exports2.parseSarif = exports2.publishAnnotations = exports2.ANNOTATION_NOTICE = exports2.ANNOTATION_WARNING = exports2.ANNOTATION_FAILURE = void 0;
-    var core2 = __importStar3(require_core());
-    var fs2 = __importStar3(require("fs"));
+    var core2 = __importStar5(require_core());
+    var fs2 = __importStar5(require("fs"));
     var utils_12 = require_utils8();
     var output_12 = require_output();
     function getQodanaHelpString() {
@@ -68998,7 +70103,7 @@ var require_annotations = __commonJS({
     var SUCCESS_STATUS = "success";
     var MAX_ANNOTATIONS = 50;
     function publishAnnotations(name, problems, failedByThreshold, execute) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!execute) {
           return;
         }
@@ -69130,7 +70235,7 @@ var require_annotations = __commonJS({
 var require_utils8 = __commonJS({
   "lib/utils.js"(exports2) {
     "use strict";
-    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding5 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -69145,24 +70250,24 @@ var require_utils8 = __commonJS({
         k2 = k;
       o[k2] = m[k];
     });
-    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    var __setModuleDefault5 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar3 = exports2 && exports2.__importStar || function(mod) {
+    var __importStar5 = exports2 && exports2.__importStar || function(mod) {
       if (mod && mod.__esModule)
         return mod;
       var result = {};
       if (mod != null) {
         for (var k in mod)
           if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding3(result, mod, k);
+            __createBinding5(result, mod, k);
       }
-      __setModuleDefault3(result, mod);
+      __setModuleDefault5(result, mod);
       return result;
     };
-    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+    var __awaiter5 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
           resolve(value);
@@ -69193,23 +70298,23 @@ var require_utils8 = __commonJS({
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __importDefault2 = exports2 && exports2.__importDefault || function(mod) {
+    var __importDefault4 = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.publishGitHubCheck = exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.postResultsToPRComments = exports2.getWorkflowRunUrl = exports2.isNeedToUploadCache = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadArtifacts = exports2.prepareAgent = exports2.pushQuickFixes = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
-    var artifact = __importStar3(require_artifact_client2());
-    var cache = __importStar3(require_cache());
-    var core2 = __importStar3(require_core());
-    var exec = __importStar3(require_exec());
-    var github2 = __importStar3(require_github());
-    var glob = __importStar3(require_glob2());
-    var tc = __importStar3(require_tool_cache());
+    var artifact = __importStar5(require_artifact_client2());
+    var cache = __importStar5(require_cache());
+    var core2 = __importStar5(require_core());
+    var exec = __importStar5(require_exec());
+    var github2 = __importStar5(require_github());
+    var glob = __importStar5(require_glob2());
+    var tc = __importStar5(require_tool_cache());
     var annotations_1 = require_annotations();
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
-    var path_1 = __importDefault2(require("path"));
-    var fs2 = __importStar3(require("fs"));
-    var os = __importStar3(require("os"));
+    var path_1 = __importDefault4(require("path"));
+    var fs2 = __importStar5(require("fs"));
+    var os = __importStar5(require("os"));
     var output_12 = require_output();
     exports2.ANALYSIS_FINISHED_REACTION = "+1";
     exports2.ANALYSIS_STARTED_REACTION = "eyes";
@@ -69236,7 +70341,7 @@ var require_utils8 = __commonJS({
     __name(getInputs, "getInputs");
     exports2.getInputs = getInputs;
     function qodana(inputs, args = []) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (args.length === 0) {
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
           if (inputs.prMode && github2.context.payload.pull_request !== void 0) {
@@ -69254,7 +70359,7 @@ var require_utils8 = __commonJS({
     exports2.qodana = qodana;
     function pushQuickFixes(mode, commitMessage) {
       var _a;
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (mode === qodana_12.NONE) {
           return;
         }
@@ -69286,7 +70391,7 @@ var require_utils8 = __commonJS({
     __name(pushQuickFixes, "pushQuickFixes");
     exports2.pushQuickFixes = pushQuickFixes;
     function prepareAgent(args) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
         const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
@@ -69314,7 +70419,7 @@ var require_utils8 = __commonJS({
     __name(prepareAgent, "prepareAgent");
     exports2.prepareAgent = prepareAgent;
     function uploadArtifacts(resultsDir, artifactName, execute) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!execute) {
           return;
         }
@@ -69333,7 +70438,7 @@ var require_utils8 = __commonJS({
     __name(uploadArtifacts, "uploadArtifacts");
     exports2.uploadArtifacts = uploadArtifacts;
     function uploadCaches(cacheDir, primaryKey, reservedCacheKey, execute) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!execute) {
           return;
         }
@@ -69356,7 +70461,7 @@ var require_utils8 = __commonJS({
     __name(uploadCaches, "uploadCaches");
     exports2.uploadCaches = uploadCaches;
     function restoreCaches(cacheDir, primaryKey, additionalCacheKey, execute) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         if (!execute) {
           return "";
         }
@@ -69405,7 +70510,7 @@ var require_utils8 = __commonJS({
     exports2.getWorkflowRunUrl = getWorkflowRunUrl;
     function postResultsToPRComments(toolName, content, postComment) {
       var _a;
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const pr = (_a = github2.context.payload.pull_request) !== null && _a !== void 0 ? _a : "";
         if (!postComment || !pr) {
           return;
@@ -69425,7 +70530,7 @@ ${comment_tag_pattern}`;
     __name(postResultsToPRComments, "postResultsToPRComments");
     exports2.postResultsToPRComments = postResultsToPRComments;
     function findCommentByTag(client, tag) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         try {
           const { data: comments } = yield client.rest.issues.listComments(Object.assign(Object.assign({}, github2.context.repo), { issue_number: github2.context.issue.number }));
           const comment = comments.find((c) => {
@@ -69442,7 +70547,7 @@ ${comment_tag_pattern}`;
     __name(findCommentByTag, "findCommentByTag");
     exports2.findCommentByTag = findCommentByTag;
     function createComment(client, body) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         try {
           yield client.rest.issues.createComment({
             owner: github2.context.repo.owner,
@@ -69458,7 +70563,7 @@ ${comment_tag_pattern}`;
     __name(createComment, "createComment");
     exports2.createComment = createComment;
     function updateComment(client, comment_id, body) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         try {
           yield client.rest.issues.updateComment({
             owner: github2.context.repo.owner,
@@ -69475,7 +70580,7 @@ ${comment_tag_pattern}`;
     exports2.updateComment = updateComment;
     function putReaction(newReaction, oldReaction) {
       var _a;
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const client = github2.getOctokit(getInputs().githubToken);
         const issue_number = (_a = github2.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
         if (oldReaction !== "") {
@@ -69499,7 +70604,7 @@ ${comment_tag_pattern}`;
     __name(putReaction, "putReaction");
     exports2.putReaction = putReaction;
     function publishGitHubCheck(failedByThreshold, name, output) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const conclusion = (0, annotations_1.getGitHubCheckConclusion)(output.annotations, failedByThreshold);
         let sha = github2.context.sha;
         if (github2.context.payload.pull_request) {
@@ -69518,7 +70623,7 @@ ${comment_tag_pattern}`;
     __name(publishGitHubCheck, "publishGitHubCheck");
     exports2.publishGitHubCheck = publishGitHubCheck;
     function createCheck(client, conclusion, head_sha, name, output) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         yield client.rest.checks.create(Object.assign(Object.assign({}, github2.context.repo), {
           accept: "application/vnd.github.v3+json",
           status: "completed",
@@ -69531,7 +70636,7 @@ ${comment_tag_pattern}`;
     }
     __name(createCheck, "createCheck");
     function updateCheck(client, conclusion, check_run_id, output) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         yield client.rest.checks.update(Object.assign(Object.assign({}, github2.context.repo), {
           accept: "application/vnd.github.v3+json",
           status: "completed",
@@ -69543,13 +70648,13 @@ ${comment_tag_pattern}`;
     }
     __name(updateCheck, "updateCheck");
     function git(args, options = {}) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return (yield exec.getExecOutput("git", args, options)).exitCode;
       });
     }
     __name(git, "git");
     function createPr(title, repo, base, head) {
-      return __awaiter3(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const prBodyFile = path_1.default.join(os.tmpdir(), "pr-body.txt");
         fs2.writeFileSync(prBodyFile, (0, output_12.prFixesBody)(getWorkflowRunUrl()));
         yield exec.getExecOutput("gh", [
@@ -69575,7 +70680,7 @@ ${comment_tag_pattern}`;
 });
 
 // lib/main.js
-var __createBinding2 = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+var __createBinding4 = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
   if (k2 === void 0)
     k2 = k;
   var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -69590,24 +70695,24 @@ var __createBinding2 = exports && exports.__createBinding || (Object.create ? fu
     k2 = k;
   o[k2] = m[k];
 });
-var __setModuleDefault2 = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+var __setModuleDefault4 = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
   Object.defineProperty(o, "default", { enumerable: true, value: v });
 } : function(o, v) {
   o["default"] = v;
 });
-var __importStar2 = exports && exports.__importStar || function(mod) {
+var __importStar4 = exports && exports.__importStar || function(mod) {
   if (mod && mod.__esModule)
     return mod;
   var result = {};
   if (mod != null) {
     for (var k in mod)
       if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-        __createBinding2(result, mod, k);
+        __createBinding4(result, mod, k);
   }
-  __setModuleDefault2(result, mod);
+  __setModuleDefault4(result, mod);
   return result;
 };
-var __awaiter2 = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
+var __awaiter4 = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
   function adopt(value) {
     return value instanceof P ? value : new P(function(resolve) {
       resolve(value);
@@ -69639,9 +70744,9 @@ var __awaiter2 = exports && exports.__awaiter || function(thisArg, _arguments, P
   });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var core = __importStar2(require_core());
-var github = __importStar2(require_github());
-var io = __importStar2(require_io());
+var core = __importStar4(require_core());
+var github = __importStar4(require_github());
+var io = __importStar4(require_io());
 var qodana_1 = (init_qodana(), __toCommonJS(qodana_exports));
 var utils_1 = require_utils8();
 var output_1 = require_output();
@@ -69651,7 +70756,7 @@ function setFailed(message) {
 }
 __name(setFailed, "setFailed");
 function main() {
-  return __awaiter2(this, void 0, void 0, function* () {
+  return __awaiter4(this, void 0, void 0, function* () {
     try {
       const inputs = (0, utils_1.getInputs)();
       if (inputs.pushFixes !== qodana_1.NONE && inputs.prMode && github.context.payload.pull_request !== void 0) {
