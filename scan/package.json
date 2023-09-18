@@ -16,7 +16,7 @@
     "url": "git+https://github.com/JetBrains/qodana-action.git"
   },
   "dependencies": {
-    "@actions/artifact": "^1.1.1",
+    "@actions/artifact": "^1.1.2",
     "@actions/cache": "^3.0.6",
     "@actions/core": "^1.9.1",
     "@actions/exec": "^1.1.0",
