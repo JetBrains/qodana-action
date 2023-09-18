@@ -145,7 +145,7 @@ async function main() {
     await downloadFile(`https://github.com/jetbrains/qodana-cli/releases/latest/download/checksums.txt`, "checksums.txt");
     updateVersions(latestVersion, currentVersion);
     updateCliChecksums(latestVersion, "checksums.txt", cliJsonPath);
-    updateCircleCIChecksums("../src/commands/scan.yml");
+    updateCircleCIChecksums("../orb/commands/scan.yml");
     console.log("Checksums updated successfully!");
   } catch (error) {
     console.error("An error occurred:", error);
