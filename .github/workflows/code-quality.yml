@@ -1,0 +1,38 @@
+name: qodana
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
+          fetch-depth: 0  # a full history is required for pull request analysis
+      - uses: docker/login-action@v2
+        with:
+          registry: registry.jetbrains.team
+          username: e433d83e-ec9b-4023-98f0-7f181b32c0da
+          password: ${{ secrets.SPACE_PASSWORD }}
+      - run: |
+          npm ci
+          npm run test 
+          mkdir -p .qodana/code-coverage 
+          mv scan/coverage/lcov.info .qodana/code-coverage 
+          rm -rf scan/coverage
+      - uses: ./
+        with:
+          args: --print-problems,--log-level,debug
+          pr-mode: true
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}

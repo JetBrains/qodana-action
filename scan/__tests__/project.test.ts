@@ -52,12 +52,12 @@ test('check whether Azure Pipelines README.md has the latest major version menti
 })
 
 test('check whether CircleCI orb definition contains the latest version', () => {
-  const orb = path.join(__dirname, '..', '..', 'src', 'commands', 'scan.yml')
+  const orb = path.join(__dirname, '..', '..', 'orb', 'commands', 'scan.yml')
   const example = path.join(
     __dirname,
     '..',
     '..',
-    'src',
+    'orb',
     'examples',
     'scan.yml'
   )
