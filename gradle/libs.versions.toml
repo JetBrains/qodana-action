@@ -1,0 +1,17 @@
+[versions]
+
+# libraries
+markdown = "0.5.0"
+
+# plugins
+dokka = "1.8.20"
+gradlePluginPublish = "1.2.1"
+gradleChangelogPlugin = "2.2.0"
+
+[libraries]
+markdown = { group = "org.jetbrains", name = "markdown", version.ref = "markdown" }
+
+[plugins]
+pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradlePluginPublish" }
+changelog = { id = "org.jetbrains.changelog", version.ref = "gradleChangelogPlugin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }

@@ -9,10 +9,11 @@ Qodana Scan GitHub Action and Qodana for Azure are written in [TypeScript](https
 Prerequisites:
 
 - [Node.js 12.x](https://nodejs.org/)
+- Java 11
 
 Other things you might need to develop:
 
-- [WebStorm](https://www.jetbrains.com/webstorm/) (it's [free for open-source development](https://www.jetbrains.com/community/opensource/))
+- [IntelliJ IDEA](https://www.jetbrains.com/idea/) (it's [free for open-source development](https://www.jetbrains.com/community/opensource/))
 
 Clone the repository anywhere:
 
@@ -103,6 +104,51 @@ cd src
 ```
 
 There are no tests to check or run locally, so just push your changes to the pull request, they will be run on CircleCI automatically.
+
+### Gradle plugin
+
+#### Build
+
+Execute Gradle task `publishToMavenLocal` to build Gradle Qodana Plugin and publish it into local Maven repository.
+By default, plugin will be published into `~/.mvn/org/jetbrains/qodana/` directory.
+
+#### Apply
+
+Add Maven local repository into available repositories in your Gradle project.
+For this you need to add following lines at the beginning of `settings.gradle[.kts]` file:
+
+```groovy
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+```
+
+Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file and mount the Maven Local directory:
+
+- Groovy – `build.gradle`
+
+  ```groovy
+  plugins {
+      id "org.jetbrains.qodana" version "0.1.0-SNAPSHOT"
+  }
+  
+  qodana {
+  }
+  ```
+
+- Kotlin DSL – `build.gradle.kts`
+
+  ```kotlin
+  plugins {
+      id("org.jetbrains.qodana") version "0.1.0-SNAPSHOT"
+  }
+
+  qodana {
+  }
+  ```
 
 ## Create a commit
 
