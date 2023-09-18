@@ -70,7 +70,7 @@ steps:
       path: << parameters.results-dir >>
       destination: << parameters.artifact-name >>
   - save_cache:
-      key: < parameters.primary-cache-key >>
+      key: << parameters.primary-cache-key >>
       paths:
         - << parameters.cache-dir >>
         - /tmp/cache/qodana-cli/
