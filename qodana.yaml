@@ -1,6 +1,6 @@
 version: "1.0"
 linter: registry.jetbrains.team/p/sa/containers/qodana-js:latest
-projectJDK: corretto-19
+projectJDK: 11
 profile:
   name: qodana.recommended
 exclude:
