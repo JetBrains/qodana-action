@@ -19,7 +19,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
           fetch-depth: 0  # a full history is required for pull request analysis
-      - uses: docker/login-action@v2
+      - uses: docker/login-action@v3
         with:
           registry: registry.jetbrains.team
           username: e433d83e-ec9b-4023-98f0-7f181b32c0da
