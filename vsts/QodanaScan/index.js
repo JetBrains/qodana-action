@@ -490,8 +490,11 @@ var require_function_bind = __commonJS({
 var require_src = __commonJS({
   "../node_modules/has/src/index.js"(exports2, module2) {
     "use strict";
-    var bind = require_function_bind();
-    module2.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
+    var hasOwnProperty = {}.hasOwnProperty;
+    var call = Function.prototype.call;
+    module2.exports = call.bind ? call.bind(hasOwnProperty) : function(O, P) {
+      return call.call(hasOwnProperty, O, P);
+    };
   }
 });
 
