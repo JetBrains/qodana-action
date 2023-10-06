@@ -1,8 +1,8 @@
 version: "1.0"
-linter: registry.jetbrains.team/p/sa/containers/qodana-js:latest
+linter: jetbrains/qodana-jvm:latest
 projectJDK: 11
 profile:
-  name: qodana.recommended
+  name: qodana.recommended.full
 exclude:
   - name: All
     paths:
