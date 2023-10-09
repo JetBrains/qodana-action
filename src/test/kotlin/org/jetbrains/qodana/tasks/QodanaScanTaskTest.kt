@@ -25,28 +25,17 @@ class QodanaScanTaskTest : BaseTest() {
     @Test
     fun `run qodana in a non-empty directory and fail with threshold`() {
         val githubActions = "true".equals(System.getenv("GITHUB_ACTIONS"), ignoreCase = true)
-        val isMacOS = System.getProperty("os.name").contains("Mac OS X")
-        Assume.assumeFalse(githubActions && isMacOS)
-
-        val notLinux = !System.getProperty("os.name").contains("Linux")
-
-        if (githubActions && notLinux) {
-            buildFile.groovy("""
-            $EXTENSION_NAME {
-            }
-            $QODANA_SCAN_TASK_NAME {
-                 arguments = ["--ide", "QDPYC"]  // "--property=idea.headless.enable.statistics=false"]
-            }
-        """)
-        } else {
-            buildFile.groovy("""
+        val isLinux = System.getProperty("os.name").contains("Linux")
+        if (githubActions) {
+            Assume.assumeTrue(isLinux)
+        }
+        buildFile.groovy("""
             $EXTENSION_NAME {
             }
             $QODANA_SCAN_TASK_NAME {
                  arguments = ["--fail-threshold", "0", "--property=idea.headless.enable.statistics=false"]
             }
-        """)
-        }
+        """.trimIndent())
         file("main.py").writeText("print('Hello, world!')\n\n\n\n\n\nprint()")
         file("qodana.yaml").writeText("linter: jetbrains/qodana-python-community")
         try {
