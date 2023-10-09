@@ -14,7 +14,7 @@ import java.nio.file.attribute.PosixFilePermission
 class Installer {
     val log: Logger = org.gradle.api.logging.Logging.getLogger(Installer::class.java)
     companion object {
-        private const val VERSION = "2023.2.7"
+        private const val VERSION = "2023.2.8"
         private const val RELEASE_DOWNLOAD_URL = "https://github.com/JetBrains/qodana-cli/releases/download/v%s/qodana_%s_%s"
 
         fun getQodanaUrl(platform: String = getPlatformName(), arch: String = getArchName(), version: String = VERSION): String {
