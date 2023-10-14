@@ -28,3 +28,4 @@ licenseRules:
       - "Apache-2.0"
     allowed:
       - "0BSD"
+      - "FPL"
