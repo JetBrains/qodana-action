@@ -23,12 +23,12 @@
   "author": "JetBrains",
   "license": "Apache-2.0",
   "dependencies": {
-    "azure-pipelines-task-lib": "^4.6.0",
+    "azure-pipelines-task-lib": "^4.6.1",
     "azure-pipelines-tasks-utility-common": "^3.225.1",
-    "azure-pipelines-tool-lib": "^2.0.4"
+    "azure-pipelines-tool-lib": "^2.0.6"
   },
   "devDependencies": {
-    "@types/node": "^20.8.3",
+    "@types/node": "^20.8.6",
     "@typescript-eslint/parser": "^6.7.3",
     "esbuild": "0.19.4",
     "eslint": "^8.50.0",
