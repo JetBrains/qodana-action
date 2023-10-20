@@ -302,16 +302,16 @@ with:
 Gradle interface to run [Qodana](https://jetbrains.com/qodana)
 
 > **Important:**
-> This project requires Gradle 6.6 or newer, however it is recommended to use the [latest Gradle available](https://gradle.org/releases/). Update it with:
+> This project requires Gradle 6.6 or newer; however, it is recommended to use the [latest Gradle available](https://gradle.org/releases/). Update it with:
 > ```bash
 > ./gradlew wrapper --gradle-version=VERSION
 > ```
 
 ## Gradle Configuration
 
-> **Note:** Make sure you have `docker` already installed and available in your environment if you want to run Qodana in a container.
+> **Note:** Make sure you have `docker` installed and available in your environment if you want to run Qodana in a container.
 
-Apply Gradle plugin `org.jetbrains.qodana` in Gradle configuration file:
+Apply Gradle plugin `org.jetbrains.qodana` in the Gradle configuration file:
 
 - Groovy – `build.gradle`
 
@@ -332,21 +332,21 @@ Apply Gradle plugin `org.jetbrains.qodana` in Gradle configuration file:
 > **Note:** The latest version is: [![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.jetbrains.qodana?color=green&label=Gradle%20Plugin%20Portal&logo=gradle)][gradle-plugin-page]
 
 ### `qodana { }` extension configuration
-Properties available for configuration in the `qodana { }` top level configuration closure:
+Properties available for configuration in the `qodana { }` top-level configuration closure:
 
 | Name             | Description                                          | Type      | Default Value                           |
 |------------------|------------------------------------------------------|-----------|-----------------------------------------|
 | `projectPath`    | Path to the project folder to inspect.               | `String`  | `project.projectDir`                    |
-| `resultsPath`    | Path to directory to store results of the task.      | `String`  | `"${projectPath}/build/qodana/results"` |
+| `resultsPath`    | Path to the directory to store task results.         | `String`  | `"${projectPath}/build/qodana/results"` |
 | `cachePath`      | Path to the directory to store the generated report. | `String`  | `"${projectPath}/build/qodana/cache/"`  |
 
 ## Gradle Qodana Tasks
 
 ### `qodanaScan`
 
-Starts Qodana in the project directory.
+Start Qodana in the project directory.
 
-Task relies on the `qodana { }` extension configuration, however it is also controlled by provided `arguments`.
+The task relies on the `qodana { }` extension configuration. However, it is also controlled by provided `arguments`.
 
 
 ### Example
@@ -390,7 +390,7 @@ Add this to your Gradle configuration file:
   }
   ```
 
-> **Note:** Docker requires at least 4GB of memory. Set it in Docker `Preferences > Resources > Memory` section.
+> **Note:** Docker requires at least 4GB of memory. Set it in the Docker `Preferences > Resources > Memory` section.
 
 Now you can run inspections with `qodanaScan` Gradle task:
 
@@ -400,9 +400,14 @@ gradle qodanaScan
 ./gradlew qodanaScan
 ```
 
-Full guide for options and configuration of `scan` parameters can be found in [Qodana docs page](https://www.jetbrains.com/help/qodana/qodana-jvm-docker-techs.html).
+A complete guide for options and configuration of `arguments` parameters can be found on [Qodana CLI docs page]((https://github.com/JetBrains/qodana-cli#scan)).
 
-  
+## Issue Tracker
+
+All the issues, feature requests, and support related to Qodana are handled on [YouTrack][youtrack].
+
+If you'd like to file a new issue, please use the link [YouTrack | New Issue][youtrack-new-issue].
+
 [gh:build]: https://github.com/JetBrains/gradle-qodana-plugin/actions?query=workflow%3ABuild
 [gradle-plugin-page]: https://plugins.gradle.org/plugin/org.jetbrains.qodana
 [jb:confluence-on-gh]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
@@ -414,8 +419,4 @@ Full guide for options and configuration of `scan` parameters can be found in [Q
 [youtrack-new-issue]: https://youtrack.jetbrains.com/newIssue?project=QD&c=Platform%20Gradle%20Plugin&c=Tool%20IntelliJ%20(Code%20Inspection)
 
 
-## Issue Tracker
 
-All the issues, feature requests, and support related to the Qodana Azure Pipelines extension are handled on [YouTrack][youtrack].
-
-If you'd like to file a new issue, please use the link [YouTrack | New Issue][youtrack-new-issue].
