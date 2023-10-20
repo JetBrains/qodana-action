@@ -1,1 +1,1 @@
-rootProject.name = "qodana-ci"
+rootProject.name = "qodana"
