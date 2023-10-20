@@ -87004,6 +87004,7 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
             (0, utils_12.putReaction)(utils_12.ANALYSIS_FINISHED_REACTION, utils_12.ANALYSIS_STARTED_REACTION),
             (0, utils_12.postResultsToPRComments)(toolName, problems.summary, postComment),
             core2.summary.addRaw(problems.summary).write(),
+            (0, utils_12.actionOutput)("summary", problems.summary),
             (0, annotations_1.publishAnnotations)(toolName, problems, failedByThreshold, useAnnotations)
           ]);
         } catch (error) {
@@ -87393,7 +87394,7 @@ var require_utils9 = __commonJS({
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.publishGitHubCheck = exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.postResultsToPRComments = exports2.getWorkflowRunUrl = exports2.isNeedToUploadCache = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadArtifacts = exports2.prepareAgent = exports2.pushQuickFixes = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
+    exports2.actionOutput = exports2.publishGitHubCheck = exports2.putReaction = exports2.updateComment = exports2.createComment = exports2.findCommentByTag = exports2.postResultsToPRComments = exports2.getWorkflowRunUrl = exports2.isNeedToUploadCache = exports2.restoreCaches = exports2.uploadCaches = exports2.uploadArtifacts = exports2.prepareAgent = exports2.pushQuickFixes = exports2.qodana = exports2.getInputs = exports2.ANALYSIS_STARTED_REACTION = exports2.ANALYSIS_FINISHED_REACTION = void 0;
     var artifact = __importStar5(require_artifact_client2());
     var cache = __importStar5(require_cache2());
     var core2 = __importStar5(require_core());
@@ -87713,6 +87714,13 @@ ${comment_tag_pattern}`;
     }
     __name(publishGitHubCheck, "publishGitHubCheck");
     exports2.publishGitHubCheck = publishGitHubCheck;
+    function actionOutput(name, value) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        core2.setOutput(name, value);
+      });
+    }
+    __name(actionOutput, "actionOutput");
+    exports2.actionOutput = actionOutput;
     function createCheck(client, conclusion, head_sha, name, output) {
       return __awaiter5(this, void 0, void 0, function* () {
         yield client.rest.checks.create(Object.assign(Object.assign({}, github2.context.repo), {

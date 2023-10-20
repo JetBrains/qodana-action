@@ -69,5 +69,5 @@ runs:
   using: 'node16'
   main: 'scan/dist/index.js'
 outputs:
-  qodana-scan:
+  summary:
     description: 'Summary of the Qodana Scan.'

@@ -16,7 +16,8 @@ import {
   ANALYSIS_FINISHED_REACTION,
   ANALYSIS_STARTED_REACTION,
   postResultsToPRComments,
-  putReaction
+  putReaction,
+  actionOutput
 } from './utils'
 import {
   Annotation,
@@ -153,6 +154,7 @@ export async function publishOutput(
       putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION),
       postResultsToPRComments(toolName, problems.summary, postComment),
       core.summary.addRaw(problems.summary).write(),
+      actionOutput('summary', problems.summary),
       publishAnnotations(toolName, problems, failedByThreshold, useAnnotations)
     ])
   } catch (error) {

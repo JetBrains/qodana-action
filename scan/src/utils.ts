@@ -493,6 +493,15 @@ export async function publishGitHubCheck(
 }
 
 /**
+ * Prints the output so composite workflows can use it.
+ * @param name the unique name of the output.
+ * @param value the string text to be printed.
+ */
+export async function actionOutput(name: string, value: string): Promise<void> {
+  core.setOutput(name, value)
+}
+
+/**
  * Creates a GitHub Check.
  * @param client The Octokit REST API client to be used for creating the Check.
  * @param conclusion The conclusion to use for the GitHub Check.
