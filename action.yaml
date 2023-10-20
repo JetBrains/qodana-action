@@ -1,4 +1,4 @@
-name: 'Qodana Scan With Output'
+name: 'Qodana Scan'
 description: 'Scan your projects with Qodana on GitHub. Docs: https://jb.gg/qodana-github-action'
 author: 'JetBrains'
 branding:
