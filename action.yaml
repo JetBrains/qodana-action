@@ -1,4 +1,4 @@
-name: 'Qodana Scan'
+name: 'Qodana Scan With Output'
 description: 'Scan your projects with Qodana on GitHub. Docs: https://jb.gg/qodana-github-action'
 author: 'JetBrains'
 branding:
@@ -68,3 +68,6 @@ inputs:
 runs:
   using: 'node16'
   main: 'scan/dist/index.js'
+outputs:
+  qodana-scan:
+    description: 'Summary of the Qodana Scan.'
