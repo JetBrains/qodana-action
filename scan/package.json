@@ -26,7 +26,7 @@
     "@octokit/rest": "latest",
     "@octokit/types": "latest",
     "@octokit/webhooks": "latest",
-    "@types/sarif": "^2.1.5"
+    "@types/sarif": "^2.1.6"
   },
   "devDependencies": {
     "@types/jest": "^29.5.5",
