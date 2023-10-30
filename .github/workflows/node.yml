@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set Node.js 16.x
-        uses: actions/setup-node@v3.8.1
+        uses: actions/setup-node@v4.0.0
         with:
           node-version: 16.x
       - name: Install dependencies
@@ -128,7 +128,7 @@ jobs:
             - "vsts/vss-extension.dev.json"
       - name: Set Node.js 12.x
         if: steps.filter.outputs.azure-dev == 'true'
-        uses: actions/setup-node@v3.8.1
+        uses: actions/setup-node@v4.0.0
         with:
           node-version: 12.x
       - name: Install dependencies
