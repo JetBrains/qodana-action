@@ -9,13 +9,6 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-  - task: Cache@2  # Not required, but Qodana will open projects with cache faster.
-    inputs:
-      key: '"$(Build.Repository.Name)" | "$(Build.SourceBranchName)" | "$(Build.SourceVersion)"'
-      path: '$(Agent.TempDirectory)/qodana/jvm/cache'
-      restoreKeys: |
-        "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
-        "$(Build.Repository.Name)"
   - task: QodanaScan@2023
     inputs:
       args: --log-level,debug,-l,jetbrains/qodana-jvm-community:latest,--property,idea.headless.enable.statistics=false
