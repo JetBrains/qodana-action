@@ -108,12 +108,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./
         with:
-          args: --ide,QDJS
+          args: --ide,QDNET
           pr-mode: false
           post-pr-comment: false
           use-annotations: false
         env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_TESTS }}
+          QODANA_LICENSE_ONLY_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
   azure-dev-release:
     runs-on: ubuntu-latest
