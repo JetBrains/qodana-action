@@ -18,6 +18,7 @@ exclude:
       - vsts/lib
       - vsts/QodanaScan
       - build.gradle.kts
+      - settings.gradle.kts
 include:
   - name: Eslint
   - name: GrazieInspection
