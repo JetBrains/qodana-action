@@ -7,6 +7,7 @@ import {
   getCoverageFromSarif,
   QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD,
+  QODANA_OPEN_IN_IDE_NAME,
   QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME,
   QODANA_SHORT_SARIF_NAME,
@@ -91,6 +92,24 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`
   )
 }
 
+export function getReportURL(resultsDir: string): string {
+  let reportUrlFile = `${resultsDir}/${QODANA_OPEN_IN_IDE_NAME}`
+  if (fs.existsSync(reportUrlFile)) {
+    const data = JSON.parse(fs.readFileSync(reportUrlFile, {encoding: 'utf8'}))
+    if (data && data.cloud && data.cloud.url) {
+      return data.cloud.url
+    }
+  } else {
+    reportUrlFile = `${resultsDir}/${QODANA_REPORT_URL_NAME}`
+    if (fs.existsSync(reportUrlFile)) {
+      return fs.readFileSync(`${resultsDir}/${QODANA_REPORT_URL_NAME}`, {
+        encoding: 'utf8'
+      })
+    }
+  }
+  return ''
+}
+
 /**
  * Publish Qodana results to GitHub: comment, job summary, annotations.
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
@@ -113,13 +132,7 @@ export async function publishOutput(
   }
   try {
     const problems = parseSarif(`${resultsDir}/${QODANA_SARIF_NAME}`)
-    let reportUrl = ''
-    const reportUrlFile = `${resultsDir}/${QODANA_REPORT_URL_NAME}`
-    if (fs.existsSync(reportUrlFile)) {
-      reportUrl = fs.readFileSync(`${resultsDir}/${QODANA_REPORT_URL_NAME}`, {
-        encoding: 'utf8'
-      })
-    }
+    const reportUrl = getReportURL(resultsDir)
     const coverageInfo = getCoverageStats(
       getCoverageFromSarif(`${resultsDir}/${QODANA_SHORT_SARIF_NAME}`),
       COVERAGE_THRESHOLD

@@ -3,7 +3,9 @@ import {AnnotationProperties} from '@actions/core'
 import {
   getCoverageFromSarif,
   getQodanaScanArgs,
-  Inputs
+  Inputs,
+  QODANA_OPEN_IN_IDE_NAME,
+  QODANA_REPORT_URL_NAME
 } from '../../common/qodana'
 import {
   Annotation,
@@ -11,7 +13,10 @@ import {
   parseSarif,
   toAnnotationProperties
 } from '../src/annotations'
-import {getSummary, getCoverageStats} from '../src/output'
+import {getSummary, getCoverageStats, getReportURL} from '../src/output'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as os from 'os'
 
 test('qodana scan command args', () => {
   const inputs = inputsDefaultFixture()
@@ -93,6 +98,58 @@ test('check neutral conclusion for the Check', () => {
 test('check success conclusion for the Check', () => {
   const result = getGitHubCheckConclusion(outputEmptyFixture(), false)
   expect(result).toEqual('success')
+})
+
+describe('getReportURL', () => {
+  let tempDir: string
+
+  beforeEach(async () => {
+    // create a unique temporary directory for each test
+    tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'jest-'))
+  })
+
+  afterEach(async () => {
+    // cleanup - remove temporary directory
+    await fs.promises.rm(tempDir, {recursive: true})
+  })
+
+  it('returns cloud URL if open in IDE file exists', async () => {
+    const url = 'http://cloud.url'
+    const data = {cloud: {url}}
+    const filepath = path.join(tempDir, QODANA_OPEN_IN_IDE_NAME)
+    await fs.promises.writeFile(filepath, JSON.stringify(data))
+    console.log(JSON.stringify(data))
+
+    const result = getReportURL(tempDir)
+
+    expect(result).toBe(url)
+  })
+
+  it('returns report URL if open in IDE file does not exist but report file exists', async () => {
+    const url = 'http://report.url'
+    const filepath = path.join(tempDir, QODANA_REPORT_URL_NAME)
+    await fs.promises.writeFile(filepath, url)
+
+    const result = getReportURL(tempDir)
+
+    expect(result).toBe(url)
+  })
+
+  it('returns empty string if no file exists', () => {
+    const result = getReportURL(tempDir)
+
+    expect(result).toBe('')
+  })
+
+  it('returns empty string if open in IDE file exists but does not contain url', async () => {
+    const data = {cloud: {}}
+    const filepath = path.join(tempDir, QODANA_OPEN_IN_IDE_NAME)
+    await fs.promises.writeFile(filepath, JSON.stringify(data))
+
+    const result = getReportURL(tempDir)
+
+    expect(result).toBe('')
+  })
 })
 
 export function outputEmptyFixture(): Annotation[] {

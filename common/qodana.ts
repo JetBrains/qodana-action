@@ -10,6 +10,7 @@ export const FAIL_THRESHOLD_OUTPUT =
 export const QODANA_SARIF_NAME = 'qodana.sarif.json'
 export const QODANA_SHORT_SARIF_NAME = 'qodana-short.sarif.json'
 export const QODANA_REPORT_URL_NAME = 'qodana.cloud'
+export const QODANA_OPEN_IN_IDE_NAME = 'open-in-ide.json'
 
 export const QODANA_LICENSES_MD = 'thirdPartySoftwareList.md'
 export const QODANA_LICENSES_JSON = 'thirdPartySoftwareList.json'

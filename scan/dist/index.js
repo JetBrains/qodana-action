@@ -24693,6 +24693,7 @@ __export(qodana_exports, {
   PULL_REQUEST: () => PULL_REQUEST,
   QODANA_LICENSES_JSON: () => QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD: () => QODANA_LICENSES_MD,
+  QODANA_OPEN_IN_IDE_NAME: () => QODANA_OPEN_IN_IDE_NAME,
   QODANA_REPORT_URL_NAME: () => QODANA_REPORT_URL_NAME,
   QODANA_SARIF_NAME: () => QODANA_SARIF_NAME,
   QODANA_SHORT_SARIF_NAME: () => QODANA_SHORT_SARIF_NAME,
@@ -24827,7 +24828,7 @@ function sha256sum(file) {
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
 }
-var import_crypto4, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
+var import_crypto4, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
@@ -24840,6 +24841,7 @@ var init_qodana = __esm({
     QODANA_SARIF_NAME = "qodana.sarif.json";
     QODANA_SHORT_SARIF_NAME = "qodana-short.sarif.json";
     QODANA_REPORT_URL_NAME = "qodana.cloud";
+    QODANA_OPEN_IN_IDE_NAME = "open-in-ide.json";
     QODANA_LICENSES_MD = "thirdPartySoftwareList.md";
     QODANA_LICENSES_JSON = "thirdPartySoftwareList.json";
     EXECUTABLE = "qodana";
@@ -85056,7 +85058,7 @@ var require_output = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.prFixesBody = exports2.getProblemPlural = exports2.getSummary = exports2.publishOutput = exports2.getCoverageStats = exports2.COMMIT_EMAIL = exports2.COMMIT_USER = void 0;
+    exports2.prFixesBody = exports2.getProblemPlural = exports2.getSummary = exports2.publishOutput = exports2.getReportURL = exports2.getCoverageStats = exports2.COMMIT_EMAIL = exports2.COMMIT_USER = void 0;
     var core2 = __importStar3(require_core());
     var fs2 = __importStar3(require("fs"));
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
@@ -85121,6 +85123,25 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
     }
     __name(getCoverageStats, "getCoverageStats");
     exports2.getCoverageStats = getCoverageStats;
+    function getReportURL(resultsDir) {
+      let reportUrlFile = `${resultsDir}/${qodana_12.QODANA_OPEN_IN_IDE_NAME}`;
+      if (fs2.existsSync(reportUrlFile)) {
+        const data = JSON.parse(fs2.readFileSync(reportUrlFile, { encoding: "utf8" }));
+        if (data && data.cloud && data.cloud.url) {
+          return data.cloud.url;
+        }
+      } else {
+        reportUrlFile = `${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`;
+        if (fs2.existsSync(reportUrlFile)) {
+          return fs2.readFileSync(`${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`, {
+            encoding: "utf8"
+          });
+        }
+      }
+      return "";
+    }
+    __name(getReportURL, "getReportURL");
+    exports2.getReportURL = getReportURL;
     function publishOutput(failedByThreshold, resultsDir, useAnnotations, postComment, isPrMode, execute) {
       var _a, _b;
       return __awaiter3(this, void 0, void 0, function* () {
@@ -85129,13 +85150,7 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
         }
         try {
           const problems = (0, annotations_1.parseSarif)(`${resultsDir}/${qodana_12.QODANA_SARIF_NAME}`);
-          let reportUrl = "";
-          const reportUrlFile = `${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`;
-          if (fs2.existsSync(reportUrlFile)) {
-            reportUrl = fs2.readFileSync(`${resultsDir}/${qodana_12.QODANA_REPORT_URL_NAME}`, {
-              encoding: "utf8"
-            });
-          }
+          const reportUrl = getReportURL(resultsDir);
           const coverageInfo = getCoverageStats((0, qodana_12.getCoverageFromSarif)(`${resultsDir}/${qodana_12.QODANA_SHORT_SARIF_NAME}`), qodana_12.COVERAGE_THRESHOLD);
           let licensesInfo = "";
           const licensesJson = `${resultsDir}/projectStructure/${qodana_12.QODANA_LICENSES_JSON}`;
