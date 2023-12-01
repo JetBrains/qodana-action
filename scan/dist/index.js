@@ -18789,9 +18789,9 @@ var require_is_plain_object = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/endpoint/dist-node/index.js
+// node_modules/@octokit/endpoint/dist-node/index.js
 var require_dist_node2 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/endpoint/dist-node/index.js"(exports2) {
+  "node_modules/@octokit/endpoint/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var isPlainObject = require_is_plain_object();
@@ -22323,9 +22323,9 @@ var require_once = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/request-error/dist-node/index.js
+// node_modules/@octokit/request-error/dist-node/index.js
 var require_dist_node4 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/request-error/dist-node/index.js"(exports2) {
+  "node_modules/@octokit/request-error/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     function _interopDefault(ex) {
@@ -22381,9 +22381,9 @@ var require_dist_node4 = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/request/dist-node/index.js
+// node_modules/@octokit/request/dist-node/index.js
 var require_dist_node5 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/request/dist-node/index.js"(exports2) {
+  "node_modules/@octokit/request/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     function _interopDefault(ex) {
@@ -22542,9 +22542,9 @@ var require_dist_node5 = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/graphql/dist-node/index.js
+// node_modules/@octokit/graphql/dist-node/index.js
 var require_dist_node6 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/graphql/dist-node/index.js"(exports2) {
+  "node_modules/@octokit/graphql/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var request = require_dist_node5();
@@ -22647,9 +22647,9 @@ var require_dist_node6 = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/auth-token/dist-node/index.js
+// node_modules/@octokit/auth-token/dist-node/index.js
 var require_dist_node7 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/auth-token/dist-node/index.js"(exports2) {
+  "node_modules/@octokit/auth-token/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var REGEX_IS_INSTALLATION_LEGACY = /^v1\./;
@@ -22696,9 +22696,9 @@ var require_dist_node7 = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/core/dist-node/index.js
+// node_modules/@octokit/core/dist-node/index.js
 var require_dist_node8 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/core/dist-node/index.js"(exports2) {
+  "node_modules/@octokit/core/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var universalUserAgent = require_dist_node();
@@ -23937,9 +23937,9 @@ var require_dist_node9 = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/plugin-paginate-rest/dist-node/index.js
+// node_modules/@octokit/plugin-paginate-rest/dist-node/index.js
 var require_dist_node10 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/plugin-paginate-rest/dist-node/index.js"(exports2) {
+  "node_modules/@octokit/plugin-paginate-rest/dist-node/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var VERSION2 = "2.21.3";
@@ -38259,7 +38259,7 @@ var require_builder = __commonJS({
           } else {
             rootName = this.options.rootName;
           }
-          render = function(_this) {
+          render = /* @__PURE__ */ function(_this) {
             return function(element, obj) {
               var attr, child, entry, index, key, value;
               if (typeof obj !== "object") {
@@ -39991,7 +39991,7 @@ var require_parser = __commonJS({
             xmlns: this.options.xmlns
           });
           this.saxParser.errThrown = false;
-          this.saxParser.onerror = function(_this) {
+          this.saxParser.onerror = /* @__PURE__ */ function(_this) {
             return function(error) {
               _this.saxParser.resume();
               if (!_this.saxParser.errThrown) {
@@ -40000,7 +40000,7 @@ var require_parser = __commonJS({
               }
             };
           }(this);
-          this.saxParser.onend = function(_this) {
+          this.saxParser.onend = /* @__PURE__ */ function(_this) {
             return function() {
               if (!_this.saxParser.ended) {
                 _this.saxParser.ended = true;
@@ -40014,7 +40014,7 @@ var require_parser = __commonJS({
           stack = [];
           attrkey = this.options.attrkey;
           charkey = this.options.charkey;
-          this.saxParser.onopentag = function(_this) {
+          this.saxParser.onopentag = /* @__PURE__ */ function(_this) {
             return function(node) {
               var key, newValue, obj, processedKey, ref;
               obj = /* @__PURE__ */ Object.create(null);
@@ -40046,7 +40046,7 @@ var require_parser = __commonJS({
               return stack.push(obj);
             };
           }(this);
-          this.saxParser.onclosetag = function(_this) {
+          this.saxParser.onclosetag = /* @__PURE__ */ function(_this) {
             return function() {
               var cdata, emptyStr, key, node, nodeName, obj, objClone, old, s, xpath;
               obj = stack.pop();
@@ -40145,7 +40145,7 @@ var require_parser = __commonJS({
               }
             };
           }(this);
-          ontext = function(_this) {
+          ontext = /* @__PURE__ */ function(_this) {
             return function(text) {
               var charChild, s;
               s = stack[stack.length - 1];
@@ -40167,7 +40167,7 @@ var require_parser = __commonJS({
             };
           }(this);
           this.saxParser.ontext = ontext;
-          return this.saxParser.oncdata = function(_this) {
+          return this.saxParser.oncdata = /* @__PURE__ */ function(_this) {
             return function(text) {
               var s;
               s = ontext(text);
@@ -40213,7 +40213,7 @@ var require_parser = __commonJS({
           }
         };
         Parser.prototype.parseStringPromise = function(str) {
-          return new Promise(function(_this) {
+          return new Promise(/* @__PURE__ */ function(_this) {
             return function(resolve, reject) {
               return _this.parseString(str, function(err, value) {
                 if (err) {
@@ -57450,7 +57450,7 @@ var require_dist8 = __commonJS({
       return async ({ init, poll }, options) => {
         const { processResult, updateState, withOperationLocation: withOperationLocationCallback, intervalInMs = POLL_INTERVAL_IN_MS, restoreFrom } = options || {};
         const stateProxy = createStateProxy$1();
-        const withOperationLocation = withOperationLocationCallback ? (() => {
+        const withOperationLocation = withOperationLocationCallback ? /* @__PURE__ */ (() => {
           let called = false;
           return (operationLocation, isUpdated) => {
             if (isUpdated)
@@ -85567,6 +85567,7 @@ var require_utils9 = __commonJS({
         cacheDefaultBranchOnly: core2.getBooleanInput("cache-default-branch-only"),
         uploadResult: core2.getBooleanInput("upload-result"),
         uploadSarif: false,
+        // not used by the action
         artifactName: core2.getInput("artifact-name"),
         useCaches: core2.getBooleanInput("use-caches"),
         useAnnotations: core2.getBooleanInput("use-annotations"),
