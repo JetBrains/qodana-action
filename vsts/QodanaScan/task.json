@@ -12,9 +12,6 @@
     "Minor": 2,
     "Patch": 9
   },
-  "demands": [
-    "RemoteDockerServerOS -equals linux"
-  ],
   "instanceNameFormat": "Qodana Scan",
   "inputs": [
     {
