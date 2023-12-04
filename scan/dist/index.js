@@ -85112,7 +85112,7 @@ ${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered`;
       }
       if (c.freshLines !== 0) {
         stats += `
-! ${c.freshCoverage} fresh lines covered
+! ${c.freshCoverage}% fresh lines covered
 ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
       }
       return wrapToDiffBlock([
