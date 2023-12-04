@@ -6,7 +6,7 @@ import * as github from '@actions/github'
 import * as glob from '@actions/glob'
 import * as tc from '@actions/tool-cache'
 import {GitHub} from '@actions/github/lib/utils'
-import {getGitHubCheckConclusion, Output} from './annotations'
+import {Conclusion, getGitHubCheckConclusion, Output} from './annotations'
 import {
   EXECUTABLE,
   Inputs,
@@ -502,7 +502,7 @@ export async function publishGitHubCheck(
  */
 async function createCheck(
   client: InstanceType<typeof GitHub>,
-  conclusion: string,
+  conclusion: Conclusion,
   head_sha: string,
   name: string,
   output: Output
@@ -527,7 +527,7 @@ async function createCheck(
  */
 async function updateCheck(
   client: InstanceType<typeof GitHub>,
-  conclusion: string,
+  conclusion: Conclusion,
   check_run_id: number,
   output: Output
 ): Promise<void> {

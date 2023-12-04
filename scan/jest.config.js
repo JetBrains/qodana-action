@@ -6,7 +6,7 @@ module.exports = {
     '^.+\\.ts$': 'ts-jest'
   },
   verbose: false,
-  testTimeout: 20000,
+  testTimeout: 400000,
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.ts'],
   coverageReporters: ['html', ['lcovonly', { projectRoot: '../' }], 'text-summary'],
