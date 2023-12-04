@@ -315,7 +315,7 @@ function failedCoverageFixture(): string {
 @@ Code coverage @@
 - 0% total lines covered
 100 lines analyzed, 0 lines covered
-! 0 fresh lines covered
+! 0% fresh lines covered
 100 lines analyzed, 0 lines covered
 # Calculated according to the filters of your coverage tool
 \`\`\``
