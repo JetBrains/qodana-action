@@ -17,6 +17,17 @@ const NEUTRAL_STATUS = 'neutral'
 const SUCCESS_STATUS = 'success'
 const MAX_ANNOTATIONS = 50
 
+export type Conclusion =
+  | typeof FAILURE_STATUS
+  | typeof SUCCESS_STATUS
+  | typeof NEUTRAL_STATUS
+  | 'cancelled'
+  | 'skipped'
+  | 'timed_out'
+  | 'action_required'
+  | 'stale'
+  | undefined
+
 /**
  * Publish SARIF to GitHub Checks.
  * @param name The name of the Check.
@@ -85,7 +96,7 @@ export interface Annotation {
   path: string
   start_line: number
   end_line: number
-  annotation_level: string
+  annotation_level: 'failure' | 'warning' | 'notice'
   message: string
   start_column: number | undefined
   end_column: number | undefined
@@ -183,7 +194,7 @@ export function parseSarif(path: string): Output {
 export function getGitHubCheckConclusion(
   annotations: Annotation[],
   failedByThreshold: boolean
-): string {
+): Conclusion {
   if (failedByThreshold) {
     return FAILURE_STATUS
   }
