@@ -94,8 +94,8 @@ export interface Rule {
 export interface Annotation {
   title: string
   path: string
-  start_line: number
-  end_line: number
+  start_line: number | undefined
+  end_line: number | undefined
   annotation_level: 'failure' | 'warning' | 'notice'
   message: string
   start_column: number | undefined
@@ -118,12 +118,12 @@ function parseResult(
     message: result.message.markdown ?? result.message.text!!,
     title: rules.get(result.ruleId!!)?.shortDescription!!,
     path: location.artifactLocation!!.uri!!,
-    start_line: region.startLine!!,
-    end_line: region.endLine || region.startLine!!,
+    start_line: region?.startLine,
+    end_line: region?.endLine || region?.startLine,
     start_column:
-      region.startLine === region.endColumn ? region.startColumn : undefined,
+      region?.startLine === region?.endColumn ? region?.startColumn : undefined,
     end_column:
-      region.startLine === region.endColumn ? region.endColumn : undefined,
+      region?.startLine === region?.endColumn ? region?.endColumn : undefined,
     annotation_level: (() => {
       switch (result.level) {
         case 'error':
