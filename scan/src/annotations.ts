@@ -94,8 +94,8 @@ export interface Rule {
 export interface Annotation {
   title: string
   path: string
-  start_line: number | undefined
-  end_line: number | undefined
+  start_line: number
+  end_line: number
   annotation_level: 'failure' | 'warning' | 'notice'
   message: string
   start_column: number | undefined
@@ -112,14 +112,21 @@ function parseResult(
   result: Result,
   rules: Map<string, Rule>
 ): Annotation | null {
-  const location = result.locations!![0].physicalLocation!!
-  const region = location.region!!
+  if (
+    !result.locations ||
+    result.locations.length === 0 ||
+    !result.locations[0].physicalLocation
+  ) {
+    return null
+  }
+  const location = result.locations[0].physicalLocation
+  const region = location.region
   return {
     message: result.message.markdown ?? result.message.text!!,
     title: rules.get(result.ruleId!!)?.shortDescription!!,
     path: location.artifactLocation!!.uri!!,
-    start_line: region?.startLine,
-    end_line: region?.endLine || region?.startLine,
+    start_line: region?.startLine || 1,
+    end_line: region?.endLine || region?.startLine || 1,
     start_column:
       region?.startLine === region?.endColumn ? region?.startColumn : undefined,
     end_column:
@@ -148,7 +155,7 @@ function parseRules(tool: Tool): Map<string, Rule> {
     rules.set(rule.id, {
       shortDescription: rule.shortDescription!!.text,
       fullDescription:
-        rule.fullDescription!!.markdown ?? rule.fullDescription!!.text
+        rule.fullDescription!!.markdown || rule.fullDescription!!.text
     })
   })
 
@@ -157,7 +164,7 @@ function parseRules(tool: Tool): Map<string, Rule> {
       rules.set(rule.id, {
         shortDescription: rule.shortDescription!!.text,
         fullDescription:
-          rule.fullDescription!!.markdown ?? rule.fullDescription!!.text
+          rule.fullDescription!!.markdown || rule.fullDescription!!.text
       })
     })
   })
