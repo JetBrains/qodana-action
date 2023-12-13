@@ -115,7 +115,7 @@ function parseResult(
   const location = result.locations!![0].physicalLocation!!
   const region = location.region!!
   return {
-    message: result.message.markdown!!,
+    message: result.message.markdown ?? result.message.text!!,
     title: rules.get(result.ruleId!!)?.shortDescription!!,
     path: location.artifactLocation!!.uri!!,
     start_line: region.startLine!!,
@@ -144,11 +144,20 @@ function parseResult(
  */
 function parseRules(tool: Tool): Map<string, Rule> {
   const rules = new Map<string, Rule>()
+  tool.driver.rules?.forEach(rule => {
+    rules.set(rule.id, {
+      shortDescription: rule.shortDescription!!.text,
+      fullDescription:
+        rule.fullDescription!!.markdown ?? rule.fullDescription!!.text
+    })
+  })
+
   tool?.extensions?.forEach(ext => {
     ext?.rules?.forEach(rule => {
       rules.set(rule.id, {
         shortDescription: rule.shortDescription!!.text,
-        fullDescription: rule.fullDescription!!.markdown!!
+        fullDescription:
+          rule.fullDescription!!.markdown ?? rule.fullDescription!!.text
       })
     })
   })
