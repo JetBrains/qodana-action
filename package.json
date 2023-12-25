@@ -37,10 +37,10 @@
     "eslint": "latest",
     "eslint-plugin-github": "latest",
     "eslint-plugin-jest": "latest",
-    "eslint-plugin-prettier": "^5.0.1",
-    "prettier": "3.1.0",
-    "prettier-eslint": "^16.1.2",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.3.2"
+    "eslint-plugin-prettier": "^5.1.2",
+    "prettier": "3.1.1",
+    "prettier-eslint": "^16.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
