@@ -287,7 +287,6 @@ with:
 All the issues, feature requests, and support related to Qodana are handled on [YouTrack][youtrack].
 
 If you'd like to file a new issue, please use the link [YouTrack | New Issue][youtrack-new-issue].
-
 [gh:qodana]: https://github.com/JetBrains/qodana-action/actions/workflows/code_scanning.yml
 [youtrack]: https://youtrack.jetbrains.com/issues/QD
 [youtrack-new-issue]: https://youtrack.jetbrains.com/newIssue?project=QD&c=Platform%20GitHub%20action
