@@ -72,7 +72,7 @@ Add this to your Gradle configuration file:
       resultsPath = "some/output/path"
   }
   
-  qodanaScan {
+  tasks.qodanaScan {
       arguments = ["--fail-threshold", "0"]
   }
   ```
@@ -90,7 +90,7 @@ Add this to your Gradle configuration file:
       resultsPath.set("some/output/path")
   }
   
-  qodanaScan {
+  tasks.qodanaScan {
       resultsPath.set("some/output/path")
       arguments.set(listOf("--fail-threshold", "0"))
   }

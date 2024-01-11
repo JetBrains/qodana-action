@@ -45,10 +45,8 @@ jobs:
     strategy:
       matrix:
         gradleVersion:
-          - 6.8
-          - 6.9.2
-          - 7.6.2
-          - 8.3
+          - 7.6
+          - 8.5
         os:
           - windows-latest
           - ubuntu-latest

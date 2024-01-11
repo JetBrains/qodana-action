@@ -28,9 +28,8 @@ class Installer {
         fun getArchName(): String {
             val arch = System.getProperty("os.arch").lowercase()
             return when {
-                getPlatformName() == "darwin" -> "all"
                 arch.contains("x86_64") || arch.contains("amd64") -> "x86_64"
-                arch.contains("arm64") -> "arm64"
+                arch.contains("arm64") || arch.contains("aarch64") -> "arm64"
                 else -> throw IllegalArgumentException("Unsupported architecture: $arch")
             }
         }
