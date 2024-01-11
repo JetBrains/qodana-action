@@ -1,10 +1,10 @@
-import * as artifact from '@actions/artifact'
 import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 import * as glob from '@actions/glob'
 import * as tc from '@actions/tool-cache'
+import artifact from '@actions/artifact'
 import {GitHub} from '@actions/github/lib/utils'
 import {Conclusion, getGitHubCheckConclusion, Output} from './annotations'
 import {
@@ -185,11 +185,7 @@ export async function uploadArtifacts(
     core.info('Uploading artifacts...')
     const globber = await glob.create(`${resultsDir}/*`)
     const files = await globber.glob()
-    await artifact
-      .create()
-      .uploadArtifact(artifactName, files, path.dirname(resultsDir), {
-        continueOnError: true
-      })
+    await artifact.uploadArtifact(artifactName, files, path.dirname(resultsDir))
   } catch (error) {
     core.warning(`Failed to upload report – ${(error as Error).message}`)
   }
