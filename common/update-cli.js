@@ -84,7 +84,7 @@ async function getLatestRelease() {
 
 function updateCliChecksums(latestVersion, checksumsPath, cliJsonPath) {
   const cliJson = JSON.parse(fs.readFileSync(cliJsonPath, "utf-8"));
-  const allowedKeysfromCliJson = ["windows_x86_64", "windows_arm64", "linux_x86_64", "linux_arm64", "darwin_all"];
+  const allowedKeysfromCliJson = ["windows_x86_64", "windows_arm64", "linux_x86_64", "linux_arm64", "darwin_x86_64", "darwin_arm64"];
   const checksums = fs.readFileSync(checksumsPath, "utf-8");
   checksums.split("\n").forEach(line => {
     const [checksum, filename] = line.trim().split("  ");
