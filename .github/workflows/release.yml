@@ -7,6 +7,24 @@ permissions:
   contents: write
 
 jobs:
+  gradle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          PATCH_VERSION=$(echo $TAG_NAME | sed -r 's/[^0-9]*([0-9]*)\.([0-9]*)\.([0-9]*)(-.*)?/\3/')
+          echo "PATCH_VERSION=${PATCH_VERSION}" >> $GITHUB_ENV
+      - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 11
+          cache: gradle
+      - name: Run linters and test
+        run: ./gradlew clean build publishPlugins -Pgradle.publish.key=${{ secrets.GRADLE_KEY }} -Pgradle.publish.secret=${{ secrets.GRADLE_TOKEN }}
   github:
     runs-on: ubuntu-latest
     steps:

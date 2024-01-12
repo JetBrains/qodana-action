@@ -115,26 +115,37 @@ function updateCircleCIChecksums(circleCIConfigPath) {
 
 function updateVersions(latestVersion, currentVersion) {
   latestVersion = latestVersion.slice(1);
-  const versions = latestVersion.split(".");
-  const major = parseInt(versions[0]);
-  const minor = parseInt(versions[1]);
-  const patch = parseInt(versions[2]);
+
+  const latestVersions = latestVersion.split(".");
+  const latestMajor = parseInt(latestVersions[0]);
+  const latestMinor = parseInt(latestVersions[1]);
+  const latestPatch = parseInt(latestVersions[2]);
+
   let taskJson = JSON.parse(
     fs.readFileSync(
       path.join(__dirname, "..", "vsts", "QodanaScan", "task.json"),
       "utf8"
     )
   );
-  taskJson.version.Major = major;
-  taskJson.version.Minor = minor;
-  taskJson.version.Patch = patch;
+  taskJson.version.Major = latestMajor;
+  taskJson.version.Minor = latestMinor;
+  taskJson.version.Patch = latestPatch;
   fs.writeFileSync(
     path.join(__dirname, "..", "vsts", "QodanaScan", "task.json"),
     JSON.stringify(taskJson, null, 2)
   );
+  const currentVersions = currentVersion.split(".");
+  const currentMajor = parseInt(currentVersions[0]);
+  const currentMinor = parseInt(currentVersions[1]);
+
+  replaceStringsInProject(`${latestMajor}.${latestMinor}.${latestPatch}`, `${currentMajor}.${currentMinor}.${latestPatch}`);
+  replaceStringsInProject(`${latestMajor}.${latestMinor}`, `${currentMajor}.${currentMinor}`);
+}
+
+function replaceStringsInProject(newString, oldString) {
   process.env.LC_ALL = "C";
   const isMacOS = process.platform === "darwin";
-  const command = `cd .. && find . -type f -not -name "*.js" -exec sed -i${isMacOS ? " ''" : ""} 's/${currentVersion}/${latestVersion}/g' {} +`;
+  const command = `cd .. && find . -type f -not -name "*.js" -exec sed -i${isMacOS ? " ''" : ""} 's/${oldString}/${newString}/g' {} +`;
   execSync(command, { shell: "/bin/bash" });
 }
 
