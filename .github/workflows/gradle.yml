@@ -2,32 +2,18 @@ name: 'gradle'
 on:
   workflow_dispatch:
   pull_request:
-    paths-ignore:
-      - 'orb/**'
-      - 'scan/**'
-      - 'vsts/**'
-      - 'common/**'
-      - 'action.yaml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig.json'
-      - 'tsconfig.base.json'
-      - '.github/workflows/node.yml'
+    paths:
+      - 'gradle/**'
+      - 'src/**'
+      - '*gradle*'
   push:
     branches:
       - main
       - 'releases/*'
-    paths-ignore:
-      - 'orb/**'
-      - 'scan/**'
-      - 'vsts/**'
-      - 'common/**'
-      - 'action.yaml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig.json'
-      - 'tsconfig.base.json'
-      - '.github/workflows/node.yml'
+    paths:
+      - 'gradle/**'
+      - 'src/**'
+      - '*gradle*'
 jobs:
   gradleValidation:
     name: gradle-wrapper
