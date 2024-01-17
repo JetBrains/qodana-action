@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: Set Node.js 16.x
         uses: actions/setup-node@v4.0.1
         with:
