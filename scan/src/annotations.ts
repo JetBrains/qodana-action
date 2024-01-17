@@ -45,7 +45,6 @@ export async function publishAnnotations(
     return
   }
   try {
-    problems.summary = problems.summary.replace(`# Qodana`, '')
     if (problems.annotations.length >= MAX_ANNOTATIONS) {
       for (let i = 0; i < problems.annotations.length; i += MAX_ANNOTATIONS) {
         await publishGitHubCheck(failedByThreshold, name, {
@@ -92,7 +91,7 @@ export interface Rule {
 }
 
 export interface Annotation {
-  title: string
+  title: string | undefined
   path: string
   start_line: number
   end_line: number
@@ -125,7 +124,7 @@ function parseResult(
     message: result.message.markdown ?? result.message.text!!,
     title: rules.get(result.ruleId!!)?.shortDescription!!,
     path: location.artifactLocation!!.uri!!,
-    start_line: region?.startLine || 1,
+    start_line: region?.startLine || 0,
     end_line: region?.endLine || region?.startLine || 1,
     start_column:
       region?.startLine === region?.endColumn ? region?.startColumn : undefined,
@@ -233,8 +232,8 @@ export function toAnnotationProperties(a: Annotation): AnnotationProperties {
   return {
     title: a.title,
     file: a.path,
-    startLine: a.start_line,
-    endLine: a.end_line,
+    startLine: a.start_line || 0,
+    endLine: a.end_line || 1,
     startColumn: a.start_column,
     endColumn: a.end_column
   }

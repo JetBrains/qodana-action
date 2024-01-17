@@ -179,6 +179,17 @@ export function annotationsDefaultFixture(): Annotation[] {
       end_column: undefined
     },
     {
+      annotation_level: 'warning',
+      message:
+        '\\[[NU1101](http://www.google.com/search?q=NU1101)\\] Unable to find package PrivatePackage. No packages exist with this id in source(s): github at (0:0)  \n\nTarget: ResolvePackageAssets  \nTask: ResolvePackageAssets',
+      end_line: 1,
+      start_line: 0,
+      path: 'LibraryReferencingPackage/LibraryReferencingPackage.csproj',
+      title: 'Rider toolset and environment errors',
+      start_column: undefined,
+      end_column: undefined
+    },
+    {
       annotation_level: 'notice',
       message: "Might be 'const'",
       end_line: 283,
@@ -239,11 +250,12 @@ export function defaultDockerRunCommandFixture(): string[] {
 export function markdownSummaryFixture(): string {
   return `# [Qodana](https://example.com/report) for JS
 
-**3 new problems** were found
+**4 new problems** were found
 
 | Inspection name | Severity | Problems |
 | --- | --- | --- |
 | \`Control flow with empty body\` | 🔴 Failure | 1 |
+| \`Rider toolset and environment errors\` | 🔶 Warning | 1 |
 | \`Condition of 'if' expression is constant\` | 🔶 Warning | 1 |
 | \`Might be 'const'\` | ◽️ Notice | 1 |
 

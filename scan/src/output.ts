@@ -206,7 +206,7 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
       map.set(
         e.title ?? UNKNOWN_RULE_ID,
         map.get(e.title ?? UNKNOWN_RULE_ID) !== undefined
-          ? map.get(e.title)!! + 1
+          ? map.get(e.title ?? UNKNOWN_RULE_ID)!! + 1
           : 1
       ),
     new Map()

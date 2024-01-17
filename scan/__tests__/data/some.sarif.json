@@ -7978,6 +7978,39 @@
                 ]
               },
               {
+                "id": "RiderSolutionErrorsInspection",
+                "shortDescription": {
+                  "text": "Rider toolset and environment errors"
+                },
+                "fullDescription": {
+                  "text": "Reports toolset and environment errors detected by Rider.",
+                  "markdown": "Reports toolset and environment errors detected by Rider."
+                },
+                "defaultConfiguration": {
+                  "enabled": true,
+                  "level": "error",
+                  "parameters": {
+                    "suppressToolId": "RiderSolutionErrorsInspection",
+                    "ideaSeverity": "ERROR",
+                    "qodanaSeverity": "Critical"
+                  }
+                },
+                "relationships": [
+                  {
+                    "target": {
+                      "id": "Rider/General",
+                      "index": 134,
+                      "toolComponent": {
+                        "name": "QDNET"
+                      }
+                    },
+                    "kinds": [
+                      "superset"
+                    ]
+                  }
+                ]
+              },
+              {
                 "id": "EqualsOrHashCode",
                 "shortDescription": {
                   "text": "'equals()' and 'hashCode()' not paired"
@@ -8134,6 +8167,32 @@
             "tags": [
               "ideaSeverity"
             ]
+          }
+        },
+        {
+          "ruleId": "RiderSolutionErrorsInspection",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "[NU1101] Unable to find package PrivatePackage. No packages exist with this id in source(s): github at (0:0) Target: ResolvePackageAssets Task: ResolvePackageAssets",
+            "markdown": "\\[[NU1101](http://www.google.com/search?q=NU1101)\\] Unable to find package PrivatePackage. No packages exist with this id in source(s): github at (0:0)  \n\nTarget: ResolvePackageAssets  \nTask: ResolvePackageAssets"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "LibraryReferencingPackage/LibraryReferencingPackage.csproj",
+                  "uriBaseId": "SRCROOT"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "equalIndicator/v1": "2eb5998cec5651ad1ad36262cf210caa653ab138d3c22e4338d3eea704104bf6"
+          },
+          "properties": {
+            "ideaSeverity": "WARNING",
+            "qodanaSeverity": "High"
           }
         },
         {
