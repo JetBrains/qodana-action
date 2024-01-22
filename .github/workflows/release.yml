@@ -24,7 +24,7 @@ jobs:
           java-version: 11
           cache: gradle
       - name: Run linters and test
-        run: ./gradlew clean build publishPlugins -Pgradle.publish.key=${{ secrets.GRADLE_KEY }} -Pgradle.publish.secret=${{ secrets.GRADLE_TOKEN }}
+        run: ./gradlew clean build publishPlugins -Pgradle.publish.key=${{ secrets.GRADLE_KEY }} -Pgradle.publish.secret=${{ secrets.GRADLE_TOKEN }} -PbuildNumber=${{ env.PATCH_VERSION }}
   github:
     runs-on: ubuntu-latest
     steps:
