@@ -66,5 +66,5 @@ inputs:
     required: false
     default: "🤖 Apply quick-fixes by Qodana"
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'scan/dist/index.js'
