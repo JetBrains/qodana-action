@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "qodana",
   "name": "Qodana",
-  "version": "2023.3.1",
+  "version": "2023.3.2",
   "public": true,
   "publisher": "JetBrains",
   "targets": [

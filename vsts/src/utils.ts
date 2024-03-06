@@ -29,7 +29,7 @@ export function setFailed(message: string): void {
  */
 export function getInputs(): Inputs {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const home = path.join(process.env['AGENT_TEMPDIRECTORY']!!, 'qodana')
+  const home = path.join(process.env['AGENT_TEMPDIRECTORY']!, 'qodana')
   return {
     args: (tl.getInput('args', false) || '').split(',').map(arg => arg.trim()),
     resultsDir: tl.getInput('resultsDir', false) || path.join(home, 'results'),

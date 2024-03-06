@@ -145,7 +145,7 @@ function updateVersions(latestVersion, currentVersion) {
 function replaceStringsInProject(newString, oldString) {
   process.env.LC_ALL = "C";
   const isMacOS = process.platform === "darwin";
-  const command = `cd .. && find . -type f -not -name "*.js" -exec sed -i${isMacOS ? " ''" : ""} 's/${oldString}/${newString}/g' {} +`;
+  const command = `cd .. && find . -type f -exec sed -i${isMacOS ? " ''" : ""} 's/${oldString}/${newString}/g' {} +`;
   execSync(command, { shell: "/bin/bash" });
 }
 
