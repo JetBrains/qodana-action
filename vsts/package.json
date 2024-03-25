@@ -23,14 +23,14 @@
   "author": "JetBrains",
   "license": "Apache-2.0",
   "dependencies": {
-    "azure-pipelines-task-lib": "^4.10.0",
+    "azure-pipelines-task-lib": "^4.10.1",
     "azure-pipelines-tasks-utility-common": "^3.235.0",
     "azure-pipelines-tool-lib": "^2.0.7"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
-    "@typescript-eslint/parser": "^6.21.0",
-    "esbuild": "0.20.1",
+    "@types/node": "^20.11.30",
+    "@typescript-eslint/parser": "^7.3.1",
+    "esbuild": "0.20.2",
     "eslint": "^8.57.0",
     "eslint-plugin-github": "^4.10.2",
     "eslint-plugin-jest": "^27.9.0",
@@ -39,6 +39,6 @@
     "prettier": "3.2.5",
     "sync-request": "^6.1.0",
     "ts-jest": "^29.1.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   }
 }

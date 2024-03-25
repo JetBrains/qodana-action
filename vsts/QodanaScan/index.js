@@ -4971,8 +4971,8 @@ var require_utils2 = __commonJS({
       };
     }
     exports2.getInputs = getInputs;
-    function qodana(args = []) {
-      return __awaiter2(this, void 0, void 0, function* () {
+    function qodana() {
+      return __awaiter2(this, arguments, void 0, function* (args = []) {
         if (args.length === 0) {
           const inputs = getInputs();
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
