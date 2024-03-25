@@ -13,7 +13,7 @@ plugins {
 }
 
 group = properties("projectGroup").get()
-version = properties("pluginVersion").get()
+version = "${properties("majorVersion").get()}.${properties("buildNumber").get()}"
 description = properties("description").get()
 
 repositories {
