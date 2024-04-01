@@ -30,8 +30,8 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.30",
-    "@typescript-eslint/parser": "^7.3.1",
+    "@types/node": "^20.12.2",
+    "@typescript-eslint/parser": "^7.4.0",
     "axios": "^1.6.8",
     "esbuild": "0.20.2",
     "eslint": "^8.57.0",
