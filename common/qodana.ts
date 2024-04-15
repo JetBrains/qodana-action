@@ -28,8 +28,6 @@ export function getQodanaSha256(arch: string, platform: string): string {
       return checksum['linux_x86_64']
     case 'linux_arm64':
       return checksum['linux_arm64']
-    case 'darwin_all':
-      return checksum['darwin_all']
     default:
       throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`)
   }
