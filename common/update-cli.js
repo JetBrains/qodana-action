@@ -76,7 +76,7 @@ async function getLatestRelease() {
     };
 
     const release = await makeRequest(options);
-    return release.tag_name;
+    return release.tag_name.substring(1);
   } catch (error) {
     console.error("An error occurred:", error);
   }
@@ -96,7 +96,7 @@ function updateCliChecksums(latestVersion, checksumsPath, cliJsonPath) {
       }
     }
   });
-  cliJson.version = latestVersion.slice(1);
+  cliJson.version = latestVersion;
   fs.writeFileSync(cliJsonPath, JSON.stringify(cliJson, null, 2));
   fs.unlinkSync(checksumsPath);
 }
@@ -114,8 +114,6 @@ function updateCircleCIChecksums(circleCIConfigPath) {
 }
 
 function updateVersions(latestVersion, currentVersion) {
-  latestVersion = latestVersion.slice(1);
-
   const latestVersions = latestVersion.split(".");
   const latestMajor = parseInt(latestVersions[0]);
   const latestMinor = parseInt(latestVersions[1]);
@@ -137,8 +135,9 @@ function updateVersions(latestVersion, currentVersion) {
   const currentVersions = currentVersion.split(".");
   const currentMajor = parseInt(currentVersions[0]);
   const currentMinor = parseInt(currentVersions[1]);
+  const currentPatch = parseInt(currentVersions[2]);
 
-  replaceStringsInProject(`${latestMajor}.${latestMinor}.${latestPatch}`, `${currentMajor}.${currentMinor}.${latestPatch}`);
+  replaceStringsInProject(`${latestMajor}.${latestMinor}.${latestPatch}`, `${currentMajor}.${currentMinor}.${currentPatch}`);
   replaceStringsInProject(`${latestMajor}.${latestMinor}`, `${currentMajor}.${currentMinor}`);
 }
 
@@ -146,18 +145,22 @@ function replaceStringsInProject(newString, oldString) {
   process.env.LC_ALL = "C";
   const isMacOS = process.platform === "darwin";
   const command = `cd .. && find . -type f -exec sed -i${isMacOS ? " ''" : ""} 's/${oldString}/${newString}/g' {} +`;
+  console.log("Running command:", command);
   execSync(command, { shell: "/bin/bash" });
 }
 
 async function main() {
   try {
     const currentVersion = JSON.parse(fs.readFileSync(cliJsonPath, "utf-8")).version;
+    console.log("Current version:", currentVersion);
     const latestVersion = await getLatestRelease();
+    console.log("Latest version:", latestVersion);
+    console.log("Downloading new checksums...");
     await downloadFile(`https://github.com/jetbrains/qodana-cli/releases/latest/download/checksums.txt`, "checksums.txt");
     updateVersions(latestVersion, currentVersion);
     updateCliChecksums(latestVersion, "checksums.txt", cliJsonPath);
     updateCircleCIChecksums("../orb/commands/scan.yml");
-    console.log("Checksums updated successfully!");
+    console.log("Versions updated successfully!");
   } catch (error) {
     console.error("An error occurred:", error);
   }
