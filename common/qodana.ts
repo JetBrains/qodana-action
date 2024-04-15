@@ -250,3 +250,15 @@ export function getQodanaSha256MismatchMessage(
 ): string {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`
 }
+
+/**
+ * Validates the given branch name.
+ * @param branchName the branch name to sanitize.
+ */
+export function validateBranchName(branchName: string): string {
+  const validBranchNameRegex = /^[a-zA-Z0-9/\-_]+$/;
+  if (!validBranchNameRegex.test(branchName)) {
+    throw new Error("Invalid branch name: not allowed characters are used:" + branchName);
+  }
+  return branchName;
+}

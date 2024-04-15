@@ -79,7 +79,8 @@ __export(qodana_exports, {
   getQodanaUrl: () => getQodanaUrl,
   isExecutionSuccessful: () => isExecutionSuccessful,
   isNativeMode: () => isNativeMode,
-  sha256sum: () => sha256sum
+  sha256sum: () => sha256sum,
+  validateBranchName: () => validateBranchName
 });
 function getQodanaSha256(arch, platform) {
   switch (`${platform}_${arch}`) {
@@ -192,6 +193,13 @@ function sha256sum(file) {
 }
 function getQodanaSha256MismatchMessage(expected, actual) {
   return `Downloaded Qodana CLI binary is corrupted. Expected SHA-256 checksum: ${expected}, actual checksum: ${actual}`;
+}
+function validateBranchName(branchName) {
+  const validBranchNameRegex = /^[a-zA-Z0-9/\-_]+$/;
+  if (!validBranchNameRegex.test(branchName)) {
+    throw new Error("Invalid branch name: not allowed characters are used:" + branchName);
+  }
+  return branchName;
 }
 var import_crypto, import_fs, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
 var init_qodana = __esm({

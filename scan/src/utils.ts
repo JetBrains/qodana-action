@@ -23,7 +23,8 @@ import {
   NONE,
   PULL_REQUEST,
   BRANCH,
-  isNativeMode
+  isNativeMode,
+  validateBranchName
 } from '../../common/qodana'
 import path from 'path'
 import * as fs from 'fs'
@@ -110,6 +111,7 @@ export async function pushQuickFixes(
   if (c.payload.pull_request?.head.ref !== undefined) {
     currentBranch = c.payload.pull_request.head.ref
   }
+  currentBranch = validateBranchName(currentBranch)
   await git(['config', 'user.name', COMMIT_USER])
   await git(['config', 'user.email', COMMIT_EMAIL])
   await git(['add', '.'])
