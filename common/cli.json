@@ -1,11 +1,11 @@
 {
-  "version": "2023.3.2",
+  "version": "2024.1.1",
   "checksum": {
-    "windows_x86_64": "50768fa57f0e6603d44dc2e505b59afd3ee3064740443443ab5c747a973d75d6",
-    "linux_arm64": "61c87ad3f8f72de5cdb5ac78821f0cef9cffec12e36d62b1747d246b01031bf5",
-    "darwin_arm64": "23383d46ea5f2c92719f4d31581e1672dde6f9dc52df00c87be603ed1181b6ab",
-    "darwin_x86_64": "6e38b4ea3d59c5e517ce2b5c530fb373acccacff311fbfca283c293e2dfee51c",
-    "windows_arm64": "eec404334deea68e6f0efffc12e6bd0ff516c1aa9bdd327bb4ef1e0b4d415bab",
-    "linux_x86_64": "08641aed84e7cb9d422feabbaa60034322f3471d3ae7f5c7b04da0b766981886"
+    "windows_x86_64": "6dc20c32fbccf9c269a95620c5f3bcf87da6f0be7436e1c3e6bfb4eed064db61",
+    "linux_arm64": "7e5a5a0889146e218479e036230275c3a372ca63596ef3ddb02c46e8303b9ff8",
+    "darwin_arm64": "c82db40dcc8464e8e34ce625f4460b9fea57a58c5d37f7fd827a1cf829d6470e",
+    "darwin_x86_64": "b17cf85aaaa4f548178bf33f6ff50e4175f59ff1474e43ed20927a7cb666ff54",
+    "windows_arm64": "dffc99c83b44a76e0ebbb3c0be4756f48f4fd954e6a99de5e4a31f6c612a4427",
+    "linux_x86_64": "3670e2e46a5677370fa0feddc6096bb02a00fc2fccb84e707b7382c5a126a433"
   }
 }
