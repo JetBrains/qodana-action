@@ -31,3 +31,10 @@ licenseRules:
     allowed:
       - "0BSD"
       - "FPL"
+      - "BlueOak-1.0.0"
+dependencyOverrides:
+  - name: "buffers"
+    version: "0.1.1"
+    licenses:
+      - key: "MIT"
+        url: "https://github.com/mk-pmb/binary-pmb-node/blob/master/LICENSE.MIT.txt"

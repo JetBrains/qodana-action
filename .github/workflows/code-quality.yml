@@ -27,7 +27,7 @@ jobs:
           rm -rf scan/coverage
       - uses: ./
         with:
-          args: --print-problems,--log-level,debug
+          args: --print-problems,--log-level,debug,--config,.github/qodana.yaml
           pr-mode: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
