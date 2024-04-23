@@ -121,6 +121,10 @@ export function getQodanaPullArgs(args: string[]): string[] {
   if (project) {
     pullArgs.push('-i', project)
   }
+  const config = extractArg('--config', '--config', args)
+  if (config) {
+    pullArgs.push('--config', config)
+  }
   return pullArgs
 }
 

@@ -141,6 +141,10 @@ function getQodanaPullArgs(args) {
   if (project) {
     pullArgs.push("-i", project);
   }
+  const config = extractArg("--config", "--config", args);
+  if (config) {
+    pullArgs.push("--config", config);
+  }
   return pullArgs;
 }
 function getQodanaScanArgs(args, resultsDir, cacheDir) {
