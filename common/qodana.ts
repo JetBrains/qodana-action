@@ -81,7 +81,7 @@ export function isExecutionSuccessful(exitCode: number): boolean {
 }
 
 /**
- * Finds the wanted argument value in the given args, if there is one.
+ * Finds the wanted argument value in the given args if there is one.
  * @param argShort the short argument name.
  * @param argLong the long argument name.
  * @param args command arguments.
@@ -256,9 +256,11 @@ export function getQodanaSha256MismatchMessage(
  * @param branchName the branch name to sanitize.
  */
 export function validateBranchName(branchName: string): string {
-  const validBranchNameRegex = /^[a-zA-Z0-9/\-_]+$/;
+  const validBranchNameRegex = /^[a-zA-Z0-9/\-_]+$/
   if (!validBranchNameRegex.test(branchName)) {
-    throw new Error("Invalid branch name: not allowed characters are used:" + branchName);
+    throw new Error(
+      `Invalid branch name: not allowed characters are used: ${branchName}`
+    )
   }
-  return branchName;
+  return branchName
 }

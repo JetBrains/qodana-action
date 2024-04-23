@@ -197,7 +197,9 @@ function getQodanaSha256MismatchMessage(expected, actual) {
 function validateBranchName(branchName) {
   const validBranchNameRegex = /^[a-zA-Z0-9/\-_]+$/;
   if (!validBranchNameRegex.test(branchName)) {
-    throw new Error("Invalid branch name: not allowed characters are used:" + branchName);
+    throw new Error(
+      `Invalid branch name: not allowed characters are used: ${branchName}`
+    );
   }
   return branchName;
 }
