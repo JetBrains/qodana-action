@@ -37,6 +37,7 @@ export function getInputs(): Inputs {
     uploadResult: tl.getBoolInput('uploadResult', false) || false,
     uploadSarif: tl.getBoolInput('uploadSarif', false) || true,
     artifactName: tl.getInput('artifactName', false) || 'qodana-report',
+    useNightly: tl.getBoolInput('useNightly', false) || false,
     // Not used by the Azure task
     postComment: false,
     additionalCacheKey: '',
@@ -73,15 +74,23 @@ export async function qodana(args: string[] = []): Promise<number> {
 /**
  * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
  * @param args qodana arguments
+ * @param useNightly whether to use a nightly version of Qodana CLI
  */
-export async function prepareAgent(args: string[]): Promise<void> {
+export async function prepareAgent(
+  args: string[],
+  useNightly = false
+): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
-  const expectedChecksum = getQodanaSha256(arch, platform)
   const temp = await tool.downloadTool(getQodanaUrl(arch, platform))
-  const actualChecksum = sha256sum(temp)
-  if (expectedChecksum !== actualChecksum) {
-    setFailed(getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum))
+  if (!useNightly) {
+    const expectedChecksum = getQodanaSha256(arch, platform)
+    const actualChecksum = sha256sum(temp)
+    if (expectedChecksum !== actualChecksum) {
+      setFailed(
+        getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
+      )
+    }
   }
   let extractRoot
   if (process.platform === 'win32') {
@@ -89,7 +98,13 @@ export async function prepareAgent(args: string[]): Promise<void> {
   } else {
     extractRoot = await tool.extractTar(temp)
   }
-  tool.prependPath(await tool.cacheDir(extractRoot, EXECUTABLE, VERSION))
+  tool.prependPath(
+    await tool.cacheDir(
+      extractRoot,
+      EXECUTABLE,
+      useNightly ? 'nightly' : VERSION
+    )
+  )
   if (!isNativeMode(args)) {
     const pull = await qodana(getQodanaPullArgs(args))
     if (pull !== 0) {

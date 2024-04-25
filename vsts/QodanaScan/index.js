@@ -105,7 +105,7 @@ function getProcessArchName() {
 function getProcessPlatformName() {
   return process.platform === "win32" ? "windows" : process.platform;
 }
-function getQodanaUrl(arch, platform) {
+function getQodanaUrl(arch, platform, nightly = false) {
   if (!SUPPORTED_PLATFORMS.includes(platform)) {
     throw new Error(`Unsupported platform: ${platform}`);
   }
@@ -113,7 +113,8 @@ function getQodanaUrl(arch, platform) {
     throw new Error(`Unsupported architecture: ${arch}`);
   }
   const archive = platform === "windows" ? "zip" : "tar.gz";
-  return `https://github.com/JetBrains/qodana-cli/releases/download/v${version}/qodana_${platform}_${arch}.${archive}`;
+  const cli_version = nightly ? "nightly" : `v${version}`;
+  return `https://github.com/JetBrains/qodana-cli/releases/download/${cli_version}/qodana_${platform}_${arch}.${archive}`;
 }
 function isExecutionSuccessful(exitCode) {
   return Object.values(QodanaExitCode).includes(exitCode);
@@ -5016,6 +5017,7 @@ var require_utils2 = __commonJS({
         uploadResult: tl2.getBoolInput("uploadResult", false) || false,
         uploadSarif: tl2.getBoolInput("uploadSarif", false) || true,
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
+        useNightly: tl2.getBoolInput("useNightly", false) || false,
         // Not used by the Azure task
         postComment: false,
         additionalCacheKey: "",
@@ -5043,15 +5045,17 @@ var require_utils2 = __commonJS({
       });
     }
     exports2.qodana = qodana;
-    function prepareAgent(args) {
-      return __awaiter2(this, void 0, void 0, function* () {
+    function prepareAgent(args_1) {
+      return __awaiter2(this, arguments, void 0, function* (args, useNightly = false) {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
         const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform));
-        const actualChecksum = (0, qodana_12.sha256sum)(temp);
-        if (expectedChecksum !== actualChecksum) {
-          setFailed((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
+        if (!useNightly) {
+          const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
+          const actualChecksum = (0, qodana_12.sha256sum)(temp);
+          if (expectedChecksum !== actualChecksum) {
+            setFailed((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
+          }
         }
         let extractRoot;
         if (process.platform === "win32") {
@@ -5059,7 +5063,7 @@ var require_utils2 = __commonJS({
         } else {
           extractRoot = yield tool.extractTar(temp);
         }
-        tool.prependPath(yield tool.cacheDir(extractRoot, qodana_12.EXECUTABLE, qodana_12.VERSION));
+        tool.prependPath(yield tool.cacheDir(extractRoot, qodana_12.EXECUTABLE, useNightly ? "nightly" : qodana_12.VERSION));
         if (!(0, qodana_12.isNativeMode)(args)) {
           const pull = yield qodana((0, qodana_12.getQodanaPullArgs)(args));
           if (pull !== 0) {

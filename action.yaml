@@ -65,6 +65,11 @@ inputs:
     description: 'Commit message for the commit with quick-fixes. Not used if `push-fixes` is set to `none`'
     required: false
     default: "🤖 Apply quick-fixes by Qodana"
+  use-nightly:
+    description: 'Use unstable Qodana CLI nightly'
+    required: false
+    default: "false"
+    deprecationMessage: 'This option is for development purposes only. Do not use it in production.'
 runs:
   using: 'node20'
   main: 'scan/dist/index.js'
