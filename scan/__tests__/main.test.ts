@@ -45,6 +45,7 @@ test('test typical summary output', () => {
     'Qodana for JS',
     annotationsDefaultFixture().reverse(), // reversed for testing the correct sorting in output
     '',
+    0,
     'There is no licenses information available',
     'https://example.com/report',
     true
@@ -57,6 +58,7 @@ test('test empty summary output', () => {
     'Qodana for JS',
     outputEmptyFixture(),
     '',
+    0,
     '',
     '',
     false
@@ -264,7 +266,7 @@ export function markdownSummaryFixture(): string {
 💡 Qodana analysis was run in the pull request mode: only the changed files were checked
 ☁️ [View the detailed Qodana report](https://example.com/report)
 <details>
-<summary>Dependencies licenses</summary>
+<summary>Detected 0 dependencies</summary>
 
 There is no licenses information available
 </details>
