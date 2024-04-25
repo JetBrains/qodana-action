@@ -196,7 +196,13 @@ export async function uploadArtifacts(
   }
   try {
     core.info('Uploading artifacts...')
-    const globber = await glob.create(`${resultsDir}/*`)
+    const locations = [
+      `${resultsDir}/*`,
+      `${resultsDir}/log/*`,
+      `${resultsDir}/report/*`,
+      `${resultsDir}/projectStructure/*`
+    ]
+    const globber = await glob.create(locations.join('\n'))
     const files = await globber.glob()
     await artifact.uploadArtifact(artifactName, files, path.dirname(resultsDir))
   } catch (error) {
