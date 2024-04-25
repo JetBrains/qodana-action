@@ -300,7 +300,7 @@ To get \`*.log\` files or any other Qodana artifacts, run the action with \`uplo
 so that the action will upload the files as the job artifacts:
 \`\`\`yaml
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2024.1.1
+        uses: JetBrains/qodana-action@v2024.1.2
         with:
           upload-result: true
 \`\`\`
