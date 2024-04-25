@@ -13,7 +13,7 @@ export const QODANA_REPORT_URL_NAME = 'qodana.cloud'
 export const QODANA_OPEN_IN_IDE_NAME = 'open-in-ide.json'
 
 export const QODANA_LICENSES_MD = 'thirdPartySoftwareList.md'
-export const QODANA_LICENSES_JSON = 'thirdPartySoftwareList.json'
+export const QODANA_LICENSES_JSON = 'third-party-libraries.json'
 export const EXECUTABLE = 'qodana'
 export const VERSION = version
 
