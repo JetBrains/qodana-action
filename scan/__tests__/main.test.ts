@@ -230,7 +230,8 @@ export function inputsDefaultFixture(): Inputs {
     postComment: true,
     githubToken: '',
     pushFixes: 'none',
-    commitMessage: ''
+    commitMessage: '',
+    useNightly: false
   }
 }
 

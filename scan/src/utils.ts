@@ -30,6 +30,7 @@ import path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
 import {COMMIT_EMAIL, COMMIT_USER, prFixesBody} from './output'
+
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
 const REACTIONS = [
@@ -68,9 +69,11 @@ export function getInputs(): Inputs {
     postComment: core.getBooleanInput('post-pr-comment'),
     githubToken: core.getInput('github-token'),
     pushFixes: core.getInput('push-fixes'),
-    commitMessage: core.getInput('commit-message')
+    commitMessage: core.getInput('commit-message'),
+    useNightly: core.getBooleanInput('use-nightly')
   }
 }
+
 /**
  * Runs the qodana command with the given arguments.
  * @param inputs the action inputs.
@@ -141,17 +144,23 @@ export async function pushQuickFixes(
 /**
  * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
  * @param args qodana arguments
+ * @param useNightly whether to use a nightly version of Qodana CLI
  */
-export async function prepareAgent(args: string[]): Promise<void> {
+export async function prepareAgent(
+  args: string[],
+  useNightly = false
+): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
-  const expectedChecksum = getQodanaSha256(arch, platform)
-  const temp = await tc.downloadTool(getQodanaUrl(arch, platform))
-  const actualChecksum = sha256sum(temp)
-  if (expectedChecksum !== actualChecksum) {
-    core.setFailed(
-      getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
-    )
+  const temp = await tc.downloadTool(getQodanaUrl(arch, platform, useNightly))
+  if (!useNightly) {
+    const expectedChecksum = getQodanaSha256(arch, platform)
+    const actualChecksum = sha256sum(temp)
+    if (expectedChecksum !== actualChecksum) {
+      core.setFailed(
+        getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
+      )
+    }
   }
   let extractRoot
   if (process.platform === 'win32') {
@@ -159,7 +168,9 @@ export async function prepareAgent(args: string[]): Promise<void> {
   } else {
     extractRoot = await tc.extractTar(temp)
   }
-  core.addPath(await tc.cacheDir(extractRoot, EXECUTABLE, VERSION))
+  core.addPath(
+    await tc.cacheDir(extractRoot, EXECUTABLE, useNightly ? 'nightly' : VERSION)
+  )
   if (!isNativeMode(args)) {
     const exitCode = await qodana(getInputs(), getQodanaPullArgs(args))
     if (exitCode !== 0) {

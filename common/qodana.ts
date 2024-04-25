@@ -18,6 +18,7 @@ export const EXECUTABLE = 'qodana'
 export const VERSION = version
 
 export const COVERAGE_THRESHOLD = 50
+
 export function getQodanaSha256(arch: string, platform: string): string {
   switch (`${platform}_${arch}`) {
     case 'windows_x86_64':
@@ -54,7 +55,11 @@ export function getProcessPlatformName(): string {
 /**
  * Gets Qodana CLI download URL from the GitHub Releases API.
  */
-export function getQodanaUrl(arch: string, platform: string): string {
+export function getQodanaUrl(
+  arch: string,
+  platform: string,
+  nightly = false
+): string {
   if (!SUPPORTED_PLATFORMS.includes(platform)) {
     throw new Error(`Unsupported platform: ${platform}`)
   }
@@ -62,7 +67,8 @@ export function getQodanaUrl(arch: string, platform: string): string {
     throw new Error(`Unsupported architecture: ${arch}`)
   }
   const archive = platform === 'windows' ? 'zip' : 'tar.gz'
-  return `https://github.com/JetBrains/qodana-cli/releases/download/v${version}/qodana_${platform}_${arch}.${archive}`
+  const cli_version = nightly ? 'nightly' : `v${version}`
+  return `https://github.com/JetBrains/qodana-cli/releases/download/${cli_version}/qodana_${platform}_${arch}.${archive}`
 }
 
 // eslint-disable-next-line no-shadow -- shadowing is intentional here (ESLint bug)
@@ -155,11 +161,13 @@ export function getQodanaScanArgs(
   }
   return cliArgs
 }
+
 export const NONE = 'none'
 export const BRANCH = 'branch'
 export const PULL_REQUEST = 'pull-request'
 const PUSH_FIXES_TYPES = [NONE, BRANCH, PULL_REQUEST]
 export type PushFixesType = (typeof PUSH_FIXES_TYPES)[number]
+
 /**
  * The context of the current run – described in action.yaml.
  */
@@ -180,6 +188,7 @@ export interface Inputs {
   githubToken: string
   pushFixes: PushFixesType
   commitMessage: string
+  useNightly: boolean
 }
 
 /**

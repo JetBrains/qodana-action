@@ -29,5 +29,6 @@ jobs:
         with:
           args: --print-problems,--log-level,debug,--config,.github/qodana.yaml
           pr-mode: true
+          use-nightly: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}

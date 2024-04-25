@@ -66,7 +66,7 @@ async function main(): Promise<void> {
     )
     await Promise.all([
       putReaction(ANALYSIS_STARTED_REACTION, ANALYSIS_FINISHED_REACTION),
-      prepareAgent(inputs.args),
+      prepareAgent(inputs.args, inputs.useNightly),
       restoreCachesPromise
     ])
     const reservedCacheKey = await restoreCachesPromise
