@@ -179,4 +179,11 @@ git tag -a vX.X.X -m "vX.X.X" && git push origin vX.X.X
 ```
 
 And [our GitHub Actions job `Release`](https://github.com/JetBrains/qodana-action/actions/workflows/release.yml) will do the rest.
-Note that Gradle, GitHub action, CircleCI orb and Azure extension are always released together.
+
+Note that Gradle, GitHub action, CircleCI orb and Azure extension are always released together. 
+The release will be published to:
+
+- [GitHub Marketplace](https://github.com/marketplace/actions/qodana-scan)
+- [Azure DevOps Marketplace](https://marketplace.visualstudio.com/items?itemName=JetBrains.qodana)
+- [CircleCI Orb Registry](https://circleci.com/developer/orbs/orb/jetbrains/qodana)
+- [Gradle Plugin Portal](https://plugins.gradle.org/plugin/org.jetbrains.qodana)
