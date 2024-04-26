@@ -4,7 +4,9 @@ By participating in this project, you agree to abide by our [Code of conduct](.g
 
 ## Set up your machine
 
-Qodana Scan GitHub Action and Qodana for Azure are written in [TypeScript](https://www.typescriptlang.org). CircleCI Orb is written in YAML (but utilizes CLI under the hood similar way Qodana for Azure doe).
+- Qodana Scan GitHub Action and Qodana for Azure are written in [TypeScript](https://www.typescriptlang.org). 
+- CircleCI Orb is written in YAML (but uses CLI under the hood similar way Qodana for Azure does).
+- Qodana for Gradle plugin is written in [Kotlin](https://kotlinlang.org).
 
 Prerequisites:
 
@@ -165,10 +167,16 @@ main branch.
 
 ## Release a new version
 
-If you are a core maintainer and want to release a new version, all you need is just run the following command:
+Because every extension depends on CLI,
+extensions follow the [CLI versioning](https://github.com/JetBrains/qodana-cli/releases) scheme.
+When a new CLI release is published, a pull request with the update is automatically created in this repository
+([example](https://github.com/JetBrains/qodana-action/pull/293))
+
+If you are a core maintainer and want to release a new version, all you need is to run the following command:
 
 ```shell
 git tag -a vX.X.X -m "vX.X.X" && git push origin vX.X.X
 ```
 
-And GitHub Actions will do the rest. Note that GitHub action, CircleCI orb and Azure extension are released together.
+And [our GitHub Actions job `Release`](https://github.com/JetBrains/qodana-action/actions/workflows/release.yml) will do the rest.
+Note that Gradle, GitHub action, CircleCI orb and Azure extension are always released together.
