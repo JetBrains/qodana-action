@@ -22,7 +22,7 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v4
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v3.3.1
+        uses: gradle/wrapper-validation-action@v3.3.2
 
   gradle-test:
     name: gradle-test
