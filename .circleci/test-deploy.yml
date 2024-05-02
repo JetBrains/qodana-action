@@ -14,7 +14,7 @@ jobs:
     steps:
       - checkout
       - qodana/scan:
-          args: "--print-problems --log-level debug --linter jetbrains/qodana-jvm-community:latest --property idea.headless.enable.statistics=false"
+          args: "--config .github/qodana.yaml --print-problems --log-level debug --linter jetbrains/qodana-jvm-community:latest --property idea.headless.enable.statistics=false"
 
 workflows:
   test-deploy:

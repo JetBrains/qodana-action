@@ -84,7 +84,7 @@ jobs:
       - name: Lint the code
         run: npm run lint
 
-  build:
+  build-test:
     runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
@@ -95,31 +95,50 @@ jobs:
     needs: [ lint ]
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci && npm run build
+      - run: npm ci && npm run build && npm run test
 
-  test-native:
-    runs-on: '${{ matrix.os }}'
+  test-action:
+    runs-on: ${{ matrix.os }}
+    needs: [lint, build-test]
     strategy:
       matrix:
-        os:
-#          - macos-latest
-          - ubuntu-latest
-          - windows-latest
-    needs: [ lint ]
+        os: [ubuntu-latest]
+        arguments: [
+          '-i,tests/dotnet',
+          '-i,tests/duplicates',
+          '-i,tests/go',
+          '-i,tests/java',
+          '-i,tests/js',
+          '-i,tests/py_error',
+          '-i,tests/dotnet,--ide,QDNET'  # TODO: '-i,tests/dotnet,--linter,jetbrains/qodana-cdnet',
+        ]
+        # TODO: pr: [ 'true', 'false' ]
+        include:
+          - arguments: '-i,tests/dotnet,--ide,QDNET'
+            os: 'windows-latest'
+            pr: 'false'
     steps:
       - uses: actions/checkout@v4
-      - uses: ./
         with:
-          args: --ide,QDNET
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: 'JetBrains/code-analytics-examples'
+          fetch-depth: 0
+          path: 'tests'
+      - name: Qodana
+        uses: ./
+        with:
+          args: '${{ matrix.arguments }}'
           pr-mode: false
           post-pr-comment: false
           use-annotations: false
         env:
-          QODANA_LICENSE_ONLY_TOKEN: ${{ secrets.QODANA_TOKEN }}
+          QODANA_TOKEN: ${{ secrets.QODANA_PROJECT_TESTS_TOKEN }}
 
   azure-dev-release:
     runs-on: ubuntu-latest
-    needs: [ lint, build ]
+    needs: [ lint, build-test ]
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
