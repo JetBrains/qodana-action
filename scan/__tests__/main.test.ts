@@ -5,7 +5,8 @@ import {
   getQodanaScanArgs,
   Inputs,
   QODANA_OPEN_IN_IDE_NAME,
-  QODANA_REPORT_URL_NAME
+  QODANA_REPORT_URL_NAME,
+  validateBranchName
 } from '../../common/qodana'
 import {
   Annotation,
@@ -17,6 +18,20 @@ import {getSummary, getCoverageStats, getReportURL} from '../src/output'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
+
+test('validate branch names', () => {
+  let validBranchNames = [
+    'main',
+    'dependabot/go_modules/cmd/dependencies.1987366a71',
+    'refs/heads/main',
+    'refs/tags/v1.0.0',
+    'refs/pull/123/merge',
+    'v2024.1.3'
+  ]
+  for (let branchName of validBranchNames) {
+    expect(validateBranchName(branchName)).toEqual(branchName)
+  }
+})
 
 test('qodana scan command args', () => {
   const inputs = inputsDefaultFixture()
