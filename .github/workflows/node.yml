@@ -104,30 +104,47 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         directory: [
-          'tests/dotnet',
-          'tests/duplicates',
-          'tests/go',
-          'tests/java',
-          'tests/js',
-          'tests/py_error',
-          'tests/dotnet',
+          'tests/dotnet', 'tests/duplicates', 'tests/go', 'tests/java', 'tests/js', 'tests/py_error'
         ]
         arguments: ['']
         pr: [ 'true', 'false' ]
         include:
           - directory: 'tests/java'
             arguments: '-l,jetbrains/qodana-jvm-community'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-community'
+            os: 'ubuntu-latest'
+            pr: 'false'
           - directory: 'tests/java'
             arguments: '-l,jetbrains/qodana-jvm-android'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-android'
+            os: 'ubuntu-latest'
+            pr: 'false'
           - directory: 'tests/py_error'
             arguments: '-l,jetbrains/qodana-python-community'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/py_error'
+            arguments: '-l,jetbrains/qodana-python-community'
+            os: 'ubuntu-latest'
+            pr: 'false'
           - directory: 'tests/dotnet'
             arguments: '--ide,QDNET'
             os: 'windows-latest'
+            pr: 'false'
+          - directory: 'tests/dotnet'
+            arguments: '--ide,QDNET'
+            os: 'windows-latest'
+            pr: 'true'
           - directory: 'tests/dotnet'
             os: 'ubuntu-latest'
-            arguments: '-l,jetbrains/qodana-cdnet'
-            pr: 'false' # TODO: remove when fixed
+            arguments: '-l,jetbrains/qodana-cdnet:2024.1-eap'
+            pr: 'false' # TODO: set to true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -139,28 +156,32 @@ jobs:
           path: 'tests'
       - name: Emulate pull request
         run: |
-          git config user.name qodana-bot
-          git config user.email qodana-support@jetbrains.com
+          git config --global user.name qodana-bot
+          git config --global user.email qodana-support@jetbrains.com
           git init
           git remote add origin https://github.com/JetBrains/code-analytics-examples.git
           echo "test" > README.md
           git add README.md
           git commit -m "Initial commit"
-          export BASE_COMMIT=$(git rev-parse HEAD)
+          QODANA_PR_SHA=$(git rev-parse HEAD)
+          echo "QODANA_PR_SHA=$QODANA_PR_SHA" >> $GITHUB_ENV
           git checkout -b new-feature
           git add .
           git commit -m "Add new feature"
-          export HEAD_COMMIT=$(git rev-parse HEAD)
         working-directory: '${{ matrix.directory }}'
+        shell: bash
       - name: Qodana
         uses: ./
         with:
-          args: '${{ matrix.arguments }}'
-          pr-mode: false
+          args: ${{ format('-i,{0},{1}', matrix.directory, matrix.arguments) }}
+          pr-mode: ${{ matrix.pr }}
           post-pr-comment: false
           use-annotations: false
+          use-caches: false
+          use-nightly: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_PROJECT_TESTS_TOKEN }}
+          QODANA_PR_SHA: ${{ env.QODANA_PR_SHA }}
 
   azure-dev-release:
     runs-on: ubuntu-latest
