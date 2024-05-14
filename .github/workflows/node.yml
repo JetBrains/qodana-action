@@ -193,7 +193,7 @@ jobs:
         run: cat ${{ runner.temp }}/qodana/results/log/idea.log
       - name: Show diff
         continue-on-error: true
-        run: find C:\Users\RUNNER~1\AppData\Local\Temp -type f -exec cat {} +
+        run: dir C:\Users\RUNNER~1\AppData\Local\Temp && type C:\Users\RUNNER~1\AppData\Local\Temp\diff-scope.txt*
 
   azure-dev-release:
     runs-on: ubuntu-latest
