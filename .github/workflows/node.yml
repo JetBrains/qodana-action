@@ -191,6 +191,9 @@ jobs:
       - name: Show logs
         continue-on-error: true
         run: cat ${{ runner.temp }}/qodana/results/log/idea.log
+      - name: Show diff
+        continue-on-error: true
+        run: echo ${{ env.TMPDIR }} && cat ${{ env.TMPDIR }}/diff-scope.txt*
 
   azure-dev-release:
     runs-on: ubuntu-latest
