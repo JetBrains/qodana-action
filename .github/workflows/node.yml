@@ -103,12 +103,6 @@ jobs:
     needs: [lint, build-test]
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        directory: [
-          'tests/cpp', 'tests/dotnet', 'tests/duplicates', 'tests/go', 'tests/java', 'tests/js', 'tests/py_error'
-        ]
-        arguments: ['']
-        pr: [ 'true', 'false' ]
         include:
           - directory: 'tests/dotnet'
             arguments: '--ide,QDNET, "--property=idea.log.debug.categories=#com.intellij.codeInspection"'
