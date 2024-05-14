@@ -1,6 +1,7 @@
 name: 'node'
 on:
   workflow_dispatch:
+
   pull_request:
     paths-ignore:
       - 'orb/**'
@@ -104,35 +105,11 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         directory: [
-          'tests/dotnet', 'tests/duplicates', 'tests/go', 'tests/java', 'tests/js', 'tests/py_error'
+          'tests/cpp', 'tests/dotnet', 'tests/duplicates', 'tests/go', 'tests/java', 'tests/js', 'tests/py_error'
         ]
         arguments: ['']
         pr: [ 'true', 'false' ]
         include:
-          - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-community'
-            os: 'ubuntu-latest'
-            pr: 'true'
-          - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-community'
-            os: 'ubuntu-latest'
-            pr: 'false'
-          - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-android'
-            os: 'ubuntu-latest'
-            pr: 'true'
-          - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-android'
-            os: 'ubuntu-latest'
-            pr: 'false'
-          - directory: 'tests/py_error'
-            arguments: '-l,jetbrains/qodana-python-community'
-            os: 'ubuntu-latest'
-            pr: 'true'
-          - directory: 'tests/py_error'
-            arguments: '-l,jetbrains/qodana-python-community'
-            os: 'ubuntu-latest'
-            pr: 'false'
           - directory: 'tests/dotnet'
             arguments: '--ide,QDNET'
             os: 'windows-latest'
@@ -144,7 +121,36 @@ jobs:
           - directory: 'tests/dotnet'
             os: 'ubuntu-latest'
             arguments: '-l,jetbrains/qodana-cdnet:2024.1-eap'
-            pr: 'false' # TODO: set to true
+            pr: 'false' # TODO: add true when pr-mode is available for dotnet-community
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-community'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-community'
+            os: 'ubuntu-latest'
+            pr: 'false'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-android'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-android'
+            os: 'ubuntu-latest'
+            pr: 'false'
+          - directory: 'tests/py_error'
+            arguments: '-l,jetbrains/qodana-python-community'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/py_error'
+            arguments: '-l,jetbrains/qodana-python-community'
+            os: 'ubuntu-latest'
+            pr: 'false'
+        exclude:  # TODO: remove this block when pr-mode is available for clang
+          - directory: 'tests/cpp'
+            arguments: ''
+            os: 'ubuntu-latest'
+            pr: 'true'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -182,6 +188,9 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_PROJECT_TESTS_TOKEN }}
           QODANA_PR_SHA: ${{ env.QODANA_PR_SHA }}
+      - name: Show logs
+        continue-on-error: true
+        run: cat ${{ runner.temp }}/qodana/results/log/idea.log
 
   azure-dev-release:
     runs-on: ubuntu-latest
