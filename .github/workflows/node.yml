@@ -103,20 +103,31 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        arguments: [
-          '-i,tests/dotnet',
-          '-i,tests/duplicates',
-          '-i,tests/go',
-          '-i,tests/java',
-          '-i,tests/js',
-          '-i,tests/py_error',
-          '-i,tests/dotnet,--ide,QDNET'  # TODO: '-i,tests/dotnet,--linter,jetbrains/qodana-cdnet',
+        directory: [
+          'tests/dotnet',
+          'tests/duplicates',
+          'tests/go',
+          'tests/java',
+          'tests/js',
+          'tests/py_error',
+          'tests/dotnet',
         ]
-        # TODO: pr: [ 'true', 'false' ]
+        arguments: ['']
+        pr: [ 'true', 'false' ]
         include:
-          - arguments: '-i,tests/dotnet,--ide,QDNET'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-community'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-android'
+          - directory: 'tests/py_error'
+            arguments: '-l,jetbrains/qodana-python-community'
+          - directory: 'tests/dotnet'
+            arguments: '--ide,QDNET'
             os: 'windows-latest'
-            pr: 'false'
+          - directory: 'tests/dotnet'
+            os: 'ubuntu-latest'
+            arguments: '-l,jetbrains/qodana-cdnet'
+            pr: 'false' # TODO: remove when fixed
     steps:
       - uses: actions/checkout@v4
         with:
@@ -126,6 +137,21 @@ jobs:
           repository: 'JetBrains/code-analytics-examples'
           fetch-depth: 0
           path: 'tests'
+      - name: Emulate pull request
+        run: |
+          git config user.name qodana-bot
+          git config user.email qodana-support@jetbrains.com
+          git init
+          git remote add origin https://github.com/JetBrains/code-analytics-examples.git
+          echo "test" > README.md
+          git add README.md
+          git commit -m "Initial commit"
+          export BASE_COMMIT=$(git rev-parse HEAD)
+          git checkout -b new-feature
+          git add .
+          git commit -m "Add new feature"
+          export HEAD_COMMIT=$(git rev-parse HEAD)
+        working-directory: '${{ matrix.directory }}'
       - name: Qodana
         uses: ./
         with:
