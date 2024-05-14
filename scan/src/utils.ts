@@ -74,6 +74,16 @@ export function getInputs(): Inputs {
   }
 }
 
+function getPrSha(): string {
+  if (process.env.QODANA_PR_SHA) {
+    return process.env.QODANA_PR_SHA
+  }
+  if (github.context.payload.pull_request !== undefined) {
+    return github.context.payload.pull_request.base.sha
+  }
+  return ''
+}
+
 /**
  * Runs the qodana command with the given arguments.
  * @param inputs the action inputs.
@@ -86,9 +96,11 @@ export async function qodana(
 ): Promise<number> {
   if (args.length === 0) {
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
-    if (inputs.prMode && github.context.payload.pull_request !== undefined) {
-      const pr = github.context.payload.pull_request
-      args.push('--commit', `CI${pr.base.sha}`)
+    if (inputs.prMode) {
+      const sha = getPrSha()
+      if (sha !== '') {
+        args.push('--commit', sha)
+      }
     }
   }
   return (
