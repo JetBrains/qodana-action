@@ -106,7 +106,7 @@ jobs:
         os: [ubuntu-latest]
         directory: ['tests/dotnet']
         arguments: ['']
-        pr: [ 'true' ]
+        pr: [ 'true', 'false' ]
         include:
           - directory: 'tests/dotnet'
             arguments: '--ide,QDNET,--property=idea.log.debug.categories=#com.intellij.codeInspection'
@@ -152,7 +152,12 @@ jobs:
       - name: Show logs
         continue-on-error: true
         run: cat ${{ runner.temp }}/qodana/results/log/idea.log
-
+      - name: Show start result
+        continue-on-error: true
+        run: cat ${{ runner.temp }}/qodana/results/start/qodana.sarif.json
+      - name: Show end result
+        continue-on-error: true
+        run: cat ${{ runner.temp }}/qodana/results/end/qodana.sarif.json
   azure-dev-release:
     runs-on: ubuntu-latest
     needs: [ lint, build-test ]
