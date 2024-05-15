@@ -3,7 +3,7 @@ description: >
 usage:
   version: 2.1
   orbs:
-    qodana: jetbrains/qodana@2024.1.4
+    qodana: jetbrains/qodana@2024.1.5
   jobs:
     code-quality:
       machine:
