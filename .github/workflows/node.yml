@@ -102,16 +102,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [lint, build-test]
     strategy:
-      matrix:
+     matrix:
+        os: [ubuntu-latest]
+        directory: ['tests/dotnet']
+        arguments: ['']
+        pr: [ 'true' ]
         include:
           - directory: 'tests/dotnet'
             arguments: '--ide,QDNET, "--property=idea.log.debug.categories=#com.intellij.codeInspection"'
             os: 'windows-latest'
-            pr: 'true'
-        exclude:  # TODO: remove this block when pr-mode is available for clang
-          - directory: 'tests/cpp'
-            arguments: ''
-            os: 'ubuntu-latest'
             pr: 'true'
     steps:
       - uses: actions/checkout@v4
