@@ -109,7 +109,7 @@ jobs:
         pr: [ 'true' ]
         include:
           - directory: 'tests/dotnet'
-            arguments: '--ide,QDNET, "--property=idea.log.debug.categories=#com.intellij.codeInspection"'
+            arguments: '--ide,QDNET, --property=idea.log.debug.categories=#com.intellij.codeInspection'
             os: 'windows-latest'
             pr: 'true'
     steps:
