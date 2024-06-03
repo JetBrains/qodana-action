@@ -30,10 +30,10 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.12.11",
-    "@typescript-eslint/parser": "^7.8.0",
-    "axios": "^1.6.8",
-    "esbuild": "0.21.2",
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "axios": "^1.7.2",
+    "esbuild": "0.21.4",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-github": "^4.10.2",
@@ -41,7 +41,7 @@
     "jest": "latest",
     "js-yaml": "^4.1.0",
     "nock": "^13.5.4",
-    "prettier": "3.2.5",
+    "prettier": "3.3.0",
     "ts-jest": "latest",
     "typescript": "^5.4.5"
   }
