@@ -11,6 +11,6 @@ pool:
 steps:
   - task: QodanaScan@2024
     env:
-      QODANA_BRANCH=azure-main
+      QODANA_BRANCH: azure-main
     inputs:
       args: --log-level,debug,-l,jetbrains/qodana-jvm-community:latest,--property,idea.headless.enable.statistics=false,--config,.github/qodana.yaml
