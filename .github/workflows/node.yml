@@ -184,7 +184,7 @@ jobs:
           post-pr-comment: false
           use-annotations: false
           use-caches: false
-          use-nightly: true
+          use-nightly: false
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_PROJECT_TESTS_TOKEN }}
           QODANA_PR_SHA: ${{ env.QODANA_PR_SHA }}
