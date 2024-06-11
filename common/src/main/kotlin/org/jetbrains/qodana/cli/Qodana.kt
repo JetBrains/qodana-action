@@ -1,4 +1,4 @@
-package org.jetbrains.qodana
+package org.jetbrains.qodana.cli
 
 import java.io.File
 import java.io.FileInputStream
