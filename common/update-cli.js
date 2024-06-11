@@ -7,6 +7,9 @@ const { execSync } = require("child_process");
 const path = require("path");
 const cliJsonPath = "./cli.json";
 
+const PLATFORMS = ["windows", "linux", "darwin"];
+const ARCHS = ["x86_64", "arm64"];
+
 function sha256sum(file) {
   const hash = createHash("sha256");
   hash.update(readFileSync(file));
@@ -113,6 +116,18 @@ function updateCircleCIChecksums(circleCIConfigPath) {
   execSync("rm -rf qodana/ qodana_linux_x86_64.tar.gz");
 }
 
+function updateQodanaKtChecksums(checksums) {
+  const qodanaKtPath = "../src/main/kotlin/org/jetbrains/qodana/Qodana.kt";
+  let qodanaKtContent = fs.readFileSync(qodanaKtPath, "utf-8");
+
+  const newChecksums = `private val CHECKSUMS = mapOf(\n` +
+    checksums.map(({ platform, arch, checksum }) => `            "${platform}_${arch}" to "${checksum}"`).join(",\n") +
+    "\n        )";
+
+  qodanaKtContent = qodanaKtContent.replace(/private val CHECKSUMS = mapOf\((.|\n)*?\)/, newChecksums);
+  fs.writeFileSync(qodanaKtPath, qodanaKtContent);
+}
+
 function updateVersions(latestVersion, currentVersion) {
   const latestVersions = latestVersion.split(".");
   const latestMajor = parseInt(latestVersions[0]);
@@ -161,6 +176,20 @@ async function main() {
     updateVersions(latestVersion, currentVersion);
     updateCliChecksums(latestVersion, "checksums.txt", cliJsonPath);
     updateCircleCIChecksums("../orb/commands/scan.yml");
+    // Download binaries, calculate checksums, and update Qodana.kt
+    const checksums = [];
+    for (const platform of PLATFORMS) {
+      for (const arch of ARCHS) {
+        const url = `https://github.com/jetbrains/qodana-cli/releases/latest/download/qodana_${platform}_${arch}${platform === "windows" ? ".exe" : ""}`;
+        const filePath = path.join(__dirname, `qodana_${platform}_${arch}${platform === "windows" ? ".exe" : ""}`);
+        console.log(`Downloading ${url}...`);
+        await downloadFile(url, filePath);
+        const checksum = sha256sum(filePath);
+        checksums.push({ platform, arch, checksum });
+        fs.unlinkSync(filePath);
+      }
+    }
+    updateQodanaKtChecksums(checksums);
     console.log("Versions updated successfully!");
   } catch (error) {
     console.error("An error occurred:", error);
