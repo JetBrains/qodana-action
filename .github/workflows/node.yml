@@ -105,7 +105,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         directory: [
-          'tests/cpp', 'tests/dotnet', 'tests/duplicates', 'tests/go', 'tests/java', 'tests/js', 'tests/py_error'
+          'tests/dotnet', 'tests/duplicates', 'tests/go', 'tests/java', 'tests/js', 'tests/py_error' # 'tests/cpp',
         ]
         arguments: ['']
         pr: [ 'true', 'false' ]
@@ -122,35 +122,34 @@ jobs:
             os: 'ubuntu-latest'
             arguments: '-l,jetbrains/qodana-cdnet:2024.1-eap'
             pr: 'false' # TODO: add true when pr-mode is available for dotnet-community
-          - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-community'
-            os: 'ubuntu-latest'
-            pr: 'true'
-          - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-community'
-            os: 'ubuntu-latest'
-            pr: 'false'
-          - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-android'
-            os: 'ubuntu-latest'
-            pr: 'true'
-          - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-android'
-            os: 'ubuntu-latest'
-            pr: 'false'
-          - directory: 'tests/py_error'
-            arguments: '-l,jetbrains/qodana-python-community'
-            os: 'ubuntu-latest'
-            pr: 'true'
-          - directory: 'tests/py_error'
-            arguments: '-l,jetbrains/qodana-python-community'
-            os: 'ubuntu-latest'
-            pr: 'false'
-        exclude:  # TODO: remove this block when pr-mode is available for clang
           - directory: 'tests/cpp'
-            arguments: ''
+            arguments: '-l,jetbrains/qodana-clang:2024.1-eap'
+            os: 'ubuntu-latest'
+            pr: 'false'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-community'
             os: 'ubuntu-latest'
             pr: 'true'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-community'
+            os: 'ubuntu-latest'
+            pr: 'false'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-android'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/java'
+            arguments: '-l,jetbrains/qodana-jvm-android'
+            os: 'ubuntu-latest'
+            pr: 'false'
+          - directory: 'tests/py_error'
+            arguments: '-l,jetbrains/qodana-python-community'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/py_error'
+            arguments: '-l,jetbrains/qodana-python-community'
+            os: 'ubuntu-latest'
+            pr: 'false'
     steps:
       - uses: actions/checkout@v4
         with:
