@@ -12,7 +12,7 @@ val kotlinVersion by extra(libs.versions.kotlin.get())
 group = "org.jetbrains.qodana.common"
 version = "${properties("majorVersion").get()}.${properties("buildNumber").get()}"
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(8)
     version = "2024.1.6"
 }
 publishing {
