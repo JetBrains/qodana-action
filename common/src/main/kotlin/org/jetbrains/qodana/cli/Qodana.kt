@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021-2024 JetBrains s.r.o.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jetbrains.qodana.cli
 
 import java.io.File
@@ -14,25 +30,23 @@ import java.util.logging.Logger
 @Suppress("MemberVisibilityCanBePrivate")
 class Installer {
     val log: Logger = Logger.getLogger(Installer::class.java.name)
-    companion object {
-        private const val VERSION = "2024.1.6"
-        private const val RELEASE_DOWNLOAD_URL = "https://github.com/JetBrains/qodana-cli/releases/download/v%s/qodana_%s_%s"
-        private val CHECKSUMS = mapOf(
-            "windows_x86_64" to "cba8236cc8c650ecac61d543e744cb20e4763a26a075f37dc5909880de93b1f3",
-            "windows_arm64" to "b0547cd008959ca275d0a945e9ae025c4c9271cffa0e87ffaac883d164bf84e2",
-            "linux_x86_64" to "597d870f4c747d04d0280956306e2e7b9e003662d4600d93c1b69fcaffc2bb7b",
-            "linux_arm64" to "b127fc5fe46f5c197781ff0f30de4e4f68b3ba19c5748dcb87c3d1417a3d9f89",
-            "darwin_x86_64" to "847495bdeb8bffd2e13b0af8decdbd3b7b23735ad18746d0629e7a5e25c867de",
-            "darwin_arm64" to "e87ff91a64b8c77466938ee2020bf8636b46016ff9b587aa3fcaa356d6de6b72"
-        )
 
-        fun getQodanaUrl(platform: String = getPlatformName(), arch: String = getArchName(), version: String = VERSION): String {
+    companion object {
+        private const val LATEST_VERSION = "2024.1.6"
+        private const val RELEASE_DOWNLOAD_URL =
+            "https://github.com/JetBrains/qodana-cli/releases/download/v%s/qodana_%s_%s"
+
+        fun getQodanaUrl(
+            platform: String = getPlatformName(),
+            arch: String = getArchName(),
+            version: String = LATEST_VERSION
+        ): String {
             return String.format(RELEASE_DOWNLOAD_URL, version, platform, arch) + getExtension()
         }
 
         fun getExtension(): String = if (getPlatformName() == "windows") ".exe" else ""
 
-        fun getVersion(): String = VERSION
+        fun getLatestVersion(): String = LATEST_VERSION
 
         fun getArchName(): String {
             val arch = System.getProperty("os.arch").lowercase()
@@ -53,20 +67,21 @@ class Installer {
             }
         }
 
-        fun getChecksum(): String {
+        fun getChecksum(version: String = getLatestVersion()): String {
             val platform = getPlatformName()
             val arch = getArchName()
-            return CHECKSUMS["${platform}_${arch}"]
-                ?: throw IllegalArgumentException("Unsupported combination of platform and architecture: ${platform}_${arch}")
+            return CHECKSUMS[version]?.get("${platform}_${arch}")
+                ?: throw IllegalArgumentException("Unsupported combination of version, platform and architecture: $version ${platform}_${arch}")
         }
     }
 
-    fun setup(path: File, downloadURL: String = getQodanaUrl()): String {
+    fun setup(path: File, downloadURL: String = getQodanaUrl(), version: String = getLatestVersion()): String {
         if (path.exists()) {
+            verifyChecksum(path, getChecksum(version))
             return path.absolutePath
         } else try {
             download(downloadURL, path)
-            verifyChecksum(path, getChecksum())
+            verifyChecksum(path, getChecksum(version))
         } catch (e: IOException) {
             throw IOException("Unable to download latest qodana binary", e)
         }
