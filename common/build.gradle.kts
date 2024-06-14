@@ -29,7 +29,7 @@ group = "org.jetbrains.qodana.common"
 version = "${properties("majorVersion").get()}.${properties("buildNumber").get()}"
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(11)
     version = "2024.1.6"
 }
 

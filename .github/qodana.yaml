@@ -1,6 +1,6 @@
 version: "1.0"
 linter: jetbrains/qodana-jvm:latest
-projectJDK: "8"
+projectJDK: "11"
 profile:
   name: qodana.recommended.full
 exclude:
