@@ -4411,10 +4411,14 @@ var require_semver_compare = __commonJS({
       for (var i = 0; i < 3; i++) {
         var na = Number(pa[i]);
         var nb = Number(pb[i]);
-        if (na > nb) return 1;
-        if (nb > na) return -1;
-        if (!isNaN(na) && isNaN(nb)) return 1;
-        if (isNaN(na) && !isNaN(nb)) return -1;
+        if (na > nb)
+          return 1;
+        if (nb > na)
+          return -1;
+        if (!isNaN(na) && isNaN(nb))
+          return 1;
+        if (isNaN(na) && !isNaN(nb))
+          return -1;
       }
       return 0;
     };
@@ -4935,7 +4939,8 @@ var require_utils2 = __commonJS({
   "lib/utils.js"(exports2) {
     "use strict";
     var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0) k2 = k;
+      if (k2 === void 0)
+        k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
         desc = { enumerable: true, get: function() {
@@ -4944,7 +4949,8 @@ var require_utils2 = __commonJS({
       }
       Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
-      if (k2 === void 0) k2 = k;
+      if (k2 === void 0)
+        k2 = k;
       o[k2] = m[k];
     });
     var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
@@ -4953,10 +4959,13 @@ var require_utils2 = __commonJS({
       o["default"] = v;
     });
     var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+      if (mod && mod.__esModule)
+        return mod;
       var result = {};
       if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding2(result, mod, k);
       }
       __setModuleDefault2(result, mod);
       return result;
@@ -5101,7 +5110,8 @@ var require_utils2 = __commonJS({
 
 // lib/main.js
 var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-  if (k2 === void 0) k2 = k;
+  if (k2 === void 0)
+    k2 = k;
   var desc = Object.getOwnPropertyDescriptor(m, k);
   if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
     desc = { enumerable: true, get: function() {
@@ -5110,7 +5120,8 @@ var __createBinding = exports && exports.__createBinding || (Object.create ? fun
   }
   Object.defineProperty(o, k2, desc);
 } : function(o, m, k, k2) {
-  if (k2 === void 0) k2 = k;
+  if (k2 === void 0)
+    k2 = k;
   o[k2] = m[k];
 });
 var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
@@ -5119,10 +5130,13 @@ var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create
   o["default"] = v;
 });
 var __importStar = exports && exports.__importStar || function(mod) {
-  if (mod && mod.__esModule) return mod;
+  if (mod && mod.__esModule)
+    return mod;
   var result = {};
   if (mod != null) {
-    for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    for (var k in mod)
+      if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+        __createBinding(result, mod, k);
   }
   __setModuleDefault(result, mod);
   return result;
