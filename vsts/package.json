@@ -38,7 +38,7 @@
     "js-yaml": "^4.1.0",
     "prettier": "3.3.2",
     "sync-request": "^6.1.0",
-    "ts-jest": "^29.1.4",
+    "ts-jest": "^29.1.5",
     "typescript": "^5.4.5"
   }
 }
