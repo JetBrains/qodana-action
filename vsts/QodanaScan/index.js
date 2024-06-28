@@ -37,14 +37,14 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2024.1.6";
+    version = "2024.1.7";
     checksum = {
-      windows_x86_64: "1701c23a4ef7dcfbeb3563a4a3f0d1681bbf25dad34938783d755833fff90276",
-      linux_arm64: "8e4f61b30dcebba06923828aef62329acf8f0caa49f2159689dce277c55466bd",
-      darwin_arm64: "40aa43ab15f3979a7a506dee18eaa7f57cc1c634a8347fd2cf3096750b082b2e",
-      darwin_x86_64: "c2e9bacfb842a3a0890ce81d64d93040dfba996f5cd9df73335ef5448e5c86a6",
-      windows_arm64: "0cfb3b9912aafda00ce2d91e8d778f8e5d71e130a7b5c3fbaf71926d0bff7c70",
-      linux_x86_64: "6252d97a6e9f674863f3dcc43bb84c48c71db88400c28036738959443591fea4"
+      windows_x86_64: "c7523a1332f566519111dad70b7f39e25aabe2b4db7790c8eeb0503e8e0bc5a8",
+      linux_arm64: "ba196787569f97519d002446844ee72402e3700d86c475c3145088ec9d4dcfc2",
+      darwin_arm64: "abaf85c4295760e4c8cc75518c16ea7d68818a2a8438cf8005640b13a87f58af",
+      darwin_x86_64: "20b296f31f00e9aac0ab186a85cf13d03d49b737bda5ec37f8ed82316ffa2d45",
+      windows_arm64: "26709690340e873b37288beabec93a570fa0530a59fb43cdac3eb7e9df5dc1dc",
+      linux_x86_64: "49173d02499c9bf485c02a76315d208d8382cd02cbf0b135dc741a2c74922095"
     };
   }
 });
@@ -4411,14 +4411,10 @@ var require_semver_compare = __commonJS({
       for (var i = 0; i < 3; i++) {
         var na = Number(pa[i]);
         var nb = Number(pb[i]);
-        if (na > nb)
-          return 1;
-        if (nb > na)
-          return -1;
-        if (!isNaN(na) && isNaN(nb))
-          return 1;
-        if (isNaN(na) && !isNaN(nb))
-          return -1;
+        if (na > nb) return 1;
+        if (nb > na) return -1;
+        if (!isNaN(na) && isNaN(nb)) return 1;
+        if (isNaN(na) && !isNaN(nb)) return -1;
       }
       return 0;
     };
@@ -4939,8 +4935,7 @@ var require_utils2 = __commonJS({
   "lib/utils.js"(exports2) {
     "use strict";
     var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
+      if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
         desc = { enumerable: true, get: function() {
@@ -4949,8 +4944,7 @@ var require_utils2 = __commonJS({
       }
       Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
+      if (k2 === void 0) k2 = k;
       o[k2] = m[k];
     });
     var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
@@ -4959,13 +4953,10 @@ var require_utils2 = __commonJS({
       o["default"] = v;
     });
     var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule)
-        return mod;
+      if (mod && mod.__esModule) return mod;
       var result = {};
       if (mod != null) {
-        for (var k in mod)
-          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-            __createBinding2(result, mod, k);
+        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
       }
       __setModuleDefault2(result, mod);
       return result;
@@ -5110,8 +5101,7 @@ var require_utils2 = __commonJS({
 
 // lib/main.js
 var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-  if (k2 === void 0)
-    k2 = k;
+  if (k2 === void 0) k2 = k;
   var desc = Object.getOwnPropertyDescriptor(m, k);
   if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
     desc = { enumerable: true, get: function() {
@@ -5120,8 +5110,7 @@ var __createBinding = exports && exports.__createBinding || (Object.create ? fun
   }
   Object.defineProperty(o, k2, desc);
 } : function(o, m, k, k2) {
-  if (k2 === void 0)
-    k2 = k;
+  if (k2 === void 0) k2 = k;
   o[k2] = m[k];
 });
 var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
@@ -5130,13 +5119,10 @@ var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create
   o["default"] = v;
 });
 var __importStar = exports && exports.__importStar || function(mod) {
-  if (mod && mod.__esModule)
-    return mod;
+  if (mod && mod.__esModule) return mod;
   var result = {};
   if (mod != null) {
-    for (var k in mod)
-      if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
-        __createBinding(result, mod, k);
+    for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
   }
   __setModuleDefault(result, mod);
   return result;
