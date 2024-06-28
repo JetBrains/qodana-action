@@ -127,8 +127,8 @@ function updateChecksumsKtFile(checksums, latestVersion) {
     const match = checksumSectionRegex.exec(checksumsKtContent);
 
     if (match) {
-        const newContent = match[0].replace(")", `,\n${newChecksums})`);
-        checksumsKtContent = checksumsKtContent.replace(checksumSectionRegex, newContent);
+        const updatedContent = match[0].replace(")", `,\n${newChecksums}\n)`);
+        checksumsKtContent = checksumsKtContent.replace(checksumSectionRegex, updatedContent);
     } else {
         const newContent = `val CHECKSUMS = mapOf(\n${newChecksums}\n)`;
         checksumsKtContent = checksumsKtContent.replace("val CHECKSUMS = mapOf()", newContent);

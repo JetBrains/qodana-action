@@ -30,7 +30,7 @@ version = "${properties("majorVersion").get()}.${properties("buildNumber").get()
 
 kotlin {
     jvmToolchain(8)
-    version = "2024.1.6"
+    version = "2024.1.7"
 }
 
 tasks.register<Jar>("jarSources") {
