@@ -24,7 +24,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "azure-pipelines-task-lib": "^4.13.0",
-    "azure-pipelines-tasks-utility-common": "^3.238.0",
+    "azure-pipelines-tasks-utility-common": "^3.241.0",
     "azure-pipelines-tool-lib": "^2.0.7"
   },
   "devDependencies": {
@@ -38,7 +38,7 @@
     "js-yaml": "^4.1.0",
     "prettier": "3.3.2",
     "sync-request": "^6.1.0",
-    "ts-jest": "^29.1.4",
+    "ts-jest": "^29.1.5",
     "typescript": "^5.4.5"
   }
 }
