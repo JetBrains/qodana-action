@@ -20,7 +20,7 @@ import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 import * as glob from '@actions/glob'
 import * as tc from '@actions/tool-cache'
-import artifact from '@actions/artifact'
+import {DefaultArtifactClient} from '@actions/artifact'
 import {GitHub} from '@actions/github/lib/utils'
 import {Conclusion, getGitHubCheckConclusion, Output} from './annotations'
 import {
@@ -224,15 +224,10 @@ export async function uploadArtifacts(
   }
   try {
     core.info('Uploading artifacts...')
-    const locations = [
-      `${resultsDir}/*`,
-      `${resultsDir}/log/*`,
-      `${resultsDir}/report/*`,
-      `${resultsDir}/projectStructure/*`
-    ]
-    const globber = await glob.create(locations.join('\n'))
+    const globber = await glob.create(`${resultsDir}/**/*`)
     const files = await globber.glob()
-    await artifact.uploadArtifact(artifactName, files, path.dirname(resultsDir))
+    const artifactClient = new DefaultArtifactClient()
+    await artifactClient.uploadArtifact(artifactName, files, resultsDir)
   } catch (error) {
     core.warning(`Failed to upload report – ${(error as Error).message}`)
   }
