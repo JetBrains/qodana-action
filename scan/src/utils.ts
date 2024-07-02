@@ -137,35 +137,44 @@ export async function pushQuickFixes(
   if (mode === NONE) {
     return
   }
-  const c = github.context
-  let currentBranch = c.ref
-  if (c.payload.pull_request?.head.ref !== undefined) {
-    currentBranch = c.payload.pull_request.head.ref
-  }
-  currentBranch = validateBranchName(currentBranch)
-  await git(['config', 'user.name', COMMIT_USER])
-  await git(['config', 'user.email', COMMIT_EMAIL])
-  await git(['add', '.'])
-  const exitCode = await git(['commit', '-m', commitMessage], {
-    ignoreReturnCode: true
-  })
-  if (exitCode !== 0) {
-    return
-  }
-
-  await git(['pull', '--rebase', 'origin', currentBranch])
-  if (mode === BRANCH) {
-    await git(['push', 'origin', currentBranch])
-  } else if (mode === PULL_REQUEST) {
-    const newBranch = `qodana/quick-fixes-${c.runId}`
-    await git(['checkout', '-b', newBranch])
-    await git(['push', 'origin', newBranch])
-    await createPr(
-      commitMessage,
-      `${c.repo.owner}/${c.repo.repo}`,
-      currentBranch,
-      newBranch
-    )
+  try {
+    const c = github.context
+    let currentBranch = c.ref
+    if (c.payload.pull_request?.head.ref !== undefined) {
+      currentBranch = c.payload.pull_request.head.ref
+    }
+    const currentCommit = (
+      await exec.getExecOutput('git', ['rev-parse', 'HEAD'])
+    ).stdout.trim()
+    currentBranch = validateBranchName(currentBranch)
+    await git(['config', 'user.name', COMMIT_USER])
+    await git(['config', 'user.email', COMMIT_EMAIL])
+    await git(['add', '.'])
+    let exitCode = await git(['commit', '-m', commitMessage], {
+      ignoreReturnCode: true
+    })
+    if (exitCode !== 0) {
+      return
+    }
+    exitCode = await git(['pull', '--rebase', 'origin', currentBranch])
+    if (exitCode !== 0) {
+      return
+    }
+    if (mode === BRANCH) {
+      await git(['push', 'origin', currentBranch])
+    } else if (mode === PULL_REQUEST) {
+      const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
+      await git(['checkout', '-b', newBranch])
+      await git(['push', 'origin', newBranch])
+      await createPr(
+        commitMessage,
+        `${c.repo.owner}/${c.repo.repo}`,
+        currentBranch,
+        newBranch
+      )
+    }
+  } catch (error) {
+    core.warning(`Failed to push quick fixes – ${(error as Error).message}`)
   }
 }
 
