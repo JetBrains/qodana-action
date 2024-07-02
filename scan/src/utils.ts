@@ -18,7 +18,6 @@ import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
-import * as glob from '@actions/glob'
 import * as tc from '@actions/tool-cache'
 import artifact from '@actions/artifact'
 import {GitHub} from '@actions/github/lib/utils'
@@ -40,7 +39,8 @@ import {
   PULL_REQUEST,
   BRANCH,
   isNativeMode,
-  validateBranchName
+  validateBranchName,
+  compressFolder
 } from '../../common/qodana'
 import path from 'path'
 import * as fs from 'fs'
@@ -137,35 +137,44 @@ export async function pushQuickFixes(
   if (mode === NONE) {
     return
   }
-  const c = github.context
-  let currentBranch = c.ref
-  if (c.payload.pull_request?.head.ref !== undefined) {
-    currentBranch = c.payload.pull_request.head.ref
-  }
-  currentBranch = validateBranchName(currentBranch)
-  await git(['config', 'user.name', COMMIT_USER])
-  await git(['config', 'user.email', COMMIT_EMAIL])
-  await git(['add', '.'])
-  const exitCode = await git(['commit', '-m', commitMessage], {
-    ignoreReturnCode: true
-  })
-  if (exitCode !== 0) {
-    return
-  }
-
-  await git(['pull', '--rebase', 'origin', currentBranch])
-  if (mode === BRANCH) {
-    await git(['push', 'origin', currentBranch])
-  } else if (mode === PULL_REQUEST) {
-    const newBranch = `qodana/quick-fixes-${c.runId}`
-    await git(['checkout', '-b', newBranch])
-    await git(['push', 'origin', newBranch])
-    await createPr(
-      commitMessage,
-      `${c.repo.owner}/${c.repo.repo}`,
-      currentBranch,
-      newBranch
-    )
+  try {
+    const c = github.context
+    let currentBranch = c.ref
+    if (c.payload.pull_request?.head.ref !== undefined) {
+      currentBranch = c.payload.pull_request.head.ref
+    }
+    const currentCommit = (
+      await exec.getExecOutput('git', ['rev-parse', 'HEAD'])
+    ).stdout.trim()
+    currentBranch = validateBranchName(currentBranch)
+    await git(['config', 'user.name', COMMIT_USER])
+    await git(['config', 'user.email', COMMIT_EMAIL])
+    await git(['add', '.'])
+    let exitCode = await git(['commit', '-m', commitMessage], {
+      ignoreReturnCode: true
+    })
+    if (exitCode !== 0) {
+      return
+    }
+    exitCode = await git(['pull', '--rebase', 'origin', currentBranch])
+    if (exitCode !== 0) {
+      return
+    }
+    if (mode === BRANCH) {
+      await git(['push', 'origin', currentBranch])
+    } else if (mode === PULL_REQUEST) {
+      const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
+      await git(['checkout', '-b', newBranch])
+      await git(['push', 'origin', newBranch])
+      await createPr(
+        commitMessage,
+        `${c.repo.owner}/${c.repo.repo}`,
+        currentBranch,
+        newBranch
+      )
+    }
+  } catch (error) {
+    core.warning(`Failed to push quick fixes – ${(error as Error).message}`)
   }
 }
 
@@ -223,16 +232,10 @@ export async function uploadArtifacts(
     return
   }
   try {
-    core.info('Uploading artifacts...')
-    const locations = [
-      `${resultsDir}/*`,
-      `${resultsDir}/log/*`,
-      `${resultsDir}/report/*`,
-      `${resultsDir}/projectStructure/*`
-    ]
-    const globber = await glob.create(locations.join('\n'))
-    const files = await globber.glob()
-    await artifact.uploadArtifact(artifactName, files, path.dirname(resultsDir))
+    const workingDir = path.dirname(resultsDir)
+    const archivePath = path.join(workingDir, `${artifactName}.zip`)
+    await compressFolder(resultsDir, archivePath)
+    await artifact.uploadArtifact(artifactName, [archivePath], workingDir)
   } catch (error) {
     core.warning(`Failed to upload report – ${(error as Error).message}`)
   }
