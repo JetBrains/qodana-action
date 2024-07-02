@@ -14622,7 +14622,12 @@ var require_utils3 = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.uploadSarif = exports2.uploadArtifacts = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.setFailed = void 0;
+    exports2.setFailed = setFailed;
+    exports2.getInputs = getInputs;
+    exports2.qodana = qodana;
+    exports2.prepareAgent = prepareAgent;
+    exports2.uploadArtifacts = uploadArtifacts;
+    exports2.uploadSarif = uploadSarif;
     var tl2 = __importStar2(require("azure-pipelines-task-lib/task"));
     var tool = __importStar2(require_tool());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
@@ -14630,7 +14635,6 @@ var require_utils3 = __commonJS({
     function setFailed(message) {
       tl2.setResult(tl2.TaskResult.Failed, message);
     }
-    exports2.setFailed = setFailed;
     function getInputs() {
       const home = path2.join(process.env["AGENT_TEMPDIRECTORY"], "qodana");
       return {
@@ -14654,7 +14658,6 @@ var require_utils3 = __commonJS({
         commitMessage: ""
       };
     }
-    exports2.getInputs = getInputs;
     function qodana() {
       return __awaiter2(this, arguments, void 0, function* (args = []) {
         if (args.length === 0) {
@@ -14667,7 +14670,6 @@ var require_utils3 = __commonJS({
         });
       });
     }
-    exports2.qodana = qodana;
     function prepareAgent(args_1) {
       return __awaiter2(this, arguments, void 0, function* (args, useNightly = false) {
         const arch = (0, qodana_12.getProcessArchName)();
@@ -14695,7 +14697,6 @@ var require_utils3 = __commonJS({
         }
       });
     }
-    exports2.prepareAgent = prepareAgent;
     function uploadArtifacts(resultsDir, artifactName, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
@@ -14711,7 +14712,6 @@ var require_utils3 = __commonJS({
         }
       });
     }
-    exports2.uploadArtifacts = uploadArtifacts;
     function uploadSarif(resultsDir, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!execute) {
@@ -14727,7 +14727,6 @@ var require_utils3 = __commonJS({
         }
       });
     }
-    exports2.uploadSarif = uploadSarif;
   }
 });
 
