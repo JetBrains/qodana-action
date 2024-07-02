@@ -21,7 +21,8 @@ import {
   FAIL_THRESHOLD_OUTPUT,
   QodanaExitCode,
   isExecutionSuccessful,
-  NONE
+  NONE,
+  extractArg
 } from '../../common/qodana'
 import {
   ANALYSIS_FINISHED_REACTION,
@@ -106,6 +107,7 @@ async function main(): Promise<void> {
       ),
       publishOutput(
         exitCode === QodanaExitCode.FailThreshold,
+        extractArg('-i', '--project-dir', inputs.args),
         inputs.resultsDir,
         inputs.useAnnotations,
         inputs.postComment,
