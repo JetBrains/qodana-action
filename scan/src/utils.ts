@@ -18,7 +18,6 @@ import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
-import * as glob from '@actions/glob'
 import * as tc from '@actions/tool-cache'
 import artifact from '@actions/artifact'
 import {GitHub} from '@actions/github/lib/utils'
@@ -40,7 +39,8 @@ import {
   PULL_REQUEST,
   BRANCH,
   isNativeMode,
-  validateBranchName
+  validateBranchName,
+  compressFolder
 } from '../../common/qodana'
 import path from 'path'
 import * as fs from 'fs'
@@ -224,15 +224,10 @@ export async function uploadArtifacts(
   }
   try {
     core.info('Uploading artifacts...')
-    const locations = [
-      `${resultsDir}/*`,
-      `${resultsDir}/log/*`,
-      `${resultsDir}/report/*`,
-      `${resultsDir}/projectStructure/*`
-    ]
-    const globber = await glob.create(locations.join('\n'))
-    const files = await globber.glob()
-    await artifact.uploadArtifact(artifactName, files, path.dirname(resultsDir))
+    const workingDir = path.resolve(resultsDir, '..')
+    const zipPath = path.join(workingDir, 'results.zip')
+    await compressFolder(resultsDir, zipPath)
+    await artifact.uploadArtifact(artifactName, [zipPath], workingDir)
   } catch (error) {
     core.warning(`Failed to upload report – ${(error as Error).message}`)
   }

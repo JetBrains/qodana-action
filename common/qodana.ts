@@ -18,6 +18,9 @@
 import {checksum, version} from './cli.json'
 import {createHash} from 'crypto'
 import fs from 'fs'
+import path from 'path'
+import fsp from 'fs/promises'
+import JSZip from 'jszip'
 
 export const SUPPORTED_PLATFORMS = ['windows', 'linux']
 export const SUPPORTED_ARCHS = ['x86_64', 'arm64']
@@ -292,4 +295,52 @@ export function validateBranchName(branchName: string): string {
     )
   }
   return branchName
+}
+
+async function getFilePathsRecursively(dir: string): Promise<string[]> {
+  const list = await fsp.readdir(dir)
+  const statPromises = list.map(async file => {
+    const fullPath = path.resolve(dir, file)
+    const stat = await fsp.stat(fullPath)
+    if (stat && stat.isDirectory()) {
+      return getFilePathsRecursively(fullPath)
+    }
+    return fullPath
+  })
+  return (await Promise.all(statPromises)).flat(
+    Number.POSITIVE_INFINITY
+  ) as string[]
+}
+
+async function createZipFromFolder(dir: string): Promise<JSZip> {
+  const absRoot = path.resolve(dir)
+  const filePaths = await getFilePathsRecursively(dir)
+  const zip = new JSZip()
+  for (const filePath of filePaths) {
+    const relative = filePath.replace(absRoot, '')
+    zip.file(relative, fs.createReadStream(filePath), {
+      unixPermissions: '777'
+    })
+  }
+  return zip
+}
+
+/**
+ * Compresses the given folder into a ZIP archive.
+ * @param srcDir the source directory to compress.
+ * @param destFile the destination ZIP file.
+ */
+export async function compressFolder(
+  srcDir: string,
+  destFile: string
+): Promise<void> {
+  await fsp.mkdir(path.dirname(destFile), {recursive: true})
+  const zip = await createZipFromFolder(srcDir)
+  await new Promise((resolve, reject) => {
+    zip
+      .generateNodeStream({streamFiles: true, compression: 'DEFLATE'})
+      .pipe(fs.createWriteStream(destFile))
+      .on('error', err => reject(err))
+      .on('finish', resolve)
+  })
 }
