@@ -74,6 +74,7 @@ test('test sarif with no problems to output annotations', () => {
 test('test typical summary output', () => {
   const result = getSummary(
     'Qodana for JS',
+    'frontend',
     annotationsDefaultFixture().reverse(), // reversed for testing the correct sorting in output
     '',
     0,
@@ -87,6 +88,7 @@ test('test typical summary output', () => {
 test('test empty summary output', () => {
   const result = getSummary(
     'Qodana for JS',
+    '',
     outputEmptyFixture(),
     '',
     0,
@@ -283,6 +285,7 @@ export function defaultDockerRunCommandFixture(): string[] {
 
 export function markdownSummaryFixture(): string {
   return `# [Qodana](https://example.com/report) for JS
+\`frontend/\`
 
 **4 new problems** were found
 

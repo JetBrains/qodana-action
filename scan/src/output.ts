@@ -129,6 +129,7 @@ export function getReportURL(resultsDir: string): string {
 /**
  * Publish Qodana results to GitHub: comment, job summary, annotations.
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
+ * @param projectDir The path to the project.
  * @param resultsDir The path to the results.
  * @param postComment whether to post a PR comment or not.
  * @param isPrMode
@@ -137,6 +138,7 @@ export function getReportURL(resultsDir: string): string {
  */
 export async function publishOutput(
   failedByThreshold: boolean,
+  projectDir: string,
   resultsDir: string,
   useAnnotations: boolean,
   postComment: boolean,
@@ -173,6 +175,7 @@ export async function publishOutput(
     const toolName = problems.title.split('found by ')[1] ?? QODANA_CHECK_NAME
     problems.summary = getSummary(
       toolName,
+      projectDir,
       annotations,
       coverageInfo,
       packages,
@@ -239,6 +242,7 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
 /**
  * Generates action summary string of annotations.
  * @param toolName The name of the tool to generate the summary from.
+ * @param projectDir The path to the project.
  * @param annotations The annotations to generate the summary from.
  * @param coverageInfo The coverage is a Markdown text to generate the summary from.
  * @param packages The number of dependencies in the analyzed project.
@@ -248,6 +252,7 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
  */
 export function getSummary(
   toolName: string,
+  projectDir: string,
   annotations: Annotation[],
   coverageInfo: string,
   packages: number,
@@ -277,7 +282,7 @@ export function getSummary(
   if (annotations.length === 0) {
     return [
       `# ${toolName}`,
-      '',
+      projectDir === '' ? '' : ['`', projectDir, '/`\n'].join(''),
       '**It seems all right 👌**',
       '',
       'No new problems were found according to the checks applied',
@@ -291,7 +296,7 @@ export function getSummary(
 
   return [
     `# ${toolName}`,
-    '',
+    projectDir === '' ? '' : ['`', projectDir, '/`\n'].join(''),
     `**${annotations.length} ${getProblemPlural(
       annotations.length
     )}** were found`,
