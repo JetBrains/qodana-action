@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as compress from 'azure-pipelines-tasks-utility-common/compressutility'
 import * as tl from 'azure-pipelines-task-lib/task'
 import * as tool from 'azure-pipelines-tool-lib'
 import {
@@ -29,7 +28,8 @@ import {
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
   sha256sum,
-  isNativeMode
+  isNativeMode,
+  compressFolder
 } from '../../common/qodana'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -144,9 +144,9 @@ export async function uploadArtifacts(
     return
   }
   try {
-    const parentDir = path.dirname(resultsDir)
-    const archivePath = path.join(parentDir, `${artifactName}.zip`)
-    compress.createArchive(resultsDir, 'zip', archivePath)
+    const workingDir = path.dirname(resultsDir)
+    const archivePath = path.join(workingDir, `${artifactName}.zip`)
+    await compressFolder(resultsDir, archivePath)
     tl.uploadArtifact('Qodana', archivePath, artifactName)
   } catch (error) {
     tl.warning(`Failed to upload report – ${(error as Error).message}`)
