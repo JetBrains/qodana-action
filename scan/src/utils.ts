@@ -223,11 +223,10 @@ export async function uploadArtifacts(
     return
   }
   try {
-    core.info('Uploading artifacts...')
-    const workingDir = path.resolve(resultsDir, '..')
-    const zipPath = path.join(workingDir, 'results.zip')
-    await compressFolder(resultsDir, zipPath)
-    await artifact.uploadArtifact(artifactName, [zipPath], workingDir)
+    const workingDir = path.dirname(resultsDir)
+    const archivePath = path.join(workingDir, `${artifactName}.zip`)
+    await compressFolder(resultsDir, archivePath)
+    await artifact.uploadArtifact(artifactName, [archivePath], workingDir)
   } catch (error) {
     core.warning(`Failed to upload report – ${(error as Error).message}`)
   }

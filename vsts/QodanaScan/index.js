@@ -9984,119 +9984,6 @@ var init_qodana = __esm({
   }
 });
 
-// ../node_modules/azure-pipelines-tasks-utility-common/compressutility.js
-var require_compressutility = __commonJS({
-  "../node_modules/azure-pipelines-tasks-utility-common/compressutility.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.createArchive = void 0;
-    var path2 = require("path");
-    var tl2 = require("azure-pipelines-task-lib/task");
-    var rootFolder;
-    var xpTarLocation;
-    var xpZipLocation;
-    var xpSevenZipLocation;
-    var winSevenZipLocation = path2.join(__dirname, "tools/7zip/7z.exe");
-    function createArchive(sourceFolder, archiveType, archiveFile) {
-      rootFolder = sourceFolder;
-      if (tl2.osType().match(/^Win/)) {
-        var sourcePath = sourceFolder + "/*";
-        if (archiveType == "zip") {
-          sevenZipArchive(archiveFile, "zip", [sourcePath]);
-        } else if (archiveType == "targz") {
-          var tarFile = archiveFile.substring(0, archiveFile.lastIndexOf("."));
-          try {
-            sevenZipArchive(tarFile, "tar", [sourcePath]);
-            sevenZipArchive(archiveFile, "gzip", [tarFile]);
-          } finally {
-            tl2.rmRF(tarFile);
-          }
-        }
-      } else {
-        if (archiveType == "zip") {
-          zipArchive(archiveFile, []);
-        } else if (archiveType == "targz") {
-          tarArchive(archiveFile, "gz", []);
-        }
-      }
-    }
-    exports2.createArchive = createArchive;
-    function getOptions() {
-      tl2.debug("cwd = " + rootFolder);
-      return { cwd: rootFolder };
-    }
-    function getSevenZipLocation() {
-      if (tl2.osType().match(/^Win/)) {
-        return winSevenZipLocation;
-      } else {
-        if (typeof xpTarLocation == "undefined") {
-          xpSevenZipLocation = tl2.which("7z", true);
-        }
-        return xpSevenZipLocation;
-      }
-    }
-    function sevenZipArchive(archive, compression, files) {
-      tl2.debug("Creating archive with 7-zip: " + archive);
-      var sevenZip = tl2.tool(getSevenZipLocation());
-      sevenZip.arg("a");
-      sevenZip.arg("-t" + compression);
-      sevenZip.arg(archive);
-      for (var i = 0; i < files.length; i++) {
-        sevenZip.arg(files[i]);
-      }
-      return handleExecResult(sevenZip.execSync(getOptions()), archive);
-    }
-    function zipArchive(archive, files) {
-      tl2.debug("Creating archive with zip: " + archive);
-      if (typeof xpZipLocation == "undefined") {
-        xpZipLocation = tl2.which("zip", true);
-      }
-      var zip = tl2.tool(xpZipLocation);
-      zip.arg("-r");
-      zip.arg(archive);
-      if (files.length > 0) {
-        for (var i = 0; i < files.length; i++) {
-          zip.arg(files[i]);
-        }
-      } else {
-        zip.arg(".");
-      }
-      return handleExecResult(zip.execSync(getOptions()), archive);
-    }
-    function tarArchive(archive, compression, files) {
-      tl2.debug("Creating archive with tar: " + archive + " using compression: " + compression);
-      if (typeof xpTarLocation == "undefined") {
-        xpTarLocation = tl2.which("tar", true);
-      }
-      var tar = tl2.tool(xpTarLocation);
-      if (tl2.exist(archive)) {
-        tar.arg("-r");
-      } else {
-        tar.arg("-c");
-      }
-      if (compression) {
-        tar.arg("--" + compression);
-      }
-      tar.arg("-f");
-      tar.arg(archive);
-      if (files.length > 0) {
-        for (var i = 0; i < files.length; i++) {
-          tar.arg(files[i]);
-        }
-      } else {
-        tar.arg(".");
-      }
-      return handleExecResult(tar.execSync(getOptions()), archive);
-    }
-    function handleExecResult(execResult, archive) {
-      if (execResult.code != tl2.TaskResult.Succeeded) {
-        tl2.debug("execResult: " + JSON.stringify(execResult));
-        throw tl2.loc("ArchiveCreationFailedWithError", archive, execResult.code, execResult.stdout, execResult.stderr, execResult.error);
-      }
-    }
-  }
-});
-
 // ../node_modules/es-errors/index.js
 var require_es_errors = __commonJS({
   "../node_modules/es-errors/index.js"(exports2, module2) {
@@ -14736,7 +14623,6 @@ var require_utils3 = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.uploadSarif = exports2.uploadArtifacts = exports2.prepareAgent = exports2.qodana = exports2.getInputs = exports2.setFailed = void 0;
-    var compress = __importStar2(require_compressutility());
     var tl2 = __importStar2(require("azure-pipelines-task-lib/task"));
     var tool = __importStar2(require_tool());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
@@ -14816,9 +14702,9 @@ var require_utils3 = __commonJS({
           return;
         }
         try {
-          const parentDir = path2.dirname(resultsDir);
-          const archivePath = path2.join(parentDir, `${artifactName}.zip`);
-          compress.createArchive(resultsDir, "zip", archivePath);
+          const workingDir = path2.dirname(resultsDir);
+          const archivePath = path2.join(workingDir, `${artifactName}.zip`);
+          yield (0, qodana_12.compressFolder)(resultsDir, archivePath);
           tl2.uploadArtifact("Qodana", archivePath, artifactName);
         } catch (error) {
           tl2.warning(`Failed to upload report \u2013 ${error.message}`);
