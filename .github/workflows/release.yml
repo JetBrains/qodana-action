@@ -77,10 +77,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set Node.js 12.x
+      - name: Set Node.js 16.x
         uses: actions/setup-node@v4.0.2
         with:
-          node-version: 12.x
+          node-version: 16.x
       - name: Install dependencies
         run: cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli
       - name: Package and publish
