@@ -9875,9 +9875,9 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
   return cliArgs;
 }
 function getCoverageFromSarif(sarifPath) {
-  if (import_fs.default.existsSync(sarifPath)) {
+  if (fs.existsSync(sarifPath)) {
     const sarifContents = JSON.parse(
-      import_fs.default.readFileSync(sarifPath, { encoding: "utf8" })
+      fs.readFileSync(sarifPath, { encoding: "utf8" })
     );
     if (sarifContents.runs[0].properties["coverage"]) {
       return {
@@ -9903,7 +9903,7 @@ function getCoverageFromSarif(sarifPath) {
 }
 function sha256sum(file) {
   const hash = (0, import_crypto.createHash)("sha256");
-  hash.update(import_fs.default.readFileSync(file));
+  hash.update(fs.readFileSync(file));
   return hash.digest("hex");
 }
 function getQodanaSha256MismatchMessage(expected, actual) {
@@ -9938,7 +9938,7 @@ async function createZipFromFolder(dir) {
   const zip = new import_jszip.default();
   for (const filePath of filePaths) {
     const relative = filePath.replace(absRoot, "");
-    zip.file(relative, import_fs.default.createReadStream(filePath), {
+    zip.file(relative, fs.createReadStream(filePath), {
       unixPermissions: "777"
     });
   }
@@ -9948,16 +9948,16 @@ async function compressFolder(srcDir, destFile) {
   await import_promises.default.mkdir(import_path.default.dirname(destFile), { recursive: true });
   const zip = await createZipFromFolder(srcDir);
   await new Promise((resolve, reject) => {
-    zip.generateNodeStream({ streamFiles: true, compression: "DEFLATE" }).pipe(import_fs.default.createWriteStream(destFile)).on("error", (err) => reject(err)).on("finish", resolve);
+    zip.generateNodeStream({ streamFiles: true, compression: "DEFLATE" }).pipe(fs.createWriteStream(destFile)).on("error", (err) => reject(err)).on("finish", resolve);
   });
 }
-var import_crypto, import_fs, import_path, import_promises, import_jszip, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
+var import_crypto, fs, import_path, import_promises, import_jszip, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
     init_cli();
     import_crypto = require("crypto");
-    import_fs = __toESM(require("fs"));
+    fs = __toESM(require("fs"));
     import_path = __toESM(require("path"));
     import_promises = __toESM(require("fs/promises"));
     import_jszip = __toESM(require_lib3());

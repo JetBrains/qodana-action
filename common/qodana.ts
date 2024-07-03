@@ -17,7 +17,7 @@
 // noinspection JSUnusedGlobalSymbols
 import {checksum, version} from './cli.json'
 import {createHash} from 'crypto'
-import fs from 'fs'
+import * as fs from 'fs'
 import path from 'path'
 import fsp from 'fs/promises'
 import JSZip from 'jszip'
