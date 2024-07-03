@@ -13,4 +13,5 @@ steps:
     env:
       QODANA_BRANCH: azure-main
     inputs:
+      uploadResult: true
       args: --log-level,debug,-l,jetbrains/qodana-jvm-community:latest,--property,idea.headless.enable.statistics=false,--config,.github/qodana.yaml
