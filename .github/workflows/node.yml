@@ -202,11 +202,11 @@ jobs:
           filters: |
             azure-dev:
             - "vsts/vss-extension.dev.json"
-      - name: Set Node.js 12.x
+      - name: Set Node.js 16.x
         if: steps.filter.outputs.azure-dev == 'true'
         uses: actions/setup-node@v4.0.2
         with:
-          node-version: 12.x
+          node-version: 16.x
       - name: Install dependencies
         if: steps.filter.outputs.azure-dev == 'true'
         run: cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli
