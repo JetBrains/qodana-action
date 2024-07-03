@@ -77,9 +77,16 @@ class Installer {
 
     fun setup(path: File, downloadURL: String = getQodanaUrl(), version: String = getLatestVersion()): String {
         if (path.exists()) {
-            verifyChecksum(path, getChecksum(version))
-            return path.absolutePath
-        } else try {
+            try {
+                verifyChecksum(path, getChecksum(version))
+                return path.absolutePath
+            } catch (e: IOException) {
+                log.warning("Checksum verification failed. Redownloading the binary.")
+            }
+            path.delete()
+        }
+
+        try {
             download(downloadURL, path)
             verifyChecksum(path, getChecksum(version))
         } catch (e: IOException) {
