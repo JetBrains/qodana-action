@@ -32,7 +32,7 @@ class Installer {
     val log: Logger = Logger.getLogger(Installer::class.java.name)
 
     companion object {
-        private const val LATEST_VERSION = "2024.1.7"
+        private const val LATEST_VERSION = "2024.1.8"
         private const val RELEASE_DOWNLOAD_URL =
             "https://github.com/JetBrains/qodana-cli/releases/download/v%s/qodana_%s_%s"
 
