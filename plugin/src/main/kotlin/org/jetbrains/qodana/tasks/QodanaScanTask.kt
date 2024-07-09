@@ -21,7 +21,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.property
-import org.jetbrains.qodana.cli.Installer
+import org.jetbrains.qodana.Installer
 import org.jetbrains.qodana.QodanaPluginConstants.QODANA_ENV
 import org.jetbrains.qodana.QodanaPluginConstants.QODANA_ENV_NAME
 import java.io.ByteArrayOutputStream

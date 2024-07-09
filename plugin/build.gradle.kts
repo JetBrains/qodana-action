@@ -37,7 +37,6 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":common"))
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
@@ -58,11 +57,6 @@ val javadocJar by tasks.registering(Jar::class) {
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
     archiveClassifier = "sources"
     from(sourceSets.main.get().allSource)
-}
-
-artifacts {
-    archives(javadocJar)
-    archives(sourcesJar)
 }
 
 tasks {
@@ -91,5 +85,34 @@ gradlePlugin {
         implementationClass = properties("pluginImplementationClass").get()
         description = project.description
         tags = properties("tags").map { it.split(',') }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("common") {
+            groupId = group.toString()
+            artifactId = "cli"
+            version = version.toString()
+            from(components["java"])
+            pom {
+                url.set("https://github.com/JetBrains/qodana-action")
+                licenses {
+                    license {
+                        name.set("Apache-2.0")
+                        url.set("https://github.com/JetBrains/qodana-action/blob/main/LICENSE")
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = uri("https://packages.jetbrains.team/maven/p/sa/maven-public")
+            credentials {
+                username = System.getenv("JB_SPACE_INTELLIJ_CLIENT_ID")
+                password = System.getenv("JB_SPACE_INTELLIJ_CLIENT_SECRET")
+            }
+        }
     }
 }
