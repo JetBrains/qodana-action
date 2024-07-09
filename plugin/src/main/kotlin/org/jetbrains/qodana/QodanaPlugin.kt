@@ -19,7 +19,6 @@ package org.jetbrains.qodana
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.PluginInstantiationException
-import org.jetbrains.qodana.cli.Installer
 import org.jetbrains.qodana.tasks.QodanaScanTask
 
 class QodanaPlugin : Plugin<Project> {

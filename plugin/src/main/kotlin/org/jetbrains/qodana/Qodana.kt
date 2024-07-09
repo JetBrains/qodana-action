@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jetbrains.qodana.cli
+package org.jetbrains.qodana
 
 import java.io.File
 import java.io.FileInputStream

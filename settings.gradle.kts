@@ -29,6 +29,5 @@ plugins {
 }
 
 include(
-    ":plugin",
-    ":common",
+    ":plugin"
 )

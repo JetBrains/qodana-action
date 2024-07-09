@@ -6,7 +6,7 @@ const {readFileSync} = require("fs");
 const {execSync} = require("child_process");
 const path = require("path");
 const cliJsonPath = "./cli.json";
-const checksumsKtPath = "../common/src/main/kotlin/org/jetbrains/qodana/cli/Checksums.kt";
+const checksumsKtPath = "../plugin/src/main/kotlin/org/jetbrains/qodana/Checksums.kt";
 
 const PLATFORMS = ["windows", "linux", "darwin"];
 const ARCHS = ["x86_64", "arm64"];
