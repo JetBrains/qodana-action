@@ -72,8 +72,12 @@
     }
   ],
   "execution": {
+    "Node10": {
+      "target": "index.js"
+    },
     "Node16": {
       "target": "index.js"
     }
-  }
+  },
+  "minimumAgentVersion": "2.144.0"
 }
