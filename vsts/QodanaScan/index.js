@@ -9802,14 +9802,15 @@ function getQodanaSha256(arch, platform) {
       return checksum["linux_x86_64"];
     case "linux_arm64":
       return checksum["linux_arm64"];
+    case "darwin_x86_64":
+      return checksum["darwin_x86_64"];
+    case "darwin_arm64":
+      return checksum["darwin_arm64"];
     default:
       throw new Error(`Qodana CLI does not exist for ${platform}_${arch}`);
   }
 }
 function getProcessArchName() {
-  if (process.platform === "darwin") {
-    return "all";
-  }
   return process.arch === "x64" ? "x86_64" : "arm64";
 }
 function getProcessPlatformName() {
@@ -9961,7 +9962,7 @@ var init_qodana = __esm({
     import_path = __toESM(require("path"));
     import_promises = __toESM(require("fs/promises"));
     import_jszip = __toESM(require_lib3());
-    SUPPORTED_PLATFORMS = ["windows", "linux"];
+    SUPPORTED_PLATFORMS = ["windows", "linux", "darwin"];
     SUPPORTED_ARCHS = ["x86_64", "arm64"];
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";
     QODANA_SARIF_NAME = "qodana.sarif.json";
