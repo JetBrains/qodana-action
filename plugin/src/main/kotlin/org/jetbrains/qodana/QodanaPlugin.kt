@@ -65,6 +65,7 @@ class QodanaPlugin : Plugin<Project> {
                 project.file(extension.qodanaPath)
             })
             arguments.convention(listOf())
+            useNightly.convention(false)
         }
     }
 }

@@ -32,9 +32,9 @@ class Installer {
     val log: Logger = Logger.getLogger(Installer::class.java.name)
 
     companion object {
-        private const val LATEST_VERSION = "2024.1.8"
+        private const val LATEST_VERSION = "v2024.1.8"
         private const val RELEASE_DOWNLOAD_URL =
-            "https://github.com/JetBrains/qodana-cli/releases/download/v%s/qodana_%s_%s"
+            "https://github.com/JetBrains/qodana-cli/releases/download/%s/qodana_%s_%s"
 
         fun getQodanaUrl(
             platform: String = getPlatformName(),
@@ -70,15 +70,21 @@ class Installer {
         fun getChecksum(version: String = getLatestVersion()): String {
             val platform = getPlatformName()
             val arch = getArchName()
-            return CHECKSUMS[version]?.get("${platform}_${arch}")
+            return CHECKSUMS[version.removePrefix("v")]?.get("${platform}_${arch}")
                 ?: throw IllegalArgumentException("Unsupported combination of version, platform and architecture: $version ${platform}_${arch}")
         }
     }
 
-    fun setup(path: File, downloadURL: String = getQodanaUrl(), version: String = getLatestVersion()): String {
+    fun setup(
+        path: File,
+        version: String = getLatestVersion(),
+    ): String {
+        val downloadURL = getQodanaUrl(version = version)
+        val useNightly = version == "nightly"
+
         if (path.exists()) {
             try {
-                verifyChecksum(path, getChecksum(version))
+                if (!useNightly) verifyChecksum(path, getChecksum(version))
                 return path.absolutePath
             } catch (e: IOException) {
                 log.warning("Checksum verification failed. Redownloading the binary.")
@@ -88,7 +94,7 @@ class Installer {
 
         try {
             download(downloadURL, path)
-            verifyChecksum(path, getChecksum(version))
+            if (!useNightly) verifyChecksum(path, getChecksum(version))
         } catch (e: IOException) {
             throw IOException("Unable to download latest qodana binary", e)
         }

@@ -39,7 +39,7 @@ class QodanaScanTaskTest : BaseTest() {
     }
 
     @Test
-    fun `run qodana in a non-empty directory and fail with threshold`() {
+    fun `run qodana in a container in a non-empty directory and fail with threshold`() {
         val githubActions = "true".equals(System.getenv("GITHUB_ACTIONS"), ignoreCase = true)
         val isLinux = System.getProperty("os.name").contains("Linux")
         if (githubActions) {
@@ -60,6 +60,29 @@ class QodanaScanTaskTest : BaseTest() {
             assertTrue(e.message!!.contains("The number of problems exceeds"))
         }
     }
+//
+//    @Test
+//    fun `run qodana in a non-empty directory and fail a with threshold`() {
+//        buildFile.groovy("""
+//            $EXTENSION_NAME {
+//            }
+//            $QODANA_SCAN_TASK_NAME {
+//                 environment = [
+//                    "QD_PRODUCT_INTERNAL_FEED" : "https://data.services.jetbrains.com/products",
+//                    "QODANA_LICENSE_ONLY_TOKEN": "",
+//                 ]
+//                 arguments = ["--fail-threshold", "0", "--property=idea.headless.enable.statistics=false"]
+//                 useNightly = true
+//            }
+//        """.trimIndent())
+//        file("main.py").writeText("print('Hello, world!')\n\n\n\n\n\nprintln()")
+//        file("qodana.yaml").writeText("ide: QDPY-EAP")
+//        try {
+//            runTaskForCommand(QODANA_SCAN_TASK_NAME)
+//        } catch (e: Exception) {
+//            assertTrue(e.message!!.contains("The number of problems exceeds"))
+//        }
+//    }
 
     @Test
     fun `task loads from the configuration cache`() {
