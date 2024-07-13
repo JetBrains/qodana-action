@@ -29,6 +29,9 @@ import java.io.File
 
 @UntrackedTask(because = "Qodana tracks the state")  // TODO:
 open class QodanaScanTask : Exec() {
+    private val currentPath = System.getenv("PATH")
+    private val currentHome = System.getenv("HOME")
+
     /**
      * Root directory of the project to be analyzed.
      */
@@ -64,11 +67,27 @@ open class QodanaScanTask : Exec() {
     @Optional
     val arguments: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
+
+    /**
+     * Use a nightly version of Qodana CLI.
+     */
+    @Input
+    @Optional
+    val useNightly = objectFactory.property<Boolean>()
+
     @TaskAction
     override fun exec() {
         setArgs(getArguments())
-        executable = Installer().setup(qodanaPath.get())
+
+        executable = (if (useNightly.get()) "nightly" else Installer.getLatestVersion()).let {
+            Installer().setup(
+                qodanaPath.get(),
+                version = it
+            )
+        }
         environment(QODANA_ENV, QODANA_ENV_NAME)
+        environment("PATH", currentPath)
+        environment("HOME", currentHome)
 
         ByteArrayOutputStream().use { os ->
             standardOutput = TeeOutputStream(System.out, os)
