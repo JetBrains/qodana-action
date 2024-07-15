@@ -35,7 +35,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - name: Set Node.js 16.x
-        uses: actions/setup-node@v4.0.2
+        uses: actions/setup-node@v4.0.3
         with:
           node-version: 16.x
       - name: Install dependencies
@@ -204,7 +204,7 @@ jobs:
             - "vsts/vss-extension.dev.json"
       - name: Set Node.js 16.x
         if: steps.filter.outputs.azure-dev == 'true'
-        uses: actions/setup-node@v4.0.2
+        uses: actions/setup-node@v4.0.3
         with:
           node-version: 16.x
       - name: Install dependencies
