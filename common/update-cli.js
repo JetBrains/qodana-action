@@ -6,7 +6,7 @@ const {readFileSync} = require("fs");
 const {execSync} = require("child_process");
 const path = require("path");
 const cliJsonPath = "./cli.json";
-const checksumsKtPath = "../plugin/src/main/kotlin/org/jetbrains/qodana/Checksums.kt";
+const checksumsKtPath = "plugin/src/main/kotlin/org/jetbrains/qodana/Checksums.kt";
 
 const PLATFORMS = ["windows", "linux", "darwin"];
 const ARCHS = ["x86_64", "arm64"];
@@ -30,8 +30,8 @@ function downloadFile(url, destinationPath) {
                 });
             } else if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
                 downloadFile(response.headers.location, destinationPath)
-                    .then(resolve)
-                    .catch(reject);
+                  .then(resolve)
+                  .catch(reject);
             } else {
                 reject(new Error(`Failed to download file. Status code: ${response.statusCode}`));
             }
@@ -117,24 +117,39 @@ function updateCircleCIChecksums(circleCIConfigPath) {
 }
 
 function updateChecksumsKtFile(checksums, latestVersion) {
-    let checksumsKtContent = fs.readFileSync(checksumsKtPath, "utf-8");
-
-    const newChecksums = `    "${latestVersion}" to mapOf(\n` +
-        checksums.map(({platform, arch, checksum}) => `        "${platform}_${arch}" to "${checksum}"`).join(",\n") +
-        "\n    )";
-
-    const checksumSectionRegex = /val CHECKSUMS = mapOf\((.|\n)*?\)/;
-    const match = checksumSectionRegex.exec(checksumsKtContent);
-
-    if (match) {
-        const updatedContent = match[0].replace(")", `,\n${newChecksums}\n)`);
-        checksumsKtContent = checksumsKtContent.replace(checksumSectionRegex, updatedContent);
+    const filepath = path.resolve(__dirname, `../${checksumsKtPath}`);
+    if (fs.existsSync(filepath)) {
+        console.log(`Checksums.kt file exists at ${filepath}`);
     } else {
-        const newContent = `val CHECKSUMS = mapOf(\n${newChecksums}\n)`;
-        checksumsKtContent = checksumsKtContent.replace("val CHECKSUMS = mapOf()", newContent);
+        throw new Error(`Checksums.kt file not found at ${filepath}`);
     }
 
-    fs.writeFileSync(checksumsKtPath, checksumsKtContent);
+    let checksumsKtContent = fs.readFileSync(filepath, 'utf-8');
+    console.log('Current Checksum File Content:', checksumsKtContent);
+
+    const checksumsMapStart = checksumsKtContent.indexOf('val CHECKSUMS = mapOf(');
+    const checksumsMapEnd = checksumsKtContent.lastIndexOf(')') + 1;
+
+    const beforeChecksumsMap = checksumsKtContent.substring(0, checksumsMapStart);
+    const afterChecksumsMap = checksumsKtContent.substring(checksumsMapEnd);
+
+    const newChecksums = `    "${latestVersion}" to mapOf(\n` +
+      checksums.map(
+        ({platform, arch, checksum}) => `        "${platform}_${arch}" to "${checksum}"`
+      ).join(',\n') +
+      '\n    )';
+
+    let updatedChecksumsMap = checksumsKtContent.substring(checksumsMapStart, checksumsMapEnd);
+
+    // Insert the new checksums before the final closing parenthesis
+    updatedChecksumsMap = updatedChecksumsMap.replace(/\n\)$/, `,\n${newChecksums}\n)`);
+
+    // Combine all parts
+    const updatedContent = beforeChecksumsMap + updatedChecksumsMap + afterChecksumsMap;
+
+    // Write the updated content back to the file
+    fs.writeFileSync(filepath, updatedContent);
+    console.log('Checksums.kt file updated');
 }
 
 function updateVersions(latestVersion, currentVersion) {
@@ -144,17 +159,17 @@ function updateVersions(latestVersion, currentVersion) {
     const latestPatch = parseInt(latestVersions[2]);
 
     let taskJson = JSON.parse(
-        fs.readFileSync(
-            path.join(__dirname, "..", "vsts", "QodanaScan", "task.json"),
-            "utf8"
-        )
+      fs.readFileSync(
+        path.join(__dirname, "..", "vsts", "QodanaScan", "task.json"),
+        "utf8"
+      )
     );
     taskJson.version.Major = latestMajor;
     taskJson.version.Minor = latestMinor;
     taskJson.version.Patch = latestPatch;
     fs.writeFileSync(
-        path.join(__dirname, "..", "vsts", "QodanaScan", "task.json"),
-        JSON.stringify(taskJson, null, 2)
+      path.join(__dirname, "..", "vsts", "QodanaScan", "task.json"),
+      JSON.stringify(taskJson, null, 2)
     );
     const currentVersions = currentVersion.split(".");
     const currentMajor = parseInt(currentVersions[0]);
@@ -169,7 +184,7 @@ function updateVersions(latestVersion, currentVersion) {
 function replaceStringsInProject(newString, oldString) {
     process.env.LC_ALL = "C";
     const isMacOS = process.platform === "darwin";
-    const command = `cd .. && find . -type f -not -path "./common/src/main/kotlin/org/jetbrains/qodana/cli/Checksums.kt" -exec sed -i${isMacOS ? " ''" : ""} 's/${oldString}/${newString}/g' {} +`;
+    const command = `cd .. && find . -type f -not -path "./${checksumsKtPath}" -exec sed -i${isMacOS ? " ''" : ""} 's/${oldString}/${newString}/g' {} +`;
     console.log("Running command:", command);
     execSync(command, {shell: "/bin/bash"});
 }
