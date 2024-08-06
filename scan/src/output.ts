@@ -69,6 +69,7 @@ so that the action will upload the files as the job artifacts:
 \`\`\`
 `
 const SUMMARY_PR_MODE = `💡 Qodana analysis was run in the pull request mode: only the changed files were checked`
+const DEPENDENCY_CHARS_LIMIT = 65000 // 65k chars is the GitHub limit for a comment
 
 function wrapToDiffBlock(message: string): string {
   return `\`\`\`diff
@@ -262,7 +263,7 @@ export function getSummary(
 ): string {
   const contactBlock = wrapToToggleBlock('Contact Qodana team', SUMMARY_MISC)
   let licensesBlock = ''
-  if (licensesInfo !== '') {
+  if (licensesInfo !== '' && licensesInfo.length < DEPENDENCY_CHARS_LIMIT) {
     licensesBlock = wrapToToggleBlock(
       `Detected ${packages} ${getDepencencyPlural(packages)}`,
       licensesInfo
