@@ -43,7 +43,7 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(8)
 }
 
 val dokkaHtml by tasks.getting(DokkaTask::class)
