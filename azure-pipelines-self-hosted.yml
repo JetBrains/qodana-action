@@ -18,6 +18,7 @@ steps:
   - task: QodanaScan@2024
     env:
       QODANA_TOKEN: $(QODANA_TOKEN)
+      AGENT_USE_NODE10: true
     inputs:
       uploadResult: true
       args: --log-level,debug,--ide,QDNET,--property,idea.headless.enable.statistics=false,--config,.github/qodana.yaml
