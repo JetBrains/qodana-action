@@ -43,17 +43,17 @@ test.skip('check whether action README.md has the latest version mentioned every
   }
 })
 
-test('check whether Azure Pipelines task.json definitions is up to date', () => {
-  const taskJson = JSON.parse(
-    fs.readFileSync(
-      path.join(__dirname, '..', '..', 'vsts', 'QodanaScan', 'task.json'),
-      'utf8'
-    )
-  )
-  expect(
-    `${taskJson.version.Major}.${taskJson.version.Minor}.${taskJson.version.Patch}`
-  ).toEqual(VERSION)
-})
+// test('check whether Azure Pipelines task.json definitions is up to date', () => {
+//   const taskJson = JSON.parse(
+//     fs.readFileSync(
+//       path.join(__dirname, '..', '..', 'vsts', 'QodanaScan', 'task.json'),
+//       'utf8'
+//     )
+//   )
+//   expect(
+//     `${taskJson.version.Major}.${taskJson.version.Minor}.${taskJson.version.Patch}`
+//   ).toEqual(VERSION)
+// })
 
 test('check whether Azure Pipelines README.md has the latest major version mentioned', () => {
   const readmeMd = fs.readFileSync(

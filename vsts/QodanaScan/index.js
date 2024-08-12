@@ -9920,17 +9920,18 @@ function validateBranchName(branchName) {
   return branchName;
 }
 async function getFilePathsRecursively(dir) {
-  const list = await import_promises.default.readdir(dir);
+  const list = await readdir2(dir);
   const statPromises = list.map(async (file) => {
     const fullPath = import_path.default.resolve(dir, file);
-    const stat = await import_promises.default.stat(fullPath);
-    if (stat && stat.isDirectory()) {
+    const statPromise = await stat2(fullPath);
+    if (statPromise && statPromise.isDirectory()) {
       return getFilePathsRecursively(fullPath);
     }
-    return fullPath;
+    return [fullPath];
   });
-  return (await Promise.all(statPromises)).flat(
-    Number.POSITIVE_INFINITY
+  return (await Promise.all(statPromises)).reduce(
+    (acc, val) => acc.concat(val),
+    []
   );
 }
 async function createZipFromFolder(dir) {
@@ -9946,13 +9947,13 @@ async function createZipFromFolder(dir) {
   return zip;
 }
 async function compressFolder(srcDir, destFile) {
-  await import_promises.default.mkdir(import_path.default.dirname(destFile), { recursive: true });
+  await mkdir2(import_path.default.dirname(destFile), { recursive: true });
   const zip = await createZipFromFolder(srcDir);
   await new Promise((resolve, reject) => {
     zip.generateNodeStream({ streamFiles: true, compression: "DEFLATE" }).pipe(fs.createWriteStream(destFile)).on("error", (err) => reject(err)).on("finish", resolve);
   });
 }
-var import_crypto, fs, import_path, import_promises, import_jszip, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
+var import_crypto, fs, import_path, import_jszip, import_util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
@@ -9960,8 +9961,11 @@ var init_qodana = __esm({
     import_crypto = require("crypto");
     fs = __toESM(require("fs"));
     import_path = __toESM(require("path"));
-    import_promises = __toESM(require("fs/promises"));
     import_jszip = __toESM(require_lib3());
+    import_util = require("util");
+    readdir2 = (0, import_util.promisify)(fs.readdir);
+    stat2 = (0, import_util.promisify)(fs.stat);
+    mkdir2 = (0, import_util.promisify)(fs.mkdir);
     SUPPORTED_PLATFORMS = ["windows", "linux", "darwin"];
     SUPPORTED_ARCHS = ["x86_64", "arm64"];
     FAIL_THRESHOLD_OUTPUT = "The number of problems exceeds the failThreshold";

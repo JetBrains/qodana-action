@@ -19,8 +19,12 @@ import {checksum, version} from './cli.json'
 import {createHash} from 'crypto'
 import * as fs from 'fs'
 import path from 'path'
-import fsp from 'fs/promises'
 import JSZip from 'jszip'
+import {promisify} from 'util'
+
+const readdir = promisify(fs.readdir)
+const stat = promisify(fs.stat)
+const mkdir = promisify(fs.mkdir)
 
 export const SUPPORTED_PLATFORMS = ['windows', 'linux', 'darwin']
 export const SUPPORTED_ARCHS = ['x86_64', 'arm64']
@@ -299,18 +303,19 @@ export function validateBranchName(branchName: string): string {
 }
 
 async function getFilePathsRecursively(dir: string): Promise<string[]> {
-  const list = await fsp.readdir(dir)
+  const list = await readdir(dir)
   const statPromises = list.map(async file => {
     const fullPath = path.resolve(dir, file)
-    const stat = await fsp.stat(fullPath)
-    if (stat && stat.isDirectory()) {
+    const statPromise = await stat(fullPath)
+    if (statPromise && statPromise.isDirectory()) {
       return getFilePathsRecursively(fullPath)
     }
-    return fullPath
+    return [fullPath]
   })
-  return (await Promise.all(statPromises)).flat(
-    Number.POSITIVE_INFINITY
-  ) as string[]
+  return (await Promise.all(statPromises)).reduce(
+    (acc, val) => acc.concat(val),
+    []
+  )
 }
 
 async function createZipFromFolder(dir: string): Promise<JSZip> {
@@ -335,7 +340,7 @@ export async function compressFolder(
   srcDir: string,
   destFile: string
 ): Promise<void> {
-  await fsp.mkdir(path.dirname(destFile), {recursive: true})
+  await mkdir(path.dirname(destFile), {recursive: true})
   const zip = await createZipFromFolder(srcDir)
   await new Promise((resolve, reject) => {
     zip
