@@ -10,9 +10,6 @@ pool:
   name: Default 
 
 steps:
-  - task: UseNode@1
-    inputs:
-      versionSpec: '16.x'
   - task: QodanaScan@2024
     env:
       QODANA_TOKEN: $(QODANA_TOKEN)
