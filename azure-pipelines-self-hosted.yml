@@ -17,9 +17,8 @@ steps:
 
   - task: QodanaScan@2024
     env:
-      AGENT_USE_NODE10: true
+      QODANA_TOKEN: $(QODANA_TOKEN)
     inputs:
       uploadResult: true
-      useNightly: true
-      args: --log-level,debug,--ide,QDJVMC-EAP,--property,idea.headless.enable.statistics=false,--config,.github/qodana.yaml
+      args: --log-level,debug,--ide,QDNET,--property,idea.headless.enable.statistics=false,--config,.github/qodana.yaml
 
