@@ -33,7 +33,7 @@
     "@types/jest": "^29.5.12",
     "@types/node": "^22.2.0",
     "@typescript-eslint/parser": "^7.18.0",
-    "axios": "^1.7.3",
+    "axios": "^1.7.4",
     "esbuild": "0.23.0",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.6.1",
