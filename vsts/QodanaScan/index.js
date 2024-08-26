@@ -7122,6 +7122,7 @@ var require_inflate = __commonJS({
               hold = 0;
               bits = 0;
               state.mode = TIME;
+            /* falls through */
             case TIME:
               while (bits < 32) {
                 if (have === 0) {
@@ -7144,6 +7145,7 @@ var require_inflate = __commonJS({
               hold = 0;
               bits = 0;
               state.mode = OS;
+            /* falls through */
             case OS:
               while (bits < 16) {
                 if (have === 0) {
@@ -7165,6 +7167,7 @@ var require_inflate = __commonJS({
               hold = 0;
               bits = 0;
               state.mode = EXLEN;
+            /* falls through */
             case EXLEN:
               if (state.flags & 1024) {
                 while (bits < 16) {
@@ -7190,6 +7193,7 @@ var require_inflate = __commonJS({
                 state.head.extra = null;
               }
               state.mode = EXTRA;
+            /* falls through */
             case EXTRA:
               if (state.flags & 1024) {
                 copy = state.length;
@@ -7226,6 +7230,7 @@ var require_inflate = __commonJS({
               }
               state.length = 0;
               state.mode = NAME;
+            /* falls through */
             case NAME:
               if (state.flags & 2048) {
                 if (have === 0) {
@@ -7251,6 +7256,7 @@ var require_inflate = __commonJS({
               }
               state.length = 0;
               state.mode = COMMENT;
+            /* falls through */
             case COMMENT:
               if (state.flags & 4096) {
                 if (have === 0) {
@@ -7275,6 +7281,7 @@ var require_inflate = __commonJS({
                 state.head.comment = null;
               }
               state.mode = HCRC;
+            /* falls through */
             case HCRC:
               if (state.flags & 512) {
                 while (bits < 16) {
@@ -7313,6 +7320,7 @@ var require_inflate = __commonJS({
               hold = 0;
               bits = 0;
               state.mode = DICT;
+            /* falls through */
             case DICT:
               if (state.havedict === 0) {
                 strm.next_out = put;
@@ -7325,10 +7333,12 @@ var require_inflate = __commonJS({
               }
               strm.adler = state.check = 1;
               state.mode = TYPE;
+            /* falls through */
             case TYPE:
               if (flush === Z_BLOCK || flush === Z_TREES) {
                 break inf_leave;
               }
+            /* falls through */
             case TYPEDO:
               if (state.last) {
                 hold >>>= bits & 7;
@@ -7393,8 +7403,10 @@ var require_inflate = __commonJS({
               if (flush === Z_TREES) {
                 break inf_leave;
               }
+            /* falls through */
             case COPY_:
               state.mode = COPY;
+            /* falls through */
             case COPY:
               copy = state.length;
               if (copy) {
@@ -7442,6 +7454,7 @@ var require_inflate = __commonJS({
               }
               state.have = 0;
               state.mode = LENLENS;
+            /* falls through */
             case LENLENS:
               while (state.have < state.ncode) {
                 while (bits < 3) {
@@ -7471,6 +7484,7 @@ var require_inflate = __commonJS({
               }
               state.have = 0;
               state.mode = CODELENS;
+            /* falls through */
             case CODELENS:
               while (state.have < state.nlen + state.ndist) {
                 for (; ; ) {
@@ -7588,8 +7602,10 @@ var require_inflate = __commonJS({
               if (flush === Z_TREES) {
                 break inf_leave;
               }
+            /* falls through */
             case LEN_:
               state.mode = LEN;
+            /* falls through */
             case LEN:
               if (have >= 6 && left >= 258) {
                 strm.next_out = put;
@@ -7671,6 +7687,7 @@ var require_inflate = __commonJS({
               }
               state.extra = here_op & 15;
               state.mode = LENEXT;
+            /* falls through */
             case LENEXT:
               if (state.extra) {
                 n = state.extra;
@@ -7689,6 +7706,7 @@ var require_inflate = __commonJS({
               }
               state.was = state.length;
               state.mode = DIST;
+            /* falls through */
             case DIST:
               for (; ; ) {
                 here = state.distcode[hold & (1 << state.distbits) - 1];
@@ -7739,6 +7757,7 @@ var require_inflate = __commonJS({
               state.offset = here_val;
               state.extra = here_op & 15;
               state.mode = DISTEXT;
+            /* falls through */
             case DISTEXT:
               if (state.extra) {
                 n = state.extra;
@@ -7761,6 +7780,7 @@ var require_inflate = __commonJS({
                 break;
               }
               state.mode = MATCH;
+            /* falls through */
             case MATCH:
               if (left === 0) {
                 break inf_leave;
@@ -7837,6 +7857,7 @@ var require_inflate = __commonJS({
                 bits = 0;
               }
               state.mode = LENGTH;
+            /* falls through */
             case LENGTH:
               if (state.wrap && state.flags) {
                 while (bits < 32) {
@@ -7856,6 +7877,7 @@ var require_inflate = __commonJS({
                 bits = 0;
               }
               state.mode = DONE;
+            /* falls through */
             case DONE:
               ret = Z_STREAM_END;
               break inf_leave;
@@ -7865,6 +7887,7 @@ var require_inflate = __commonJS({
             case MEM:
               return Z_MEM_ERROR;
             case SYNC:
+            /* falls through */
             default:
               return Z_STREAM_ERROR;
           }
@@ -13267,6 +13290,8 @@ var require_semver = __commonJS({
           this.inc("patch", identifier);
           this.inc("pre", identifier);
           break;
+        // If the input is a non-prerelease version, this acts the same as
+        // prepatch.
         case "prerelease":
           if (this.prerelease.length === 0) {
             this.inc("patch", identifier);
@@ -13294,6 +13319,8 @@ var require_semver = __commonJS({
           }
           this.prerelease = [];
           break;
+        // This probably shouldn't be used publicly.
+        // 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
         case "pre":
           if (this.prerelease.length === 0) {
             this.prerelease = [0];
@@ -13924,6 +13951,7 @@ var require_semver = __commonJS({
                 compver.prerelease.push(0);
               }
               compver.raw = compver.format();
+            /* fallthrough */
             case "":
             case ">=":
               if (!minver || gt(minver, compver)) {
@@ -13933,6 +13961,7 @@ var require_semver = __commonJS({
             case "<":
             case "<=":
               break;
+            /* istanbul ignore next */
             default:
               throw new Error("Unexpected operation: " + comparator.operator);
           }
