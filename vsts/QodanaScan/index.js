@@ -9840,6 +9840,7 @@ function getProcessPlatformName() {
   return process.platform === "win32" ? "windows" : process.platform;
 }
 function getQodanaUrl(arch, platform, nightly = false) {
+  console.info("QDindexjs")
   if (!SUPPORTED_PLATFORMS.includes(platform)) {
     throw new Error(`Unsupported platform: ${platform}`);
   }
@@ -14706,21 +14707,25 @@ var require_utils3 = __commonJS({
     }
     function prepareAgent(args_1) {
       return __awaiter2(this, arguments, void 0, function* (args, useNightly = false) {
-        const arch = (0, qodana_12.getProcessArchName)();
-        const platform = (0, qodana_12.getProcessPlatformName)();
-        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform));
-        if (!useNightly) {
-          const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
-          const actualChecksum = (0, qodana_12.sha256sum)(temp);
-          if (expectedChecksum !== actualChecksum) {
-            setFailed((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
+        let extractRoot = process.env.CLI_DIST
+        console.info(`[QDindexjs]cli path is ${extractRoot}`)
+        if(extractRoot === undefined || extractRoot === null) {
+          const arch = (0, qodana_12.getProcessArchName)();
+          const platform = (0, qodana_12.getProcessPlatformName)();
+          const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform));
+          if (!useNightly) {
+            const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
+            const actualChecksum = (0, qodana_12.sha256sum)(temp);
+            if (expectedChecksum !== actualChecksum) {
+              setFailed((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
+            }
           }
-        }
-        let extractRoot;
-        if (process.platform === "win32") {
-          extractRoot = yield tool.extractZip(temp);
-        } else {
-          extractRoot = yield tool.extractTar(temp);
+          let extractRoot;
+          if (process.platform === "win32") {
+            extractRoot = yield tool.extractZip(temp);
+          } else {
+            extractRoot = yield tool.extractTar(temp);
+          }
         }
         tool.prependPath(yield tool.cacheDir(extractRoot, qodana_12.EXECUTABLE, useNightly ? "nightly" : qodana_12.VERSION));
         if (!(0, qodana_12.isNativeMode)(args)) {

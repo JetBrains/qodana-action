@@ -188,7 +188,7 @@ export async function prepareAgent(
   useNightly = false
 ): Promise<void> {
   let extractRoot = process.env.CLI_DIST
-  core.info(`cli path is ${extractRoot}`)
+  console.info(`[utilsts]cli path is ${extractRoot}`)
   if(extractRoot === undefined || extractRoot === null) {
     const arch = getProcessArchName()
     const platform = getProcessPlatformName()

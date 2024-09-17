@@ -108,11 +108,14 @@ export async function prepareAgent(
       )
     }
   }
-  let extractRoot
-  if (process.platform === 'win32') {
-    extractRoot = await tool.extractZip(temp)
-  } else {
-    extractRoot = await tool.extractTar(temp)
+  let extractRoot = process.env.CLI_DIST
+  console.info(`[VSTSutilsts]cli path is ${extractRoot}`)
+  if(extractRoot === undefined || extractRoot === null) {
+    if (process.platform === 'win32') {
+      extractRoot = await tool.extractZip(temp)
+    } else {
+      extractRoot = await tool.extractTar(temp)
+    }
   }
   tool.prependPath(
     await tool.cacheDir(
