@@ -49,6 +49,7 @@ import {COMMIT_EMAIL, COMMIT_USER, prFixesBody} from './output'
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
+
 const REACTIONS = [
   '+1',
   '-1',

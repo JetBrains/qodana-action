@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "main": "lib/main.js",
   "scripts": {
-    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts",
+    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts --resolve-plugins-relative-to .",
     "build": "tsc --build .",
     "package": "../node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
     "test": "jest --config jest.config.js",
@@ -35,6 +35,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "axios": "^1.7.7",
     "esbuild": "0.23.1",
+    "@typescript-eslint/eslint-plugin": "^8.6.0",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-github": "^5.0.2",
