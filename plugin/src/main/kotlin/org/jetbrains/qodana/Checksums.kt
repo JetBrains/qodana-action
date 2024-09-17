@@ -66,5 +66,13 @@ val CHECKSUMS = mapOf(
         "linux_arm64" to "338372c285cfd35409769393c357e1af190823317e4ec9d4a04acd37ecfadcda",
         "darwin_x86_64" to "74f6f25176fde39018a2ee627ebbbf3a1fb9c6e5b9db911996929ab8d1dd126a",
         "darwin_arm64" to "68fff81b14a9725ffcc156f947dd23e8147203c06c952366005021c69ba40a57"
+    ),
+    "2024.2.2" to mapOf(
+        "windows_x86_64" to "eff2707f64ce0825e1164ad4b9b6fb604e47f7fb0a6920e7939661b1c8623eaf",
+        "windows_arm64" to "8849ad5eb4b05553a32199fea8649c55412e2a00655274c7de6728a51064175b",
+        "linux_x86_64" to "0ab1e76c116f3f9bf9465dc2d284eb8c2cbddcf957dcf413d91b3139ca260919",
+        "linux_arm64" to "7fce163bd13a0e3f7fe6d8e61f964d1b3143000ac6bb5af76957ccc896012114",
+        "darwin_x86_64" to "5f110c687367ba3bb47609f5bb64e2216f18bfb8cf44c1c8272846e844932d8b",
+        "darwin_arm64" to "dc2b444375f8ac15f6a1f5fa33984d199b1c497446798f221a76481f16cae32c"
     )
 )
