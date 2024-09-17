@@ -187,23 +187,27 @@ export async function prepareAgent(
   args: string[],
   useNightly = false
 ): Promise<void> {
-  const arch = getProcessArchName()
-  const platform = getProcessPlatformName()
-  const temp = await tc.downloadTool(getQodanaUrl(arch, platform, useNightly))
-  if (!useNightly) {
-    const expectedChecksum = getQodanaSha256(arch, platform)
-    const actualChecksum = sha256sum(temp)
-    if (expectedChecksum !== actualChecksum) {
-      core.setFailed(
-        getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
-      )
+  let extractRoot = process.env.CLI_DIST
+  core.info(`cli path is ${extractRoot}`)
+  if(extractRoot === undefined || extractRoot === null) {
+    const arch = getProcessArchName()
+    const platform = getProcessPlatformName()
+    const temp = await tc.downloadTool(getQodanaUrl(arch, platform, useNightly))
+    if (!useNightly) {
+      const expectedChecksum = getQodanaSha256(arch, platform)
+      const actualChecksum = sha256sum(temp)
+      if (expectedChecksum !== actualChecksum) {
+        core.setFailed(
+            getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
+        )
+      }
     }
-  }
-  let extractRoot
-  if (process.platform === 'win32') {
-    extractRoot = await tc.extractZip(temp)
-  } else {
-    extractRoot = await tc.extractTar(temp)
+
+    if (process.platform === 'win32') {
+      extractRoot = await tc.extractZip(temp)
+    } else {
+      extractRoot = await tc.extractTar(temp)
+    }
   }
   core.addPath(
     await tc.cacheDir(extractRoot, EXECUTABLE, useNightly ? 'nightly' : VERSION)
