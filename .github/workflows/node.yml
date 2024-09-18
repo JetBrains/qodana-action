@@ -169,7 +169,8 @@ jobs:
           git add README.md
           if [ -f ".keep" ]; then
               while IFS= read -r file; do
-                  git add "$file"
+                  clean_file=$(echo "$file" | tr -d '\r' | sed 's/[[:space:]]*$//')
+                  git add "$clean_file"
               done < ".keep"
           else
               echo ".keep file not found, doing nothing."
