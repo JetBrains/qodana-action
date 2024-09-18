@@ -167,6 +167,13 @@ jobs:
           git remote add origin https://github.com/JetBrains/code-analytics-examples.git
           echo "test" > README.md
           git add README.md
+          if [ -f ".keep" ]; then
+              while IFS= read -r file; do
+                  git add "$file"
+              done < ".keep"
+          else
+              echo ".keep file not found, doing nothing."
+          fi
           git commit -m "Initial commit"
           QODANA_PR_SHA=$(git rev-parse HEAD)
           echo "QODANA_PR_SHA=$QODANA_PR_SHA" >> $GITHUB_ENV
