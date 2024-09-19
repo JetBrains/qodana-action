@@ -53,12 +53,12 @@ steps:
       name: Qodana Scan
       command: |
         set -e
-        QODANA_SHA_256=0ab1e76c116f3f9bf9465dc2d284eb8c2cbddcf957dcf413d91b3139ca260919
-        CLI_DIRECTORY=/tmp/cache/qodana-cli/2024.2.2
+        QODANA_SHA_256=b8b70cdd8be9f79037dd511cbdbde70737834c46f35faa3a14acaca41f292748
+        CLI_DIRECTORY=/tmp/cache/qodana-cli/2024.2.3
         mkdir -p $CLI_DIRECTORY
         if [[ ! -x "$CLI_DIRECTORY/qodana" ]]; then
           curl -fsSL https://jb.gg/qodana-cli/install | bash -s -- \
-          v2024.2.2 $CLI_DIRECTORY \
+          v2024.2.3 $CLI_DIRECTORY \
           1> /dev/null
         fi
         echo "$QODANA_SHA_256 $CLI_DIRECTORY/qodana" | sha256sum -c
