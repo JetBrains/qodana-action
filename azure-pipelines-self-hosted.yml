@@ -1,0 +1,19 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- main
+
+pool:
+  name: Default 
+
+steps:
+  - task: QodanaScan@2024
+    env:
+      QODANA_TOKEN: $(QODANA_TOKEN)
+    inputs:
+      uploadResult: true
+      args: --log-level,debug,--ide,QDNET,--property,idea.headless.enable.statistics=false,--config,.github/qodana.yaml
+
