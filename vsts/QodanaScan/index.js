@@ -14353,8 +14353,16 @@ var require_tool = __commonJS({
             tl2.debug("creating stream");
             const file = fs2.createWriteStream(destPath);
             file.on("open", (fd) => __awaiter2(this, void 0, void 0, function* () {
+              tl2.debug("file write stream opened. fd: " + fd);
+              const messageStream = response.message;
+              if (messageStream.aborted || messageStream.destroyed) {
+                file.end();
+                reject(new Error("Incoming message read stream was Aborted or Destroyed before download was complete"));
+                return;
+              }
+              tl2.debug("subscribing to message read stream events...");
               try {
-                response.message.on("error", (err) => {
+                messageStream.on("error", (err) => {
                   file.end();
                   reject(err);
                 }).on("aborted", () => {
@@ -14364,6 +14372,7 @@ var require_tool = __commonJS({
               } catch (err) {
                 reject(err);
               }
+              tl2.debug("successfully subscribed to message read stream events");
             })).on("close", () => {
               tl2.debug("download complete");
               let fileSizeInBytes;
