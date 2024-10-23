@@ -134,7 +134,7 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
 
   ```groovy
   plugins {
-      id "org.jetbrains.qodana" version "2024.1.0-SNAPSHOT"
+      id "org.jetbrains.qodana" version "2024.2.0-SNAPSHOT"
   }
   
   qodana {
@@ -145,7 +145,7 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
 
   ```kotlin
   plugins {
-      id("org.jetbrains.qodana") version "2024.1.0-SNAPSHOT"
+      id("org.jetbrains.qodana") version "2024.2.0-SNAPSHOT"
   }
 
   qodana {
@@ -172,7 +172,7 @@ extensions follow the [CLI versioning](https://github.com/JetBrains/qodana-cli/r
 When a new CLI release is published, a pull request with the update is automatically created in this repository
 ([example](https://github.com/JetBrains/qodana-action/pull/293))
 
-If you are a core maintainer and want to release a new version, all you need is to run the following command:
+If you are a core maintainer and want to release a new version, all you need (after merging a PR with the latest CLI) is to run the following command:
 
 ```shell
 git tag -a vX.X.X -m "vX.X.X" && git push origin vX.X.X

@@ -46,6 +46,7 @@ import path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
 import {COMMIT_EMAIL, COMMIT_USER, prFixesBody} from './output'
+import {ExecOutput} from '@actions/exec'
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
@@ -90,14 +91,33 @@ export function getInputs(): Inputs {
   }
 }
 
-function getPrSha(): string {
+async function getPrSha(): Promise<string> {
   if (process.env.QODANA_PR_SHA) {
     return process.env.QODANA_PR_SHA
   }
   if (github.context.payload.pull_request !== undefined) {
-    return github.context.payload.pull_request.base.sha
+    const output = await gitOutput([
+      'merge-base',
+      github.context.payload.pull_request.base.sha,
+      github.context.payload.pull_request.head.sha
+    ])
+    if (output.exitCode === 0) {
+      return output.stdout.trim()
+    } else {
+      return github.context.payload.pull_request.base.sha
+    }
   }
   return ''
+}
+
+function getHeadSha(): string {
+  if (process.env.QODANA_REVISION) {
+    return process.env.QODANA_REVISION
+  }
+  if (github.context.payload.pull_request !== undefined) {
+    return github.context.payload.pull_request.head.sha
+  }
+  return github.context.sha
 }
 
 /**
@@ -113,7 +133,7 @@ export async function qodana(
   if (args.length === 0) {
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
     if (inputs.prMode) {
-      const sha = getPrSha()
+      const sha = await getPrSha()
       if (sha !== '') {
         args.push('--commit', sha)
       }
@@ -124,6 +144,7 @@ export async function qodana(
       ignoreReturnCode: true,
       env: {
         ...process.env,
+        QODANA_REVISION: getHeadSha(),
         NONINTERACTIVE: '1'
       }
     })
@@ -596,6 +617,13 @@ async function git(
   options: exec.ExecOptions = {}
 ): Promise<number> {
   return (await exec.getExecOutput('git', args, options)).exitCode
+}
+
+async function gitOutput(
+  args: string[],
+  options: exec.ExecOptions = {}
+): Promise<ExecOutput> {
+  return await exec.getExecOutput('git', args, options)
 }
 
 async function createPr(

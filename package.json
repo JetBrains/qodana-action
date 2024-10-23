@@ -34,7 +34,7 @@
     "vsts"
   ],
   "devDependencies": {
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "eslint-plugin-github": "^5.0.1",
     "eslint-plugin-jest": "^28.8.2",
     "eslint-plugin-prettier": "^5.2.1",

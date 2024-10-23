@@ -9,14 +9,14 @@
     "build": "tsc --build .",
     "package": "../node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
     "test": "jest --config jest.config.js",
-    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2024.1/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"
+    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2024.2/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JetBrains/qodana-action.git"
   },
   "dependencies": {
-    "@actions/artifact": "^2.1.9",
+    "@actions/artifact": "^2.1.11",
     "@actions/cache": "^3.2.4",
     "@actions/core": "^1.10.1",
     "@actions/exec": "^1.1.0",
@@ -35,7 +35,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "axios": "^1.7.7",
     "esbuild": "0.23.1",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-github": "^5.0.1",
     "eslint-plugin-jest": "^28.8.2",
