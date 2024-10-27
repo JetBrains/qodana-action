@@ -96,11 +96,16 @@ async function getPrSha(): Promise<string> {
     return process.env.QODANA_PR_SHA
   }
   if (github.context.payload.pull_request !== undefined) {
-    const output = await gitOutput([
-      'merge-base',
-      github.context.payload.pull_request.base.sha,
-      github.context.payload.pull_request.head.sha
-    ])
+    const output = await gitOutput(
+      [
+        'merge-base',
+        github.context.payload.pull_request.base.sha,
+        github.context.payload.pull_request.head.sha
+      ],
+      {
+        ignoreReturnCode: true
+      }
+    )
     if (output.exitCode === 0) {
       return output.stdout.trim()
     } else {
