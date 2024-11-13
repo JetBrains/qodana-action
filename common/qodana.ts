@@ -225,6 +225,8 @@ export interface Coverage {
   freshCoverage: number
   freshLines: number
   freshCoveredLines: number
+  totalCoverageThreshold: number
+  freshCoverageThreshold: number
 }
 
 /**
@@ -250,7 +252,11 @@ export function getCoverageFromSarif(sarifPath: string): Coverage {
         freshLines:
           sarifContents.runs[0].properties['coverage']['freshLines'] || 0,
         freshCoveredLines:
-          sarifContents.runs[0].properties['coverage']['freshCoveredLines'] || 0
+          sarifContents.runs[0].properties['coverage']['freshCoveredLines'] || 0,
+        totalCoverageThreshold:
+          sarifContents.runs[0].properties['qodanaFailureConditions']?.['testCoverageThresholds']?.['totalCoverage'] || COVERAGE_THRESHOLD,
+        freshCoverageThreshold:
+            sarifContents.runs[0].properties['qodanaFailureConditions']?.['testCoverageThresholds']?.['freshCoverage'] || COVERAGE_THRESHOLD
       }
     } else {
       return {
@@ -259,7 +265,9 @@ export function getCoverageFromSarif(sarifPath: string): Coverage {
         totalCoveredLines: 0,
         freshCoverage: 0,
         freshLines: 0,
-        freshCoveredLines: 0
+        freshCoveredLines: 0,
+        totalCoverageThreshold: COVERAGE_THRESHOLD,
+        freshCoverageThreshold: COVERAGE_THRESHOLD
       }
     }
   }

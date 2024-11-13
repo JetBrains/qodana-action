@@ -19,7 +19,6 @@ import * as core from '@actions/core'
 import * as fs from 'fs'
 import {
   Coverage,
-  COVERAGE_THRESHOLD,
   getCoverageFromSarif,
   QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD,
@@ -77,7 +76,7 @@ ${message}
 \`\`\``
 }
 
-export function getCoverageStats(c: Coverage, threshold: number): string {
+export function getCoverageStats(c: Coverage): string {
   if (c.totalLines === 0 && c.totalCoveredLines === 0) {
     return ''
   }
@@ -85,7 +84,7 @@ export function getCoverageStats(c: Coverage, threshold: number): string {
   let stats = ''
   if (c.totalLines !== 0) {
     let conclusion = `${c.totalCoverage}% total lines covered`
-    if (c.totalCoverage < threshold) {
+    if (c.totalCoverage < c.totalCoverageThreshold) {
       conclusion = `- ${conclusion}`
     } else {
       conclusion = `+ ${conclusion}`
@@ -153,8 +152,7 @@ export async function publishOutput(
     const problems = parseSarif(`${resultsDir}/${QODANA_SARIF_NAME}`)
     const reportUrl = getReportURL(resultsDir)
     const coverageInfo = getCoverageStats(
-      getCoverageFromSarif(`${resultsDir}/${QODANA_SHORT_SARIF_NAME}`),
-      COVERAGE_THRESHOLD
+      getCoverageFromSarif(`${resultsDir}/${QODANA_SHORT_SARIF_NAME}`)
     )
     let licensesInfo = ''
     let packages = 0
