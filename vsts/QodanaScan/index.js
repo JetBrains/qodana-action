@@ -9899,6 +9899,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
   return cliArgs;
 }
 function getCoverageFromSarif(sarifPath) {
+  var _a, _b, _c, _d;
   if (fs.existsSync(sarifPath)) {
     const sarifContents = JSON.parse(
       fs.readFileSync(sarifPath, { encoding: "utf8" })
@@ -9910,7 +9911,9 @@ function getCoverageFromSarif(sarifPath) {
         totalCoveredLines: sarifContents.runs[0].properties["coverage"]["totalCoveredLines"] || 0,
         freshCoverage: sarifContents.runs[0].properties["coverage"]["freshCoverage"] || 0,
         freshLines: sarifContents.runs[0].properties["coverage"]["freshLines"] || 0,
-        freshCoveredLines: sarifContents.runs[0].properties["coverage"]["freshCoveredLines"] || 0
+        freshCoveredLines: sarifContents.runs[0].properties["coverage"]["freshCoveredLines"] || 0,
+        totalCoverageThreshold: ((_b = (_a = sarifContents.runs[0].properties["qodanaFailureConditions"]) == null ? void 0 : _a["testCoverageThresholds"]) == null ? void 0 : _b["totalCoverage"]) || COVERAGE_THRESHOLD,
+        freshCoverageThreshold: ((_d = (_c = sarifContents.runs[0].properties["qodanaFailureConditions"]) == null ? void 0 : _c["testCoverageThresholds"]) == null ? void 0 : _d["freshCoverage"]) || COVERAGE_THRESHOLD
       };
     } else {
       return {
@@ -9919,7 +9922,9 @@ function getCoverageFromSarif(sarifPath) {
         totalCoveredLines: 0,
         freshCoverage: 0,
         freshLines: 0,
-        freshCoveredLines: 0
+        freshCoveredLines: 0,
+        totalCoverageThreshold: COVERAGE_THRESHOLD,
+        freshCoverageThreshold: COVERAGE_THRESHOLD
       };
     }
   }
