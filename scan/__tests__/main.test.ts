@@ -101,16 +101,14 @@ test('test empty summary output', () => {
 
 test('test passed coverage output', () => {
   const result = getCoverageStats(
-    getCoverageFromSarif('__tests__/data/some.sarif.json'),
-    50
+    getCoverageFromSarif('__tests__/data/some.sarif.json')
   )
   expect(result).toEqual(passedCoverageFixture())
 })
 
 test('test failed coverage output', () => {
   const result = getCoverageStats(
-    getCoverageFromSarif('__tests__/data/empty.sarif.json'),
-    50
+    getCoverageFromSarif('__tests__/data/empty.sarif.json')
   )
   expect(result).toEqual(failedCoverageFixture())
 })
@@ -353,8 +351,8 @@ Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com
 function passedCoverageFixture(): string {
   return `\`\`\`diff
 @@ Code coverage @@
-+ 70% total lines covered
-124 lines analyzed, 87 lines covered
++ 45% total lines covered
+124 lines analyzed, 56 lines covered
 # Calculated according to the filters of your coverage tool
 \`\`\``
 }

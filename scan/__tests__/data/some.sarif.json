@@ -8258,10 +8258,16 @@
         "\n"
       ],
       "properties": {
+        "qodanaFailureConditions": {
+          "testCoverageThresholds": {
+            "totalCoverage": 40,
+            "freshCoverage": 40
+          }
+        },
         "coverage": {
-          "totalCoverage": 70.0,
+          "totalCoverage": 45.0,
           "totalLines": 124.0,
-          "totalCoveredLines": 87.0
+          "totalCoveredLines": 56.0
         }
       }
     }
