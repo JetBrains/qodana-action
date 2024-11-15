@@ -385,6 +385,20 @@ export function getWorkflowRunUrl(): string {
   return `${serverUrl}/${repo.owner}/${repo.repo}/actions/runs/${runId}`
 }
 
+function getIssueNumber(): number {
+  // var issueNumber = github.context.payload.pull_request?.number as number
+  // if (!issueNumber) {
+  //
+  // }
+  // TODO: Remove these TEMP logs!
+  core.info(`Issue number: ${github.context.issue.number}`)
+  core.info(
+    `PR number: ${github.context.payload.pull_request?.number as number}`
+  )
+
+  return github.context.issue.number
+}
+
 /**
  * Post a new comment to the pull request.
  * @param toolName The name of the tool to mention in comment.
@@ -398,6 +412,7 @@ export async function postResultsToPRComments(
 ): Promise<void> {
   const pr = github.context.payload.pull_request ?? ''
   if (!postComment || !pr) {
+    core.info(`Not a PR. Do we have a issue number? ${getIssueNumber()}`)
     return
   }
   const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName} -->`
@@ -426,7 +441,7 @@ export async function findCommentByTag(
   try {
     const {data: comments} = await client.rest.issues.listComments({
       ...github.context.repo,
-      issue_number: github.context.issue.number
+      issue_number: getIssueNumber()
     })
     const comment = comments.find(c => c?.body?.includes(tag))
     return comment ? comment.id : -1
@@ -450,7 +465,7 @@ export async function createComment(
     await client.rest.issues.createComment({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
-      issue_number: github.context.issue.number,
+      issue_number: getIssueNumber(),
       body
     })
   } catch (error) {
@@ -499,7 +514,7 @@ export async function putReaction(
 ): Promise<void> {
   const client = github.getOctokit(getInputs().githubToken)
 
-  const issue_number = github.context.payload.pull_request?.number as number
+  const issue_number = getIssueNumber()
   if (oldReaction !== '') {
     try {
       const {data: reactions} = await client.rest.reactions.listForIssue({
