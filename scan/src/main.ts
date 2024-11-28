@@ -62,16 +62,6 @@ function setFailed(message: string): void {
 async function main(): Promise<void> {
   try {
     const inputs = getInputs()
-    if (
-      inputs.pushFixes !== NONE &&
-      inputs.prMode &&
-      github.context.payload.pull_request !== undefined
-    ) {
-      inputs.pushFixes = NONE
-      core.warning(
-        `push-fixes is currently not supported with pr-mode: true in pull requests. Running Qodana with push-fixes: ${inputs.pushFixes}.`
-      )
-    }
     await io.mkdirP(inputs.resultsDir)
     await io.mkdirP(inputs.cacheDir)
 
