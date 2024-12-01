@@ -4,7 +4,7 @@
   "description": "Qodana for Azure Pipelines extension",
   "main": "azure.js",
   "scripts": {
-    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts",
+    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
     "bump-dev": "jq '.version |= (split(\".\") | .[2] = (. [2]| tonumber + 1 | tostring) | join(\".\"))' vss-extension.dev.json > tmp.json && mv tmp.json vss-extension.dev.json\n",
     "package": "npm run bump-dev && cd QodanaScan && npm ci && cd .. && ../node_modules/.bin/esbuild lib/main.js --platform=node --bundle --outfile=QodanaScan/index.js --target=node16 --external:shelljs --external:azure-pipelines-task-lib",
     "readme": "cp ../.github/md/azure.md README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2022.2/topics/azure-pipelines.md >> README.md && cat ../.github/md/tracker.md >> README.md",
@@ -29,17 +29,16 @@
     "azure-pipelines-tool-lib": "^2.0.8"
   },
   "devDependencies": {
-    "@types/node": "^22.5.2",
+    "@types/node": "^22.10.1",
     "@typescript-eslint/parser": "^7.18.0",
-    "esbuild": "0.23.1",
+    "esbuild": "0.24.0",
     "eslint": "^8.57.1",
-    "eslint-plugin-github": "^5.0.1",
-    "eslint-plugin-jest": "^28.8.2",
+    "eslint-plugin-jest": "^28.9.0",
     "jest": "^29.7.0",
     "js-yaml": "^4.1.0",
-    "prettier": "3.3.3",
+    "prettier": "3.4.1",
     "sync-request": "^6.1.0",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.5.4"
+    "typescript": "^5.7.2"
   }
 }

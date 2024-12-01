@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "main": "lib/main.js",
   "scripts": {
-    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts",
+    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
     "build": "tsc --build .",
     "package": "../node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
     "test": "jest --config jest.config.js",
@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "@actions/artifact": "^2.1.11",
-    "@actions/cache": "^3.2.4",
-    "@actions/core": "^1.10.1",
+    "@actions/cache": "^3.3.0",
+    "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.0",
     "@actions/github": "^6.0.0",
     "@actions/tool-cache": "^2.0.1",
@@ -30,20 +30,19 @@
     "jszip": "^3.10.1"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "@types/node": "^22.5.2",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.1",
     "@typescript-eslint/parser": "^7.18.0",
-    "axios": "^1.7.7",
-    "esbuild": "0.23.1",
+    "axios": "^1.7.8",
+    "esbuild": "0.24.0",
     "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "^3.6.3",
-    "eslint-plugin-github": "^5.0.1",
-    "eslint-plugin-jest": "^28.8.2",
+    "eslint-plugin-jest": "^28.9.0",
     "jest": "latest",
     "js-yaml": "^4.1.0",
-    "nock": "^13.5.5",
-    "prettier": "3.3.3",
+    "nock": "^13.5.6",
+    "prettier": "3.4.1",
     "ts-jest": "latest",
-    "typescript": "^5.5.4"
+    "typescript": "^5.7.2"
   }
 }

@@ -17,15 +17,16 @@
 import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+import {ExecOutput} from '@actions/exec'
 import * as github from '@actions/github'
 import * as tc from '@actions/tool-cache'
 import artifact from '@actions/artifact'
 import {GitHub} from '@actions/github/lib/utils'
 import {Conclusion, getGitHubCheckConclusion, Output} from './annotations'
 import {
+  BRANCH,
+  compressFolder,
   EXECUTABLE,
-  Inputs,
-  VERSION,
   getProcessArchName,
   getProcessPlatformName,
   getQodanaPullArgs,
@@ -33,45 +34,54 @@ import {
   getQodanaSha256,
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
-  sha256sum,
-  PushFixesType,
+  Inputs,
+  isNativeMode,
   NONE,
   PULL_REQUEST,
-  BRANCH,
-  isNativeMode,
+  PushFixesType,
+  sha256sum,
   validateBranchName,
-  compressFolder
+  VERSION
 } from '../../common/qodana'
 import path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
 import {COMMIT_EMAIL, COMMIT_USER, prFixesBody} from './output'
-import {ExecOutput} from '@actions/exec'
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
-const REACTIONS = [
-  '+1',
-  '-1',
-  'laugh',
-  'confused',
-  'heart',
-  'hooray',
-  'rocket',
-  'eyes'
-] as const
-type Reaction = (typeof REACTIONS)[number]
+
+type Reaction =
+  | '+1'
+  | '-1'
+  | 'laugh'
+  | 'confused'
+  | 'heart'
+  | 'hooray'
+  | 'rocket'
+  | 'eyes'
+
+interface PullRequestPayload {
+  number: number
+  head: {
+    sha: string
+    ref: string
+  }
+  base: {
+    sha: string
+    ref: string
+  }
+}
 
 /**
  * The context for the action.
  * @returns The action inputs.
  */
 export function getInputs(): Inputs {
+  const rawArgs = core.getInput('args')
+  const argList = rawArgs ? rawArgs.split(',').map(arg => arg.trim()) : []
   return {
-    args: core
-      .getInput('args')
-      .split(',')
-      .map(arg => arg.trim()),
+    args: argList,
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
     primaryCacheKey: core.getInput('primary-cache-key'),
@@ -92,45 +102,37 @@ export function getInputs(): Inputs {
 }
 
 async function getPrSha(): Promise<string> {
+  const pr = github.context.payload.pull_request as
+    | PullRequestPayload
+    | undefined
   if (process.env.QODANA_PR_SHA) {
     return process.env.QODANA_PR_SHA
   }
-  if (github.context.payload.pull_request !== undefined) {
-    const output = await gitOutput(
-      [
-        'merge-base',
-        github.context.payload.pull_request.base.sha,
-        github.context.payload.pull_request.head.sha
-      ],
-      {
-        ignoreReturnCode: true
-      }
-    )
+  if (pr) {
+    const output = await gitOutput(['merge-base', pr.base.sha, pr.head.sha], {
+      ignoreReturnCode: true
+    })
     if (output.exitCode === 0) {
       return output.stdout.trim()
     } else {
-      return github.context.payload.pull_request.base.sha
+      return pr.base.sha
     }
   }
   return ''
 }
 
 function getHeadSha(): string {
+  const c = github.context
+  const pr = c.payload.pull_request as PullRequestPayload | undefined
   if (process.env.QODANA_REVISION) {
     return process.env.QODANA_REVISION
   }
-  if (github.context.payload.pull_request !== undefined) {
-    return github.context.payload.pull_request.head.sha
+  if (pr) {
+    return pr.head.sha
   }
-  return github.context.sha
+  return c.sha
 }
 
-/**
- * Runs the qodana command with the given arguments.
- * @param inputs the action inputs.
- * @param args docker command arguments.
- * @returns The qodana command execution output.
- */
 export async function qodana(
   inputs: Inputs,
   args: string[] = []
@@ -144,16 +146,15 @@ export async function qodana(
       }
     }
   }
-  return (
-    await exec.getExecOutput(EXECUTABLE, args, {
-      ignoreReturnCode: true,
-      env: {
-        ...process.env,
-        QODANA_REVISION: getHeadSha(),
-        NONINTERACTIVE: '1'
-      }
-    })
-  ).exitCode
+  const exit = await exec.getExecOutput(EXECUTABLE, args, {
+    ignoreReturnCode: true,
+    env: {
+      ...process.env,
+      QODANA_REVISION: getHeadSha(),
+      NONINTERACTIVE: '1'
+    }
+  })
+  return exit.exitCode
 }
 
 export async function pushQuickFixes(
@@ -165,10 +166,13 @@ export async function pushQuickFixes(
   }
   try {
     const c = github.context
+    const pr = c.payload.pull_request as PullRequestPayload | undefined
     let currentBranch = c.ref
-    if (c.payload.pull_request?.head.ref !== undefined) {
-      currentBranch = c.payload.pull_request.head.ref
+
+    if (pr?.head?.ref) {
+      currentBranch = pr.head.ref
     }
+
     const currentCommit = (
       await exec.getExecOutput('git', ['rev-parse', 'HEAD'])
     ).stdout.trim()
@@ -204,11 +208,6 @@ export async function pushQuickFixes(
   }
 }
 
-/**
- * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
- * @param args qodana arguments
- * @param useNightly whether to use a nightly version of Qodana CLI
- */
 export async function prepareAgent(
   args: string[],
   useNightly = false
@@ -319,7 +318,7 @@ export async function restoreCaches(
   if (!execute) {
     return ''
   }
-  const restoreKeys = [additionalCacheKey]
+  const restoreKeys = [additionalCacheKey].filter(k => k)
   try {
     const cacheKey = await cache.restoreCache(
       [cacheDir],
@@ -328,9 +327,7 @@ export async function restoreCaches(
     )
     if (!cacheKey) {
       core.info(
-        `No cache found for input keys: ${[primaryKey, ...restoreKeys].join(
-          ', '
-        )}.
+        `No cache found for input keys: ${[primaryKey, ...restoreKeys].join(', ')}.
           With cache the pipeline would be faster.`
       )
       return ''
@@ -338,9 +335,7 @@ export async function restoreCaches(
     return cacheKey
   } catch (error) {
     core.warning(
-      `Failed to restore cache with key ${primaryKey} – ${
-        (error as Error).message
-      }`
+      `Failed to restore cache with key ${primaryKey} – ${(error as Error).message}`
     )
   }
   return ''
@@ -360,12 +355,13 @@ export function isNeedToUploadCache(
   }
 
   if (useCaches && cacheDefaultBranchOnly) {
-    const currentBranch = github.context.payload.ref_name
-    const defaultBranch = github.context.payload.repository?.default_branch
+    const currentBranch = github.context.payload.ref_name as string
+    const defaultBranch = github.context.payload.repository
+      ?.default_branch as string
     core.debug(
       `Current branch: ${currentBranch} | Default branch: ${defaultBranch}`
     )
-    return currentBranch === defaultBranch
+    return currentBranch === `refs/heads/${defaultBranch}`
   }
 
   return useCaches
@@ -396,7 +392,9 @@ export async function postResultsToPRComments(
   content: string,
   postComment: boolean
 ): Promise<void> {
-  const pr = github.context.payload.pull_request ?? ''
+  const pr = github.context.payload.pull_request as
+    | PullRequestPayload
+    | undefined
   if (!postComment || !pr) {
     return
   }
@@ -497,9 +495,15 @@ export async function putReaction(
   newReaction: Reaction,
   oldReaction: string
 ): Promise<void> {
+  const pr = github.context.payload.pull_request as
+    | PullRequestPayload
+    | undefined
+  if (!pr) {
+    return
+  }
   const client = github.getOctokit(getInputs().githubToken)
+  const issue_number = pr.number
 
-  const issue_number = github.context.payload.pull_request?.number as number
   if (oldReaction !== '') {
     try {
       const {data: reactions} = await client.rest.reactions.listForIssue({
@@ -547,9 +551,11 @@ export async function publishGitHubCheck(
     output.annotations,
     failedByThreshold
   )
-  let sha = github.context.sha
-  if (github.context.payload.pull_request) {
-    sha = github.context.payload.pull_request.head.sha
+  const c = github.context
+  const pr = c.payload.pull_request as PullRequestPayload | undefined
+  let sha = c.sha
+  if (pr) {
+    sha = pr.head.sha
   }
   const client = github.getOctokit(getInputs().githubToken)
   const result = await client.rest.checks.listForRef({
@@ -624,7 +630,7 @@ async function gitOutput(
   args: string[],
   options: exec.ExecOptions = {}
 ): Promise<ExecOutput> {
-  return await exec.getExecOutput('git', args, options)
+  return exec.getExecOutput('git', args, options)
 }
 
 async function createPr(

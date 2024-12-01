@@ -14633,15 +14633,25 @@ var require_utils3 = __commonJS({
     } : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
-      }
-      __setModuleDefault2(result, mod);
-      return result;
-    };
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ function() {
+      var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    }();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -14712,7 +14722,7 @@ var require_utils3 = __commonJS({
           const inputs = getInputs();
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
         }
-        return tl2.exec(qodana_12.EXECUTABLE, args, {
+        return yield tl2.execAsync(qodana_12.EXECUTABLE, args, {
           ignoreReturnCode: true,
           env: Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" })
         });
@@ -14761,19 +14771,17 @@ var require_utils3 = __commonJS({
       });
     }
     function uploadSarif(resultsDir, execute) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        if (!execute) {
-          return;
-        }
-        try {
-          const parentDir = path2.dirname(resultsDir);
-          const qodanaSarif = path2.join(parentDir, "qodana.sarif");
-          tl2.cp(path2.join(resultsDir, "qodana.sarif.json"), qodanaSarif);
-          tl2.uploadArtifact("CodeAnalysisLogs", qodanaSarif, "CodeAnalysisLogs");
-        } catch (error) {
-          tl2.warning(`Failed to upload SARIF \u2013 ${error.message}`);
-        }
-      });
+      if (!execute) {
+        return;
+      }
+      try {
+        const parentDir = path2.dirname(resultsDir);
+        const qodanaSarif = path2.join(parentDir, "qodana.sarif");
+        tl2.cp(path2.join(resultsDir, "qodana.sarif.json"), qodanaSarif);
+        tl2.uploadArtifact("CodeAnalysisLogs", qodanaSarif, "CodeAnalysisLogs");
+      } catch (error) {
+        tl2.warning(`Failed to upload SARIF \u2013 ${error.message}`);
+      }
     }
   }
 });
@@ -14797,15 +14805,25 @@ var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create
 } : function(o, v) {
   o["default"] = v;
 });
-var __importStar = exports && exports.__importStar || function(mod) {
-  if (mod && mod.__esModule) return mod;
-  var result = {};
-  if (mod != null) {
-    for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-  }
-  __setModuleDefault(result, mod);
-  return result;
-};
+var __importStar = exports && exports.__importStar || /* @__PURE__ */ function() {
+  var ownKeys = function(o) {
+    ownKeys = Object.getOwnPropertyNames || function(o2) {
+      var ar = [];
+      for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+      return ar;
+    };
+    return ownKeys(o);
+  };
+  return function(mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) {
+      for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+    }
+    __setModuleDefault(result, mod);
+    return result;
+  };
+}();
 var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
   function adopt(value) {
     return value instanceof P ? value : new P(function(resolve) {
@@ -14847,7 +14865,7 @@ function main() {
       yield (0, utils_1.prepareAgent)(inputs.args);
       const exitCode = yield (0, utils_1.qodana)();
       yield (0, utils_1.uploadArtifacts)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult);
-      yield (0, utils_1.uploadSarif)(inputs.resultsDir, inputs.uploadSarif);
+      (0, utils_1.uploadSarif)(inputs.resultsDir, inputs.uploadSarif);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         (0, utils_1.setFailed)(`qodana scan failed with exit code ${exitCode}`);
       } else if (exitCode === qodana_1.QodanaExitCode.FailThreshold) {
@@ -14858,4 +14876,4 @@ function main() {
     }
   });
 }
-main();
+void main();

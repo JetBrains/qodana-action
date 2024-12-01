@@ -95,7 +95,6 @@ export function getQodanaUrl(
   return `https://github.com/JetBrains/qodana-cli/releases/download/${cli_version}/qodana_${platform}_${arch}.${archive}`
 }
 
-// eslint-disable-next-line no-shadow -- shadowing is intentional here (ESLint bug)
 export enum QodanaExitCode {
   Success = 0,
   FailThreshold = 255

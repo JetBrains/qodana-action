@@ -17,9 +17,8 @@
 import * as tl from 'azure-pipelines-task-lib/task'
 import * as tool from 'azure-pipelines-tool-lib'
 import {
+  compressFolder,
   EXECUTABLE,
-  Inputs,
-  VERSION,
   getProcessArchName,
   getProcessPlatformName,
   getQodanaPullArgs,
@@ -27,9 +26,10 @@ import {
   getQodanaSha256,
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
-  sha256sum,
+  Inputs,
   isNativeMode,
-  compressFolder
+  sha256sum,
+  VERSION
 } from '../../common/qodana'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -78,7 +78,7 @@ export async function qodana(args: string[] = []): Promise<number> {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
   }
-  return tl.exec(EXECUTABLE, args, {
+  return await tl.execAsync(EXECUTABLE, args, {
     ignoreReturnCode: true,
     env: {
       ...process.env,
@@ -158,10 +158,7 @@ export async function uploadArtifacts(
  * @param resultsDir The path to upload a report from.
  * @param execute whether to execute promise or not.
  */
-export async function uploadSarif(
-  resultsDir: string,
-  execute: boolean
-): Promise<void> {
+export function uploadSarif(resultsDir: string, execute: boolean): void {
   if (!execute) {
     return
   }
