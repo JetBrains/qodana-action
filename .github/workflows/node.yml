@@ -34,10 +34,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-      - name: Set Node.js 16.x
-        uses: actions/setup-node@v4.1.0
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version-file: .node-version
+          cache: npm
       - name: Install dependencies
         run: npm ci && npm run build
       - name: Rebuild scan/dist/
@@ -89,6 +91,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [lint]
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         directory: [
@@ -384,11 +387,12 @@ jobs:
           filters: |
             azure-dev:
             - "vsts/vss-extension.dev.json"
-      - name: Set Node.js 16.x
+      - name: Set Node.js
         if: steps.filter.outputs.azure-dev == 'true'
-        uses: actions/setup-node@v4.1.0
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version-file: .node-version
+          cache: npm
       - name: Install dependencies
         if: steps.filter.outputs.azure-dev == 'true'
         run: cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli

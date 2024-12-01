@@ -14,14 +14,11 @@ updates:
     schedule:
       interval: weekly
     groups:
-      npm-development:
-        dependency-type: development
+      dependencies:
+        patterns:
+          - "*"
         update-types:
           - minor
-          - patch
-      npm-production:
-        dependency-type: production
-        update-types:
           - patch
 
   - package-ecosystem: gradle

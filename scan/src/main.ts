@@ -87,7 +87,7 @@ async function main(): Promise<void> {
       restoreCachesPromise
     ])
     const reservedCacheKey = await restoreCachesPromise
-    const exitCode = await qodana(inputs)
+    const exitCode = (await qodana(inputs)) as QodanaExitCode
     const canUploadCache =
       isNeedToUploadCache(inputs.useCaches, inputs.cacheDefaultBranchOnly) &&
       isExecutionSuccessful(exitCode)
@@ -125,5 +125,4 @@ async function main(): Promise<void> {
   }
 }
 
-// noinspection JSIgnoredPromiseFromCall
-main()
+void main()

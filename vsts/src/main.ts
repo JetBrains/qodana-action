@@ -40,13 +40,13 @@ async function main(): Promise<void> {
     tl.mkdirP(inputs.resultsDir)
     tl.mkdirP(inputs.cacheDir)
     await prepareAgent(inputs.args)
-    const exitCode = await qodana()
+    const exitCode = (await qodana()) as QodanaExitCode
     await uploadArtifacts(
       inputs.resultsDir,
       inputs.artifactName,
       inputs.uploadResult
     )
-    await uploadSarif(inputs.resultsDir, inputs.uploadSarif)
+    uploadSarif(inputs.resultsDir, inputs.uploadSarif)
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)
     } else if (exitCode === QodanaExitCode.FailThreshold) {
@@ -57,5 +57,4 @@ async function main(): Promise<void> {
   }
 }
 
-// noinspection JSIgnoredPromiseFromCall
-main()
+void main()
