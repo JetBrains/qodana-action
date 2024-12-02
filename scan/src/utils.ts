@@ -360,7 +360,7 @@ export function isNeedToUploadCache(
   }
 
   if (useCaches && cacheDefaultBranchOnly) {
-    const currentBranch = github.context.payload.ref
+    const currentBranch = github.context.payload.ref_name
     const defaultBranch = github.context.payload.repository?.default_branch
     core.debug(
       `Current branch: ${currentBranch} | Default branch: ${defaultBranch}`
