@@ -1,0 +1,14 @@
+{
+    "messages": {
+        "TOOL_LIB_CachingTool": "Caching tool: %s %s %s",
+        "_TOOL_LIB_CachingTool.comment": "This informational log message indicates that a tool, that was just downloaded, is being copied into the cache directory. %s %s %s represent the tool name, version information, and processor architecture.",
+        "TOOL_LIB_Downloading": "Downloading: %s",
+        "_TOOL_LIB_Downloading.comment": "This information log message indicates that a file is being downloaded. %s represents the URL being downloaded.",
+        "TOOL_LIB_ExtractingArchive": "Extracting archive",
+        "_TOOL_LIB_ExtractingArchive.comment": "This informational log message indicates that an archive file is being extracted. For example, a .zip file, .7z file, or .tar.gz file.",
+        "TOOL_LIB_FoundInCache": "Found tool in cache: %s %s %s",
+        "_TOOL_LIB_FoundInCache.comment": "This informational log message indicates that the request tool is already cached, and does not need to be downloaded again. %s %s %s represent the tool name, version information, and processor architecture.",
+        "TOOL_LIB_PrependPath": "Prepending PATH environment variable with directory: %s",
+        "_TOOL_LIB_PrependPath.comment": "This informational log message indicates that a directory is being prepended to the front of the PATH environment variable. The directories specified by the PATH environment variable are used to resolve the location of command line tools."
+    }
+}

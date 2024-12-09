@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
     "build": "tsc --build .",
-    "package": "../node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
+    "package": "npx ncc build src/main.ts -o dist --source-map --license licenses.txt",
     "test": "jest --config jest.config.js",
     "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2024.2/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"
   },
@@ -30,11 +30,11 @@
     "jszip": "^3.10.1"
   },
   "devDependencies": {
+    "@vercel/ncc": "^0.38.3",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.1",
     "@typescript-eslint/parser": "^8.18.0",
     "axios": "^1.7.9",
-    "esbuild": "0.24.0",
     "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-jest": "^28.9.0",
