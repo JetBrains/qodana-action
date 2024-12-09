@@ -14722,7 +14722,7 @@ var require_utils3 = __commonJS({
           const inputs = getInputs();
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
         }
-        return tl2.exec(qodana_12.EXECUTABLE, args, {
+        return yield tl2.execAsync(qodana_12.EXECUTABLE, args, {
           ignoreReturnCode: true,
           env: Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" })
         });
@@ -14771,19 +14771,17 @@ var require_utils3 = __commonJS({
       });
     }
     function uploadSarif(resultsDir, execute) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        if (!execute) {
-          return;
-        }
-        try {
-          const parentDir = path2.dirname(resultsDir);
-          const qodanaSarif = path2.join(parentDir, "qodana.sarif");
-          tl2.cp(path2.join(resultsDir, "qodana.sarif.json"), qodanaSarif);
-          tl2.uploadArtifact("CodeAnalysisLogs", qodanaSarif, "CodeAnalysisLogs");
-        } catch (error) {
-          tl2.warning(`Failed to upload SARIF \u2013 ${error.message}`);
-        }
-      });
+      if (!execute) {
+        return;
+      }
+      try {
+        const parentDir = path2.dirname(resultsDir);
+        const qodanaSarif = path2.join(parentDir, "qodana.sarif");
+        tl2.cp(path2.join(resultsDir, "qodana.sarif.json"), qodanaSarif);
+        tl2.uploadArtifact("CodeAnalysisLogs", qodanaSarif, "CodeAnalysisLogs");
+      } catch (error) {
+        tl2.warning(`Failed to upload SARIF \u2013 ${error.message}`);
+      }
     }
   }
 });
@@ -14867,7 +14865,7 @@ function main() {
       yield (0, utils_1.prepareAgent)(inputs.args);
       const exitCode = yield (0, utils_1.qodana)();
       yield (0, utils_1.uploadArtifacts)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult);
-      yield (0, utils_1.uploadSarif)(inputs.resultsDir, inputs.uploadSarif);
+      (0, utils_1.uploadSarif)(inputs.resultsDir, inputs.uploadSarif);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         (0, utils_1.setFailed)(`qodana scan failed with exit code ${exitCode}`);
       } else if (exitCode === qodana_1.QodanaExitCode.FailThreshold) {
@@ -14878,4 +14876,4 @@ function main() {
     }
   });
 }
-main();
+void main();

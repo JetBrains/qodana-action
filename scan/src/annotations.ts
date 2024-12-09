@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion,github/array-foreach */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as core from '@actions/core'
 import {AnnotationProperties} from '@actions/core'
 import * as fs from 'fs'
@@ -138,7 +138,7 @@ function parseResult(
   const region = location.region
   return {
     message: result.message.markdown ?? result.message.text!,
-    title: rules.get(result.ruleId!)?.shortDescription!,
+    title: rules.get(result.ruleId!)?.shortDescription,
     path: location.artifactLocation!.uri!,
     start_line: region?.startLine || 0,
     end_line: region?.endLine || region?.startLine || 1,
@@ -192,7 +192,9 @@ function parseRules(tool: Tool): Map<string, Rule> {
  * @returns GitHub Check Outputs with annotations are created for each result.
  */
 export function parseSarif(path: string): Output {
-  const sarif: Log = JSON.parse(fs.readFileSync(path, {encoding: 'utf8'}))
+  const sarif: Log = JSON.parse(
+    fs.readFileSync(path, {encoding: 'utf8'})
+  ) as Log
   const run = sarif.runs[0]
   const rules = parseRules(run.tool)
   let title = 'No new problems found by '

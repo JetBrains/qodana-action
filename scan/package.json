@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "main": "lib/main.js",
   "scripts": {
-    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts",
+    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
     "build": "tsc --build .",
     "package": "../node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
     "test": "jest --config jest.config.js",

@@ -70,6 +70,20 @@ so that the action will upload the files as the job artifacts:
 const SUMMARY_PR_MODE = `💡 Qodana analysis was run in the pull request mode: only the changed files were checked`
 const DEPENDENCY_CHARS_LIMIT = 65000 // 65k chars is the GitHub limit for a comment
 
+interface CloudData {
+  url?: string
+}
+
+interface OpenInIDEData {
+  cloud?: CloudData
+}
+
+interface LicenseEntry {
+  name?: string
+  version?: string
+  license?: string
+}
+
 function wrapToDiffBlock(message: string): string {
   return `\`\`\`diff
 ${message}
@@ -111,16 +125,15 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`
 export function getReportURL(resultsDir: string): string {
   let reportUrlFile = `${resultsDir}/${QODANA_OPEN_IN_IDE_NAME}`
   if (fs.existsSync(reportUrlFile)) {
-    const data = JSON.parse(fs.readFileSync(reportUrlFile, {encoding: 'utf8'}))
-    if (data && data.cloud && data.cloud.url) {
+    const rawData = fs.readFileSync(reportUrlFile, {encoding: 'utf8'})
+    const data = JSON.parse(rawData) as OpenInIDEData
+    if (data?.cloud?.url) {
       return data.cloud.url
     }
   } else {
     reportUrlFile = `${resultsDir}/${QODANA_REPORT_URL_NAME}`
     if (fs.existsSync(reportUrlFile)) {
-      return fs.readFileSync(`${resultsDir}/${QODANA_REPORT_URL_NAME}`, {
-        encoding: 'utf8'
-      })
+      return fs.readFileSync(reportUrlFile, {encoding: 'utf8'})
     }
   }
   return ''
@@ -154,13 +167,14 @@ export async function publishOutput(
     const coverageInfo = getCoverageStats(
       getCoverageFromSarif(`${resultsDir}/${QODANA_SHORT_SARIF_NAME}`)
     )
+
     let licensesInfo = ''
     let packages = 0
     const licensesJson = `${resultsDir}/projectStructure/${QODANA_LICENSES_JSON}`
     if (fs.existsSync(licensesJson)) {
       const licenses = JSON.parse(
         fs.readFileSync(licensesJson, {encoding: 'utf8'})
-      )
+      ) as LicenseEntry[]
       if (licenses.length > 0) {
         packages = licenses.length
         licensesInfo = fs.readFileSync(
