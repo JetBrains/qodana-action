@@ -10,7 +10,7 @@ By participating in this project, you agree to abide by our [Code of conduct](.g
 
 Prerequisites:
 
-- [Node.js 12.x](https://nodejs.org/)
+- [Node.js](https://nodejs.org/) (the version is specified in [.node-version](.node-version))
 - Java 11
 
 Other things you might need to develop:
