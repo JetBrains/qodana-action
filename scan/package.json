@@ -35,7 +35,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "axios": "^1.7.8",
     "esbuild": "0.24.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.16.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-jest": "^28.9.0",
     "jest": "latest",

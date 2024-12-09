@@ -34,7 +34,7 @@
     "vsts"
   ],
   "devDependencies": {
-    "eslint": "^8.57.1",
+    "eslint": "^9.16.0",
     "eslint-plugin-jest": "^28.9.0",
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "eslint-plugin-prettier": "^5.2.1",
