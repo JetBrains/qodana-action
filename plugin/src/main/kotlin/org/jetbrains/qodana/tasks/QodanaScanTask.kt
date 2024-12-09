@@ -26,6 +26,7 @@ import org.jetbrains.qodana.QodanaPluginConstants.QODANA_ENV
 import org.jetbrains.qodana.QodanaPluginConstants.QODANA_ENV_NAME
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.ArrayList
 
 @UntrackedTask(because = "Qodana tracks the state")  // TODO:
 open class QodanaScanTask : Exec() {
