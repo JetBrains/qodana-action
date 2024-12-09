@@ -27,7 +27,7 @@ jobs:
           rm -rf scan/coverage
       - uses: ./
         with:
-          args: --print-problems,--log-level,debug,--config,.github/qodana.yaml
+          args: --print-problems,--log-level,debug,--config,.github/qodana.yaml,--apply-fixes
           pr-mode: true
           use-nightly: true
           upload-result: true
