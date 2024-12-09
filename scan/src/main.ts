@@ -65,6 +65,7 @@ async function main(): Promise<void> {
     await io.mkdirP(inputs.resultsDir)
     await io.mkdirP(inputs.cacheDir)
 
+    // just some random comment
     const restoreCachesPromise = restoreCaches(
       inputs.cacheDir,
       inputs.primaryCacheKey,
