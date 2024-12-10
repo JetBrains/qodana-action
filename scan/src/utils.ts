@@ -191,6 +191,13 @@ export async function pushQuickFixes(
       return
     }
     if (mode === BRANCH) {
+      if (pr?.head?.ref) {
+        const commitToCherryPick = (
+          await exec.getExecOutput('git', ['rev-parse', 'HEAD'])
+        ).stdout.trim()
+        await git(['checkout', currentBranch])
+        await git(['cherry-pick', commitToCherryPick])
+      }
       await git(['push', 'origin', currentBranch])
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
