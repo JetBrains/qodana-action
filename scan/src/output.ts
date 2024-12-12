@@ -302,8 +302,15 @@ export function getSummary(
       `[${firstToolName}](${reportUrl})`
     )
   }
-  const analysisScope = (projectDir === '' ? '' : ['Analyzed project: `', projectDir, '/`\n'].join(''))
-      .concat(sourceDir === '' ? '' : ['Analyzed directory: `', sourceDir, '/`\n'].join(''))
+  const analysisScope = (
+    projectDir === ''
+      ? ''
+      : ['Analyzed project: `', projectDir, '/`\n'].join('')
+  ).concat(
+    sourceDir === ''
+      ? ''
+      : ['Analyzed directory: `', sourceDir, '/`\n'].join('')
+  )
   if (annotations.length === 0) {
     return [
       `# ${toolName}`,
