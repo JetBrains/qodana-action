@@ -187,3 +187,4 @@ The release will be published to:
 - [Azure DevOps Marketplace](https://marketplace.visualstudio.com/items?itemName=JetBrains.qodana)
 - [CircleCI Orb Registry](https://circleci.com/developer/orbs/orb/jetbrains/qodana)
 - [Gradle Plugin Portal](https://plugins.gradle.org/plugin/org.jetbrains.qodana)
+- [Space Packages JAR](https://jetbrains.team/p/sa/packages/maven/maven-public/org.jetbrains.qodana/cli) (so an update for other extensions can be handled by `dependabot`, [an example](https://github.com/JetBrains/qodana-teamcity/pull/1))
