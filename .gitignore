@@ -3,6 +3,8 @@ node_modules
 **/node_modules
 **/lib
 .idea
+.vscode
+.github/local
 # Rest pulled from https://github.com/github/gitignore/blob/master/Node.gitignore
 # Logs
 logs
