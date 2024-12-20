@@ -34,6 +34,8 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 import path = require('path')
+import * as exec from '@actions/exec'
+import {ExecOutput} from '@actions/exec'
 
 export function setFailed(message: string): void {
   tl.setResult(tl.TaskResult.Failed, message)
@@ -77,6 +79,12 @@ export async function qodana(args: string[] = []): Promise<number> {
   if (args.length === 0) {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
+    if (inputs.prMode && tl.getVariable('Build.Reason') === 'PullRequest') {
+      const sha = await getPrSha()
+      if (sha !== '') {
+        args.push('--commit', sha)
+      }
+    }
   }
   return await tl.execAsync(EXECUTABLE, args, {
     ignoreReturnCode: true,
@@ -170,4 +178,46 @@ export function uploadSarif(resultsDir: string, execute: boolean): void {
   } catch (error) {
     tl.warning(`Failed to upload SARIF – ${(error as Error).message}`)
   }
+}
+
+async function getPrSha(): Promise<string> {
+  if (process.env.QODANA_PR_SHA) {
+    return process.env.QODANA_PR_SHA
+  }
+  const sourceBranch = tl
+    .getVariable('System.PullRequest.SourceBranch')
+    ?.replace('refs/heads/', '')
+  const targetBranch = tl
+    .getVariable('System.PullRequest.TargetBranch')
+    ?.replace('refs/heads/', '')
+
+  if (sourceBranch && targetBranch) {
+    await git(['fetch', 'origin'])
+    const output = await gitOutput(
+      ['merge-base', 'origin/' + sourceBranch, 'origin/' + targetBranch],
+      {
+        ignoreReturnCode: true
+      }
+    )
+    if (output.exitCode === 0) {
+      return output.stdout.trim()
+    } else {
+      return ''
+    }
+  }
+  return ''
+}
+
+async function git(
+  args: string[],
+  options: exec.ExecOptions = {}
+): Promise<number> {
+  return (await exec.getExecOutput('git', args, options)).exitCode
+}
+
+async function gitOutput(
+  args: string[],
+  options: exec.ExecOptions = {}
+): Promise<ExecOutput> {
+  return exec.getExecOutput('git', args, options)
 }
