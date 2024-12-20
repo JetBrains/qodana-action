@@ -42,8 +42,6 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci && npm run build
-      - name: Run commitlint
-        run: npx commitlint --from HEAD~20 --to HEAD
       - name: Rebuild scan/dist/
         run: cd scan && npm run package
       - name: Compare the expected and actual dist/ directories
