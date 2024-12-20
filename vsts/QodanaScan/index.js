@@ -14690,6 +14690,7 @@ var require_utils3 = __commonJS({
     var tool = __importStar2(require_tool());
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var path2 = require("path");
+    var node_stream_1 = require("node:stream");
     function setFailed(message) {
       tl2.setResult(tl2.TaskResult.Failed, message);
     }
@@ -14703,6 +14704,7 @@ var require_utils3 = __commonJS({
         uploadSarif: tl2.getBoolInput("uploadSarif", false) || true,
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
         useNightly: tl2.getBoolInput("useNightly", false) || false,
+        prMode: tl2.getBoolInput("prMode", false) || false,
         // Not used by the Azure task
         postComment: false,
         additionalCacheKey: "",
@@ -14710,7 +14712,6 @@ var require_utils3 = __commonJS({
         useAnnotations: false,
         useCaches: false,
         cacheDefaultBranchOnly: false,
-        prMode: false,
         githubToken: "",
         pushFixes: "none",
         commitMessage: ""
@@ -14718,13 +14719,24 @@ var require_utils3 = __commonJS({
     }
     function qodana() {
       return __awaiter2(this, arguments, void 0, function* (args = []) {
+        const env = Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" });
         if (args.length === 0) {
           const inputs = getInputs();
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
+          if (inputs.prMode && tl2.getVariable("Build.Reason") === "PullRequest") {
+            const sha = yield getPrSha();
+            if (sha !== "") {
+              args.push("--commit", sha);
+              const sourceBranch = process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch;
+              if (sourceBranch) {
+                env.QODANA_BRANCH = sourceBranch;
+              }
+            }
+          }
         }
         return yield tl2.execAsync(qodana_12.EXECUTABLE, args, {
           ignoreReturnCode: true,
-          env: Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" })
+          env
         });
       });
     }
@@ -14782,6 +14794,63 @@ var require_utils3 = __commonJS({
       } catch (error) {
         tl2.warning(`Failed to upload SARIF \u2013 ${error.message}`);
       }
+    }
+    function getSourceAndTargetBranches() {
+      var _a, _b;
+      const sourceBranch = (_a = tl2.getVariable("System.PullRequest.SourceBranch")) === null || _a === void 0 ? void 0 : _a.replace("refs/heads/", "");
+      const targetBranch = (_b = tl2.getVariable("System.PullRequest.TargetBranch")) === null || _b === void 0 ? void 0 : _b.replace("refs/heads/", "");
+      return { sourceBranch, targetBranch };
+    }
+    function getPrSha() {
+      return __awaiter2(this, void 0, void 0, function* () {
+        if (process.env.QODANA_PR_SHA) {
+          return process.env.QODANA_PR_SHA;
+        }
+        const { sourceBranch, targetBranch } = getSourceAndTargetBranches();
+        if (sourceBranch && targetBranch) {
+          yield git(["fetch", "origin"]);
+          const output = yield gitOutput(["merge-base", "origin/" + sourceBranch, "origin/" + targetBranch], {
+            ignoreReturnCode: true
+          });
+          if (output.exitCode === 0) {
+            const lines = output.stdout.trim().split("\n");
+            if (lines.length > 1) {
+              return lines[1].trim();
+            }
+          }
+        }
+        return "";
+      });
+    }
+    function git(args_1) {
+      return __awaiter2(this, arguments, void 0, function* (args, options = {}) {
+        return (yield gitOutput(args, options)).exitCode;
+      });
+    }
+    function gitOutput(args_1) {
+      return __awaiter2(this, arguments, void 0, function* (args, options = {}) {
+        const result = {
+          exitCode: 0,
+          stdout: "",
+          stderr: ""
+        };
+        const outStream = new node_stream_1.Writable({
+          write(chunk, _, callback) {
+            result.stdout += chunk.toString("utf8");
+            callback();
+          }
+        });
+        const errStream = new node_stream_1.Writable({
+          write(chunk, _, callback) {
+            result.stderr += chunk.toString("utf8");
+            callback();
+          }
+        });
+        options.outStream = outStream;
+        options.errStream = errStream;
+        result.exitCode = yield tl2.execAsync("git", args, options);
+        return result;
+      });
     }
   }
 });

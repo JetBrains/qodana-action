@@ -69,6 +69,14 @@
       "defaultValue": false,
       "required": false,
       "helpMarkDown": "This option is for development purposes only. Do not use it in production."
+    },
+    {
+      "name": "prMode",
+      "type": "boolean",
+      "label": "PR Mode",
+      "defaultValue": false,
+      "required": false,
+      "helpMarkDown": "Whether the PR analysis gets executed in the pull request mode."
     }
   ],
   "execution": {

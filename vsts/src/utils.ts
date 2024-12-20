@@ -34,6 +34,8 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 import path = require('path')
+import {IExecOptions} from 'azure-pipelines-task-lib/toolrunner'
+import {Writable} from 'node:stream'
 
 export function setFailed(message: string): void {
   tl.setResult(tl.TaskResult.Failed, message)
@@ -54,6 +56,7 @@ export function getInputs(): Inputs {
     uploadSarif: tl.getBoolInput('uploadSarif', false) || true,
     artifactName: tl.getInput('artifactName', false) || 'qodana-report',
     useNightly: tl.getBoolInput('useNightly', false) || false,
+    prMode: tl.getBoolInput('prMode', false) || false,
     // Not used by the Azure task
     postComment: false,
     additionalCacheKey: '',
@@ -61,7 +64,6 @@ export function getInputs(): Inputs {
     useAnnotations: false,
     useCaches: false,
     cacheDefaultBranchOnly: false,
-    prMode: false,
     githubToken: '',
     pushFixes: 'none',
     commitMessage: ''
@@ -74,16 +76,28 @@ export function getInputs(): Inputs {
  * @returns The qodana command execution output.
  */
 export async function qodana(args: string[] = []): Promise<number> {
+  const env: Record<string, string> = {
+    ...process.env,
+    NONINTERACTIVE: '1'
+  }
   if (args.length === 0) {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
+    if (inputs.prMode && tl.getVariable('Build.Reason') === 'PullRequest') {
+      const sha = await getPrSha()
+      if (sha !== '') {
+        args.push('--commit', sha)
+        const sourceBranch =
+          process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch
+        if (sourceBranch) {
+          env.QODANA_BRANCH = sourceBranch
+        }
+      }
+    }
   }
   return await tl.execAsync(EXECUTABLE, args, {
     ignoreReturnCode: true,
-    env: {
-      ...process.env,
-      NONINTERACTIVE: '1'
-    }
+    env
   })
 }
 
@@ -170,4 +184,80 @@ export function uploadSarif(resultsDir: string, execute: boolean): void {
   } catch (error) {
     tl.warning(`Failed to upload SARIF – ${(error as Error).message}`)
   }
+}
+
+function getSourceAndTargetBranches(): {
+  sourceBranch?: string
+  targetBranch?: string
+} {
+  const sourceBranch = tl
+    .getVariable('System.PullRequest.SourceBranch')
+    ?.replace('refs/heads/', '')
+  const targetBranch = tl
+    .getVariable('System.PullRequest.TargetBranch')
+    ?.replace('refs/heads/', '')
+  return {sourceBranch, targetBranch}
+}
+
+async function getPrSha(): Promise<string> {
+  if (process.env.QODANA_PR_SHA) {
+    return process.env.QODANA_PR_SHA
+  }
+  const {sourceBranch, targetBranch} = getSourceAndTargetBranches()
+
+  if (sourceBranch && targetBranch) {
+    await git(['fetch', 'origin'])
+    const output = await gitOutput(
+      ['merge-base', 'origin/' + sourceBranch, 'origin/' + targetBranch],
+      {
+        ignoreReturnCode: true
+      }
+    )
+    if (output.exitCode === 0) {
+      const lines = output.stdout.trim().split('\n')
+      if (lines.length > 1) {
+        return lines[1].trim()
+      }
+    }
+  }
+  return ''
+}
+
+async function git(
+  args: string[],
+  options: IExecOptions = {}
+): Promise<number> {
+  return (await gitOutput(args, options)).exitCode
+}
+
+async function gitOutput(
+  args: string[],
+  options: IExecOptions = {}
+): Promise<{exitCode: number; stderr: string; stdout: string}> {
+  const result = {
+    exitCode: 0,
+    stdout: '',
+    stderr: ''
+  }
+
+  const outStream = new Writable({
+    write(chunk, _, callback) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      result.stdout += chunk.toString('utf8')
+      callback()
+    }
+  })
+
+  const errStream = new Writable({
+    write(chunk, _, callback) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      result.stderr += chunk.toString('utf8')
+      callback()
+    }
+  })
+  options.outStream = outStream
+  options.errStream = errStream
+
+  result.exitCode = await tl.execAsync('git', args, options)
+  return result
 }
