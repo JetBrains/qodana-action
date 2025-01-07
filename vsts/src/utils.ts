@@ -112,7 +112,7 @@ export async function prepareAgent(
 ): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
-  const temp = await tool.downloadTool(getQodanaUrl(arch, platform))
+  const temp = await tool.downloadTool(getQodanaUrl(arch, platform, useNightly))
   if (!useNightly) {
     const expectedChecksum = getQodanaSha256(arch, platform)
     const actualChecksum = sha256sum(temp)

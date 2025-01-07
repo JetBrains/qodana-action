@@ -14744,7 +14744,7 @@ var require_utils3 = __commonJS({
       return __awaiter2(this, arguments, void 0, function* (args, useNightly = false) {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform));
+        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, useNightly));
         if (!useNightly) {
           const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
           const actualChecksum = (0, qodana_12.sha256sum)(temp);
