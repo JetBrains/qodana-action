@@ -15,4 +15,6 @@ steps:
       AGENT_USE_NODE10: true
     inputs:
       uploadResult: true
+      useNightly: true
+      uploadSarif: "false"
       args: --log-level,debug,-l,jetbrains/qodana-jvm-community:latest,--property,idea.headless.enable.statistics=false,--config,.github/qodana.yaml

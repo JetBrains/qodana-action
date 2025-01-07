@@ -14744,7 +14744,7 @@ var require_utils3 = __commonJS({
       return __awaiter2(this, arguments, void 0, function* (args, useNightly = false) {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform));
+        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, useNightly));
         if (!useNightly) {
           const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
           const actualChecksum = (0, qodana_12.sha256sum)(temp);
@@ -14758,7 +14758,7 @@ var require_utils3 = __commonJS({
         } else {
           extractRoot = yield tool.extractTar(temp);
         }
-        tool.prependPath(yield tool.cacheDir(extractRoot, qodana_12.EXECUTABLE, useNightly ? "nightly" : qodana_12.VERSION));
+        tool.prependPath(yield tool.cacheDir(extractRoot, qodana_12.EXECUTABLE, qodana_12.VERSION));
         if (!(0, qodana_12.isNativeMode)(args)) {
           const pull = yield qodana((0, qodana_12.getQodanaPullArgs)(args));
           if (pull !== 0) {
@@ -14931,7 +14931,7 @@ function main() {
       const inputs = (0, utils_1.getInputs)();
       tl.mkdirP(inputs.resultsDir);
       tl.mkdirP(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs.args);
+      yield (0, utils_1.prepareAgent)(inputs.args, inputs.useNightly);
       const exitCode = yield (0, utils_1.qodana)();
       yield (0, utils_1.uploadArtifacts)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult);
       (0, utils_1.uploadSarif)(inputs.resultsDir, inputs.uploadSarif);

@@ -39,7 +39,7 @@ async function main(): Promise<void> {
     const inputs = getInputs()
     tl.mkdirP(inputs.resultsDir)
     tl.mkdirP(inputs.cacheDir)
-    await prepareAgent(inputs.args)
+    await prepareAgent(inputs.args, inputs.useNightly)
     const exitCode = (await qodana()) as QodanaExitCode
     await uploadArtifacts(
       inputs.resultsDir,

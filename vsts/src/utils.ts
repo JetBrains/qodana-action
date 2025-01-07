@@ -112,7 +112,7 @@ export async function prepareAgent(
 ): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
-  const temp = await tool.downloadTool(getQodanaUrl(arch, platform))
+  const temp = await tool.downloadTool(getQodanaUrl(arch, platform, useNightly))
   if (!useNightly) {
     const expectedChecksum = getQodanaSha256(arch, platform)
     const actualChecksum = sha256sum(temp)
@@ -128,13 +128,7 @@ export async function prepareAgent(
   } else {
     extractRoot = await tool.extractTar(temp)
   }
-  tool.prependPath(
-    await tool.cacheDir(
-      extractRoot,
-      EXECUTABLE,
-      useNightly ? 'nightly' : VERSION
-    )
-  )
+  tool.prependPath(await tool.cacheDir(extractRoot, EXECUTABLE, VERSION))
   if (!isNativeMode(args)) {
     const pull = await qodana(getQodanaPullArgs(args))
     if (pull !== 0) {
