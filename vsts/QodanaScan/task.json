@@ -40,11 +40,11 @@
     },
     {
       "name": "uploadSarif",
-      "type": "string",
+      "type": "boolean",
       "label": "Upload SARIF",
-      "defaultValue": "true",
+      "defaultValue": true,
       "required": false,
-      "helpMarkDown": "Upload qodana.sarif.json as an qodana.sarif artifact to the job"
+      "helpMarkDown": "For SARIF SAST Scans Tab extension. Upload qodana.sarif.json as an qodana.sarif artifact to the job"
     },
     {
       "name": "artifactName",
