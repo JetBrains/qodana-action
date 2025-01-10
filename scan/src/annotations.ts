@@ -204,7 +204,11 @@ export function parseSarif(path: string): Output {
       run.results.length
     )} found by `
     annotations = run.results
-      .filter(result => result.baselineState !== 'unchanged')
+      .filter(
+        result =>
+          result.baselineState !== 'unchanged' &&
+          result.baselineState !== 'absent'
+      )
       .map(result => parseResult(result, rules))
       .filter((a): a is Annotation => a !== null && a !== undefined)
   }
