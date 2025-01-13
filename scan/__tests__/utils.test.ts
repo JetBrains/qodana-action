@@ -15,7 +15,7 @@
  */
 
 import {expect} from '@jest/globals'
-import {isNeedToUploadCache} from '../lib/utils'
+import {isNeedToUploadCache} from '../src/utils'
 import * as github from '@actions/github'
 import {ENABLE_USE_CACHE_OPTION_WARNING} from '../src/utils'
 
