@@ -16,7 +16,7 @@
     "url": "git+https://github.com/JetBrains/qodana-action.git"
   },
   "dependencies": {
-    "@actions/artifact": "^2.2.0",
+    "@actions/artifact": "^2.2.1",
     "@actions/cache": "^4.0.0",
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.0",
@@ -32,7 +32,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
-    "@typescript-eslint/parser": "^8.19.0",
+    "@typescript-eslint/parser": "^8.19.1",
     "axios": "^1.7.9",
     "esbuild": "0.24.2",
     "eslint": "^8.57.1",
@@ -43,6 +43,6 @@
     "nock": "^13.5.6",
     "prettier": "3.4.2",
     "ts-jest": "latest",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.3"
   }
 }
