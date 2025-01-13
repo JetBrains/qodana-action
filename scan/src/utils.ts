@@ -50,6 +50,8 @@ import {COMMIT_EMAIL, COMMIT_USER, prFixesBody} from './output'
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
+export const ENABLE_USE_CACHE_OPTION_WARNING =
+  'Turn on "use-cache" option to use "cache-default-branch-only"'
 
 type Reaction =
   | '+1'
@@ -356,13 +358,11 @@ export function isNeedToUploadCache(
   cacheDefaultBranchOnly: boolean
 ): boolean {
   if (!useCaches && cacheDefaultBranchOnly) {
-    core.warning(
-      'Turn on "use-cache" option to use "cache-default-branch-only"'
-    )
+    core.warning(ENABLE_USE_CACHE_OPTION_WARNING)
   }
 
   if (useCaches && cacheDefaultBranchOnly) {
-    const currentBranch = github.context.payload.ref_name as string
+    const currentBranch = github.context.ref
     const defaultBranch = github.context.payload.repository
       ?.default_branch as string
     core.debug(
