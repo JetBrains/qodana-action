@@ -18,16 +18,19 @@ import * as tl from 'azure-pipelines-task-lib/task'
 import {
   FAIL_THRESHOLD_OUTPUT,
   QodanaExitCode,
-  isExecutionSuccessful
+  isExecutionSuccessful,
+  extractArg
 } from '../../common/qodana'
 import {
   getInputs,
   prepareAgent,
+  pushQuickFixes,
   qodana,
   setFailed,
   uploadArtifacts,
   uploadSarif
 } from './utils'
+import {publishOutput} from './output'
 
 // Catch and log any unhandled exceptions. These exceptions can leak out in
 // azure-pipelines-task-lib when a failed upload closes the file descriptor causing any in-process reads to
@@ -41,11 +44,21 @@ async function main(): Promise<void> {
     tl.mkdirP(inputs.cacheDir)
     await prepareAgent(inputs.args, inputs.useNightly)
     const exitCode = (await qodana()) as QodanaExitCode
-    await uploadArtifacts(
-      inputs.resultsDir,
-      inputs.artifactName,
-      inputs.uploadResult
-    )
+    await Promise.all([
+      pushQuickFixes(inputs.pushFixes, inputs.commitMessage),
+      uploadArtifacts(
+        inputs.resultsDir,
+        inputs.artifactName,
+        inputs.uploadResult
+      ),
+      publishOutput(
+        extractArg('-i', '--project-dir', inputs.args),
+        inputs.resultsDir,
+        inputs.postComment,
+        inputs.prMode,
+        isExecutionSuccessful(exitCode)
+      )
+    ])
     uploadSarif(inputs.resultsDir, inputs.uploadSarif)
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)
