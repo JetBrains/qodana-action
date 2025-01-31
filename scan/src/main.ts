@@ -96,6 +96,7 @@ async function main(): Promise<void> {
       publishOutput(
         exitCode === QodanaExitCode.FailThreshold,
         extractArg('-i', '--project-dir', inputs.args),
+        extractArg('-d', '--source-directory', inputs.args),
         inputs.resultsDir,
         inputs.useAnnotations,
         inputs.postComment,

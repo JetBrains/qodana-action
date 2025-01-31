@@ -143,6 +143,7 @@ export function getReportURL(resultsDir: string): string {
  * Publish Qodana results to GitHub: comment, job summary, annotations.
  * @param failedByThreshold flag if the Qodana failThreshold was reached.
  * @param projectDir The path to the project.
+ * @param sourceDir The path to the analyzed directory inside the project.
  * @param resultsDir The path to the results.
  * @param postComment whether to post a PR comment or not.
  * @param isPrMode
@@ -152,6 +153,7 @@ export function getReportURL(resultsDir: string): string {
 export async function publishOutput(
   failedByThreshold: boolean,
   projectDir: string,
+  sourceDir: string,
   resultsDir: string,
   useAnnotations: boolean,
   postComment: boolean,
@@ -189,6 +191,7 @@ export async function publishOutput(
     problems.summary = getSummary(
       toolName,
       projectDir,
+      sourceDir,
       annotations,
       coverageInfo,
       packages,
@@ -199,7 +202,12 @@ export async function publishOutput(
 
     await Promise.all([
       putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION),
-      postResultsToPRComments(toolName, problems.summary, postComment),
+      postResultsToPRComments(
+        toolName,
+        problems.summary,
+        sourceDir,
+        postComment
+      ),
       core.summary.addRaw(problems.summary).write(),
       publishAnnotations(toolName, problems, failedByThreshold, useAnnotations)
     ])
@@ -256,6 +264,7 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
  * Generates action summary string of annotations.
  * @param toolName The name of the tool to generate the summary from.
  * @param projectDir The path to the project.
+ * @param sourceDir The path to analyzed directory inside the project.
  * @param annotations The annotations to generate the summary from.
  * @param coverageInfo The coverage is a Markdown text to generate the summary from.
  * @param packages The number of dependencies in the analyzed project.
@@ -266,6 +275,7 @@ function getRowsByLevel(annotations: Annotation[], level: string): string {
 export function getSummary(
   toolName: string,
   projectDir: string,
+  sourceDir: string,
   annotations: Annotation[],
   coverageInfo: string,
   packages: number,
@@ -292,10 +302,19 @@ export function getSummary(
       `[${firstToolName}](${reportUrl})`
     )
   }
+  const analysisScope = (
+    projectDir === ''
+      ? ''
+      : ['Analyzed project: `', projectDir, '/`\n'].join('')
+  ).concat(
+    sourceDir === ''
+      ? ''
+      : ['Analyzed directory: `', sourceDir, '/`\n'].join('')
+  )
   if (annotations.length === 0) {
     return [
       `# ${toolName}`,
-      projectDir === '' ? '' : ['`', projectDir, '/`\n'].join(''),
+      analysisScope,
       '**It seems all right 👌**',
       '',
       'No new problems were found according to the checks applied',
@@ -309,7 +328,7 @@ export function getSummary(
 
   return [
     `# ${toolName}`,
-    projectDir === '' ? '' : ['`', projectDir, '/`\n'].join(''),
+    analysisScope,
     `**${annotations.length} ${getProblemPlural(
       annotations.length
     )}** were found`,
