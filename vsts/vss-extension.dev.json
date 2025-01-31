@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "qodana-dev",
   "name": "Qodana (Dev)",
-  "version": "2024.3.155",
+  "version": "2024.3.156",
   "publisher": "JetBrains",
   "targets": [
     {

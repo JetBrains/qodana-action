@@ -90,6 +90,17 @@ ${message}
 \`\`\``
 }
 
+function makeConclusion(
+  conclusion: string,
+  failedByThreshold: boolean
+): string {
+  if (failedByThreshold) {
+    return `- ${conclusion}`
+  } else {
+    return `+ ${conclusion}`
+  }
+}
+
 export function getCoverageStats(c: Coverage): string {
   if (c.totalLines === 0 && c.totalCoveredLines === 0) {
     return ''
@@ -97,19 +108,15 @@ export function getCoverageStats(c: Coverage): string {
 
   let stats = ''
   if (c.totalLines !== 0) {
-    let conclusion = `${c.totalCoverage}% total lines covered`
-    if (c.totalCoverage < c.totalCoverageThreshold) {
-      conclusion = `- ${conclusion}`
-    } else {
-      conclusion = `+ ${conclusion}`
-    }
-    stats += `${conclusion}
+    const conclusion = `${c.totalCoverage}% total lines covered`
+    stats += `${makeConclusion(conclusion, c.totalCoverage < c.totalCoverageThreshold)}
 ${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered`
   }
 
   if (c.freshLines !== 0) {
+    const conclusion = `${c.freshCoverage}% fresh lines covered`
     stats += `
-! ${c.freshCoverage}% fresh lines covered
+${makeConclusion(conclusion, c.freshCoverage < c.freshCoverageThreshold)}
 ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`
   }
 
