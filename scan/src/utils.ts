@@ -392,11 +392,13 @@ export function getWorkflowRunUrl(): string {
  * Post a new comment to the pull request.
  * @param toolName The name of the tool to mention in comment.
  * @param content The comment to post.
+ * @param sourceDir The analyzed directory inside project
  * @param postComment Whether to post a comment or not.
  */
 export async function postResultsToPRComments(
   toolName: string,
   content: string,
+  sourceDir: string,
   postComment: boolean
 ): Promise<void> {
   const pr = github.context.payload.pull_request as
@@ -405,7 +407,8 @@ export async function postResultsToPRComments(
   if (!postComment || !pr) {
     return
   }
-  const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName} -->`
+  // source dir needed in case of monorepo with projects analyzed by the same tool
+  const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName}, ${sourceDir} -->`
   const body = `${content}\n${comment_tag_pattern}`
   const client = github.getOctokit(getInputs().githubToken)
   const comment_id = await findCommentByTag(client, comment_tag_pattern)
