@@ -8261,13 +8261,16 @@
         "qodanaFailureConditions": {
           "testCoverageThresholds": {
             "totalCoverage": 40,
-            "freshCoverage": 40
+            "freshCoverage": 30
           }
         },
         "coverage": {
           "totalCoverage": 45.0,
           "totalLines": 124.0,
-          "totalCoveredLines": 56.0
+          "totalCoveredLines": 56.0,
+          "freshCoverage": 33.0,
+          "freshLines": 9.0,
+          "freshCoveredLines": 3.0
         }
       }
     }

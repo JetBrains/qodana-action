@@ -362,6 +362,8 @@ function passedCoverageFixture(): string {
 @@ Code coverage @@
 + 45% total lines covered
 124 lines analyzed, 56 lines covered
++ 33% fresh lines covered
+9 lines analyzed, 3 lines covered
 # Calculated according to the filters of your coverage tool
 \`\`\``
 }
@@ -371,7 +373,7 @@ function failedCoverageFixture(): string {
 @@ Code coverage @@
 - 0% total lines covered
 100 lines analyzed, 0 lines covered
-! 0% fresh lines covered
+- 0% fresh lines covered
 100 lines analyzed, 0 lines covered
 # Calculated according to the filters of your coverage tool
 \`\`\``
