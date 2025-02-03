@@ -394,7 +394,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         if: steps.filter.outputs.azure-dev == 'true'
-        run: cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli
+        run: cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli@0.18.0
       - name: Package and publish
         id: publisher-run
         if: steps.filter.outputs.azure-dev == 'true'
