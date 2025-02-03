@@ -18,9 +18,10 @@
 import * as core from '@actions/core'
 import {AnnotationProperties} from '@actions/core'
 import * as fs from 'fs'
-import type {Log, Result, Tool} from 'sarif'
+import type {Log, Result} from 'sarif'
 import {getWorkflowRunUrl, publishGitHubCheck} from './utils'
-import {getProblemPlural} from './output'
+import {getProblemPlural} from '../../common/output'
+import {parseRules, Rule} from '../../common/utils'
 
 function getQodanaHelpString(): string {
   return `This result was published with [Qodana GitHub Action](${getWorkflowRunUrl()})`
@@ -101,11 +102,6 @@ export interface Output {
   annotations: Annotation[]
 }
 
-export interface Rule {
-  shortDescription: string
-  fullDescription: string
-}
-
 export interface Annotation {
   title: string | undefined
   path: string
@@ -157,33 +153,6 @@ function parseResult(
       }
     })()
   }
-}
-
-/**
- * Extracts the rules descriptions from SARIF tool field.
- * @param tool the SARIF tool field.
- * @returns The map of SARIF rule IDs to their descriptions.
- */
-function parseRules(tool: Tool): Map<string, Rule> {
-  const rules = new Map<string, Rule>()
-  tool.driver.rules?.forEach(rule => {
-    rules.set(rule.id, {
-      shortDescription: rule.shortDescription!.text,
-      fullDescription:
-        rule.fullDescription!.markdown || rule.fullDescription!.text
-    })
-  })
-
-  tool?.extensions?.forEach(ext => {
-    ext?.rules?.forEach(rule => {
-      rules.set(rule.id, {
-        shortDescription: rule.shortDescription!.text,
-        fullDescription:
-          rule.fullDescription!.markdown || rule.fullDescription!.text
-      })
-    })
-  })
-  return rules
 }
 
 /**

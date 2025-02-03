@@ -5,5 +5,10 @@
     "rootDir": ".",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
   },
   "types": ".qodana.d.ts",
-  "files": ["cli.json", "qodana.ts"]
+  "files": [
+    "cli.json",
+    "qodana.ts",
+    "output.ts",
+    "utils.ts"
+  ]
 }
