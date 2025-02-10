@@ -19,11 +19,11 @@ import {
   QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD,
   QODANA_OPEN_IN_IDE_NAME,
-  QODANA_REPORT_URL_NAME,
+  QODANA_REPORT_URL_NAME, VERSION,
 } from "./qodana";
 import * as fs from "fs";
-import type {Result} from 'sarif'
-import {Rule} from './utils'
+import type {Log, Result} from 'sarif'
+import {parseRules, Rule} from './utils'
 
 export const COMMIT_USER = 'qodana-bot'
 export const COMMIT_EMAIL = 'qodana-support@jetbrains.com'
@@ -63,6 +63,44 @@ export interface LicenseEntry {
 export interface LicenseInfo {
   licenses: string,
   packages: number
+}
+
+export interface Output {
+  title: string
+  summary: string
+  text: string
+  problemDescriptions: ProblemDescriptor[]
+}
+
+export function parseSarif(path: string, text: string): Output {
+  const sarif: Log = JSON.parse(
+    fs.readFileSync(path, {encoding: 'utf8'})
+  ) as Log
+  const run = sarif.runs[0]
+  const rules = parseRules(run.tool)
+  let title = 'No new problems found by '
+  let problemDescriptions: ProblemDescriptor[] = []
+  if (run.results?.length) {
+    title = `${run.results.length} ${getProblemPlural(
+      run.results.length
+    )} found by `
+    problemDescriptions = run.results
+      .filter(
+        result =>
+          result.baselineState !== 'unchanged' &&
+          result.baselineState !== 'absent'
+      )
+      .map(result => parseResult(result, rules))
+      .filter((a): a is ProblemDescriptor => a !== null && a !== undefined)
+  }
+  const name = run.tool.driver.fullName || 'Qodana'
+  title += name
+  return {
+    title,
+    text: text,
+    summary: title,
+    problemDescriptions
+  }
 }
 
 export function parseResult(
@@ -336,4 +374,9 @@ export function getProblemPlural(count: number): string {
  */
 export function getDepencencyPlural(count: number): string {
   return `dependenc${count !== 1 ? 'ies' : 'y'}`
+}
+
+export function getCommentTag(toolName: string, sourceDir: string): string {
+  // source dir needed in case of monorepo with projects analyzed by the same tool
+  return `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName}, ${sourceDir} -->`
 }

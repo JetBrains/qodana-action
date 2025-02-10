@@ -24,6 +24,7 @@
 common/ @tiulpin
 orb/ @tiulpin
 vsts/ @tiulpin
+gitlab/ @AndreiIurko
 scan/ @tiulpin
 *.yml @tiulpin
 *.yaml @tiulpin

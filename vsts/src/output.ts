@@ -21,12 +21,13 @@ import {
   QODANA_SHORT_SARIF_NAME,
   VERSION
 } from '../../common/qodana'
-import {parseSarif, postResultsToPRComments, postSummary} from './utils'
+import {getWorkflowRunUrl, postResultsToPRComments, postSummary} from './utils'
 import {
   getCoverageStats,
   getLicenseInfo,
   getReportURL,
   getSummary,
+  parseSarif,
   QODANA_CHECK_NAME
 } from '../../common/output'
 
@@ -44,6 +45,10 @@ so that the action will upload the files as the job artifacts:
             uploadResult: true
 \`\`\`
 `
+
+export function getQodanaHelpString(): string {
+  return `This result was published with [Qodana Task](<${getWorkflowRunUrl()}>)`
+}
 
 /**
  * Publish Qodana results to Azure: comment, job summary.
@@ -66,7 +71,10 @@ export async function publishOutput(
     return
   }
   try {
-    const problems = parseSarif(`${resultsDir}/${QODANA_SARIF_NAME}`)
+    const problems = parseSarif(
+      `${resultsDir}/${QODANA_SARIF_NAME}`,
+      getQodanaHelpString()
+    )
     const reportUrl = getReportURL(resultsDir)
     const coverageInfo = getCoverageStats(
       getCoverageFromSarif(`${resultsDir}/${QODANA_SHORT_SARIF_NAME}`),

@@ -208,7 +208,7 @@ export interface Inputs {
   useAnnotations: boolean
   prMode: boolean
   postComment: boolean
-  githubToken: string
+  accessToken: string
   pushFixes: PushFixesType
   commitMessage: string
   useNightly: boolean
