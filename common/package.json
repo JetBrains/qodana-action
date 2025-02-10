@@ -7,10 +7,13 @@
     "url": "git+https://github.com/JetBrains/qodana-cli.git"
   },
   "scripts": {
-    "lint": "eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml"
+    "lint": "eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
+    "test": "jest --config jest.config.js"
   },
   "files": [
     "qodana.ts",
+    "output.ts",
+    "utils.ts",
     "cli.json"
   ],
   "devDependencies": {
@@ -22,6 +25,8 @@
     "js-yaml": "^4.1.0",
     "prettier": "3.4.2",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@types/sarif": "^2.1.7",
+    "jszip": "^3.10.1"
   }
 }

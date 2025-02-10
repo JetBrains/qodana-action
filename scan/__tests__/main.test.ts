@@ -17,11 +17,8 @@
 import {expect, test} from '@jest/globals'
 import {AnnotationProperties} from '@actions/core'
 import {
-  getCoverageFromSarif,
   getQodanaScanArgs,
   Inputs,
-  QODANA_OPEN_IN_IDE_NAME,
-  QODANA_REPORT_URL_NAME,
   validateBranchName
 } from '../../common/qodana'
 import {
@@ -30,10 +27,46 @@ import {
   parseSarif,
   toAnnotationProperties
 } from '../src/annotations'
-import {getSummary, getCoverageStats, getReportURL} from '../src/output'
-import * as fs from 'fs'
-import * as path from 'path'
-import * as os from 'os'
+import {getSummary} from '../../common/output'
+import {
+  annotationsToProblemDescriptors,
+  VIEW_REPORT_OPTIONS,
+  DEPENDENCY_CHARS_LIMIT
+} from '../src/output'
+
+test('test typical summary output', () => {
+  const result = getSummary(
+    'Qodana for JS',
+    'frontend',
+    'web',
+    annotationsToProblemDescriptors(annotationsDefaultFixture()).reverse(), // reversed for testing the correct sorting in output
+    '',
+    0,
+    'There is no licenses information available',
+    'https://example.com/report',
+    true,
+    DEPENDENCY_CHARS_LIMIT,
+    VIEW_REPORT_OPTIONS
+  )
+  expect(result).toEqual(markdownSummaryFixture())
+})
+
+test('test empty summary output', () => {
+  const result = getSummary(
+    'Qodana for JS',
+    '',
+    '',
+    annotationsToProblemDescriptors(outputEmptyFixture()),
+    '',
+    0,
+    '',
+    '',
+    false,
+    DEPENDENCY_CHARS_LIMIT,
+    VIEW_REPORT_OPTIONS
+  )
+  expect(result).toEqual(markdownEmptySummaryFixture())
+})
 
 test('validate branch names', () => {
   let validBranchNames = [
@@ -77,50 +110,6 @@ test('test sarif with no problems to output annotations', () => {
   expect(result.annotations).toEqual(output)
 })
 
-test('test typical summary output', () => {
-  const result = getSummary(
-    'Qodana for JS',
-    'frontend',
-    'web',
-    annotationsDefaultFixture().reverse(), // reversed for testing the correct sorting in output
-    '',
-    0,
-    'There is no licenses information available',
-    'https://example.com/report',
-    true
-  )
-  expect(result).toEqual(markdownSummaryFixture())
-})
-
-test('test empty summary output', () => {
-  const result = getSummary(
-    'Qodana for JS',
-    '',
-    '',
-    outputEmptyFixture(),
-    '',
-    0,
-    '',
-    '',
-    false
-  )
-  expect(result).toEqual(markdownEmptySummaryFixture())
-})
-
-test('test passed coverage output', () => {
-  const result = getCoverageStats(
-    getCoverageFromSarif('__tests__/data/some.sarif.json')
-  )
-  expect(result).toEqual(passedCoverageFixture())
-})
-
-test('test failed coverage output', () => {
-  const result = getCoverageStats(
-    getCoverageFromSarif('__tests__/data/empty.sarif.json')
-  )
-  expect(result).toEqual(failedCoverageFixture())
-})
-
 test('check conversion from Checks API Annotations to actions/core AnnotationProperty', () => {
   const result = toAnnotationProperties(annotationsDefaultFixture()[0])
   expect(result).toEqual(annotationPropertyDefaultFixture())
@@ -139,58 +128,6 @@ test('check neutral conclusion for the Check', () => {
 test('check success conclusion for the Check', () => {
   const result = getGitHubCheckConclusion(outputEmptyFixture(), false)
   expect(result).toEqual('success')
-})
-
-describe('getReportURL', () => {
-  let tempDir: string
-
-  beforeEach(async () => {
-    // create a unique temporary directory for each test
-    tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'jest-'))
-  })
-
-  afterEach(async () => {
-    // cleanup - remove temporary directory
-    await fs.promises.rm(tempDir, {recursive: true})
-  })
-
-  it('returns cloud URL if open in IDE file exists', async () => {
-    const url = 'http://cloud.url'
-    const data = {cloud: {url}}
-    const filepath = path.join(tempDir, QODANA_OPEN_IN_IDE_NAME)
-    await fs.promises.writeFile(filepath, JSON.stringify(data))
-    console.log(JSON.stringify(data))
-
-    const result = getReportURL(tempDir)
-
-    expect(result).toBe(url)
-  })
-
-  it('returns report URL if open in IDE file does not exist but report file exists', async () => {
-    const url = 'http://report.url'
-    const filepath = path.join(tempDir, QODANA_REPORT_URL_NAME)
-    await fs.promises.writeFile(filepath, url)
-
-    const result = getReportURL(tempDir)
-
-    expect(result).toBe(url)
-  })
-
-  it('returns empty string if no file exists', () => {
-    const result = getReportURL(tempDir)
-
-    expect(result).toBe('')
-  })
-
-  it('returns empty string if open in IDE file exists but does not contain url', async () => {
-    const data = {cloud: {}}
-    const filepath = path.join(tempDir, QODANA_OPEN_IN_IDE_NAME)
-    await fs.promises.writeFile(filepath, JSON.stringify(data))
-
-    const result = getReportURL(tempDir)
-
-    expect(result).toBe('')
-  })
 })
 
 export function outputEmptyFixture(): Annotation[] {
@@ -355,26 +292,4 @@ Contact us at [qodana-support@jetbrains.com](mailto:qodana-support@jetbrains.com
   - Or via our issue tracker: https://jb.gg/qodana-issue
   - Or share your feedback: https://jb.gg/qodana-discussions
 </details>`
-}
-
-function passedCoverageFixture(): string {
-  return `\`\`\`diff
-@@ Code coverage @@
-+ 45% total lines covered
-124 lines analyzed, 56 lines covered
-+ 33% fresh lines covered
-9 lines analyzed, 3 lines covered
-# Calculated according to the filters of your coverage tool
-\`\`\``
-}
-
-function failedCoverageFixture(): string {
-  return `\`\`\`diff
-@@ Code coverage @@
-- 0% total lines covered
-100 lines analyzed, 0 lines covered
-- 0% fresh lines covered
-100 lines analyzed, 0 lines covered
-# Calculated according to the filters of your coverage tool
-\`\`\``
 }

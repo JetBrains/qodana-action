@@ -5,6 +5,7 @@
   "main": "azure.js",
   "scripts": {
     "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
+    "test": "jest --config jest.config.js",
     "bump-dev": "jq '.version |= (split(\".\") | .[2] = (. [2]| tonumber + 1 | tostring) | join(\".\"))' vss-extension.dev.json > tmp.json && mv tmp.json vss-extension.dev.json\n",
     "package": "npm run bump-dev && cd QodanaScan && npm ci && cd .. && ../node_modules/.bin/esbuild lib/main.js --platform=node --bundle --outfile=QodanaScan/index.js --target=node16 --external:shelljs --external:azure-pipelines-task-lib",
     "readme": "cp ../.github/md/azure.md README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2022.2/topics/azure-pipelines.md >> README.md && cat ../.github/md/tracker.md >> README.md",
@@ -24,9 +25,11 @@
   "author": "JetBrains",
   "license": "Apache-2.0",
   "dependencies": {
+    "azure-devops-node-api": "^14.1.0",
     "azure-pipelines-task-lib": "^4.17.3",
     "azure-pipelines-tasks-utility-common": "^3.246.0",
-    "azure-pipelines-tool-lib": "^2.0.8"
+    "azure-pipelines-tool-lib": "^2.0.8",
+    "@types/sarif": "^2.1.7"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

@@ -55,6 +55,42 @@ Triggering this job depends on [what type of repository you are using in Azure P
 The task can be run on any OS and x86_64/arm64 CPUs, but it requires the agent to have Docker installed.
 And since most of the Qodana Docker images are Linux-based, the docker daemon must be able to run Linux containers.
 
+### Apply quick-fixes
+
+To make Qodana automatically fix found issues and push the changes to your repository,
+you need
+to
+1. Choose what kind of fixes to apply
+    - [Specify `fixesStrategy` in the `qodana.yaml` file in your repository root](https://www.jetbrains.com/help/qodana/qodana-yaml.html)
+    - Or set the task `args` property with the quick-fix strategy to use: `--apply-fixes` or `--cleanup`
+2. Set `pushFixes` property to
+    - `pull-request`: create a new branch with fixes and create a pull request to the original branch
+    - or `branch`: push fixes to the original branch
+3. Set the correct permissions for the job. Go to `Repositories` → `Manage repositories` → `Security`. Choose `Qodana for Azure Pipelines Build Service` user. Allow:
+    - `Contribute`
+    - `Bypass policies when pushing`. Without this, the analysis will be performed twice
+    - `Create branch` if you use `pull-request` value
+   
+   Also, set `persistCredentials` property to `true`. This is needed for pushing changes to the repository
+
+Example configuration:
+
+```yaml
+steps:
+  - checkout: self
+    fetchDepth: 0
+    persistCredentials: true
+  - task: QodanaScan@2024
+    env:
+      QODANA_TOKEN: $(QODANA_TOKEN)
+    inputs:
+      pushFixes: "branch"
+      args: "--apply-fixes"
+```
+
+> **Note**
+> Qodana could automatically modify not only the code, but also the configuration in `.idea`: if you do not wish to push these changes, add `.idea` to your `.gitignore` file.
+
 ### Qodana Cloud
 
 To send the results to Qodana Cloud, all you need to do is to specify the `QODANA_TOKEN` environment variable in the build configuration.
@@ -84,15 +120,17 @@ To display Qodana report summary in Azure DevOps UI in 'Scans' tab, install Micr
 
 You probably won't need other options than `args`: all other options can be helpful if you are configuring multiple Qodana Scan jobs in one workflow.
 
-| Name           | Description                                                                                                                                                                 | Default Value                           |
-|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| `args`         | Additional [Qodana CLI `scan` command](https://github.com/jetbrains/qodana-cli#scan) arguments, split the arguments with commas (`,`), for example `-i,frontend`. Optional. | -                                       |
-| `resultsDir`   | Directory to store the analysis results. Optional.                                                                                                                          | `$(Agent.TempDirectory)/qodana/results` |
-| `uploadResult` | Upload Qodana results as an artifact to the job. Optional.                                                                                                                  | `false`                                 |
-| `uploadSarif`  | For SARIF SAST Scans Tab extension. Upload qodana.sarif.json as an qodana.sarif artifact to the job. Optional.                                                              | `true`                                  |
-| `artifactName` | Specify Qodana results artifact name, used for results uploading. Optional.                                                                                                 | `qodana-report`                         |
-| `cacheDir`     | Directory to store Qodana caches. Optional.                                                                                                                                 | `$(Agent.TempDirectory)/qodana/cache`   |
-| `prMode`       | Analyze ONLY changed files in a pull request. Optional.                                                                                                                     | `false`                                 |
+| Name            | Description                                                                                                                                                                                                                                                                                                                            | Default Value                           |
+|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `args`          | Additional [Qodana CLI `scan` command](https://github.com/jetbrains/qodana-cli#scan) arguments, split the arguments with commas (`,`), for example `-i,frontend`. Optional.                                                                                                                                                            |                                         |
+| `resultsDir`    | Directory to store the analysis results. Optional.                                                                                                                                                                                                                                                                                     | `$(Agent.TempDirectory)/qodana/results` |
+| `uploadResult`  | Upload Qodana results as an artifact to the job. Optional.                                                                                                                                                                                                                                                                             | `false`                                 |
+| `uploadSarif`   | For SARIF SAST Scans Tab extension. Upload qodana.sarif.json as an qodana.sarif artifact to the job. Optional.                                                                                                                                                                                                                         | `true`                                  |
+| `artifactName`  | Specify Qodana results artifact name, used for results uploading. Optional.                                                                                                                                                                                                                                                            | `qodana-report`                         |
+| `cacheDir`      | Directory to store Qodana caches. Optional.                                                                                                                                                                                                                                                                                            | `$(Agent.TempDirectory)/qodana/cache`   |
+| `prMode`        | Analyze ONLY changed files in a pull request. Optional.                                                                                                                                                                                                                                                                                | `true`                                  |
+| `postPrComment` | Post a comment with the Qodana results summary to the pull request. Needs `Contribute to pull request` permission and [SYSTEM_ACCESSTOKEN](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#systemaccesstoken) or `persistCredentials` set to true during checkout step. Optional. | `false`                                 |
+| `pushFixes`     | Push Qodana fixes to the repository, can be `none`, `branch` to the current branch, or `pull-request`. Optional.                                                                                                                                                                                                                       | `none`                                  |
 
 [gh:qodana]: https://github.com/JetBrains/qodana-action/actions/workflows/code_scanning.yml
 [youtrack]: https://youtrack.jetbrains.com/issues/QD
