@@ -1,7 +1,10 @@
 import {expect, test} from '@jest/globals'
-import {parseSarif} from '../src/utils'
-import {getSummary, ProblemDescriptor} from '../../common/output'
+import {getSummary} from '../../common/output'
 import {DEPENDENCY_CHARS_LIMIT, VIEW_REPORT_OPTIONS} from '../src/output'
+import {
+  outputEmptyFixture,
+  problemDescriptorsDefaultFixture
+} from '../../common/__tests__/common.test.utils'
 
 test('test typical summary output', () => {
   const result = getSummary(
@@ -36,49 +39,6 @@ test('test empty summary output', () => {
   )
   expect(result).toEqual(markdownEmptySummaryFixture())
 })
-
-test('test sarif with problems to output annotations', () => {
-  const output = problemDescriptorsDefaultFixture()
-  const result = parseSarif('__tests__/data/some.sarif.json')
-  expect(result.problemDescriptions).toEqual(output)
-})
-
-test('test sarif with problems and baseline to output annotations', () => {
-  const output = problemDescriptorsDefaultFixture()
-  const result = parseSarif('__tests__/data/with.baseline.sarif.json')
-  expect(result.problemDescriptions).toEqual(output)
-})
-
-test('test sarif with no problems to output annotations', () => {
-  const output = outputEmptyFixture()
-  const result = parseSarif('__tests__/data/empty.sarif.json')
-  expect(result.problemDescriptions).toEqual(output)
-})
-
-export function problemDescriptorsDefaultFixture(): ProblemDescriptor[] {
-  return [
-    {
-      level: 'failure',
-      title: 'Control flow with empty body'
-    },
-    {
-      level: 'warning',
-      title: "Condition of 'if' expression is constant"
-    },
-    {
-      level: 'warning',
-      title: 'Rider toolset and environment errors'
-    },
-    {
-      level: 'notice',
-      title: "Might be 'const'"
-    }
-  ]
-}
-
-export function outputEmptyFixture(): ProblemDescriptor[] {
-  return []
-}
 
 export function markdownSummaryFixture(): string {
   return `# [Qodana](https://example.com/report) for JS
