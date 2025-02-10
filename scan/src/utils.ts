@@ -46,7 +46,8 @@ import {
 import path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
-import {COMMIT_EMAIL, COMMIT_USER, prFixesBody} from './output'
+import {prFixesBody} from './output'
+import {COMMIT_EMAIL, COMMIT_USER} from '../../common/output'
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'

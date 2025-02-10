@@ -10,7 +10,7 @@
   "scripts": {
     "lint": "npm run -w common lint && npm run -w scan lint && npm run -w vsts lint",
     "build": "tsc -b common scan vsts --force",
-    "test": "npm run -w scan test",
+    "test": "npm run test --workspaces",
     "package": "npm run -w scan package && npm run -w vsts package",
     "all": "npm run lint && npm run build && npm run test && npm run package"
   },
