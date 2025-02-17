@@ -115,7 +115,8 @@ export async function publishOutput(
       DEPENDENCY_CHARS_LIMIT,
       VIEW_REPORT_OPTIONS
     )
-
+    // source dir is needed for project distinction in monorepo
+    const jobName = `${toolName}` + (sourceDir === '' ? '' : ` (${sourceDir})`)
     await Promise.all([
       putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION),
       postResultsToPRComments(
@@ -125,7 +126,7 @@ export async function publishOutput(
         postComment
       ),
       core.summary.addRaw(problems.summary).write(),
-      publishAnnotations(toolName, problems, failedByThreshold, useAnnotations)
+      publishAnnotations(jobName, problems, failedByThreshold, useAnnotations)
     ])
   } catch (error) {
     core.warning(
