@@ -94,7 +94,8 @@ test('qodana scan command args', () => {
 
 test('test sarif with problems to output annotations', () => {
   const output = annotationsDefaultFixture()
-  const result = parseSarif('__tests__/data/some.sarif.json')
+  const defaultProjectDir = ''
+  const result = parseSarif('__tests__/data/some.sarif.json', defaultProjectDir)
   expect(result.annotations).toEqual(output)
 })
 
@@ -106,7 +107,11 @@ test('test sarif with problems and baseline to output annotations', () => {
 
 test('test sarif with no problems to output annotations', () => {
   const output = outputEmptyFixture()
-  const result = parseSarif('__tests__/data/empty.sarif.json')
+  const defaultProjectDir = ''
+  const result = parseSarif(
+    '__tests__/data/empty.sarif.json',
+    defaultProjectDir
+  )
   expect(result.annotations).toEqual(output)
 })
 

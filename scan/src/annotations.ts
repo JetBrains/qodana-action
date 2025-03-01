@@ -117,11 +117,13 @@ export interface Annotation {
  * Converts a SARIF result to a GitHub Check Annotation.
  * @param result The SARIF log to convert.
  * @param rules The map of SARIF rule IDs to their descriptions.
+ * @param projectDir The path to the project.
  * @returns GitHub Check annotations are created for each result.
  */
 function parseResult(
   result: Result,
-  rules: Map<string, Rule>
+  rules: Map<string, Rule>,
+  projectDir: string
 ): Annotation | null {
   if (
     !result.locations ||
@@ -132,10 +134,14 @@ function parseResult(
   }
   const location = result.locations[0].physicalLocation
   const region = location.region
+  const pathPrefix =
+    projectDir === '' || projectDir.endsWith('/')
+      ? projectDir
+      : `${projectDir}/`
   return {
     message: result.message.markdown ?? result.message.text!,
     title: rules.get(result.ruleId!)?.shortDescription,
-    path: location.artifactLocation!.uri!,
+    path: pathPrefix + location.artifactLocation!.uri!,
     start_line: region?.startLine || 0,
     end_line: region?.endLine || region?.startLine || 1,
     start_column:
@@ -158,9 +164,10 @@ function parseResult(
 /**
  * Converts a SARIF from the given path to a GitHub Check Output.
  * @param path The SARIF path to convert.
+ * @param projectDir The path to the project.
  * @returns GitHub Check Outputs with annotations are created for each result.
  */
-export function parseSarif(path: string): Output {
+export function parseSarif(path: string, projectDir: string): Output {
   const sarif: Log = JSON.parse(
     fs.readFileSync(path, {encoding: 'utf8'})
   ) as Log
@@ -175,7 +182,7 @@ export function parseSarif(path: string): Output {
           result.baselineState !== 'unchanged' &&
           result.baselineState !== 'absent'
       )
-      .map(result => parseResult(result, rules))
+      .map(result => parseResult(result, rules, projectDir))
       .filter((a): a is Annotation => a !== null && a !== undefined)
     title = `${annotations.length} ${getProblemPlural(
       annotations.length
