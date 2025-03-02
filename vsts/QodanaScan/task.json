@@ -74,9 +74,33 @@
       "name": "prMode",
       "type": "boolean",
       "label": "PR Mode",
-      "defaultValue": false,
+      "defaultValue": true,
       "required": false,
       "helpMarkDown": "Whether the PR analysis gets executed in the pull request mode."
+    },
+    {
+      "name": "postPrComment",
+      "type": "boolean",
+      "label": "Post PR comment",
+      "defaultValue": true,
+      "required": false,
+      "helpMarkDown": "Post a comment with the Qodana results summary to the pull request."
+    },
+    {
+      "name": "pushFixes",
+      "type": "string",
+      "label": "Push quick-fixes",
+      "defaultValue": "none",
+      "required": false,
+      "helpMarkDown": "Push Qodana fixes to the repository, can be `none`, `branch` to the current branch, or `pull-request`."
+    },
+    {
+      "name": "commitMessage",
+      "type": "string",
+      "label": "Commit Message",
+      "defaultValue": "\uD83E\uDD16 Apply quick-fixes by Qodana\n\n[skip ci]",
+      "required": false,
+      "helpMarkDown": "Message used when quick-fixes are pushed"
     }
   ],
   "execution": {

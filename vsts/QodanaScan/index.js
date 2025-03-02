@@ -16872,16 +16872,11 @@ function parseResult(result2, rules) {
     })()
   };
 }
-function wrapToDiffBlock(message) {
-  return `\`\`\`diff
-${message}
-\`\`\``;
-}
 function makeConclusion(conclusion, failedByThreshold) {
   if (failedByThreshold) {
-    return `- ${conclusion}`;
+    return `<span style="background-color: #ffe6e6; color: red;">${conclusion}</span>`;
   } else {
-    return `+ ${conclusion}`;
+    return `<span style="background-color: #e6f4e6; color: green;">${conclusion}</span>`;
   }
 }
 function getCoverageStats(c) {
@@ -16900,13 +16895,11 @@ ${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered`;
 ${makeConclusion(conclusion, c.freshCoverage < c.freshCoverageThreshold)}
 ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
   }
-  return wrapToDiffBlock(
-    [
-      `@@ Code coverage @@`,
-      `${stats}`,
-      `# Calculated according to the filters of your coverage tool`
-    ].join("\n")
-  );
+  return [
+    `@@ Code coverage @@`,
+    `${stats}`,
+    `# Calculated according to the filters of your coverage tool`
+  ].join("\n");
 }
 function getLicenseInfo(resultsDir) {
   let licensesInfo = "";
@@ -79185,10 +79178,10 @@ var require_utils4 = __commonJS({
         uploadSarif: tl2.getBoolInput("uploadSarif", false),
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
         useNightly: tl2.getBoolInput("useNightly", false),
-        prMode: tl2.getBoolInput("prMode", true),
+        prMode: tl2.getBoolInput("prMode", false),
         postComment: tl2.getBoolInput("postPrComment", false),
         pushFixes: tl2.getInput("pushFixes", false) || "none",
-        commitMessage: tl2.getInput("commitMessage", false) || "\u{1F916} Apply quick-fixes by Qodana",
+        commitMessage: tl2.getInput("commitMessage", false) || "\u{1F916} Apply quick-fixes by Qodana \n\n[skip ci]",
         // Not used by the Azure task
         additionalCacheKey: "",
         primaryCacheKey: "",
@@ -79466,11 +79459,9 @@ ${comment_tag_pattern}`;
             return;
           }
           if (mode === qodana_12.BRANCH) {
-            if (pullRequest) {
-              const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"])).stdout.trim();
-              yield git(["checkout", currentBranch]);
-              yield git(["cherry-pick", commitToCherryPick]);
-            }
+            const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"])).stdout.trim();
+            yield git(["checkout", currentBranch]);
+            yield git(["cherry-pick", commitToCherryPick]);
             yield gitPush(currentBranch);
           } else if (mode === qodana_12.PULL_REQUEST) {
             const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`;
@@ -79488,9 +79479,7 @@ ${comment_tag_pattern}`;
         const output = yield gitOutput(["push", "origin", branch], {
           ignoreReturnCode: true
         });
-        if (output.exitCode == 1) {
-          tl2.warning(`Branch ${branch} already exists. Push of quick-fixes was skipped.`);
-        } else if (output.exitCode !== 0) {
+        if (output.exitCode !== 0) {
           tl2.warning(`Failed to push branch ${branch}: ${output.stderr}`);
         }
       });

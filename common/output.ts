@@ -91,20 +91,14 @@ export function parseResult(
   }
 }
 
-function wrapToDiffBlock(message: string): string {
-  return `\`\`\`diff
-${message}
-\`\`\``
-}
-
 function makeConclusion(
   conclusion: string,
   failedByThreshold: boolean
 ): string {
   if (failedByThreshold) {
-    return `- ${conclusion}`
+    return `<span style="background-color: #ffe6e6; color: red;">${conclusion}</span>`
   } else {
-    return `+ ${conclusion}`
+    return `<span style="background-color: #e6f4e6; color: green;">${conclusion}</span>`
   }
 }
 
@@ -127,13 +121,11 @@ ${makeConclusion(conclusion, c.freshCoverage < c.freshCoverageThreshold)}
 ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`
   }
 
-  return wrapToDiffBlock(
-    [
-      `@@ Code coverage @@`,
-      `${stats}`,
-      `# Calculated according to the filters of your coverage tool`
-    ].join('\n')
-  )
+  return [
+    `@@ Code coverage @@`,
+    `${stats}`,
+    `# Calculated according to the filters of your coverage tool`
+  ].join('\n')
 }
 
 export function getLicenseInfo(

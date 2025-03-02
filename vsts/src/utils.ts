@@ -73,11 +73,12 @@ export function getInputs(): Inputs {
     uploadSarif: tl.getBoolInput('uploadSarif', false),
     artifactName: tl.getInput('artifactName', false) || 'qodana-report',
     useNightly: tl.getBoolInput('useNightly', false),
-    prMode: tl.getBoolInput('prMode', true),
+    prMode: tl.getBoolInput('prMode', false),
     postComment: tl.getBoolInput('postPrComment', false),
     pushFixes: tl.getInput('pushFixes', false) || 'none',
     commitMessage:
-      tl.getInput('commitMessage', false) || '🤖 Apply quick-fixes by Qodana',
+      tl.getInput('commitMessage', false) ||
+      '🤖 Apply quick-fixes by Qodana \n\n[skip ci]',
     // Not used by the Azure task
     additionalCacheKey: '',
     primaryCacheKey: '',
@@ -487,13 +488,11 @@ export async function pushQuickFixes(
       return
     }
     if (mode === BRANCH) {
-      if (pullRequest) {
-        const commitToCherryPick = (
-          await gitOutput(['rev-parse', 'HEAD'])
-        ).stdout.trim()
-        await git(['checkout', currentBranch])
-        await git(['cherry-pick', commitToCherryPick])
-      }
+      const commitToCherryPick = (
+        await gitOutput(['rev-parse', 'HEAD'])
+      ).stdout.trim()
+      await git(['checkout', currentBranch])
+      await git(['cherry-pick', commitToCherryPick])
       await gitPush(currentBranch)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
@@ -510,11 +509,7 @@ async function gitPush(branch: string): Promise<void> {
   const output = await gitOutput(['push', 'origin', branch], {
     ignoreReturnCode: true
   })
-  if (output.exitCode == 1) {
-    tl.warning(
-      `Branch ${branch} already exists. Push of quick-fixes was skipped.`
-    )
-  } else if (output.exitCode !== 0) {
+  if (output.exitCode !== 0) {
     tl.warning(`Failed to push branch ${branch}: ${output.stderr}`)
   }
 }

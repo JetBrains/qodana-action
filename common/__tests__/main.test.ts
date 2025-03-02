@@ -91,23 +91,19 @@ describe('getReportURL', () => {
 })
 
 function passedCoverageFixture(): string {
-  return `\`\`\`diff
-@@ Code coverage @@
-+ 45% total lines covered
+  return `@@ Code coverage @@
+<span style="background-color: #e6f4e6; color: green;">45% total lines covered</span>
 124 lines analyzed, 56 lines covered
-+ 33% fresh lines covered
+<span style="background-color: #e6f4e6; color: green;">33% fresh lines covered</span>
 9 lines analyzed, 3 lines covered
-# Calculated according to the filters of your coverage tool
-\`\`\``
+# Calculated according to the filters of your coverage tool`
 }
 
 function failedCoverageFixture(): string {
-  return `\`\`\`diff
-@@ Code coverage @@
-- 0% total lines covered
+  return `@@ Code coverage @@
+<span style="background-color: #ffe6e6; color: red;">0% total lines covered</span>
 100 lines analyzed, 0 lines covered
-- 0% fresh lines covered
+<span style="background-color: #ffe6e6; color: red;">0% fresh lines covered</span>
 100 lines analyzed, 0 lines covered
-# Calculated according to the filters of your coverage tool
-\`\`\``
+# Calculated according to the filters of your coverage tool`
 }
