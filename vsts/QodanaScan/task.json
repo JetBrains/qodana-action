@@ -10,7 +10,7 @@
   "version": {
     "Major": 2024,
     "Minor": 3,
-    "Patch": 5
+    "Patch": 198
   },
   "instanceNameFormat": "Qodana Scan",
   "inputs": [
