@@ -24,18 +24,36 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
 
-test('test passed coverage output', () => {
+test('test passed coverage output using diff', () => {
   const result = getCoverageStats(
-    getCoverageFromSarif('__tests__/data/some.sarif.json')
+    getCoverageFromSarif('__tests__/data/some.sarif.json'),
+    true
   )
-  expect(result).toEqual(passedCoverageFixture())
+  expect(result).toEqual(passedCoverageFixtureDiff())
 })
 
-test('test failed coverage output', () => {
+test('test failed coverage output using diff', () => {
   const result = getCoverageStats(
-    getCoverageFromSarif('__tests__/data/empty.sarif.json')
+    getCoverageFromSarif('__tests__/data/empty.sarif.json'),
+    true
   )
-  expect(result).toEqual(failedCoverageFixture())
+  expect(result).toEqual(failedCoverageFixtureDiff())
+})
+
+test('test passed coverage output using spam', () => {
+  const result = getCoverageStats(
+    getCoverageFromSarif('__tests__/data/some.sarif.json'),
+    false
+  )
+  expect(result).toEqual(passedCoverageFixtureSpam())
+})
+
+test('test failed coverage output using spam', () => {
+  const result = getCoverageStats(
+    getCoverageFromSarif('__tests__/data/empty.sarif.json'),
+    false
+  )
+  expect(result).toEqual(failedCoverageFixtureSpam())
 })
 
 describe('getReportURL', () => {
@@ -90,7 +108,25 @@ describe('getReportURL', () => {
   })
 })
 
-function passedCoverageFixture(): string {
+function passedCoverageFixtureSpam(): string {
+  return `@@ Code coverage @@
+<span style="background-color: #e6f4e6; color: green;">45% total lines covered</span>
+124 lines analyzed, 56 lines covered
+<span style="background-color: #e6f4e6; color: green;">33% fresh lines covered</span>
+9 lines analyzed, 3 lines covered
+# Calculated according to the filters of your coverage tool`
+}
+
+function failedCoverageFixtureSpam(): string {
+  return `@@ Code coverage @@
+<span style="background-color: #ffe6e6; color: red;">0% total lines covered</span>
+100 lines analyzed, 0 lines covered
+<span style="background-color: #ffe6e6; color: red;">0% fresh lines covered</span>
+100 lines analyzed, 0 lines covered
+# Calculated according to the filters of your coverage tool`
+}
+
+function passedCoverageFixtureDiff(): string {
   return `\`\`\`diff
 @@ Code coverage @@
 + 45% total lines covered
@@ -101,7 +137,7 @@ function passedCoverageFixture(): string {
 \`\`\``
 }
 
-function failedCoverageFixture(): string {
+function failedCoverageFixtureDiff(): string {
   return `\`\`\`diff
 @@ Code coverage @@
 - 0% total lines covered

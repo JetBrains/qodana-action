@@ -99,16 +99,19 @@ ${message}
 
 function makeConclusion(
   conclusion: string,
-  failedByThreshold: boolean
+  failedByThreshold: boolean,
+  useDiffBlock: boolean,
 ): string {
-  if (failedByThreshold) {
-    return `- ${conclusion}`
+  if (useDiffBlock) {
+    return failedByThreshold ? `- ${conclusion}` : `+ ${conclusion}`
   } else {
-    return `+ ${conclusion}`
+    return failedByThreshold
+      ? `<span style="background-color: #ffe6e6; color: red;">${conclusion}</span>`
+      : `<span style="background-color: #e6f4e6; color: green;">${conclusion}</span>`
   }
 }
 
-export function getCoverageStats(c: Coverage): string {
+export function getCoverageStats(c: Coverage, useDiffBlock: boolean): string {
   if (c.totalLines === 0 && c.totalCoveredLines === 0) {
     return ''
   }
@@ -116,24 +119,23 @@ export function getCoverageStats(c: Coverage): string {
   let stats = ''
   if (c.totalLines !== 0) {
     const conclusion = `${c.totalCoverage}% total lines covered`
-    stats += `${makeConclusion(conclusion, c.totalCoverage < c.totalCoverageThreshold)}
+    stats += `${makeConclusion(conclusion, c.totalCoverage < c.totalCoverageThreshold, useDiffBlock)}
 ${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered`
   }
 
   if (c.freshLines !== 0) {
     const conclusion = `${c.freshCoverage}% fresh lines covered`
     stats += `
-${makeConclusion(conclusion, c.freshCoverage < c.freshCoverageThreshold)}
+${makeConclusion(conclusion, c.freshCoverage < c.freshCoverageThreshold, useDiffBlock)}
 ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`
   }
 
-  return wrapToDiffBlock(
-    [
-      `@@ Code coverage @@`,
-      `${stats}`,
-      `# Calculated according to the filters of your coverage tool`
-    ].join('\n')
-  )
+  const coverageBlock =  [
+    `@@ Code coverage @@`,
+    `${stats}`,
+    `# Calculated according to the filters of your coverage tool`
+  ].join('\n')
+  return useDiffBlock ? wrapToDiffBlock(coverageBlock) : coverageBlock
 }
 
 export function getLicenseInfo(
