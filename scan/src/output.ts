@@ -90,7 +90,10 @@ export async function publishOutput(
     return
   }
   try {
-    const problems = parseSarif(`${resultsDir}/${QODANA_SARIF_NAME}`)
+    const problems = parseSarif(
+      `${resultsDir}/${QODANA_SARIF_NAME}`,
+      projectDir
+    )
     const reportUrl = getReportURL(resultsDir)
     const coverageInfo = getCoverageStats(
       getCoverageFromSarif(`${resultsDir}/${QODANA_SHORT_SARIF_NAME}`),
