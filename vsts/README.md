@@ -68,7 +68,7 @@ to
     - or `branch`: push fixes to the original branch
 3. Set the correct permissions for the job. Go to `Repositories` → `Manage repositories` → `Security`. Choose `Qodana for Azure Pipelines Build Service` user. Allow:
     - `Contribute`
-    - `Bypass policies when pushing`. Without this, the analysis will be performed twice
+    - `Bypass policies when pushing` if they may fail the push of quick-fixes
     - `Create branch` if you use `pull-request` value
    
    Also, set `persistCredentials` property to `true`. This is needed for pushing changes to the repository

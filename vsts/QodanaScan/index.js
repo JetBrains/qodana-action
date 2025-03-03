@@ -16877,36 +16877,35 @@ function wrapToDiffBlock(message) {
 ${message}
 \`\`\``;
 }
-function makeConclusion(conclusion, failedByThreshold) {
-  if (failedByThreshold) {
-    return `- ${conclusion}`;
+function makeConclusion(conclusion, failedByThreshold, useDiffBlock) {
+  if (useDiffBlock) {
+    return failedByThreshold ? `- ${conclusion}` : `+ ${conclusion}`;
   } else {
-    return `+ ${conclusion}`;
+    return failedByThreshold ? `<span style="background-color: #ffe6e6; color: red;">${conclusion}</span>` : `<span style="background-color: #e6f4e6; color: green;">${conclusion}</span>`;
   }
 }
-function getCoverageStats(c) {
+function getCoverageStats(c, useDiffBlock) {
   if (c.totalLines === 0 && c.totalCoveredLines === 0) {
     return "";
   }
   let stats = "";
   if (c.totalLines !== 0) {
     const conclusion = `${c.totalCoverage}% total lines covered`;
-    stats += `${makeConclusion(conclusion, c.totalCoverage < c.totalCoverageThreshold)}
+    stats += `${makeConclusion(conclusion, c.totalCoverage < c.totalCoverageThreshold, useDiffBlock)}
 ${c.totalLines} lines analyzed, ${c.totalCoveredLines} lines covered`;
   }
   if (c.freshLines !== 0) {
     const conclusion = `${c.freshCoverage}% fresh lines covered`;
     stats += `
-${makeConclusion(conclusion, c.freshCoverage < c.freshCoverageThreshold)}
+${makeConclusion(conclusion, c.freshCoverage < c.freshCoverageThreshold, useDiffBlock)}
 ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`;
   }
-  return wrapToDiffBlock(
-    [
-      `@@ Code coverage @@`,
-      `${stats}`,
-      `# Calculated according to the filters of your coverage tool`
-    ].join("\n")
-  );
+  const coverageBlock = [
+    `@@ Code coverage @@`,
+    `${stats}`,
+    `# Calculated according to the filters of your coverage tool`
+  ].join("\n");
+  return useDiffBlock ? wrapToDiffBlock(coverageBlock) : coverageBlock;
 }
 function getLicenseInfo(resultsDir) {
   let licensesInfo = "";
@@ -79048,7 +79047,7 @@ so that the action will upload the files as the job artifacts:
         try {
           const problems = (0, utils_12.parseSarif)(`${resultsDir}/${qodana_12.QODANA_SARIF_NAME}`);
           const reportUrl = (0, output_12.getReportURL)(resultsDir);
-          const coverageInfo = (0, output_12.getCoverageStats)((0, qodana_12.getCoverageFromSarif)(`${resultsDir}/${qodana_12.QODANA_SHORT_SARIF_NAME}`));
+          const coverageInfo = (0, output_12.getCoverageStats)((0, qodana_12.getCoverageFromSarif)(`${resultsDir}/${qodana_12.QODANA_SHORT_SARIF_NAME}`), false);
           const licensesInfo = (0, output_12.getLicenseInfo)(resultsDir);
           const problemsDescriptions = (_a = problems.problemDescriptions) !== null && _a !== void 0 ? _a : [];
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : output_12.QODANA_CHECK_NAME;
@@ -79185,10 +79184,10 @@ var require_utils4 = __commonJS({
         uploadSarif: tl2.getBoolInput("uploadSarif", false),
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
         useNightly: tl2.getBoolInput("useNightly", false),
-        prMode: tl2.getBoolInput("prMode", true),
+        prMode: tl2.getBoolInput("prMode", false),
         postComment: tl2.getBoolInput("postPrComment", false),
         pushFixes: tl2.getInput("pushFixes", false) || "none",
-        commitMessage: tl2.getInput("commitMessage", false) || "\u{1F916} Apply quick-fixes by Qodana",
+        commitMessage: tl2.getInput("commitMessage", false) || "\u{1F916} Apply quick-fixes by Qodana \n\n[skip ci]",
         // Not used by the Azure task
         additionalCacheKey: "",
         primaryCacheKey: "",
@@ -79466,11 +79465,9 @@ ${comment_tag_pattern}`;
             return;
           }
           if (mode === qodana_12.BRANCH) {
-            if (pullRequest) {
-              const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"])).stdout.trim();
-              yield git(["checkout", currentBranch]);
-              yield git(["cherry-pick", commitToCherryPick]);
-            }
+            const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"])).stdout.trim();
+            yield git(["checkout", currentBranch]);
+            yield git(["cherry-pick", commitToCherryPick]);
             yield gitPush(currentBranch);
           } else if (mode === qodana_12.PULL_REQUEST) {
             const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`;
@@ -79488,9 +79485,7 @@ ${comment_tag_pattern}`;
         const output = yield gitOutput(["push", "origin", branch], {
           ignoreReturnCode: true
         });
-        if (output.exitCode == 1) {
-          tl2.warning(`Branch ${branch} already exists. Push of quick-fixes was skipped.`);
-        } else if (output.exitCode !== 0) {
+        if (output.exitCode !== 0) {
           tl2.warning(`Failed to push branch ${branch}: ${output.stderr}`);
         }
       });
