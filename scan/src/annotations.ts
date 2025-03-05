@@ -169,9 +169,6 @@ export function parseSarif(path: string): Output {
   let title = 'No new problems found by '
   let annotations: Annotation[] = []
   if (run.results?.length) {
-    title = `${run.results.length} ${getProblemPlural(
-      run.results.length
-    )} found by `
     annotations = run.results
       .filter(
         result =>
@@ -180,6 +177,9 @@ export function parseSarif(path: string): Output {
       )
       .map(result => parseResult(result, rules))
       .filter((a): a is Annotation => a !== null && a !== undefined)
+    title = `${annotations.length} ${getProblemPlural(
+      annotations.length
+    )} found by `
   }
   const name = run.tool.driver.fullName || 'Qodana'
   title += name
