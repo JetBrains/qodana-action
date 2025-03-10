@@ -47,7 +47,7 @@ import path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
 import {prFixesBody} from './output'
-import {COMMIT_EMAIL, COMMIT_USER} from '../../common/output'
+import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
@@ -97,7 +97,7 @@ export function getInputs(): Inputs {
     useAnnotations: core.getBooleanInput('use-annotations'),
     prMode: core.getBooleanInput('pr-mode'),
     postComment: core.getBooleanInput('post-pr-comment'),
-    githubToken: core.getInput('github-token'),
+    accessToken: core.getInput('github-token'),
     pushFixes: core.getInput('push-fixes'),
     commitMessage: core.getInput('commit-message'),
     useNightly: core.getBooleanInput('use-nightly')
@@ -409,9 +409,9 @@ export async function postResultsToPRComments(
     return
   }
   // source dir needed in case of monorepo with projects analyzed by the same tool
-  const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName}, ${sourceDir} -->`
+  const comment_tag_pattern = getCommentTag(toolName, sourceDir)
   const body = `${content}\n${comment_tag_pattern}`
-  const client = github.getOctokit(getInputs().githubToken)
+  const client = github.getOctokit(getInputs().accessToken)
   const comment_id = await findCommentByTag(client, comment_tag_pattern)
   if (comment_id !== -1) {
     await updateComment(client, comment_id, body)
@@ -512,7 +512,7 @@ export async function putReaction(
   if (!pr) {
     return
   }
-  const client = github.getOctokit(getInputs().githubToken)
+  const client = github.getOctokit(getInputs().accessToken)
   const issue_number = pr.number
 
   if (oldReaction !== '') {
@@ -568,7 +568,7 @@ export async function publishGitHubCheck(
   if (pr) {
     sha = pr.head.sha
   }
-  const client = github.getOctokit(getInputs().githubToken)
+  const client = github.getOctokit(getInputs().accessToken)
   const result = await client.rest.checks.listForRef({
     ...github.context.repo,
     ref: sha
@@ -671,7 +671,7 @@ async function createPr(
     {
       env: {
         ...process.env,
-        GH_TOKEN: getInputs().githubToken
+        GH_TOKEN: getInputs().accessToken
       }
     }
   )

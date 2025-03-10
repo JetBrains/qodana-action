@@ -18,8 +18,8 @@ import {expect, test} from '@jest/globals'
 import {getCoverageFromSarif, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
   getCoverageStats,
-  getReportURL
-} from "../output";
+  getReportURL, ProblemDescriptor
+} from '../output'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
