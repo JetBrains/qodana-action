@@ -1,0 +1,1 @@
+For documentation, please refer to the [component repository](https://gitlab.com/qodana/qodana)

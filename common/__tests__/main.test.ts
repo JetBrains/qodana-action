@@ -18,11 +18,12 @@ import {expect, test} from '@jest/globals'
 import {getCoverageFromSarif, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
   getCoverageStats,
-  getReportURL
-} from "../output";
+  getReportURL, parseSarif, ProblemDescriptor
+} from '../output'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
+import {outputEmptyFixture, problemDescriptorsDefaultFixture} from './common.test.utils'
 
 test('test passed coverage output using diff', () => {
   const result = getCoverageStats(
@@ -54,6 +55,33 @@ test('test failed coverage output using spam', () => {
     false
   )
   expect(result).toEqual(failedCoverageFixtureSpam())
+})
+
+test('test sarif with problems to output annotations', () => {
+  const output = problemDescriptorsDefaultFixture()
+  const result = parseSarif(
+    '__tests__/data/some.sarif.json',
+    "This is a test help string"
+  )
+  expect(result.problemDescriptions).toEqual(output)
+})
+
+test('test sarif with problems and baseline to output annotations', () => {
+  const output = problemDescriptorsDefaultFixture()
+  const result = parseSarif(
+    '__tests__/data/with.baseline.sarif.json',
+    "This is a test help string"
+  )
+  expect(result.problemDescriptions).toEqual(output)
+})
+
+test('test sarif with no problems to output annotations', () => {
+  const output = outputEmptyFixture()
+  const result = parseSarif(
+    '__tests__/data/empty.sarif.json',
+    "This is a test help string"
+  )
+  expect(result.problemDescriptions).toEqual(output)
 })
 
 describe('getReportURL', () => {

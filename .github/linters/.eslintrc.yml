@@ -16,6 +16,7 @@ ignorePatterns:
   - '*.js'
   - '*.d.ts'
   - '*.test.ts'
+  - '*.test.utils.ts'
   - '**/coverage/.*'
   - '*.json'
 
