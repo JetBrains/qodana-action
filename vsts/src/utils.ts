@@ -18,7 +18,6 @@ import * as tl from 'azure-pipelines-task-lib/task'
 import * as tool from 'azure-pipelines-tool-lib'
 import {IExecOptions} from 'azure-pipelines-task-lib/toolrunner'
 import {Writable} from 'node:stream'
-import type {Log} from 'sarif'
 import fs from 'fs'
 import path from 'path'
 import * as GitInterfaces from 'azure-devops-node-api/interfaces/GitInterfaces'
@@ -43,14 +42,7 @@ import {
   validateBranchName,
   VERSION
 } from '../../common/qodana'
-import {
-  COMMIT_EMAIL,
-  COMMIT_USER,
-  getProblemPlural,
-  parseResult,
-  ProblemDescriptor
-} from '../../common/output'
-import {parseRules} from '../../common/utils'
+import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 import {getGitApi} from './gitApiProvider'
 import {prFixesBody} from './output'
 
@@ -284,48 +276,6 @@ async function gitOutput(
   return result
 }
 
-export interface Output {
-  title: string
-  summary: string
-  text: string
-  problemDescriptions: ProblemDescriptor[]
-}
-
-function getQodanaHelpString(): string {
-  return `This result was published with [Qodana Task](<${getWorkflowRunUrl()}>)`
-}
-
-export function parseSarif(path: string): Output {
-  const sarif: Log = JSON.parse(
-    fs.readFileSync(path, {encoding: 'utf8'})
-  ) as Log
-  const run = sarif.runs[0]
-  const rules = parseRules(run.tool)
-  let title = 'No new problems found by '
-  let problemDescriptions: ProblemDescriptor[] = []
-  if (run.results?.length) {
-    title = `${run.results.length} ${getProblemPlural(
-      run.results.length
-    )} found by `
-    problemDescriptions = run.results
-      .filter(
-        result =>
-          result.baselineState !== 'unchanged' &&
-          result.baselineState !== 'absent'
-      )
-      .map(result => parseResult(result, rules))
-      .filter((a): a is ProblemDescriptor => a !== null && a !== undefined)
-  }
-  const name = run.tool.driver.fullName || 'Qodana'
-  title += name
-  return {
-    title,
-    text: getQodanaHelpString(),
-    summary: title,
-    problemDescriptions
-  }
-}
-
 /**
  * Returns the URL to the current pipeline run.
  */
@@ -355,8 +305,7 @@ export async function postResultsToPRComments(
     if (!postComment) {
       return
     }
-    // source dir needed in case of monorepo with projects analyzed by the same tool
-    const comment_tag_pattern = `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName}, ${sourceDir} -->`
+    const comment_tag_pattern = getCommentTag(toolName, sourceDir)
     const body = `${content}\n${comment_tag_pattern}`
 
     const pullRequestId = parseInt(
@@ -412,7 +361,7 @@ export async function postResultsToPRComments(
  * @param tag The string to be searched for in the comments' body.
  * @returns A Promise resolving to the comment and containing thread if found, or undefined for both if not found or an error occurs.
  */
-export async function findCommentByTag(tag: string): Promise<{
+async function findCommentByTag(tag: string): Promise<{
   thread: GitInterfaces.CommentThread | undefined
   comment: GitInterfaces.Comment | undefined
 }> {
