@@ -1,0 +1,38 @@
+{
+  "name": "@qodana/gitlab",
+  "version": "1.0.0",
+  "author": "JetBrains",
+  "license": "Apache-2.0",
+  "main": "lib/main.js",
+  "scripts": {
+    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
+    "build": "tsc --build .",
+    "package": "../node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/qodana-gitlab.js",
+    "test": "jest --config jest.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JetBrains/qodana-action.git"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.5",
+    "@typescript-eslint/parser": "^8.19.1",
+    "esbuild": "0.24.2",
+    "eslint": "^8.57.1",
+    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-jest": "^28.10.0",
+    "jest": "latest",
+    "js-yaml": "^4.1.0",
+    "prettier": "3.4.2",
+    "ts-jest": "latest",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@gitbeaker/rest": "^42.1.0",
+    "@types/adm-zip": "^0.5.7",
+    "adm-zip": "^0.5.16",
+    "axios": "^1.7.9",
+    "tar": "^7.4.3"
+  }
+}
