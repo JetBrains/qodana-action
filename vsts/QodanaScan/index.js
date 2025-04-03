@@ -79627,7 +79627,7 @@ var require_utils4 = __commonJS({
     function postResultsToPRComments(toolName, sourceDir, content, hasIssues, postComment) {
       return __awaiter2(this, void 0, void 0, function* () {
         try {
-          if (!postComment) {
+          if (!postComment || tl2.getVariable("Build.Reason") !== "PullRequest") {
             return;
           }
           const comment_tag_pattern = (0, output_12.getCommentTag)(toolName, sourceDir);

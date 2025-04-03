@@ -302,7 +302,7 @@ export async function postResultsToPRComments(
   postComment: boolean
 ): Promise<void> {
   try {
-    if (!postComment) {
+    if (!postComment || tl.getVariable('Build.Reason') !== 'PullRequest') {
       return
     }
     const comment_tag_pattern = getCommentTag(toolName, sourceDir)
