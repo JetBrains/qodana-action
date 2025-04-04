@@ -1,7 +1,7 @@
 **JetBrains Privacy Policy**
 ============================
 
-#### **Version 3.0, last updated: 3 July, 2024**
+#### **Version 3.0, last updated: 3 July, 2025**
 
 In this Privacy Notice, we describe the types of data, including Personal Data, (collectively,
 “data”) that we and our associated companies collect from you when you use JetBrains Websites and

@@ -9,7 +9,7 @@
     "build": "tsc --build .",
     "package": "../node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
     "test": "jest --config jest.config.js",
-    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2024.3/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"
+    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2025.1/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"
   },
   "repository": {
     "type": "git",
