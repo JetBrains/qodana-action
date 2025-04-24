@@ -354,11 +354,11 @@ export async function compressFolder(
 ): Promise<void> {
   await mkdir(path.dirname(destFile), {recursive: true})
   const zip = await createZipFromFolder(srcDir)
-  await new Promise((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     zip
       .generateNodeStream({streamFiles: true, compression: 'DEFLATE'})
       .pipe(fs.createWriteStream(destFile))
       .on('error', err => reject(err))
-      .on('finish', resolve)
+      .on('finish', () => resolve())
   })
 }
