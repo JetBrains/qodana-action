@@ -40,12 +40,12 @@ var init_cli = __esm({
   "../common/cli.json"() {
     version = "2025.1.0";
     checksum = {
-      windows_x86_64: "d45e5ea8fd4fc9747015ffcaccc7d98c05bf600b273742c482c95e247e3f1ea7",
-      linux_arm64: "fb0131d97cd277d2f4225226cd3db9f63d624056b244ff7ba628c685c2de432f",
-      darwin_arm64: "3d271059843a64dcdcc3f76e37ecfe47e1a5e4905c5c8b2d09154b55b0196694",
-      darwin_x86_64: "e8124936591dd88e936b51191d51928f27e223b87890f283242602b2a3dd75ca",
-      windows_arm64: "6a2bb540719153102a5cbcb33d894a7fb7653a724944cd503e3624498034649c",
-      linux_x86_64: "0c8495e6c6c8a28ce3fd8f87a088ce1d53a6779ac0cdf87584cba261a481721c"
+      windows_x86_64: "903886c93aa2a223f50a1013402ee23a2817873dc7403052c9b58cee8f2cca1b",
+      linux_arm64: "3a655e0d720eee472bcd39edcebaff75fbe4176c065de0281a2972841e9e2500",
+      darwin_arm64: "40b1cddc0c4e4d8d5a9eedfc24db32838e36e77cec396a810c824f571c6e4205",
+      darwin_x86_64: "11ea9686d2e3d704a5dac039a59771e003ed2f033a694f861676ffd5ef4073ac",
+      windows_arm64: "78230ff420a7ce701b8d9dc25b8404691dccda31acc6c856e674f1022e0fa06a",
+      linux_x86_64: "d9e2e0c9ed5120f722c2b2f80c7c842b32a4f520cd78db8b3b69e68e30a4dcee"
     };
   }
 });
@@ -10233,7 +10233,7 @@ async function compressFolder(srcDir, destFile) {
   await mkdir2(import_path.default.dirname(destFile), { recursive: true });
   const zip = await createZipFromFolder(srcDir);
   await new Promise((resolve, reject) => {
-    zip.generateNodeStream({ streamFiles: true, compression: "DEFLATE" }).pipe(fs.createWriteStream(destFile)).on("error", (err) => reject(err)).on("finish", resolve);
+    zip.generateNodeStream({ streamFiles: true, compression: "DEFLATE" }).pipe(fs.createWriteStream(destFile)).on("error", (err) => reject(err)).on("finish", () => resolve());
   });
 }
 var import_crypto, fs, import_path, import_jszip, import_util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
@@ -21421,6 +21421,7 @@ var require_axios = __commonJS({
   "../node_modules/axios/dist/node/axios.cjs"(exports2, module2) {
     "use strict";
     var FormData$1 = require_form_data();
+    var crypto = require("crypto");
     var url = require("url");
     var proxyFromEnv = require_proxy_from_env();
     var http = require("http");
@@ -21435,6 +21436,7 @@ var require_axios = __commonJS({
     }
     __name(_interopDefaultLegacy, "_interopDefaultLegacy");
     var FormData__default = /* @__PURE__ */ _interopDefaultLegacy(FormData$1);
+    var crypto__default = /* @__PURE__ */ _interopDefaultLegacy(crypto);
     var url__default = /* @__PURE__ */ _interopDefaultLegacy(url);
     var proxyFromEnv__default = /* @__PURE__ */ _interopDefaultLegacy(proxyFromEnv);
     var http__default = /* @__PURE__ */ _interopDefaultLegacy(http);
@@ -21709,21 +21711,6 @@ var require_axios = __commonJS({
     var toFiniteNumber = /* @__PURE__ */ __name((value, defaultValue) => {
       return value != null && Number.isFinite(value = +value) ? value : defaultValue;
     }, "toFiniteNumber");
-    var ALPHA = "abcdefghijklmnopqrstuvwxyz";
-    var DIGIT = "0123456789";
-    var ALPHABET = {
-      DIGIT,
-      ALPHA,
-      ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
-    };
-    var generateString = /* @__PURE__ */ __name((size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
-      let str = "";
-      const { length } = alphabet;
-      while (size--) {
-        str += alphabet[Math.random() * length | 0];
-      }
-      return str;
-    }, "generateString");
     function isSpecCompliantForm(thing) {
       return !!(thing && isFunction(thing.append) && thing[Symbol.toStringTag] === "FormData" && thing[Symbol.iterator]);
     }
@@ -21823,8 +21810,6 @@ var require_axios = __commonJS({
       findKey,
       global: _global,
       isContextDefined,
-      ALPHABET,
-      generateString,
       isSpecCompliantForm,
       toJSONObject,
       isAsyncFn,
@@ -22156,6 +22141,23 @@ var require_axios = __commonJS({
       clarifyTimeoutError: false
     };
     var URLSearchParams = url__default["default"].URLSearchParams;
+    var ALPHA = "abcdefghijklmnopqrstuvwxyz";
+    var DIGIT = "0123456789";
+    var ALPHABET = {
+      DIGIT,
+      ALPHA,
+      ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
+    };
+    var generateString = /* @__PURE__ */ __name((size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
+      let str = "";
+      const { length } = alphabet;
+      const randomValues = new Uint32Array(size);
+      crypto__default["default"].randomFillSync(randomValues);
+      for (let i = 0; i < size; i++) {
+        str += alphabet[randomValues[i] % length];
+      }
+      return str;
+    }, "generateString");
     var platform$1 = {
       isNode: true,
       classes: {
@@ -22163,6 +22165,8 @@ var require_axios = __commonJS({
         FormData: FormData__default["default"],
         Blob: typeof Blob !== "undefined" && Blob || null
       },
+      ALPHABET,
+      generateString,
       protocols: ["http", "https", "file", "data"]
     };
     var hasBrowserEnv = typeof window !== "undefined" && typeof document !== "undefined";
@@ -22680,14 +22684,15 @@ var require_axios = __commonJS({
       return relativeURL ? baseURL.replace(/\/?\/$/, "") + "/" + relativeURL.replace(/^\/+/, "") : baseURL;
     }
     __name(combineURLs, "combineURLs");
-    function buildFullPath(baseURL, requestedURL) {
-      if (baseURL && !isAbsoluteURL(requestedURL)) {
+    function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
+      let isRelativeUrl = !isAbsoluteURL(requestedURL);
+      if (baseURL && (isRelativeUrl || allowAbsoluteUrls == false)) {
         return combineURLs(baseURL, requestedURL);
       }
       return requestedURL;
     }
     __name(buildFullPath, "buildFullPath");
-    var VERSION2 = "1.7.9";
+    var VERSION2 = "1.8.4";
     function parseProtocol(url2) {
       const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
       return match && match[1] || "";
@@ -22849,7 +22854,7 @@ var require_axios = __commonJS({
       }
     }, "readBlob");
     var readBlob$1 = readBlob;
-    var BOUNDARY_ALPHABET = utils$1.ALPHABET.ALPHA_DIGIT + "-_";
+    var BOUNDARY_ALPHABET = platform.ALPHABET.ALPHA_DIGIT + "-_";
     var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : new util__default["default"].TextEncoder();
     var CRLF = "\r\n";
     var CRLF_BYTES = textEncoder.encode(CRLF);
@@ -22895,7 +22900,7 @@ var require_axios = __commonJS({
       const {
         tag = "form-data-boundary",
         size = 25,
-        boundary = tag + "-" + utils$1.generateString(size, BOUNDARY_ALPHABET)
+        boundary = tag + "-" + platform.generateString(size, BOUNDARY_ALPHABET)
       } = options || {};
       if (!utils$1.isFormData(form)) {
         throw TypeError("FormData instance required");
@@ -23204,7 +23209,7 @@ var require_axios = __commonJS({
             config.signal.aborted ? abort() : config.signal.addEventListener("abort", abort);
           }
         }
-        const fullPath = buildFullPath(config.baseURL, config.url);
+        const fullPath = buildFullPath(config.baseURL, config.url, config.allowAbsoluteUrls);
         const parsed = new URL(fullPath, platform.hasBrowserEnv ? platform.origin : void 0);
         const protocol = parsed.protocol || supportedProtocols[0];
         if (protocol === "data:") {
@@ -23692,7 +23697,7 @@ var require_axios = __commonJS({
       const newConfig = mergeConfig({}, config);
       let { data, withXSRFToken, xsrfHeaderName, xsrfCookieName, headers, auth } = newConfig;
       newConfig.headers = headers = AxiosHeaders$1.from(headers);
-      newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
+      newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config.params, config.paramsSerializer);
       if (auth) {
         headers.set(
           "Authorization",
@@ -24346,6 +24351,12 @@ var require_axios = __commonJS({
             }, true);
           }
         }
+        if (config.allowAbsoluteUrls !== void 0) ;
+        else if (this.defaults.allowAbsoluteUrls !== void 0) {
+          config.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls;
+        } else {
+          config.allowAbsoluteUrls = true;
+        }
         validator.assertOptions(config, {
           baseUrl: validators.spelling("baseURL"),
           withXsrfToken: validators.spelling("withXSRFToken")
@@ -24416,7 +24427,7 @@ var require_axios = __commonJS({
       }
       getUri(config) {
         config = mergeConfig(this.defaults, config);
-        const fullPath = buildFullPath(config.baseURL, config.url);
+        const fullPath = buildFullPath(config.baseURL, config.url, config.allowAbsoluteUrls);
         return buildURL(fullPath, config.params, config.paramsSerializer);
       }
     };
@@ -35625,7 +35636,7 @@ var require_get_intrinsic = __commonJS({
             if (!allowMissing) {
               throw new $TypeError("base intrinsic for " + name + " exists, but the property is not available.");
             }
-            return void 0;
+            return void undefined2;
           }
           if ($gOPD && i + 1 >= parts.length) {
             var desc = $gOPD(value, part);
@@ -41671,18 +41682,30 @@ var require_dist2 = __commonJS({
     function appendFormFromObject(object) {
       const form = new FormData();
       Object.entries(object).forEach(([k, v]) => {
-        if (!v) return;
+        if (v == null) return;
         if (Array.isArray(v)) form.append(k, v[0], v[1]);
         else form.append(k, v);
       });
       return form;
     }
     __name(appendFormFromObject, "appendFormFromObject");
+    var RawPathSegment = class {
+      static {
+        __name(this, "RawPathSegment");
+      }
+      value;
+      constructor(value) {
+        this.value = value;
+      }
+      toString() {
+        return this.value;
+      }
+    };
     function endpoint(strings, ...values) {
-      return values.reduce(
-        (string, value, index) => string + encodeURIComponent(value) + strings[index + 1],
-        strings[0]
-      );
+      return values.reduce((result, value, index) => {
+        const encodedValue = value instanceof RawPathSegment ? value.value : encodeURIComponent(String(value));
+        return result + encodedValue + strings[index + 1];
+      }, strings[0]);
     }
     __name(endpoint, "endpoint");
     function parseLinkHeader(linkString) {
@@ -44546,7 +44569,7 @@ var require_dist2 = __commonJS({
         __name(this, "CommitDiscussions");
       }
       constructor(options) {
-        super("projects", "repository/commits", options);
+        super("projects", new RawPathSegment("repository/commits"), options);
       }
     };
     var Commits = class extends requesterUtils.BaseResource {
@@ -47161,6 +47184,13 @@ var require_dist2 = __commonJS({
           options
         );
       }
+      allInvitedGroups(projectId, options) {
+        return RequestHelper.get()(
+          this,
+          endpoint`projects/${projectId}/invited_groups`,
+          options
+        );
+      }
       allSharableGroups(projectId, options) {
         return RequestHelper.get()(
           this,
@@ -49455,10 +49485,11 @@ var require_dist3 = __commonJS({
     async function throwFailedRequestError(request, response) {
       const content = await response.text();
       const contentType = response.headers.get("Content-Type");
-      let description = "API Request Error";
+      let description;
       if (contentType?.includes("application/json")) {
         const output = JSON.parse(content);
-        description = output.message;
+        const contentProperty = output?.error || output?.message || "";
+        description = typeof contentProperty === "string" ? contentProperty : JSON.stringify(contentProperty);
       } else {
         description = content;
       }
@@ -49705,6 +49736,24 @@ var require_dist3 = __commonJS({
       UserSSHKeys,
       Gitlab
     } = API;
+    Object.defineProperty(exports2, "GitbeakerRequestError", {
+      enumerable: true,
+      get: /* @__PURE__ */ __name(function() {
+        return requesterUtils.GitbeakerRequestError;
+      }, "get")
+    });
+    Object.defineProperty(exports2, "GitbeakerRetryError", {
+      enumerable: true,
+      get: /* @__PURE__ */ __name(function() {
+        return requesterUtils.GitbeakerRetryError;
+      }, "get")
+    });
+    Object.defineProperty(exports2, "GitbeakerTimeoutError", {
+      enumerable: true,
+      get: /* @__PURE__ */ __name(function() {
+        return requesterUtils.GitbeakerTimeoutError;
+      }, "get")
+    });
     exports2.AccessLevel = AccessLevel;
     exports2.Agents = Agents;
     exports2.AlertManagement = AlertManagement;
@@ -50674,4 +50723,7 @@ mime-types/index.js:
    * Copyright(c) 2015 Douglas Christopher Wilson
    * MIT Licensed
    *)
+
+axios/dist/node/axios.cjs:
+  (*! Axios v1.8.4 Copyright (c) 2025 Matt Zabriskie and contributors *)
 */

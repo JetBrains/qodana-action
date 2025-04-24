@@ -432,7 +432,7 @@ export async function pushQuickFixes(
     await git(['config', 'user.name', COMMIT_USER])
     await git(['config', 'user.email', COMMIT_EMAIL])
     await git(['add', '.'])
-    commitMessage = commitMessage + "\n\n[skip-ci]"
+    commitMessage = commitMessage + '\n\n[skip-ci]'
     let output = await gitOutput(['commit', '-m', `'${commitMessage}'`], {
       ignoreReturnCode: true
     })
