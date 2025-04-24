@@ -47,7 +47,7 @@ steps:
       restoreKeys: |
         "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
         "$(Build.Repository.Name)"
-  - task: QodanaScan@2024
+  - task: QodanaScan@2025
 ```
 
 Triggering this job depends on [what type of repository you are using in Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/build/triggers?view=azure-devops#classic-build-pipelines-and-yaml-pipelines).
@@ -80,7 +80,7 @@ steps:
   - checkout: self
     fetchDepth: 0
     persistCredentials: true
-  - task: QodanaScan@2024
+  - task: QodanaScan@2025
     env:
       QODANA_TOKEN: $(QODANA_TOKEN)
     inputs:
@@ -101,7 +101,7 @@ To send the results to Qodana Cloud, all you need to do is to specify the `QODAN
    add `QODANA_TOKEN` variable to the `env` section of the `QodanaScan` task:
 
 ```yaml
-  - task: QodanaScan@2024
+  - task: QodanaScan@2025
     env:
       QODANA_TOKEN: $(QODANA_TOKEN)
 ```

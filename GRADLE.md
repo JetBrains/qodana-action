@@ -23,7 +23,7 @@ Apply Gradle plugin `org.jetbrains.qodana` in the Gradle configuration file:
 
   ```groovy
   plugins {
-      id "org.jetbrains.qodana" version "2024.3.5"
+      id "org.jetbrains.qodana" version "2025.1.0"
   }
   ```
 
@@ -31,7 +31,7 @@ Apply Gradle plugin `org.jetbrains.qodana` in the Gradle configuration file:
 
   ```kotlin
   plugins {
-      id("org.jetbrains.qodana") version "2024.3.5"
+      id("org.jetbrains.qodana") version "2025.1.0"
   }
   ```
 
@@ -64,7 +64,7 @@ Add this to your Gradle configuration file:
   ```groovy
   plugins {
       // applies Gradle Qodana plugin to use it in project
-      id "org.jetbrains.qodana" version "2024.3.5"
+      id "org.jetbrains.qodana" version "2025.1.0"
   }
   
   qodana {
@@ -82,7 +82,7 @@ Add this to your Gradle configuration file:
   ```kotlin
   plugins {
       // applies Gradle Qodana plugin to use it in project
-      id("org.jetbrains.qodana") version "2024.3.5"
+      id("org.jetbrains.qodana") version "2025.1.0"
   }
   
   qodana {
