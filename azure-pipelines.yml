@@ -9,7 +9,7 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-  - task: QodanaScan@2024
+  - task: QodanaScan@2025
     env:
       QODANA_BRANCH: azure-main
       AGENT_USE_NODE10: true

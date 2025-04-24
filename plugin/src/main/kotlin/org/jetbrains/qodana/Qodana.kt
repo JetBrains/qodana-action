@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 JetBrains s.r.o.
+ * Copyright 2021-2025 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class Installer {
     val log: Logger = Logger.getLogger(Installer::class.java.name)
 
     companion object {
-        private const val LATEST_VERSION = "v2024.3.5"
+        private const val LATEST_VERSION = "v2025.1.0"
         private const val RELEASE_DOWNLOAD_URL =
             "https://github.com/JetBrains/qodana-cli/releases/download/%s/qodana_%s_%s"
 

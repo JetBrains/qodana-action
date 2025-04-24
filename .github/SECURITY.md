@@ -4,7 +4,7 @@
 
 | Version  | Supported          |
 |----------|--------------------|
-| 2024.x.x | :white_check_mark: |
+| 2025.x.x | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
