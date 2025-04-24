@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 JetBrains s.r.o.
+ * Copyright 2021-2025 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ test('validate branch names', () => {
     'refs/heads/main',
     'refs/tags/v1.0.0',
     'refs/pull/123/merge',
-    'v2024.3.5'
+    'v2025.1.0'
   ]
   for (let branchName of validBranchNames) {
     expect(validateBranchName(branchName)).toEqual(branchName)
@@ -278,7 +278,7 @@ To get \`*.log\` files or any other Qodana artifacts, run the action with \`uplo
 so that the action will upload the files as the job artifacts:
 \`\`\`yaml
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2024.3.5
+        uses: JetBrains/qodana-action@v2025.1.0
         with:
           upload-result: true
 \`\`\`
