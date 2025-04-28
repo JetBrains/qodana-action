@@ -27,6 +27,12 @@ on:
       - 'gradlew'
       - 'gradlew.bat'
       - '.github/workflows/gradle.yml'
+
+permissions:
+  contents: write
+  pull-requests: read
+  statuses: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
