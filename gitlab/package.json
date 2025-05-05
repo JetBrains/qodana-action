@@ -16,8 +16,8 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.14.1",
-    "@typescript-eslint/parser": "^8.31.0",
+    "@types/node": "^22.15.3",
+    "@typescript-eslint/parser": "^8.31.1",
     "esbuild": "0.25.3",
     "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "^3.7.0",
@@ -29,10 +29,10 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@gitbeaker/rest": "^42.4.1",
+    "@gitbeaker/rest": "^42.5.0",
     "@types/adm-zip": "^0.5.7",
     "adm-zip": "^0.5.16",
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "tar": "^7.4.3"
   }
 }
