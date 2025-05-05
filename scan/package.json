@@ -40,7 +40,7 @@
     "eslint-plugin-jest": "^28.11.0",
     "jest": "latest",
     "js-yaml": "^4.1.0",
-    "nock": "^13.5.6",
+    "nock": "^14.0.4",
     "prettier": "3.5.3",
     "ts-jest": "latest",
     "typescript": "^5.8.3"
