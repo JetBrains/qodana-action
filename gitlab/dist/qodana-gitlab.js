@@ -38,7 +38,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2025.1.0";
+    version = "2025.1.1";
     checksum = {
       windows_x86_64: "903886c93aa2a223f50a1013402ee23a2817873dc7403052c9b58cee8f2cca1b",
       linux_arm64: "3a655e0d720eee472bcd39edcebaff75fbe4176c065de0281a2972841e9e2500",
