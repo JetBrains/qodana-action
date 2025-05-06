@@ -1,20 +1,41 @@
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+trigger: none
 
-trigger:
-  - main
+pr:
+  branches:
+    include:
+      - main
+      - release/*
+      - feature/*
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
   - task: QodanaScan@2025
+    displayName: 'Run Qodana Scan'
     env:
       QODANA_BRANCH: azure-main
       AGENT_USE_NODE10: true
     inputs:
       uploadResult: true
       useNightly: true
-      uploadSarif: "false"
-      args: --log-level,debug,-l,jetbrains/qodana-jvm-community:latest,--property,idea.headless.enable.statistics=false,--config,.github/qodana.yaml
+      uploadSarif: false
+      args: >
+        --log-level debug
+        -l jetbrains/qodana-jvm-community:latest
+        --property idea.headless.enable.statistics=false
+        --config .github/qodana.yaml
+
+stages:
+  - stage: Deploy
+    dependsOn: []
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    jobs:
+      - deployment: ManualApprovalGate
+        displayName: 'Manual approval for forked PRs'
+        environment: pr-approval-environment
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "PR approved—continuing..."
