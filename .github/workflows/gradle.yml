@@ -17,6 +17,11 @@ on:
       - 'plugin/**'
       - 'common/src/**'
       - 'common/build.gradle.kts'
+
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   gradleValidation:
     name: gradle-wrapper

@@ -9,19 +9,19 @@
     "build": "tsc --build .",
     "package": "../node_modules/.bin/esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/index.js",
     "test": "jest --config jest.config.js",
-    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2024.3/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"
+    "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2025.1/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JetBrains/qodana-action.git"
   },
   "dependencies": {
-    "@actions/artifact": "^2.2.1",
-    "@actions/cache": "^4.0.0",
+    "@actions/artifact": "^2.3.2",
+    "@actions/cache": "^4.0.3",
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.0",
     "@actions/github": "^6.0.0",
-    "@actions/tool-cache": "^2.0.1",
+    "@actions/tool-cache": "^2.0.2",
     "@octokit/plugin-paginate-rest": "latest",
     "@octokit/rest": "latest",
     "@octokit/types": "latest",
@@ -31,18 +31,18 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.5",
-    "@typescript-eslint/parser": "^8.19.1",
-    "axios": "^1.8.2",
-    "esbuild": "0.24.2",
+    "@types/node": "^22.14.1",
+    "@typescript-eslint/parser": "^8.31.0",
+    "axios": "^1.8.4",
+    "esbuild": "0.25.3",
     "eslint": "^8.57.1",
-    "eslint-import-resolver-typescript": "^3.7.0",
-    "eslint-plugin-jest": "^28.10.0",
+    "eslint-import-resolver-typescript": "^4.3.4",
+    "eslint-plugin-jest": "^28.11.0",
     "jest": "latest",
     "js-yaml": "^4.1.0",
-    "nock": "^13.5.6",
-    "prettier": "3.4.2",
+    "nock": "^14.0.4",
+    "prettier": "3.5.3",
     "ts-jest": "latest",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.3"
   }
 }
