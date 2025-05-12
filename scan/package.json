@@ -20,7 +20,7 @@
     "@actions/cache": "^4.0.3",
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.0",
-    "@actions/github": "^6.0.0",
+    "@actions/github": "^6.0.1",
     "@actions/tool-cache": "^2.0.2",
     "@octokit/plugin-paginate-rest": "latest",
     "@octokit/rest": "latest",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.15.12",
+    "@types/node": "^22.15.17",
     "@typescript-eslint/parser": "^8.32.0",
     "axios": "^1.9.0",
     "esbuild": "0.25.4",
