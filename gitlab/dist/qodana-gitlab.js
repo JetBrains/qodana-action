@@ -41682,30 +41682,18 @@ var require_dist2 = __commonJS({
     function appendFormFromObject(object) {
       const form = new FormData();
       Object.entries(object).forEach(([k, v]) => {
-        if (v == null) return;
+        if (!v) return;
         if (Array.isArray(v)) form.append(k, v[0], v[1]);
         else form.append(k, v);
       });
       return form;
     }
     __name(appendFormFromObject, "appendFormFromObject");
-    var RawPathSegment = class {
-      static {
-        __name(this, "RawPathSegment");
-      }
-      value;
-      constructor(value) {
-        this.value = value;
-      }
-      toString() {
-        return this.value;
-      }
-    };
     function endpoint(strings, ...values) {
-      return values.reduce((result, value, index) => {
-        const encodedValue = value instanceof RawPathSegment ? value.value : encodeURIComponent(String(value));
-        return result + encodedValue + strings[index + 1];
-      }, strings[0]);
+      return values.reduce(
+        (string, value, index) => string + encodeURIComponent(value) + strings[index + 1],
+        strings[0]
+      );
     }
     __name(endpoint, "endpoint");
     function parseLinkHeader(linkString) {
@@ -44569,7 +44557,7 @@ var require_dist2 = __commonJS({
         __name(this, "CommitDiscussions");
       }
       constructor(options) {
-        super("projects", new RawPathSegment("repository/commits"), options);
+        super("projects", "repository/commits", options);
       }
     };
     var Commits = class extends requesterUtils.BaseResource {
@@ -47184,13 +47172,6 @@ var require_dist2 = __commonJS({
           options
         );
       }
-      allInvitedGroups(projectId, options) {
-        return RequestHelper.get()(
-          this,
-          endpoint`projects/${projectId}/invited_groups`,
-          options
-        );
-      }
       allSharableGroups(projectId, options) {
         return RequestHelper.get()(
           this,
@@ -49485,11 +49466,10 @@ var require_dist3 = __commonJS({
     async function throwFailedRequestError(request, response) {
       const content = await response.text();
       const contentType = response.headers.get("Content-Type");
-      let description;
+      let description = "API Request Error";
       if (contentType?.includes("application/json")) {
         const output = JSON.parse(content);
-        const contentProperty = output?.error || output?.message || "";
-        description = typeof contentProperty === "string" ? contentProperty : JSON.stringify(contentProperty);
+        description = output.message;
       } else {
         description = content;
       }
@@ -49736,24 +49716,6 @@ var require_dist3 = __commonJS({
       UserSSHKeys,
       Gitlab
     } = API;
-    Object.defineProperty(exports2, "GitbeakerRequestError", {
-      enumerable: true,
-      get: /* @__PURE__ */ __name(function() {
-        return requesterUtils.GitbeakerRequestError;
-      }, "get")
-    });
-    Object.defineProperty(exports2, "GitbeakerRetryError", {
-      enumerable: true,
-      get: /* @__PURE__ */ __name(function() {
-        return requesterUtils.GitbeakerRetryError;
-      }, "get")
-    });
-    Object.defineProperty(exports2, "GitbeakerTimeoutError", {
-      enumerable: true,
-      get: /* @__PURE__ */ __name(function() {
-        return requesterUtils.GitbeakerTimeoutError;
-      }, "get")
-    });
     exports2.AccessLevel = AccessLevel;
     exports2.Agents = Agents;
     exports2.AlertManagement = AlertManagement;
@@ -50554,11 +50516,9 @@ ${comment_tag_pattern}`;
             return;
           }
           if (mode === qodana_12.BRANCH) {
-            if (isMergeRequest()) {
-              const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"])).stdout.trim();
-              yield git(["checkout", currentBranch]);
-              yield git(["cherry-pick", commitToCherryPick]);
-            }
+            const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"])).stdout.trim();
+            yield git(["checkout", currentBranch]);
+            yield git(["cherry-pick", commitToCherryPick]);
             yield gitPush(currentBranch, false);
           } else if (mode === qodana_12.PULL_REQUEST) {
             const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`;
