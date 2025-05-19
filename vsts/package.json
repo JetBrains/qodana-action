@@ -32,8 +32,8 @@
     "@types/sarif": "^2.1.7"
   },
   "devDependencies": {
-    "@types/node": "^22.15.12",
-    "@typescript-eslint/parser": "^8.32.0",
+    "@types/node": "^22.15.19",
+    "@typescript-eslint/parser": "^8.32.1",
     "esbuild": "0.25.4",
     "eslint": "^8.57.1",
     "eslint-plugin-jest": "^28.11.0",
@@ -41,7 +41,7 @@
     "js-yaml": "^4.1.0",
     "prettier": "3.5.3",
     "sync-request": "^6.1.0",
-    "ts-jest": "^29.3.2",
+    "ts-jest": "^29.3.4",
     "typescript": "^5.8.3"
   }
 }
