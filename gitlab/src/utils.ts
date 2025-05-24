@@ -472,6 +472,7 @@ async function gitPush(branch: string, force: boolean): Promise<void> {
     .trim()
     .replace('git@', '')
   const url = `https://${COMMIT_USER}:${process.env.QODANA_GITLAB_TOKEN}@${gitRepo.split('@')[1]}`
+  await git(['fetch', url, branch])
   if (force) {
     await git(['push', '--force', '-o', 'ci.skip', url, branch])
   } else {

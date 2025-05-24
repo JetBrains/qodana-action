@@ -50536,6 +50536,7 @@ ${comment_tag_pattern}`;
       return __awaiter2(this, void 0, void 0, function* () {
         const gitRepo = (yield gitOutput(["config", "--get", "remote.origin.url"])).stdout.trim().replace("git@", "");
         const url = `https://${output_12.COMMIT_USER}:${process.env.QODANA_GITLAB_TOKEN}@${gitRepo.split("@")[1]}`;
+        yield git(["fetch", url, branch]);
         if (force) {
           yield git(["push", "--force", "-o", "ci.skip", url, branch]);
         } else {
