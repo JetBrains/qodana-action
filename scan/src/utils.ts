@@ -48,6 +48,7 @@ import * as fs from 'fs'
 import * as os from 'os'
 import {prFixesBody} from './output'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
+import {parseRawArguments} from '../../common/utils'
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
@@ -82,7 +83,7 @@ interface PullRequestPayload {
  */
 export function getInputs(): Inputs {
   const rawArgs = core.getInput('args')
-  const argList = rawArgs ? rawArgs.split(',').map(arg => arg.trim()) : []
+  const argList = parseRawArguments(rawArgs)
   return {
     args: argList,
     resultsDir: core.getInput('results-dir'),

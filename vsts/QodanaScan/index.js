@@ -17093,6 +17093,11 @@ var require_GitInterfaces = __commonJS({
 });
 
 // ../common/utils.ts
+var utils_exports = {};
+__export(utils_exports, {
+  parseRawArguments: () => parseRawArguments,
+  parseRules: () => parseRules
+});
 function parseRules(tool) {
   var _a, _b;
   const rules = /* @__PURE__ */ new Map();
@@ -17112,6 +17117,27 @@ function parseRules(tool) {
     });
   });
   return rules;
+}
+function parseRawArguments(rawArgs) {
+  const initialSplit = rawArgs ? rawArgs.split(",").map((arg) => arg.trim()) : [];
+  const result2 = [];
+  let i = 0;
+  while (i < initialSplit.length) {
+    let currentArg = initialSplit[i];
+    if (currentArg.startsWith("--property=")) {
+      let propertyValue = currentArg;
+      i++;
+      while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
+        propertyValue += "," + initialSplit[i];
+        i++;
+      }
+      result2.push(propertyValue);
+    } else {
+      result2.push(currentArg);
+      i++;
+    }
+  }
+  return result2;
 }
 var init_utils = __esm({
   "../common/utils.ts"() {
@@ -79452,6 +79478,7 @@ var require_utils4 = __commonJS({
     var fs_1 = __importDefault(require("fs"));
     var path_1 = __importDefault(require("path"));
     var GitInterfaces = __importStar2(require_GitInterfaces());
+    var utils_12 = (init_utils(), __toCommonJS(utils_exports));
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var output_12 = (init_output(), __toCommonJS(output_exports));
     var gitApiProvider_1 = require_gitApiProvider();
@@ -79462,7 +79489,7 @@ var require_utils4 = __commonJS({
     function getInputs() {
       const home = path_1.default.join(process.env["AGENT_TEMPDIRECTORY"], "qodana");
       return {
-        args: (tl2.getInput("args", false) || "").split(",").map((arg) => arg.trim()),
+        args: (0, utils_12.parseRawArguments)(tl2.getInput("args", false) || ""),
         resultsDir: tl2.getInput("resultsDir", false) || path_1.default.join(home, "results"),
         cacheDir: tl2.getInput("cacheDir", false) || path_1.default.join(home, "cache"),
         uploadResult: tl2.getBoolInput("uploadResult", false),

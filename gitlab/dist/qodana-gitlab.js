@@ -10289,6 +10289,11 @@ var init_qodana = __esm({
 });
 
 // ../common/utils.ts
+var utils_exports = {};
+__export(utils_exports, {
+  parseRawArguments: () => parseRawArguments,
+  parseRules: () => parseRules
+});
 function parseRules(tool) {
   const rules = /* @__PURE__ */ new Map();
   tool.driver.rules?.forEach((rule) => {
@@ -10307,10 +10312,32 @@ function parseRules(tool) {
   });
   return rules;
 }
+function parseRawArguments(rawArgs) {
+  const initialSplit = rawArgs ? rawArgs.split(",").map((arg) => arg.trim()) : [];
+  const result = [];
+  let i = 0;
+  while (i < initialSplit.length) {
+    let currentArg = initialSplit[i];
+    if (currentArg.startsWith("--property=")) {
+      let propertyValue = currentArg;
+      i++;
+      while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
+        propertyValue += "," + initialSplit[i];
+        i++;
+      }
+      result.push(propertyValue);
+    } else {
+      result.push(currentArg);
+      i++;
+    }
+  }
+  return result;
+}
 var init_utils = __esm({
   "../common/utils.ts"() {
     "use strict";
     __name(parseRules, "parseRules");
+    __name(parseRawArguments, "parseRawArguments");
   }
 });
 
@@ -50154,9 +50181,10 @@ var require_utils5 = __commonJS({
     var gitlabApiProvider_1 = require_gitlabApiProvider();
     var output_2 = require_output();
     var path_1 = __importDefault(require("path"));
+    var utils_12 = (init_utils(), __toCommonJS(utils_exports));
     function getInputs() {
       const rawArgs = getQodanaStringArg("ARGS", "");
-      const argList = rawArgs !== "" ? rawArgs.split(",").map((arg) => arg.trim()) : [];
+      const argList = (0, utils_12.parseRawArguments)(rawArgs);
       let pushFixes = getQodanaStringArg("PUSH_FIXES", "none");
       if (pushFixes === "merge-request") {
         pushFixes = "pull-request";

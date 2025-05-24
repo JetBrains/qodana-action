@@ -27,11 +27,11 @@ import {getGitlabApi} from './gitlabApiProvider'
 import {prFixesBody} from './output'
 import path from 'path'
 import {Readable} from 'stream'
+import {parseRawArguments} from '../../common/utils'
 
 export function getInputs(): Inputs {
   const rawArgs = getQodanaStringArg('ARGS', '')
-  const argList =
-    rawArgs !== '' ? rawArgs.split(',').map(arg => arg.trim()) : []
+  const argList = parseRawArguments(rawArgs)
 
   let pushFixes = getQodanaStringArg('PUSH_FIXES', 'none')
   if (pushFixes === 'merge-request') {
