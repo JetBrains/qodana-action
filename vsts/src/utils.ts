@@ -21,6 +21,7 @@ import {Writable} from 'node:stream'
 import fs from 'fs'
 import path from 'path'
 import * as GitInterfaces from 'azure-devops-node-api/interfaces/GitInterfaces'
+import {parseRawArguments} from '../../common/utils'
 
 import {
   BRANCH,
@@ -58,7 +59,7 @@ export function getInputs(): Inputs {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const home = path.join(process.env['AGENT_TEMPDIRECTORY']!, 'qodana')
   return {
-    args: (tl.getInput('args', false) || '').split(',').map(arg => arg.trim()),
+    args: parseRawArguments(tl.getInput('args', false) || ''),
     resultsDir: tl.getInput('resultsDir', false) || path.join(home, 'results'),
     cacheDir: tl.getInput('cacheDir', false) || path.join(home, 'cache'),
     uploadResult: tl.getBoolInput('uploadResult', false),
