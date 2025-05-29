@@ -88,9 +88,14 @@
     },
     {
       "name": "pushFixes",
-      "type": "string",
+      "type": "pickList",
       "label": "Push quick-fixes",
       "defaultValue": "none",
+      "options": {
+        "none": "none",
+        "branch": "branch",
+        "pull-request": "pull-request"
+      },
       "required": false,
       "helpMarkDown": "Push Qodana fixes to the repository, can be `none`, `branch` to the current branch, or `pull-request`."
     },
