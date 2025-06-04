@@ -20323,7 +20323,7 @@ var require_common2 = __commonJS({
         createDebug.namespaces = namespaces;
         createDebug.names = [];
         createDebug.skips = [];
-        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(" ", ",").split(",").filter(Boolean);
+        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(/\s+/g, ",").split(",").filter(Boolean);
         for (const ns of split) {
           if (ns[0] === "-") {
             createDebug.skips.push(ns.slice(1));
@@ -20551,7 +20551,7 @@ var require_browser = __commonJS({
     function load() {
       let r;
       try {
-        r = exports2.storage.getItem("debug");
+        r = exports2.storage.getItem("debug") || exports2.storage.getItem("DEBUG");
       } catch (error) {
       }
       if (!r && typeof process !== "undefined" && "env" in process) {
@@ -21453,6 +21453,7 @@ var require_axios = __commonJS({
     __name(bind, "bind");
     var { toString } = Object.prototype;
     var { getPrototypeOf } = Object;
+    var { iterator, toStringTag } = Symbol;
     var kindOf = /* @__PURE__ */ ((cache) => (thing) => {
       const str = toString.call(thing);
       return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());
@@ -21489,7 +21490,7 @@ var require_axios = __commonJS({
         return false;
       }
       const prototype2 = getPrototypeOf(val);
-      return (prototype2 === null || prototype2 === Object.prototype || Object.getPrototypeOf(prototype2) === null) && !(Symbol.toStringTag in val) && !(Symbol.iterator in val);
+      return (prototype2 === null || prototype2 === Object.prototype || Object.getPrototypeOf(prototype2) === null) && !(toStringTag in val) && !(iterator in val);
     }, "isPlainObject");
     var isDate = kindOfTest("Date");
     var isFile = kindOfTest("File");
@@ -21639,10 +21640,10 @@ var require_axios = __commonJS({
       };
     })(typeof Uint8Array !== "undefined" && getPrototypeOf(Uint8Array));
     var forEachEntry = /* @__PURE__ */ __name((obj, fn) => {
-      const generator = obj && obj[Symbol.iterator];
-      const iterator = generator.call(obj);
+      const generator = obj && obj[iterator];
+      const _iterator = generator.call(obj);
       let result;
-      while ((result = iterator.next()) && !result.done) {
+      while ((result = _iterator.next()) && !result.done) {
         const pair = result.value;
         fn.call(obj, pair[0], pair[1]);
       }
@@ -21712,7 +21713,7 @@ var require_axios = __commonJS({
       return value != null && Number.isFinite(value = +value) ? value : defaultValue;
     }, "toFiniteNumber");
     function isSpecCompliantForm(thing) {
-      return !!(thing && isFunction(thing.append) && thing[Symbol.toStringTag] === "FormData" && thing[Symbol.iterator]);
+      return !!(thing && isFunction(thing.append) && thing[toStringTag] === "FormData" && thing[iterator]);
     }
     __name(isSpecCompliantForm, "isSpecCompliantForm");
     var toJSONObject = /* @__PURE__ */ __name((obj) => {
@@ -21759,6 +21760,7 @@ var require_axios = __commonJS({
       isFunction(_global.postMessage)
     );
     var asap = typeof queueMicrotask !== "undefined" ? queueMicrotask.bind(_global) : typeof process !== "undefined" && process.nextTick || _setImmediate;
+    var isIterable = /* @__PURE__ */ __name((thing) => thing != null && isFunction(thing[iterator]), "isIterable");
     var utils$1 = {
       isArray,
       isArrayBuffer,
@@ -21815,7 +21817,8 @@ var require_axios = __commonJS({
       isAsyncFn,
       isThenable,
       setImmediate: _setImmediate,
-      asap
+      asap,
+      isIterable
     };
     function AxiosError(message, code, config, request, response) {
       Error.call(this);
@@ -22488,10 +22491,15 @@ var require_axios = __commonJS({
           setHeaders(header, valueOrRewrite);
         } else if (utils$1.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
           setHeaders(parseHeaders(header), valueOrRewrite);
-        } else if (utils$1.isHeaders(header)) {
-          for (const [key, value] of header.entries()) {
-            setHeader(value, key, rewrite);
+        } else if (utils$1.isObject(header) && utils$1.isIterable(header)) {
+          let obj = {}, dest, key;
+          for (const entry of header) {
+            if (!utils$1.isArray(entry)) {
+              throw TypeError("Object iterator must return a key-value pair");
+            }
+            obj[key = entry[0]] = (dest = obj[key]) ? utils$1.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
           }
+          setHeaders(obj, valueOrRewrite);
         } else {
           header != null && setHeader(valueOrRewrite, header, rewrite);
         }
@@ -22596,6 +22604,9 @@ var require_axios = __commonJS({
       toString() {
         return Object.entries(this.toJSON()).map(([header, value]) => header + ": " + value).join("\n");
       }
+      getSetCookie() {
+        return this.get("set-cookie") || [];
+      }
       get [Symbol.toStringTag]() {
         return "AxiosHeaders";
       }
@@ -22692,7 +22703,7 @@ var require_axios = __commonJS({
       return requestedURL;
     }
     __name(buildFullPath, "buildFullPath");
-    var VERSION2 = "1.8.4";
+    var VERSION2 = "1.9.0";
     function parseProtocol(url2) {
       const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
       return match && match[1] || "";
@@ -22909,7 +22920,7 @@ var require_axios = __commonJS({
         throw Error("boundary must be 10-70 characters long");
       }
       const boundaryBytes = textEncoder.encode("--" + boundary + CRLF);
-      const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF + CRLF);
+      const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF);
       let contentLength = footerBytes.byteLength;
       const parts = Array.from(form.entries()).map(([name, value]) => {
         const part = new FormDataPart(name, value);
@@ -23923,7 +23934,7 @@ var require_axios = __commonJS({
       }
     }, "readStream");
     var trackStream = /* @__PURE__ */ __name((stream2, chunkSize, onProgress, onFinish) => {
-      const iterator = readBytes(stream2, chunkSize);
+      const iterator2 = readBytes(stream2, chunkSize);
       let bytes = 0;
       let done;
       let _onFinish = /* @__PURE__ */ __name((e) => {
@@ -23935,7 +23946,7 @@ var require_axios = __commonJS({
       return new ReadableStream({
         async pull(controller) {
           try {
-            const { done: done2, value } = await iterator.next();
+            const { done: done2, value } = await iterator2.next();
             if (done2) {
               _onFinish();
               controller.close();
@@ -23954,7 +23965,7 @@ var require_axios = __commonJS({
         },
         cancel(reason) {
           _onFinish(reason);
-          return iterator.return();
+          return iterator2.return();
         }
       }, {
         highWaterMark: 2
@@ -24111,7 +24122,7 @@ var require_axios = __commonJS({
         });
       } catch (err) {
         unsubscribe && unsubscribe();
-        if (err && err.name === "TypeError" && /fetch/i.test(err.message)) {
+        if (err && err.name === "TypeError" && /Load failed|fetch/i.test(err.message)) {
           throw Object.assign(
             new AxiosError("Network Error", AxiosError.ERR_NETWORK, config, request),
             {
@@ -24289,7 +24300,7 @@ var require_axios = __commonJS({
         __name(this, "Axios");
       }
       constructor(instanceConfig) {
-        this.defaults = instanceConfig;
+        this.defaults = instanceConfig || {};
         this.interceptors = {
           request: new InterceptorManager$1(),
           response: new InterceptorManager$1()
@@ -41682,18 +41693,30 @@ var require_dist2 = __commonJS({
     function appendFormFromObject(object) {
       const form = new FormData();
       Object.entries(object).forEach(([k, v]) => {
-        if (!v) return;
+        if (v == null) return;
         if (Array.isArray(v)) form.append(k, v[0], v[1]);
         else form.append(k, v);
       });
       return form;
     }
     __name(appendFormFromObject, "appendFormFromObject");
+    var RawPathSegment = class {
+      static {
+        __name(this, "RawPathSegment");
+      }
+      value;
+      constructor(value) {
+        this.value = value;
+      }
+      toString() {
+        return this.value;
+      }
+    };
     function endpoint(strings, ...values) {
-      return values.reduce(
-        (string, value, index) => string + encodeURIComponent(value) + strings[index + 1],
-        strings[0]
-      );
+      return values.reduce((result, value, index) => {
+        const encodedValue = value instanceof RawPathSegment ? value.value : encodeURIComponent(String(value));
+        return result + encodedValue + strings[index + 1];
+      }, strings[0]);
     }
     __name(endpoint, "endpoint");
     function parseLinkHeader(linkString) {
@@ -44557,7 +44580,7 @@ var require_dist2 = __commonJS({
         __name(this, "CommitDiscussions");
       }
       constructor(options) {
-        super("projects", "repository/commits", options);
+        super("projects", new RawPathSegment("repository/commits"), options);
       }
     };
     var Commits = class extends requesterUtils.BaseResource {
@@ -47096,6 +47119,53 @@ var require_dist2 = __commonJS({
         );
       }
     };
+    var ProjectTerraformState = class extends requesterUtils.BaseResource {
+      static {
+        __name(this, "ProjectTerraformState");
+      }
+      show(projectId, name, options) {
+        return RequestHelper.get()(
+          this,
+          endpoint`projects/${projectId}/terraform/state/${name}`,
+          options
+        );
+      }
+      showVersion(projectId, name, serial, options) {
+        return RequestHelper.get()(
+          this,
+          endpoint`projects/${projectId}/terraform/state/${name}/versions/${serial}`,
+          options
+        );
+      }
+      removeVersion(projectId, name, serial, options) {
+        return RequestHelper.del()(
+          this,
+          endpoint`projects/${projectId}/terraform/state/${name}/versions/${serial}`,
+          options
+        );
+      }
+      remove(projectId, name, options) {
+        return RequestHelper.del()(
+          this,
+          endpoint`projects/${projectId}/terraform/state/${name}`,
+          options
+        );
+      }
+      removeTerraformStateLock(projectId, name, options) {
+        return RequestHelper.del()(
+          this,
+          endpoint`projects/${projectId}/terraform/state/${name}/lock`,
+          options
+        );
+      }
+      createVersion(projectId, name, options) {
+        return RequestHelper.post()(
+          this,
+          endpoint`projects/${projectId}/terraform/state/${name}`,
+          options
+        );
+      }
+    };
     var ProjectVariables = class extends ResourceVariables {
       static {
         __name(this, "ProjectVariables");
@@ -47169,6 +47239,13 @@ var require_dist2 = __commonJS({
         return RequestHelper.get()(
           this,
           endpoint`projects/${projectId}/groups`,
+          options
+        );
+      }
+      allInvitedGroups(projectId, options) {
+        return RequestHelper.get()(
+          this,
+          endpoint`projects/${projectId}/invited_groups`,
           options
         );
       }
@@ -49134,6 +49211,7 @@ var require_dist2 = __commonJS({
       ProjectSnippets,
       ProjectStatistics,
       ProjectTemplates,
+      ProjectTerraformState,
       ProjectVariables,
       ProjectVulnerabilities,
       ProjectWikis,
@@ -49369,6 +49447,7 @@ var require_dist2 = __commonJS({
     exports2.ProjectSnippets = ProjectSnippets;
     exports2.ProjectStatistics = ProjectStatistics;
     exports2.ProjectTemplates = ProjectTemplates;
+    exports2.ProjectTerraformState = ProjectTerraformState;
     exports2.ProjectVariables = ProjectVariables;
     exports2.ProjectVulnerabilities = ProjectVulnerabilities;
     exports2.ProjectWikis = ProjectWikis;
@@ -49466,10 +49545,11 @@ var require_dist3 = __commonJS({
     async function throwFailedRequestError(request, response) {
       const content = await response.text();
       const contentType = response.headers.get("Content-Type");
-      let description = "API Request Error";
+      let description;
       if (contentType?.includes("application/json")) {
         const output = JSON.parse(content);
-        description = output.message;
+        const contentProperty = output?.error || output?.message || "";
+        description = typeof contentProperty === "string" ? contentProperty : JSON.stringify(contentProperty);
       } else {
         description = content;
       }
@@ -49657,6 +49737,7 @@ var require_dist3 = __commonJS({
       ProjectSnippets,
       ProjectStatistics,
       ProjectTemplates,
+      ProjectTerraformState,
       ProjectVariables,
       ProjectVulnerabilities,
       ProjectWikis,
@@ -49716,6 +49797,24 @@ var require_dist3 = __commonJS({
       UserSSHKeys,
       Gitlab
     } = API;
+    Object.defineProperty(exports2, "GitbeakerRequestError", {
+      enumerable: true,
+      get: /* @__PURE__ */ __name(function() {
+        return requesterUtils.GitbeakerRequestError;
+      }, "get")
+    });
+    Object.defineProperty(exports2, "GitbeakerRetryError", {
+      enumerable: true,
+      get: /* @__PURE__ */ __name(function() {
+        return requesterUtils.GitbeakerRetryError;
+      }, "get")
+    });
+    Object.defineProperty(exports2, "GitbeakerTimeoutError", {
+      enumerable: true,
+      get: /* @__PURE__ */ __name(function() {
+        return requesterUtils.GitbeakerTimeoutError;
+      }, "get")
+    });
     exports2.AccessLevel = AccessLevel;
     exports2.Agents = Agents;
     exports2.AlertManagement = AlertManagement;
@@ -49871,6 +49970,7 @@ var require_dist3 = __commonJS({
     exports2.ProjectSnippets = ProjectSnippets;
     exports2.ProjectStatistics = ProjectStatistics;
     exports2.ProjectTemplates = ProjectTemplates;
+    exports2.ProjectTerraformState = ProjectTerraformState;
     exports2.ProjectVariables = ProjectVariables;
     exports2.ProjectVulnerabilities = ProjectVulnerabilities;
     exports2.ProjectWikis = ProjectWikis;
@@ -50519,6 +50619,7 @@ ${comment_tag_pattern}`;
             const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"])).stdout.trim();
             yield git(["checkout", currentBranch]);
             yield git(["cherry-pick", commitToCherryPick]);
+            yield git(["fetch", "origin", currentBranch]);
             yield gitPush(currentBranch, false);
           } else if (mode === qodana_12.PULL_REQUEST) {
             const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`;
@@ -50536,7 +50637,6 @@ ${comment_tag_pattern}`;
       return __awaiter2(this, void 0, void 0, function* () {
         const gitRepo = (yield gitOutput(["config", "--get", "remote.origin.url"])).stdout.trim().replace("git@", "");
         const url = `https://${output_12.COMMIT_USER}:${process.env.QODANA_GITLAB_TOKEN}@${gitRepo.split("@")[1]}`;
-        yield git(["fetch", url, branch]);
         if (force) {
           yield git(["push", "--force", "-o", "ci.skip", url, branch]);
         } else {
@@ -50686,5 +50786,5 @@ mime-types/index.js:
    *)
 
 axios/dist/node/axios.cjs:
-  (*! Axios v1.8.4 Copyright (c) 2025 Matt Zabriskie and contributors *)
+  (*! Axios v1.9.0 Copyright (c) 2025 Matt Zabriskie and contributors *)
 */
