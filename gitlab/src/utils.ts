@@ -453,6 +453,7 @@ export async function pushQuickFixes(
       ).stdout.trim()
       await git(['checkout', currentBranch])
       await git(['cherry-pick', commitToCherryPick])
+      await git(['fetch', 'origin', currentBranch])
       await gitPush(currentBranch, false)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
@@ -472,7 +473,6 @@ async function gitPush(branch: string, force: boolean): Promise<void> {
     .trim()
     .replace('git@', '')
   const url = `https://${COMMIT_USER}:${process.env.QODANA_GITLAB_TOKEN}@${gitRepo.split('@')[1]}`
-  await git(['fetch', url, branch])
   if (force) {
     await git(['push', '--force', '-o', 'ci.skip', url, branch])
   } else {
