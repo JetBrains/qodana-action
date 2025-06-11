@@ -134,7 +134,7 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
 
   ```groovy
   plugins {
-      id "org.jetbrains.qodana" version "2025.1.1-SNAPSHOT"
+      id "org.jetbrains.qodana" version "2025.1.2-SNAPSHOT"
   }
   
   qodana {
@@ -145,7 +145,7 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
 
   ```kotlin
   plugins {
-      id("org.jetbrains.qodana") version "2025.1.1-SNAPSHOT"
+      id("org.jetbrains.qodana") version "2025.1.2-SNAPSHOT"
   }
 
   qodana {
