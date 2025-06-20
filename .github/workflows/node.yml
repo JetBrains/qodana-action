@@ -17,24 +17,9 @@ on:
     branches:
       - iurko/fix-native-runs
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        id: setup-node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: npm
-      - name: Install dependencies
-        run: npm ci && npm run build
-      - name: Rebuild scan/dist/
-        run: cd scan && npm run package
 
   test-action:
     runs-on: ${{ matrix.os }}
-    needs: [prepare]
     strategy:
       fail-fast: false
       matrix:
@@ -81,6 +66,25 @@ jobs:
           git commit -m "Add new feature"
         working-directory: '${{ matrix.directory }}'
         shell: bash
+      - name: Unpack GoLand IDE and Set Path
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $zipPath = "goland-251.27027.win.zip"
+          $destDir = Join-Path $env:RUNNER_TEMP "goland-unpacked"
+
+          Expand-Archive -Path $zipPath -DestinationPath $destDir -Force
+
+          $unpackedDir = Get-ChildItem -Path $destDir -Directory | Select-Object -First 1
+          if ($null -eq $unpackedDir) {
+            Write-Error "Could not find a directory inside the unpacked archive at '$destDir'"
+            exit 1
+          }
+          $fullPathToContents = $unpackedDir.FullName
+
+          Write-Host "GoLand executable path found at: $fullPathToContents"
+
+          echo "QODANA_DIST=$fullPathToContents" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Qodana
         uses: ./
         with:
