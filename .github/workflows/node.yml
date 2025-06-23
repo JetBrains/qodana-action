@@ -23,11 +23,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest]
         directory: [
-          'tests/go' # 'tests/cpp',
+          'tests/py_error' # 'tests/cpp',
         ]
-        arguments: ['--ide,D:\a\_temp\goland-unpacked,--log-level,debug']
+        arguments: ['--ide,QDPY,--log-level,debug']
         pr: [ 'false' ]
     steps:
       - uses: actions/checkout@v4
@@ -66,22 +66,22 @@ jobs:
           git commit -m "Add new feature"
         working-directory: '${{ matrix.directory }}'
         shell: bash
-      - name: Download distribution
-        shell: pwsh
-        run: |
-          curl "https://drive.usercontent.google.com/download?id={1W1Fv-zuluNX7V_LThVu6RB1mmnGf4XKN}&confirm=xxx" -o goland-251.27027.win.zip
-      - name: Unpack GoLand IDE and Set Path
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $zipPath = "goland-251.27027.win.zip"
-          $destDir = Join-Path $env:RUNNER_TEMP "goland-unpacked"
-
-          Expand-Archive -Path $zipPath -DestinationPath $destDir -Force
-
-          Write-Host "GoLand executable path found at: $destDir"
-
-          echo "QODANA_DIST=$destDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+#      - name: Download distribution
+#        shell: pwsh
+#        run: |
+#          curl "https://drive.usercontent.google.com/download?id={1W1Fv-zuluNX7V_LThVu6RB1mmnGf4XKN}&confirm=xxx" -o goland-251.27027.win.zip
+#      - name: Unpack GoLand IDE and Set Path
+#        if: runner.os == 'Windows'
+#        shell: pwsh
+#        run: |
+#          $zipPath = "goland-251.27027.win.zip"
+#          $destDir = Join-Path $env:RUNNER_TEMP "goland-unpacked"
+#
+#          Expand-Archive -Path $zipPath -DestinationPath $destDir -Force
+#
+#          Write-Host "GoLand executable path found at: $destDir"
+#
+#          echo "QODANA_DIST=$destDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Qodana
         uses: ./
         with:
