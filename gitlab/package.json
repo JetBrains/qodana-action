@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
-    "@types/node": "^24.0.1",
+    "@types/node": "^24.0.3",
     "@typescript-eslint/parser": "^8.32.1",
     "esbuild": "0.25.5",
     "eslint": "^8.57.1",
@@ -24,7 +24,7 @@
     "eslint-plugin-jest": "^28.14.0",
     "jest": "latest",
     "js-yaml": "^4.1.0",
-    "prettier": "3.5.3",
+    "prettier": "3.6.0",
     "ts-jest": "latest",
     "typescript": "^5.8.3"
   },
