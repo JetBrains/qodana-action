@@ -444,11 +444,15 @@ export async function pushQuickFixes(
       await git(['checkout', currentBranch])
       await git(['cherry-pick', commitToCherryPick])
       await gitPush(currentBranch)
+      console.log(`Pushed quick-fixes to branch ${currentBranch}`)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
       await git(['checkout', '-b', newBranch])
       await gitPush(newBranch)
       await createPr(commitMessage, currentBranch, newBranch)
+      console.log(
+        `Pushed quick-fixes to branch ${newBranch} and created pull request`
+      )
     }
   } catch (error) {
     tl.warning(`Failed to push quick fixes – ${(error as Error).message}`)

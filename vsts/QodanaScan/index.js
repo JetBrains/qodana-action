@@ -79758,11 +79758,13 @@ ${comment_tag_pattern}`;
             yield git(["checkout", currentBranch]);
             yield git(["cherry-pick", commitToCherryPick]);
             yield gitPush(currentBranch);
+            console.log(`Pushed quick-fixes to branch ${currentBranch}`);
           } else if (mode === qodana_12.PULL_REQUEST) {
             const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`;
             yield git(["checkout", "-b", newBranch]);
             yield gitPush(newBranch);
             yield createPr(commitMessage, currentBranch, newBranch);
+            console.log(`Pushed quick-fixes to branch ${newBranch} and created pull request`);
           }
         } catch (error) {
           tl2.warning(`Failed to push quick fixes \u2013 ${error.message}`);
