@@ -203,6 +203,7 @@ export async function pushQuickFixes(
         await git(['cherry-pick', commitToCherryPick])
       }
       await git(['push', 'origin', currentBranch])
+      core.info(`Pushed quick-fixes to branch ${currentBranch}`)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
       await git(['checkout', '-b', newBranch])
@@ -212,6 +213,9 @@ export async function pushQuickFixes(
         `${c.repo.owner}/${c.repo.repo}`,
         currentBranch,
         newBranch
+      )
+      core.info(
+        `Pushed quick-fixes to branch ${newBranch} and created pull request`
       )
     }
   } catch (error) {

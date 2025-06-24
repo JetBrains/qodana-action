@@ -21969,6 +21969,9 @@ var require_axios = __commonJS({
         if (utils$1.isDate(value)) {
           return value.toISOString();
         }
+        if (utils$1.isBoolean(value)) {
+          return value.toString();
+        }
         if (!useBlob && utils$1.isBlob(value)) {
           throw new AxiosError("Blob is not supported. Use a Buffer instead.");
         }
@@ -22730,7 +22733,7 @@ var require_axios = __commonJS({
       return requestedURL;
     }
     __name(buildFullPath, "buildFullPath");
-    var VERSION2 = "1.9.0";
+    var VERSION2 = "1.10.0";
     function parseProtocol(url2) {
       const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
       return match && match[1] || "";
@@ -24114,7 +24117,7 @@ var require_axios = __commonJS({
           duplex: "half",
           credentials: isCredentialsSupported ? withCredentials : void 0
         });
-        let response = await fetch(request);
+        let response = await fetch(request, fetchOptions);
         const isStreamResponse = supportsResponseStream && (responseType === "stream" || responseType === "response");
         if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
           const options = {};
@@ -50649,11 +50652,13 @@ ${comment_tag_pattern}`;
             yield git(["cherry-pick", commitToCherryPick]);
             yield git(["fetch", "origin", currentBranch]);
             yield gitPush(currentBranch, false);
+            console.log(`Pushed quick-fixes to branch ${currentBranch}`);
           } else if (mode === qodana_12.PULL_REQUEST) {
             const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`;
             yield git(["checkout", "-b", newBranch]);
             yield gitPush(newBranch, true);
             yield createPr(commitMessage, newBranch, currentBranch);
+            console.log(`Pushed quick-fixes to branch ${newBranch} and created pull request`);
           }
         } catch (e) {
           console.warn(`Failed to push quick fixes \u2013 ${e.message}`);
@@ -50814,5 +50819,5 @@ mime-types/index.js:
    *)
 
 axios/dist/node/axios.cjs:
-  (*! Axios v1.9.0 Copyright (c) 2025 Matt Zabriskie and contributors *)
+  (*! Axios v1.10.0 Copyright (c) 2025 Matt Zabriskie and contributors *)
 */
