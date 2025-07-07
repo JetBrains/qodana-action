@@ -37,9 +37,9 @@
   "devDependencies": {
     "eslint": "^8.57.1",
     "eslint-plugin-jest": "^28.14.0",
-    "@typescript-eslint/eslint-plugin": "^8.34.0",
-    "eslint-plugin-prettier": "^5.4.1",
-    "prettier": "3.5.3",
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
+    "eslint-plugin-prettier": "^5.5.1",
+    "prettier": "3.6.2",
     "prettier-eslint": "^16.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
