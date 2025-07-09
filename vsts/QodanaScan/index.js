@@ -79519,10 +79519,12 @@ var require_utils4 = __commonJS({
             const sha = yield getPrSha();
             if (sha !== "") {
               args.push("--commit", sha);
-              const sourceBranch = process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch;
-              if (sourceBranch) {
-                env.QODANA_BRANCH = sourceBranch;
-              }
+            }
+          }
+          if (tl2.getVariable("Build.Reason") === "PullRequest") {
+            const sourceBranch = process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch;
+            if (sourceBranch) {
+              env.QODANA_BRANCH = sourceBranch;
             }
           }
         }
