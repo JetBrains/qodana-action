@@ -120,12 +120,15 @@ export async function execAsync(
 
 async function gitOutput(
   args: string[],
-  ignoreReturnCode: boolean = false,
+  ignoreReturnCode = false
 ): Promise<CommandOutput> {
   return execAsync('git', args, ignoreReturnCode)
 }
 
-async function git(args: string[], ignoreReturnCode: boolean = false): Promise<number> {
+async function git(
+  args: string[],
+  ignoreReturnCode = false
+): Promise<number> {
   return (await gitOutput(args, ignoreReturnCode)).returnCode
 }
 
@@ -206,6 +209,8 @@ export async function qodana(args: string[] = []): Promise<number> {
       if (sha !== '') {
         args.push('--commit', sha)
       }
+    }
+    if (isMergeRequest()) {
       const sourceBranch =
         process.env.QODANA_BRANCH ||
         process.env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
@@ -214,8 +219,8 @@ export async function qodana(args: string[] = []): Promise<number> {
       }
     }
   }
-  return new Promise((resolve) => {
-    const proc = spawn(EXECUTABLE, args, { stdio: 'inherit' })
+  return new Promise(resolve => {
+    const proc = spawn(EXECUTABLE, args, {stdio: 'inherit'})
     proc.on('close', (code, signal) => {
       if (code == null) {
         console.error(`Qodana process terminated by signal: ${signal}`)
@@ -225,7 +230,7 @@ export async function qodana(args: string[] = []): Promise<number> {
       }
     })
 
-    proc.on('error', (err) => {
+    proc.on('error', err => {
       console.error(err.message)
       resolve(127)
     })
@@ -439,7 +444,10 @@ export async function pushQuickFixes(
       console.warn(`Failed to commit fixes: ${output.stderr}`)
       return
     }
-    output = await gitOutput(['pull', '--rebase', 'origin', currentBranch], true)
+    output = await gitOutput(
+      ['pull', '--rebase', 'origin', currentBranch],
+      true
+    )
     if (output.returnCode !== 0) {
       console.warn(`Failed to update branch: ${output.stderr}`)
       return

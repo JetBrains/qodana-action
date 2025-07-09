@@ -99,11 +99,13 @@ export async function qodana(args: string[] = []): Promise<number> {
       const sha = await getPrSha()
       if (sha !== '') {
         args.push('--commit', sha)
-        const sourceBranch =
-          process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch
-        if (sourceBranch) {
-          env.QODANA_BRANCH = sourceBranch
-        }
+      }
+    }
+    if (tl.getVariable('Build.Reason') === 'PullRequest') {
+      const sourceBranch =
+        process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch
+      if (sourceBranch) {
+        env.QODANA_BRANCH = sourceBranch
       }
     }
   }
