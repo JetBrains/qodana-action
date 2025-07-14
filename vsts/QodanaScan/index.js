@@ -79641,7 +79641,9 @@ var require_utils4 = __commonJS({
           tl2.warning(`Failed to run git command with arguments: ${args.join(" ")}`);
           throw error;
         });
-        result2.stdout = result2.stdout.replace("[command]/usr/bin/git " + args.join(" "), "").trim();
+        if (result2.stdout.startsWith("[command]")) {
+          result2.stdout.slice(result2.stdout.indexOf(" ") + 1).replace(args.join(" "), "").trim();
+        }
         return result2;
       });
     }

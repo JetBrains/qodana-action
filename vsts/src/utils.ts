@@ -271,9 +271,14 @@ async function gitOutput(
     tl.warning(`Failed to run git command with arguments: ${args.join(' ')}`)
     throw error
   })
-  result.stdout = result.stdout
-    .replace('[command]/usr/bin/git ' + args.join(' '), '')
-    .trim()
+  if (result.stdout.startsWith('[command]')) {
+    result.stdout
+      // remove [command]/path/to/executable from output
+      .slice(result.stdout.indexOf(' ') + 1)
+      // remove arguments from output
+      .replace(args.join(' '), '')
+      .trim()
+  }
   return result
 }
 
