@@ -30,7 +30,7 @@
     "jszip": "^3.10.1"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.0.14",
     "@typescript-eslint/parser": "^8.32.1",
     "axios": "^1.10.0",
