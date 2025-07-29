@@ -125,10 +125,7 @@ async function gitOutput(
   return execAsync('git', args, ignoreReturnCode)
 }
 
-async function git(
-  args: string[],
-  ignoreReturnCode = false
-): Promise<number> {
+async function git(args: string[], ignoreReturnCode = false): Promise<number> {
   return (await gitOutput(args, ignoreReturnCode)).returnCode
 }
 
