@@ -157,7 +157,7 @@ export function getQodanaPullArgs(args: string[]): string[] {
   }
 
   const image = extractArg('--image', '--image', args)
-  if (linter) {
+  if (image) {
     pullArgs.push('--image', image)
   }
 
