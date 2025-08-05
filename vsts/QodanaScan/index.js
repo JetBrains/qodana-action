@@ -9864,18 +9864,13 @@ function extractArg(argShort, argLong, args) {
   return arg;
 }
 function isNativeMode(args) {
-    export function isNativeMode(args: string[]): boolean {
-        if (args.includes('--ide') || args.includes('--within-docker=false')) {
-            return true
-        }
-
-        let index = args.findIndex(arg => arg =='--within-docker')
-
-        if (index == -1) return false
-        let nextIndex = index + 1
-
-        return args.length > nextIndex && args[nextIndex] == 'false';
-    };
+  if (args.includes("--ide") || args.includes("--within-docker=false")) {
+    return true;
+  }
+  let index = args.findIndex((arg) => arg == "--within-docker");
+  if (index == -1) return false;
+  let nextIndex = index + 1;
+  return args.length > nextIndex && args[nextIndex] == "false";
 }
 function getQodanaPullArgs(args) {
   const pullArgs = ["pull"];
@@ -9883,12 +9878,10 @@ function getQodanaPullArgs(args) {
   if (linter) {
     pullArgs.push("-l", linter);
   }
-
-  const image = extractArg('--image', '--image', args);
+  const image = extractArg("--image", "--image", args);
   if (linter) {
-    pullArgs.push('--image', image);
+    pullArgs.push("--image", image);
   }
-
   const project = extractArg("-i", "--project-dir", args);
   if (project) {
     pullArgs.push("-i", project);
