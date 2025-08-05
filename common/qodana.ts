@@ -132,7 +132,16 @@ export function extractArg(
 }
 
 export function isNativeMode(args: string[]): boolean {
-  return args.includes('--ide')
+  if (args.includes('--ide') || args.includes('--within-docker=false')) {
+    return true
+  }
+
+  let index = args.findIndex(arg => arg =='--within-docker')
+
+  if (index == -1) return false
+  let nextIndex = index + 1
+
+  return args.length > nextIndex && args[nextIndex] == 'false';
 }
 
 /**
