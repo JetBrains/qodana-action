@@ -9883,6 +9883,12 @@ function getQodanaPullArgs(args) {
   if (linter) {
     pullArgs.push("-l", linter);
   }
+
+  const image = extractArg('--image', '--image', args);
+  if (linter) {
+    pullArgs.push('--image', image);
+  }
+
   const project = extractArg("-i", "--project-dir", args);
   if (project) {
     pullArgs.push("-i", project);
