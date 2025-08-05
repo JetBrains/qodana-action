@@ -10135,7 +10135,7 @@ function getQodanaPullArgs(args) {
     pullArgs.push("-l", linter);
   }
   const image = extractArg("--image", "--image", args);
-  if (linter) {
+  if (image) {
     pullArgs.push("--image", image);
   }
   const project = extractArg("-i", "--project-dir", args);
