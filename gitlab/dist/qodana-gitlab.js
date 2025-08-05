@@ -10120,13 +10120,23 @@ function extractArg(argShort, argLong, args) {
   return arg;
 }
 function isNativeMode(args) {
-  return args.includes("--ide");
+  if (args.includes("--ide") || args.includes("--within-docker=false")) {
+    return true;
+  }
+  let index = args.findIndex((arg) => arg == "--within-docker");
+  if (index == -1) return false;
+  let nextIndex = index + 1;
+  return args.length > nextIndex && args[nextIndex] == "false";
 }
 function getQodanaPullArgs(args) {
   const pullArgs = ["pull"];
   const linter = extractArg("-l", "--linter", args);
   if (linter) {
     pullArgs.push("-l", linter);
+  }
+  const image = extractArg("--image", "--image", args);
+  if (linter) {
+    pullArgs.push("--image", image);
   }
   const project = extractArg("-i", "--project-dir", args);
   if (project) {
@@ -19529,6 +19539,27 @@ var require_dist2 = __commonJS({
         );
       }
     };
+    var ResourceMarkdownUploads = class extends requesterUtils.BaseResource {
+      static {
+        __name(this, "ResourceMarkdownUploads");
+      }
+      constructor(resourceType, options) {
+        super({ prefixUrl: resourceType, ...options });
+      }
+      all(resourceId, options) {
+        return RequestHelper.get()(
+          this,
+          endpoint`${resourceId}/uploads`,
+          options
+        );
+      }
+      download(resourceId, uploadId, options) {
+        return RequestHelper.get()(this, endpoint`${resourceId}/uploads/${uploadId}`, options);
+      }
+      remove(resourceId, uploadId, options) {
+        return RequestHelper.del()(this, endpoint`${resourceId}/uploads/${uploadId}`, options);
+      }
+    };
     var ResourceMembers = class extends requesterUtils.BaseResource {
       static {
         __name(this, "ResourceMembers");
@@ -19923,13 +19954,13 @@ var require_dist2 = __commonJS({
           options
         );
       }
-      create(resourceId, name, deployAccessLevel, options) {
+      create(resourceId, name, deployAccessLevels, options) {
         return RequestHelper.post()(
           this,
           `${resourceId}/protected_environments`,
           {
             name,
-            deployAccessLevel,
+            deployAccessLevels,
             ...options
           }
         );
@@ -22932,6 +22963,13 @@ var require_dist2 = __commonJS({
           options
         );
       }
+      showLatest(projectId, options) {
+        return RequestHelper.get()(
+          this,
+          endpoint`projects/${projectId}/pipelines/latest`,
+          options
+        );
+      }
       showTestReport(projectId, pipelineId, options) {
         return RequestHelper.get()(
           this,
@@ -23198,6 +23236,21 @@ var require_dist2 = __commonJS({
       }
       constructor(options) {
         super("projects", options);
+      }
+    };
+    var ProjectMarkdownUploads = class extends ResourceMarkdownUploads {
+      static {
+        __name(this, "ProjectMarkdownUploads");
+      }
+      constructor(options) {
+        super("projects", options);
+      }
+      create(projectId, file, options) {
+        return RequestHelper.post()(this, endpoint`${projectId}/uploads`, {
+          isForm: true,
+          ...options,
+          file: [file.content, file.filename]
+        });
       }
     };
     var ProjectMembers = class extends ResourceMembers {
@@ -24737,6 +24790,14 @@ var require_dist2 = __commonJS({
         super("groups", options);
       }
     };
+    var GroupMarkdownUploads = class extends ResourceMarkdownUploads {
+      static {
+        __name(this, "GroupMarkdownUploads");
+      }
+      constructor(options) {
+        super("groups", options);
+      }
+    };
     var GroupMemberRoles = class extends requesterUtils.BaseResource {
       static {
         __name(this, "GroupMemberRoles");
@@ -25605,6 +25666,7 @@ var require_dist2 = __commonJS({
       ProjectIterations,
       ProjectJobTokenScopes,
       ProjectLabels,
+      ProjectMarkdownUploads,
       ProjectMembers,
       ProjectMilestones,
       ProjectProtectedEnvironments,
@@ -25656,6 +25718,7 @@ var require_dist2 = __commonJS({
       GroupIterations,
       GroupLabels,
       GroupLDAPLinks,
+      GroupMarkdownUploads,
       GroupMembers,
       GroupMemberRoles,
       GroupMilestones,
@@ -25763,6 +25826,7 @@ var require_dist2 = __commonJS({
     exports2.GroupIterations = GroupIterations;
     exports2.GroupLDAPLinks = GroupLDAPLinks;
     exports2.GroupLabels = GroupLabels;
+    exports2.GroupMarkdownUploads = GroupMarkdownUploads;
     exports2.GroupMemberRoles = GroupMemberRoles;
     exports2.GroupMembers = GroupMembers;
     exports2.GroupMilestones = GroupMilestones;
@@ -25842,6 +25906,7 @@ var require_dist2 = __commonJS({
     exports2.ProjectIterations = ProjectIterations;
     exports2.ProjectJobTokenScopes = ProjectJobTokenScopes;
     exports2.ProjectLabels = ProjectLabels;
+    exports2.ProjectMarkdownUploads = ProjectMarkdownUploads;
     exports2.ProjectMembers = ProjectMembers;
     exports2.ProjectMilestones = ProjectMilestones;
     exports2.ProjectProtectedEnvironments = ProjectProtectedEnvironments;
@@ -25962,7 +26027,7 @@ var require_dist3 = __commonJS({
       } else {
         description = content;
       }
-      throw new requesterUtils.GitbeakerRequestError(response.statusText, {
+      throw new requesterUtils.GitbeakerRequestError(description, {
         cause: {
           description,
           request,
@@ -26131,6 +26196,7 @@ var require_dist3 = __commonJS({
       ProjectIterations,
       ProjectJobTokenScopes,
       ProjectLabels,
+      ProjectMarkdownUploads,
       ProjectMembers,
       ProjectMilestones,
       ProjectProtectedEnvironments,
@@ -26182,6 +26248,7 @@ var require_dist3 = __commonJS({
       GroupIterations,
       GroupLabels,
       GroupLDAPLinks,
+      GroupMarkdownUploads,
       GroupMembers,
       GroupMemberRoles,
       GroupMilestones,
@@ -26286,6 +26353,7 @@ var require_dist3 = __commonJS({
     exports2.GroupIterations = GroupIterations;
     exports2.GroupLDAPLinks = GroupLDAPLinks;
     exports2.GroupLabels = GroupLabels;
+    exports2.GroupMarkdownUploads = GroupMarkdownUploads;
     exports2.GroupMemberRoles = GroupMemberRoles;
     exports2.GroupMembers = GroupMembers;
     exports2.GroupMilestones = GroupMilestones;
@@ -26365,6 +26433,7 @@ var require_dist3 = __commonJS({
     exports2.ProjectIterations = ProjectIterations;
     exports2.ProjectJobTokenScopes = ProjectJobTokenScopes;
     exports2.ProjectLabels = ProjectLabels;
+    exports2.ProjectMarkdownUploads = ProjectMarkdownUploads;
     exports2.ProjectMembers = ProjectMembers;
     exports2.ProjectMilestones = ProjectMilestones;
     exports2.ProjectProtectedEnvironments = ProjectProtectedEnvironments;
