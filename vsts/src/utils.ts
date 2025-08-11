@@ -214,15 +214,28 @@ async function getPrSha(): Promise<string> {
   const {sourceBranch, targetBranch} = getSourceAndTargetBranches()
 
   if (sourceBranch && targetBranch) {
-    await git(['fetch', 'origin'])
-    const output = await gitOutput(
-      ['merge-base', 'origin/' + sourceBranch, 'origin/' + targetBranch],
-      {
-        ignoreReturnCode: true
+    try {
+      await git(['fetch', 'origin'])
+      const output = await gitOutput(
+        ['merge-base', 'origin/' + sourceBranch, 'origin/' + targetBranch],
+        {
+          ignoreReturnCode: true
+        }
+      )
+      if (output.exitCode === 0) {
+        return output.stdout.trim()
       }
-    )
-    if (output.exitCode === 0) {
-      return output.stdout.trim()
+    } catch (error) {
+      const message = `Failed to get PR SHA for source branch ${sourceBranch} and target branch ${targetBranch}.
+The analysis will be performed in prMode: false mode.
+
+Cause:
+${(error as Error).message}
+
+To enable prMode, consider adding "fetchDepth: 0".`
+
+      tl.error(message)
+      return ''
     }
   }
   return ''
@@ -274,7 +287,7 @@ async function gitOutput(
     throw error
   })
   if (result.stdout.startsWith('[command]')) {
-    result.stdout
+    result.stdout = result.stdout
       // remove [command]/path/to/executable from output
       .slice(result.stdout.indexOf(' ') + 1)
       // remove arguments from output
