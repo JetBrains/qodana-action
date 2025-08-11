@@ -79612,12 +79612,24 @@ var require_utils4 = __commonJS({
         }
         const { sourceBranch, targetBranch } = getSourceAndTargetBranches();
         if (sourceBranch && targetBranch) {
-          yield git(["fetch", "origin"]);
-          const output = yield gitOutput(["merge-base", "origin/" + sourceBranch, "origin/" + targetBranch], {
-            ignoreReturnCode: true
-          });
-          if (output.exitCode === 0) {
-            return output.stdout.trim();
+          try {
+            yield git(["fetch", "origin"]);
+            const output = yield gitOutput(["merge-base", "origin/" + sourceBranch, "origin/" + targetBranch], {
+              ignoreReturnCode: true
+            });
+            if (output.exitCode === 0) {
+              return output.stdout.trim();
+            }
+          } catch (error) {
+            const message = `Failed to get PR SHA for source branch ${sourceBranch} and target branch ${targetBranch}.
+The analysis will be performed in prMode: false mode.
+
+Cause:
+${error.message}
+
+To enable prMode, consider adding "fetchDepth: 0".`;
+            tl2.error(message);
+            return "";
           }
         }
         return "";
@@ -79654,7 +79666,7 @@ var require_utils4 = __commonJS({
           throw error;
         });
         if (result2.stdout.startsWith("[command]")) {
-          result2.stdout.slice(result2.stdout.indexOf(" ") + 1).replace(args.join(" "), "").trim();
+          result2.stdout = result2.stdout.slice(result2.stdout.indexOf(" ") + 1).replace(args.join(" "), "").trim();
         }
         return result2;
       });
