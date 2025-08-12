@@ -293,10 +293,7 @@ export function uploadCache(cacheDir: string, execute: boolean): void {
   }
 }
 
-export function uploadArtifacts(resultsDir: string, execute: boolean): void {
-  if (!execute) {
-    return
-  }
+export function uploadArtifacts(resultsDir: string): void {
   try {
     const resultDir = getQodanaInputArg('RESULTS_DIR')
     const ciProjectDir = process.env['CI_PROJECT_DIR']

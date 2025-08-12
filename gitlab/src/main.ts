@@ -44,7 +44,7 @@ async function main(): Promise<void> {
     ])
 
     uploadCache(inputs.cacheDir, inputs.useCaches)
-    uploadArtifacts(inputs.resultsDir, inputs.uploadResult)
+    uploadArtifacts(inputs.resultsDir)
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)
     } else if (exitCode === QodanaExitCode.FailThreshold) {
