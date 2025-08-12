@@ -50599,10 +50599,7 @@ var require_utils5 = __commonJS({
       }
     }
     __name(uploadCache, "uploadCache");
-    function uploadArtifacts(resultsDir, execute) {
-      if (!execute) {
-        return;
-      }
+    function uploadArtifacts(resultsDir) {
       try {
         const resultDir = getQodanaInputArg("RESULTS_DIR");
         const ciProjectDir = process.env["CI_PROJECT_DIR"];
@@ -50860,7 +50857,7 @@ function main() {
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage)
       ]);
       (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches);
-      (0, utils_1.uploadArtifacts)(inputs.resultsDir, inputs.uploadResult);
+      (0, utils_1.uploadArtifacts)(inputs.resultsDir);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`);
       } else if (exitCode === qodana_1.QodanaExitCode.FailThreshold) {
