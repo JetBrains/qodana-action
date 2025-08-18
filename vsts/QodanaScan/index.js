@@ -79622,7 +79622,7 @@ var require_utils4 = __commonJS({
             }
           } catch (error) {
             const message = `Failed to get PR SHA for source branch ${sourceBranch} and target branch ${targetBranch}.
-The analysis will be performed in prMode: false mode.
+The analysis would be performed with disabled prMode.
 
 Cause:
 ${error.message}
