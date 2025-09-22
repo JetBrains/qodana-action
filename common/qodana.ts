@@ -123,8 +123,16 @@ export function extractArg(
 ): string {
   let arg = ''
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === argShort || args[i] === argLong) {
+    const checkArg = (arg: string) => { return arg === argShort || arg === argLong }
+    // handle case arg,value
+    if (checkArg(args[i]) && args.length > i + 1) {
       arg = args[i + 1]
+      break
+    }
+    // handle case arg=value
+    const argSplit = args[i].split('=')
+    if (argSplit.length == 2 && checkArg(argSplit[0])) {
+      arg = argSplit[1]
       break
     }
   }

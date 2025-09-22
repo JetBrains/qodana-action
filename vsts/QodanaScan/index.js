@@ -9856,8 +9856,16 @@ function isExecutionSuccessful(exitCode) {
 function extractArg(argShort, argLong, args) {
   let arg = "";
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === argShort || args[i] === argLong) {
+    const checkArg = (arg2) => {
+      return arg2 === argShort || arg2 === argLong;
+    };
+    if (checkArg(args[i]) && args.length > i + 1) {
       arg = args[i + 1];
+      break;
+    }
+    const argSplit = args[i].split("=");
+    if (argSplit.length == 2 && checkArg(argSplit[0])) {
+      arg = argSplit[1];
       break;
     }
   }
