@@ -49,6 +49,7 @@ import * as os from 'os'
 import {prFixesBody} from './output'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 import {parseRawArguments} from '../../common/utils'
+import * as util from 'node:util'
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
@@ -84,7 +85,7 @@ interface PullRequestPayload {
 export function getInputs(): Inputs {
   const rawArgs = core.getInput('args')
   const argList = parseRawArguments(rawArgs)
-  return {
+  const args = {
     args: argList,
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
@@ -103,6 +104,8 @@ export function getInputs(): Inputs {
     commitMessage: core.getInput('commit-message'),
     useNightly: core.getBooleanInput('use-nightly')
   }
+  core.debug(`Inputs: ${util.inspect(args)}`)
+  return args
 }
 
 async function getPrSha(): Promise<string> {
