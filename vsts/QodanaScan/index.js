@@ -79668,6 +79668,10 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         if (result2.stdout.startsWith("[command]")) {
           result2.stdout = result2.stdout.slice(result2.stdout.indexOf(" ") + 1).replace(args.join(" "), "").trim();
         }
+        if (result2.exitCode !== 0) {
+          tl2.debug(`Failed to run git command with arguments: ${args.join(" ")}.
+Stderr: ${result2.stderr}. Stdout: ${result2.stdout}`);
+        }
         return result2;
       });
     }
@@ -79803,7 +79807,9 @@ ${comment_tag_pattern}`;
           ignoreReturnCode: true
         });
         if (output.exitCode !== 0) {
-          tl2.warning(`Failed to push branch ${branch}: ${output.stderr}`);
+          tl2.warning(`Failed to push branch ${branch}
+Stderr: ${output.stderr}
+Stdout: ${output.stdout}`);
         }
       });
     }

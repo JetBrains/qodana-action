@@ -294,6 +294,11 @@ async function gitOutput(
       .replace(args.join(' '), '')
       .trim()
   }
+  if (result.exitCode !== 0) {
+    tl.debug(
+      `Failed to run git command with arguments: ${args.join(' ')}.\nStderr: ${result.stderr}. Stdout: ${result.stdout}`
+    )
+  }
   return result
 }
 
@@ -484,7 +489,9 @@ async function gitPush(branch: string): Promise<void> {
     ignoreReturnCode: true
   })
   if (output.exitCode !== 0) {
-    tl.warning(`Failed to push branch ${branch}: ${output.stderr}`)
+    tl.warning(
+      `Failed to push branch ${branch}\nStderr: ${output.stderr}\nStdout: ${output.stdout}`
+    )
   }
 }
 
