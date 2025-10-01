@@ -37,12 +37,12 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
           cache: npm
@@ -330,10 +330,10 @@ jobs:
             os: 'macos-latest'
             pr: 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: 'JetBrains/code-analytics-examples'
           fetch-depth: 0
@@ -385,7 +385,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ lint ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -394,7 +394,7 @@ jobs:
             - "vsts/vss-extension.dev.json"
       - name: Set Node.js
         if: steps.filter.outputs.azure-dev == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
           cache: npm
