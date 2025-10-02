@@ -215,8 +215,9 @@ async function getPrSha(): Promise<string> {
 
   if (sourceBranch && targetBranch) {
     try {
-      await git(['fetch', 'origin'])
+      await git(true, ['fetch', 'origin'])
       const output = await gitOutput(
+        false,
         ['merge-base', 'origin/' + sourceBranch, 'origin/' + targetBranch],
         {
           ignoreReturnCode: true
@@ -242,19 +243,22 @@ To enable prMode, consider adding "fetchDepth: 0".`
 }
 
 async function git(
+  withCredentials: boolean,
   args: string[],
   options: IExecOptions = {}
 ): Promise<number> {
-  return (await gitOutput(args, options)).exitCode
+  return (await gitOutput(withCredentials, args, options)).exitCode
 }
 
 /**
  * Returns trimmed output of git command omitting the command itself
  * i.e., if gitOutput(['status']) is called the "/usr/bin/git status" will be omitted
+ * @param withCredentials pass oauth token as extra header. Could be needed for fetch, push commands
  * @param args git arguments
  * @param options options for azure-pipelines-task-lib/task exec
  */
 async function gitOutput(
+  withCredentials: boolean,
   args: string[],
   options: IExecOptions = {}
 ): Promise<{exitCode: number; stderr: string; stdout: string}> {
@@ -281,6 +285,11 @@ async function gitOutput(
   })
   options.outStream = outStream
   options.errStream = errStream
+  const token =
+    process.env.SYSTEM_ACCESSTOKEN || tl.getVariable('System.AccessToken')
+  if (withCredentials && token) {
+    args = ['-c', `http.extraheader=AUTHORIZATION: bearer ${token}`, ...args]
+  }
 
   result.exitCode = await tl.execAsync('git', args, options).catch(error => {
     tl.warning(`Failed to run git command with arguments: ${args.join(' ')}`)
@@ -443,31 +452,33 @@ export async function pushQuickFixes(
     currentBranch = currentBranch.replace('refs/heads/', '')
     currentBranch = validateBranchName(currentBranch)
 
-    const currentCommit = (await gitOutput(['rev-parse', 'HEAD'])).stdout.trim()
-    await git(['config', 'user.name', COMMIT_USER])
-    await git(['config', 'user.email', COMMIT_EMAIL])
-    await git(['add', '.'])
-    let exitCode = await git(['commit', '-m', commitMessage], {
+    const currentCommit = (
+      await gitOutput(false, ['rev-parse', 'HEAD'])
+    ).stdout.trim()
+    await git(false, ['config', 'user.name', COMMIT_USER])
+    await git(false, ['config', 'user.email', COMMIT_EMAIL])
+    await git(false, ['add', '.'])
+    let exitCode = await git(false, ['commit', '-m', commitMessage], {
       ignoreReturnCode: true
     })
     if (exitCode !== 0) {
       return
     }
-    exitCode = await git(['pull', '--rebase', 'origin', currentBranch])
+    exitCode = await git(true, ['pull', '--rebase', 'origin', currentBranch])
     if (exitCode !== 0) {
       return
     }
     if (mode === BRANCH) {
       const commitToCherryPick = (
-        await gitOutput(['rev-parse', 'HEAD'])
+        await gitOutput(false, ['rev-parse', 'HEAD'])
       ).stdout.trim()
-      await git(['checkout', currentBranch])
-      await git(['cherry-pick', commitToCherryPick])
+      await git(false, ['checkout', currentBranch])
+      await git(false, ['cherry-pick', commitToCherryPick])
       await gitPush(currentBranch)
       console.log(`Pushed quick-fixes to branch ${currentBranch}`)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
-      await git(['checkout', '-b', newBranch])
+      await git(false, ['checkout', '-b', newBranch])
       await gitPush(newBranch)
       await createPr(commitMessage, currentBranch, newBranch)
       console.log(
@@ -480,11 +491,13 @@ export async function pushQuickFixes(
 }
 
 async function gitPush(branch: string): Promise<void> {
-  const output = await gitOutput(['push', 'origin', branch], {
+  const output = await gitOutput(true, ['push', 'origin', branch], {
     ignoreReturnCode: true
   })
   if (output.exitCode !== 0) {
-    tl.warning(`Failed to push branch ${branch}: ${output.stderr}`)
+    tl.warning(
+      `Failed to push branch ${branch}.\nStdout: ${output.stdout}\nStderr: ${output.stderr}`
+    )
   }
 }
 
