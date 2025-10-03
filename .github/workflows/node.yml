@@ -366,6 +366,14 @@ jobs:
           git commit -m "Add new feature"
         working-directory: '${{ matrix.directory }}'
         shell: bash
+      - uses: actions/setup-go@v6
+        if: ${{ matrix.arguments == '--ide,QDGO'}}
+        with:
+          go-version: '>=1.25.1'
+      - name: Export GOROOT for subsequent steps
+        if: ${{ matrix.arguments == '--ide,QDGO'}}
+        shell: bash
+        run: echo "GOROOT=$(go env GOROOT)" >> $GITHUB_ENV
       - name: Qodana
         uses: ./
         with:
