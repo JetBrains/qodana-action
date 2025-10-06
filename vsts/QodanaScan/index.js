@@ -79613,8 +79613,8 @@ var require_utils4 = __commonJS({
         const { sourceBranch, targetBranch } = getSourceAndTargetBranches();
         if (sourceBranch && targetBranch) {
           try {
-            yield git(true, ["fetch", "origin"]);
-            const output = yield gitOutput(false, ["merge-base", "origin/" + sourceBranch, "origin/" + targetBranch], {
+            yield git(["fetch", "origin"], true);
+            const output = yield gitOutput(["merge-base", "origin/" + sourceBranch, "origin/" + targetBranch], false, {
               ignoreReturnCode: true
             });
             if (output.exitCode === 0) {
@@ -79635,13 +79635,13 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         return "";
       });
     }
-    function git(withCredentials_1, args_1) {
-      return __awaiter2(this, arguments, void 0, function* (withCredentials, args, options = {}) {
-        return (yield gitOutput(withCredentials, args, options)).exitCode;
+    function git(args_1, withCredentials_1) {
+      return __awaiter2(this, arguments, void 0, function* (args, withCredentials, options = {}) {
+        return (yield gitOutput(args, withCredentials, options)).exitCode;
       });
     }
-    function gitOutput(withCredentials_1, args_1) {
-      return __awaiter2(this, arguments, void 0, function* (withCredentials, args, options = {}) {
+    function gitOutput(args_1, withCredentials_1) {
+      return __awaiter2(this, arguments, void 0, function* (args, withCredentials, options = {}) {
         const result2 = {
           exitCode: 0,
           stdout: "",
@@ -79661,9 +79661,12 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         });
         options.outStream = outStream;
         options.errStream = errStream;
-        const token = process.env.SYSTEM_ACCESSTOKEN || tl2.getVariable("System.AccessToken");
-        if (withCredentials && token) {
-          args = ["-c", `http.extraheader=AUTHORIZATION: bearer ${token}`, ...args];
+        if (withCredentials) {
+          args = [
+            "-c",
+            "http.extraheader=AUTHORIZATION: bearer $(System.AccessToken)",
+            ...args
+          ];
         }
         result2.exitCode = yield tl2.execAsync("git", args, options).catch((error) => {
           tl2.warning(`Failed to run git command with arguments: ${args.join(" ")}`);
@@ -79769,29 +79772,29 @@ ${comment_tag_pattern}`;
           }
           currentBranch = currentBranch.replace("refs/heads/", "");
           currentBranch = (0, qodana_12.validateBranchName)(currentBranch);
-          const currentCommit = (yield gitOutput(false, ["rev-parse", "HEAD"])).stdout.trim();
-          yield git(false, ["config", "user.name", output_12.COMMIT_USER]);
-          yield git(false, ["config", "user.email", output_12.COMMIT_EMAIL]);
-          yield git(false, ["add", "."]);
-          let exitCode = yield git(false, ["commit", "-m", commitMessage], {
+          const currentCommit = (yield gitOutput(["rev-parse", "HEAD"], false)).stdout.trim();
+          yield git(["config", "user.name", output_12.COMMIT_USER], false);
+          yield git(["config", "user.email", output_12.COMMIT_EMAIL], false);
+          yield git(["add", "."], false);
+          let exitCode = yield git(["commit", "-m", commitMessage], false, {
             ignoreReturnCode: true
           });
           if (exitCode !== 0) {
             return;
           }
-          exitCode = yield git(true, ["pull", "--rebase", "origin", currentBranch]);
+          exitCode = yield git(["pull", "--rebase", "origin", currentBranch], true);
           if (exitCode !== 0) {
             return;
           }
           if (mode === qodana_12.BRANCH) {
-            const commitToCherryPick = (yield gitOutput(false, ["rev-parse", "HEAD"])).stdout.trim();
-            yield git(false, ["checkout", currentBranch]);
-            yield git(false, ["cherry-pick", commitToCherryPick]);
+            const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"], false)).stdout.trim();
+            yield git(["checkout", currentBranch], false);
+            yield git(["cherry-pick", commitToCherryPick], false);
             yield gitPush(currentBranch);
             console.log(`Pushed quick-fixes to branch ${currentBranch}`);
           } else if (mode === qodana_12.PULL_REQUEST) {
             const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`;
-            yield git(false, ["checkout", "-b", newBranch]);
+            yield git(["checkout", "-b", newBranch], false);
             yield gitPush(newBranch);
             yield createPr(commitMessage, currentBranch, newBranch);
             console.log(`Pushed quick-fixes to branch ${newBranch} and created pull request`);
@@ -79803,7 +79806,7 @@ ${comment_tag_pattern}`;
     }
     function gitPush(branch) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const output = yield gitOutput(true, ["push", "origin", branch], {
+        const output = yield gitOutput(["push", "origin", branch], true, {
           ignoreReturnCode: true
         });
         if (output.exitCode !== 0) {

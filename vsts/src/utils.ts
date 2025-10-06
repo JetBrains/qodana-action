@@ -215,10 +215,10 @@ async function getPrSha(): Promise<string> {
 
   if (sourceBranch && targetBranch) {
     try {
-      await git(true, ['fetch', 'origin'])
+      await git(['fetch', 'origin'], true)
       const output = await gitOutput(
-        false,
         ['merge-base', 'origin/' + sourceBranch, 'origin/' + targetBranch],
+        false,
         {
           ignoreReturnCode: true
         }
@@ -243,11 +243,11 @@ To enable prMode, consider adding "fetchDepth: 0".`
 }
 
 async function git(
-  withCredentials: boolean,
   args: string[],
+  withCredentials: boolean,
   options: IExecOptions = {}
 ): Promise<number> {
-  return (await gitOutput(withCredentials, args, options)).exitCode
+  return (await gitOutput(args, withCredentials, options)).exitCode
 }
 
 /**
@@ -258,8 +258,8 @@ async function git(
  * @param options options for azure-pipelines-task-lib/task exec
  */
 async function gitOutput(
-  withCredentials: boolean,
   args: string[],
+  withCredentials: boolean,
   options: IExecOptions = {}
 ): Promise<{exitCode: number; stderr: string; stdout: string}> {
   const result = {
@@ -285,10 +285,13 @@ async function gitOutput(
   })
   options.outStream = outStream
   options.errStream = errStream
-  const token =
-    process.env.SYSTEM_ACCESSTOKEN || tl.getVariable('System.AccessToken')
-  if (withCredentials && token) {
-    args = ['-c', `http.extraheader=AUTHORIZATION: bearer ${token}`, ...args]
+
+  if (withCredentials) {
+    args = [
+      '-c',
+      'http.extraheader=AUTHORIZATION: bearer $(System.AccessToken)',
+      ...args
+    ]
   }
 
   result.exitCode = await tl.execAsync('git', args, options).catch(error => {
@@ -453,32 +456,32 @@ export async function pushQuickFixes(
     currentBranch = validateBranchName(currentBranch)
 
     const currentCommit = (
-      await gitOutput(false, ['rev-parse', 'HEAD'])
+      await gitOutput(['rev-parse', 'HEAD'], false)
     ).stdout.trim()
-    await git(false, ['config', 'user.name', COMMIT_USER])
-    await git(false, ['config', 'user.email', COMMIT_EMAIL])
-    await git(false, ['add', '.'])
-    let exitCode = await git(false, ['commit', '-m', commitMessage], {
+    await git(['config', 'user.name', COMMIT_USER], false)
+    await git(['config', 'user.email', COMMIT_EMAIL], false)
+    await git(['add', '.'], false)
+    let exitCode = await git(['commit', '-m', commitMessage], false, {
       ignoreReturnCode: true
     })
     if (exitCode !== 0) {
       return
     }
-    exitCode = await git(true, ['pull', '--rebase', 'origin', currentBranch])
+    exitCode = await git(['pull', '--rebase', 'origin', currentBranch], true)
     if (exitCode !== 0) {
       return
     }
     if (mode === BRANCH) {
       const commitToCherryPick = (
-        await gitOutput(false, ['rev-parse', 'HEAD'])
+        await gitOutput(['rev-parse', 'HEAD'], false)
       ).stdout.trim()
-      await git(false, ['checkout', currentBranch])
-      await git(false, ['cherry-pick', commitToCherryPick])
+      await git(['checkout', currentBranch], false)
+      await git(['cherry-pick', commitToCherryPick], false)
       await gitPush(currentBranch)
       console.log(`Pushed quick-fixes to branch ${currentBranch}`)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
-      await git(false, ['checkout', '-b', newBranch])
+      await git(['checkout', '-b', newBranch], false)
       await gitPush(newBranch)
       await createPr(commitMessage, currentBranch, newBranch)
       console.log(
@@ -491,7 +494,7 @@ export async function pushQuickFixes(
 }
 
 async function gitPush(branch: string): Promise<void> {
-  const output = await gitOutput(true, ['push', 'origin', branch], {
+  const output = await gitOutput(['push', 'origin', branch], true, {
     ignoreReturnCode: true
   })
   if (output.exitCode !== 0) {
