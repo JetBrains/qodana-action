@@ -215,9 +215,10 @@ async function getPrSha(): Promise<string> {
 
   if (sourceBranch && targetBranch) {
     try {
-      await git(['fetch', 'origin'])
+      await git(['fetch', 'origin'], true)
       const output = await gitOutput(
         ['merge-base', 'origin/' + sourceBranch, 'origin/' + targetBranch],
+        false,
         {
           ignoreReturnCode: true
         }
@@ -243,19 +244,22 @@ To enable prMode, consider adding "fetchDepth: 0".`
 
 async function git(
   args: string[],
+  withCredentials: boolean,
   options: IExecOptions = {}
 ): Promise<number> {
-  return (await gitOutput(args, options)).exitCode
+  return (await gitOutput(args, withCredentials, options)).exitCode
 }
 
 /**
  * Returns trimmed output of git command omitting the command itself
  * i.e., if gitOutput(['status']) is called the "/usr/bin/git status" will be omitted
+ * @param withCredentials pass oauth token as extra header. Could be needed for fetch, push commands
  * @param args git arguments
  * @param options options for azure-pipelines-task-lib/task exec
  */
 async function gitOutput(
   args: string[],
+  withCredentials: boolean,
   options: IExecOptions = {}
 ): Promise<{exitCode: number; stderr: string; stdout: string}> {
   const result = {
@@ -282,8 +286,18 @@ async function gitOutput(
   options.outStream = outStream
   options.errStream = errStream
 
+  if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== undefined) {
+    args = [
+      '-c',
+      `http.extraheader="AUTHORIZATION: bearer $SYSTEM_ACCESSTOKEN"`,
+      ...args
+    ]
+  }
+
   result.exitCode = await tl.execAsync('git', args, options).catch(error => {
-    tl.warning(`Failed to run git command with arguments: ${args.join(' ')}`)
+    tl.warning(
+      `Failed to run git command with arguments: ${args.join(' ')}.\nError: ${(error as Error).message}`
+    )
     throw error
   })
   if (result.stdout.startsWith('[command]')) {
@@ -443,31 +457,33 @@ export async function pushQuickFixes(
     currentBranch = currentBranch.replace('refs/heads/', '')
     currentBranch = validateBranchName(currentBranch)
 
-    const currentCommit = (await gitOutput(['rev-parse', 'HEAD'])).stdout.trim()
-    await git(['config', 'user.name', COMMIT_USER])
-    await git(['config', 'user.email', COMMIT_EMAIL])
-    await git(['add', '.'])
-    let exitCode = await git(['commit', '-m', commitMessage], {
+    const currentCommit = (
+      await gitOutput(['rev-parse', 'HEAD'], false)
+    ).stdout.trim()
+    await git(['config', 'user.name', COMMIT_USER], false)
+    await git(['config', 'user.email', COMMIT_EMAIL], false)
+    await git(['add', '.'], false)
+    let exitCode = await git(['commit', '-m', commitMessage], false, {
       ignoreReturnCode: true
     })
     if (exitCode !== 0) {
       return
     }
-    exitCode = await git(['pull', '--rebase', 'origin', currentBranch])
+    exitCode = await git(['pull', '--rebase', 'origin', currentBranch], true)
     if (exitCode !== 0) {
       return
     }
     if (mode === BRANCH) {
       const commitToCherryPick = (
-        await gitOutput(['rev-parse', 'HEAD'])
+        await gitOutput(['rev-parse', 'HEAD'], false)
       ).stdout.trim()
-      await git(['checkout', currentBranch])
-      await git(['cherry-pick', commitToCherryPick])
+      await git(['checkout', currentBranch], false)
+      await git(['cherry-pick', commitToCherryPick], false)
       await gitPush(currentBranch)
       console.log(`Pushed quick-fixes to branch ${currentBranch}`)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
-      await git(['checkout', '-b', newBranch])
+      await git(['checkout', '-b', newBranch], false)
       await gitPush(newBranch)
       await createPr(commitMessage, currentBranch, newBranch)
       console.log(
@@ -480,11 +496,13 @@ export async function pushQuickFixes(
 }
 
 async function gitPush(branch: string): Promise<void> {
-  const output = await gitOutput(['push', 'origin', branch], {
+  const output = await gitOutput(['push', 'origin', branch], true, {
     ignoreReturnCode: true
   })
   if (output.exitCode !== 0) {
-    tl.warning(`Failed to push branch ${branch}: ${output.stderr}`)
+    tl.warning(
+      `Failed to push branch ${branch}.\nStdout: ${output.stdout}\nStderr: ${output.stderr}`
+    )
   }
 }
 
