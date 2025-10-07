@@ -286,16 +286,18 @@ async function gitOutput(
   options.outStream = outStream
   options.errStream = errStream
 
-  if (withCredentials) {
+  if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== undefined) {
     args = [
       '-c',
-      'http.extraheader=AUTHORIZATION: bearer $(System.AccessToken)',
+      `http.extraheader="AUTHORIZATION: bearer $SYSTEM_ACCESSTOKEN"`,
       ...args
     ]
   }
 
   result.exitCode = await tl.execAsync('git', args, options).catch(error => {
-    tl.warning(`Failed to run git command with arguments: ${args.join(' ')}`)
+    tl.warning(
+      `Failed to run git command with arguments: ${args.join(' ')}.\nError: ${(error as Error).message}`
+    )
     throw error
   })
   if (result.stdout.startsWith('[command]')) {

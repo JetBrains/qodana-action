@@ -79661,15 +79661,16 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         });
         options.outStream = outStream;
         options.errStream = errStream;
-        if (withCredentials) {
+        if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== void 0) {
           args = [
             "-c",
-            "http.extraheader=AUTHORIZATION: bearer $(System.AccessToken)",
+            `http.extraheader="AUTHORIZATION: bearer $SYSTEM_ACCESSTOKEN"`,
             ...args
           ];
         }
         result2.exitCode = yield tl2.execAsync("git", args, options).catch((error) => {
-          tl2.warning(`Failed to run git command with arguments: ${args.join(" ")}`);
+          tl2.warning(`Failed to run git command with arguments: ${args.join(" ")}.
+Error: ${error.message}`);
           throw error;
         });
         if (result2.stdout.startsWith("[command]")) {
