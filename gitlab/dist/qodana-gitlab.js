@@ -40,12 +40,12 @@ var init_cli = __esm({
   "../common/cli.json"() {
     version = "2025.2.1";
     checksum = {
-      windows_x86_64: "9b6b30b295b1cc0e60c2be04f4f0054d19a35b79e13c3544c054c1bd052da164",
-      linux_arm64: "656527c02c9a12351949f96064a9599c591de2eec856d218f23ad0ea49445602",
-      darwin_arm64: "c2e365bb218413fcef4279463823d42ebce8472d12ecff0ad4266d5ad26e0cdc",
-      darwin_x86_64: "81cd002d9fcc560596ac35172ccea6958f1645030fde8111c628b98391d16761",
-      windows_arm64: "fb474395342443afa57eb9fa019544a487119b4e418cec1b823bbf238bd9e85f",
-      linux_x86_64: "785dac6b5e1d78f96b20e9ba5600590c1779d5b6daa9d57c003430adb27377e2"
+      windows_x86_64: "134b8248ce23b7e471cdc32c1a917011f510bba9f5bf0ca5be32afcc86bc9547",
+      linux_arm64: "efabe2eb9ec8a1e9794f0fe3e0a0ebf1ce7a20105dedd6baf0161503e84a438d",
+      darwin_arm64: "43a92cc573a425a5ce305f61c675acc75f6bbcfb144649796edf5fc4c08fbfd4",
+      darwin_x86_64: "dd0bd566a4e9eb41ff7e80607105ddd7e9e70c7fbda26771bf1d7608f332c9db",
+      windows_arm64: "17c4e9db6e2d5bf82e63232ac893ff4d56bcbf22bc43fd99c69ab7a41dd2e188",
+      linux_x86_64: "ed06fd82a8c408e12f2290d369cdd689e88bb3bac0a7e1e7808150eb1aedf54c"
     };
   }
 });
@@ -10327,15 +10327,24 @@ function parseRawArguments(rawArgs) {
   const result = [];
   let i = 0;
   while (i < initialSplit.length) {
-    let currentArg = initialSplit[i];
-    if (currentArg.startsWith("--property=")) {
-      let propertyValue = currentArg;
+    const currentArg = initialSplit[i];
+    if (currentArg === "--property") {
+      result.push(currentArg);
+      const propertyValues = [];
       i++;
       while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
-        propertyValue += "," + initialSplit[i];
+        propertyValues.push(initialSplit[i]);
         i++;
       }
-      result.push(propertyValue);
+      result.push(propertyValues.join(","));
+    } else if (currentArg.startsWith("--property ")) {
+      const fullPropertyArg = [currentArg];
+      i++;
+      while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
+        fullPropertyArg.push(initialSplit[i]);
+        i++;
+      }
+      result.push(fullPropertyArg.join(","));
     } else {
       result.push(currentArg);
       i++;
