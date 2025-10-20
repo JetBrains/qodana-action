@@ -61,16 +61,31 @@ export function parseRawArguments(rawArgs: string): string[] {
   let i = 0
 
   while (i < initialSplit.length) {
-    let currentArg = initialSplit[i]
+    const currentArg = initialSplit[i]
 
-    if (currentArg.startsWith('--property=')) {
-      let propertyValue = currentArg
+    // handle --property,prop.name=val1,val2,...
+    if (currentArg === '--property') {
+      result.push(currentArg)
+      const propertyValues: string[] = []
+
       i++
       while (i < initialSplit.length && !initialSplit[i].startsWith('-')) {
-        propertyValue += ',' + initialSplit[i]
+        propertyValues.push(initialSplit[i])
         i++
       }
-      result.push(propertyValue)
+
+      result.push(propertyValues.join(','))
+      // handle --property prop.name=val1,val2,...
+    } else if (currentArg.startsWith('--property ')) {
+      const fullPropertyArg: string[] = [currentArg]
+
+      i++
+      while (i < initialSplit.length && !initialSplit[i].startsWith('-')) {
+        fullPropertyArg.push(initialSplit[i])
+        i++
+      }
+
+      result.push(fullPropertyArg.join(','))
     } else {
       result.push(currentArg)
       i++

@@ -17133,15 +17133,24 @@ function parseRawArguments(rawArgs) {
   const result2 = [];
   let i = 0;
   while (i < initialSplit.length) {
-    let currentArg = initialSplit[i];
-    if (currentArg.startsWith("--property=")) {
-      let propertyValue = currentArg;
+    const currentArg = initialSplit[i];
+    if (currentArg === "--property") {
+      result2.push(currentArg);
+      const propertyValues = [];
       i++;
       while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
-        propertyValue += "," + initialSplit[i];
+        propertyValues.push(initialSplit[i]);
         i++;
       }
-      result2.push(propertyValue);
+      result2.push(propertyValues.join(","));
+    } else if (currentArg.startsWith("--property ")) {
+      const fullPropertyArg = [currentArg];
+      i++;
+      while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
+        fullPropertyArg.push(initialSplit[i]);
+        i++;
+      }
+      result2.push(fullPropertyArg.join(","));
     } else {
       result2.push(currentArg);
       i++;
