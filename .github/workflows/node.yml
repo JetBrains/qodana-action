@@ -377,7 +377,7 @@ jobs:
       - name: Qodana
         uses: ./
         with:
-          args: ${{ format('-i,{0},{1}', matrix.directory, matrix.arguments) }}
+          args: ${{ format('-i,{0},{1},--property=idea.background.write.action.enabled=false', matrix.directory, matrix.arguments) }}
           pr-mode: ${{ matrix.pr }}
           post-pr-comment: false
           use-annotations: false
