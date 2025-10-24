@@ -289,7 +289,7 @@ async function gitOutput(
   if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== undefined) {
     args = [
       '-c',
-      `http.extraheader="AUTHORIZATION: bearer $SYSTEM_ACCESSTOKEN"`,
+      `http.extraheader="AUTHORIZATION: bearer ${process.env.SYSTEM_ACCESSTOKEN}"`,
       ...args
     ]
   }
