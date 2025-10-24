@@ -79673,7 +79673,7 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== void 0) {
           args = [
             "-c",
-            `http.extraheader="AUTHORIZATION: bearer $SYSTEM_ACCESSTOKEN"`,
+            `http.extraheader="AUTHORIZATION: bearer ${process.env.SYSTEM_ACCESSTOKEN}"`,
             ...args
           ];
         }
