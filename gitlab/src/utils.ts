@@ -60,7 +60,8 @@ export function getInputs(): Inputs {
     primaryCacheKey: '',
     cacheDefaultBranchOnly: false,
     githubToken: '',
-    artifactName: ''
+    artifactName: '',
+    workingDirectory: ''
   }
 }
 
