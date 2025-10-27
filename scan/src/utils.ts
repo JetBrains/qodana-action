@@ -101,7 +101,9 @@ export function getInputs(): Inputs {
     githubToken: core.getInput('github-token'),
     pushFixes: core.getInput('push-fixes'),
     commitMessage: core.getInput('commit-message'),
-    useNightly: core.getBooleanInput('use-nightly')
+    useNightly: core.getBooleanInput('use-nightly'),
+    // not used by the action
+    workingDirectory: ''
   }
 }
 

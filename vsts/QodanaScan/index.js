@@ -79519,6 +79519,7 @@ var require_utils4 = __commonJS({
         postComment: tl2.getBoolInput("postPrComment", false),
         pushFixes: tl2.getInput("pushFixes", false) || "none",
         commitMessage: tl2.getInput("commitMessage", false) || "\u{1F916} Apply quick-fixes by Qodana \n\n[skip ci]",
+        workingDirectory: tl2.getInput("workingDirectory", false) || "",
         // Not used by the Azure task
         additionalCacheKey: "",
         primaryCacheKey: "",
@@ -79530,11 +79531,12 @@ var require_utils4 = __commonJS({
     }
     function qodana() {
       return __awaiter2(this, arguments, void 0, function* (args = []) {
+        const inputs = getInputs();
         const env = Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" });
         if (args.length === 0) {
-          const inputs = getInputs();
-          args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
-          if (inputs.prMode && tl2.getVariable("Build.Reason") === "PullRequest") {
+          const inputs2 = getInputs();
+          args = (0, qodana_12.getQodanaScanArgs)(inputs2.args, inputs2.resultsDir, inputs2.cacheDir);
+          if (inputs2.prMode && tl2.getVariable("Build.Reason") === "PullRequest") {
             const sha = yield getPrSha();
             if (sha !== "") {
               args.push("--commit", sha);
@@ -79547,10 +79549,7 @@ var require_utils4 = __commonJS({
             }
           }
         }
-        return yield tl2.execAsync(qodana_12.EXECUTABLE, args, {
-          ignoreReturnCode: true,
-          env
-        });
+        return yield tl2.execAsync(qodana_12.EXECUTABLE, args, Object.assign(Object.assign({ ignoreReturnCode: true }, inputs.workingDirectory && { cwd: inputs.workingDirectory }), { env }));
       });
     }
     function prepareAgent(args_1) {
@@ -79651,6 +79650,10 @@ To enable prMode, consider adding "fetchDepth: 0".`;
     }
     function gitOutput(args_1, withCredentials_1) {
       return __awaiter2(this, arguments, void 0, function* (args, withCredentials, options = {}) {
+        const inputs = getInputs();
+        if (options.cwd === void 0 && inputs.workingDirectory !== "") {
+          options.cwd = inputs.workingDirectory;
+        }
         const result2 = {
           exitCode: 0,
           stdout: "",

@@ -10,7 +10,7 @@
   "version": {
     "Major": 2025,
     "Minor": 2,
-    "Patch": 1
+    "Patch": 230
   },
   "instanceNameFormat": "Qodana Scan",
   "inputs": [
@@ -106,6 +106,14 @@
       "defaultValue": "🤖 Apply quick-fixes by Qodana\n\n[skip ci]",
       "required": false,
       "helpMarkDown": "Message used when quick-fixes are pushed"
+    },
+    {
+      "name": "workingDirectory",
+      "type": "string",
+      "label": "Working Directory",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Working directory for the Qodana Task"
     }
   ],
   "execution": {
