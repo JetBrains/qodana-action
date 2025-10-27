@@ -227,6 +227,7 @@ export interface Inputs {
   pushFixes: PushFixesType
   commitMessage: string
   useNightly: boolean
+  workingDirectory: string
 }
 
 /**

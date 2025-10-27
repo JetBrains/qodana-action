@@ -50380,7 +50380,8 @@ var require_utils5 = __commonJS({
         primaryCacheKey: "",
         cacheDefaultBranchOnly: false,
         githubToken: "",
-        artifactName: ""
+        artifactName: "",
+        workingDirectory: ""
       };
     }
     __name(getInputs, "getInputs");

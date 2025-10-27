@@ -72,6 +72,7 @@ export function getInputs(): Inputs {
     commitMessage:
       tl.getInput('commitMessage', false) ||
       '🤖 Apply quick-fixes by Qodana \n\n[skip ci]',
+    workingDirectory: tl.getInput('workingDirectory', false) || '',
     // Not used by the Azure task
     additionalCacheKey: '',
     primaryCacheKey: '',
@@ -88,6 +89,7 @@ export function getInputs(): Inputs {
  * @returns The qodana command execution output.
  */
 export async function qodana(args: string[] = []): Promise<number> {
+  const inputs = getInputs()
   const env: Record<string, string> = {
     ...process.env,
     NONINTERACTIVE: '1'
@@ -111,6 +113,7 @@ export async function qodana(args: string[] = []): Promise<number> {
   }
   return await tl.execAsync(EXECUTABLE, args, {
     ignoreReturnCode: true,
+    ...(inputs.workingDirectory && {cwd: inputs.workingDirectory}),
     env
   })
 }
@@ -262,6 +265,10 @@ async function gitOutput(
   withCredentials: boolean,
   options: IExecOptions = {}
 ): Promise<{exitCode: number; stderr: string; stdout: string}> {
+  const inputs = getInputs()
+  if (options.cwd === undefined && inputs.workingDirectory !== '') {
+    options.cwd = inputs.workingDirectory
+  }
   const result = {
     exitCode: 0,
     stdout: '',
