@@ -61,7 +61,8 @@ export function getInputs(): Inputs {
     cacheDefaultBranchOnly: false,
     githubToken: '',
     artifactName: '',
-    workingDirectory: ''
+    workingDirectory: '',
+    edictTestDir: ''
   }
 }
 

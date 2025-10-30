@@ -70,6 +70,10 @@ inputs:
     required: false
     default: "false"
     deprecationMessage: 'This option is for development purposes only. Do not use it in production.'
+  edict-test-dir:
+    description: 'Directory with test files for Edict'
+    required: false
+    default: ""
 runs:
   using: 'node20'
   main: 'scan/dist/index.js'

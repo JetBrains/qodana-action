@@ -46,7 +46,7 @@ import {
 import path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
-import {prFixesBody} from './output'
+import {prFixesBody, prEdictBody, InspectionMeta} from './output'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 import {parseRawArguments} from '../../common/utils'
 
@@ -102,6 +102,7 @@ export function getInputs(): Inputs {
     pushFixes: core.getInput('push-fixes'),
     commitMessage: core.getInput('commit-message'),
     useNightly: core.getBooleanInput('use-nightly'),
+    edictTestDir: core.getInput('edict-test-dir'),
     // not used by the action
     workingDirectory: ''
   }
@@ -682,4 +683,202 @@ async function createPr(
       }
     }
   )
+}
+
+async function createPrWithBody(
+  title: string,
+  body: string,
+  repo: string,
+  base: string,
+  head: string
+): Promise<void> {
+  const prBodyFile = path.join(os.tmpdir(), 'pr-body-edict.txt')
+  fs.writeFileSync(prBodyFile, body)
+  await exec.getExecOutput(
+    'gh',
+    [
+      'pr',
+      'create',
+      '--repo',
+      repo,
+      '--title',
+      title,
+      '--body-file',
+      prBodyFile,
+      '--base',
+      base,
+      '--head',
+      head
+    ],
+    {
+      env: {
+        ...process.env,
+        GH_TOKEN: getInputs().githubToken
+      }
+    }
+  )
+}
+
+/**
+ * Publish Edict results by extracting inspection files and creating a pull request.
+ * @param inputs The action inputs.
+ */
+export async function publishEdictResult(inputs: Inputs): Promise<void> {
+  try {
+    if (inputs.edictTestDir != '') {
+      inputs.resultsDir = inputs.edictTestDir
+    }
+    const edictDir = path.join(inputs.resultsDir, 'edict')
+
+    // Check if edict directory exists
+    if (!fs.existsSync(edictDir)) {
+      core.info('No edict directory found, skipping Edict PR creation')
+      return
+    }
+
+    const extractedInspectionsDir = path.join(edictDir, 'extractedInspections')
+
+    // Check if extractedInspections directory exists
+    if (!fs.existsSync(extractedInspectionsDir)) {
+      core.info(
+        'No extractedInspections directory found, skipping Edict PR creation'
+      )
+      return
+    }
+
+    // Find all .inspection.kts files
+    const inspectionFiles = fs
+      .readdirSync(extractedInspectionsDir)
+      .filter(file => file.endsWith('.inspection.kts'))
+
+    if (inspectionFiles.length === 0) {
+      core.info('No .inspection.kts files found, skipping Edict PR creation')
+      return
+    }
+
+    core.info(`Found ${inspectionFiles.length} inspection file(s)`)
+
+    // Read metadata for each inspection
+    const inspectionMetas = new Map<string, InspectionMeta>()
+    for (const file of inspectionFiles) {
+      const baseName = file.replace('.inspection.kts', '')
+      const metaPath = path.join(
+        extractedInspectionsDir,
+        `${baseName}.meta.json`
+      )
+
+      if (fs.existsSync(metaPath)) {
+        try {
+          const metaContent = fs.readFileSync(metaPath, 'utf8')
+          const meta = JSON.parse(metaContent) as InspectionMeta
+          inspectionMetas.set(baseName, meta)
+          core.info(`Read metadata for ${baseName}`)
+        } catch (error) {
+          core.warning(
+            `Failed to read metadata for ${baseName}: ${(error as Error).message}`
+          )
+        }
+      }
+    }
+
+    // Create inspections directory at workspace root
+    const inspectionsDir = path.join(
+      process.env.GITHUB_WORKSPACE || process.cwd(),
+      'inspections'
+    )
+    if (!fs.existsSync(inspectionsDir)) {
+      fs.mkdirSync(inspectionsDir, {recursive: true})
+    }
+
+    // Copy all .inspection.kts files to inspections/ directory
+    for (const file of inspectionFiles) {
+      const sourcePath = path.join(extractedInspectionsDir, file)
+      const destPath = path.join(inspectionsDir, file)
+      fs.copyFileSync(sourcePath, destPath)
+      core.info(`Copied ${file} to inspections/`)
+    }
+
+    // We need body before checkout
+    const prBody = prEdictBody(
+      inputs.resultsDir,
+      getWorkflowRunUrl(),
+      inspectionMetas
+    )
+
+    // Get default branch
+    const c = github.context
+    const defaultBranch = c.payload.repository?.default_branch as
+      | string
+      | undefined
+    const currentBranch = c.ref.replace('refs/heads/', '')
+    const targetBranch = defaultBranch || currentBranch
+
+    core.info(`Target branch: ${targetBranch}`)
+
+    // Stash only the inspections folder to avoid conflicts with other changes
+    const stashResult = await git(
+      ['stash', 'push', '--include-untracked', 'inspections/'],
+      {
+        ignoreReturnCode: true
+      }
+    )
+    const hasStash = stashResult === 0
+
+    // Checkout default branch (force to ignore other uncommitted changes)
+    await git(['checkout', '-f', targetBranch])
+    core.info(`Checked out ${targetBranch}`)
+
+    // Restore stashed inspection files
+    if (hasStash) {
+      await git(['stash', 'pop'], {
+        ignoreReturnCode: true
+      })
+    }
+
+    // Configure git user
+    await git(['config', 'user.name', COMMIT_USER])
+    await git(['config', 'user.email', COMMIT_EMAIL])
+
+    // Stage only files in inspections/ directory
+    await git(['add', 'inspections/'])
+
+    // Commit
+    const commitMessage = 'Update Edict extracted inspections'
+    const exitCode = await git(['commit', '-m', commitMessage], {
+      ignoreReturnCode: true
+    })
+
+    if (exitCode !== 0) {
+      core.info('No changes to commit, skipping Edict PR creation')
+      return
+    }
+
+    // Get commit hash
+    const commitHash = (
+      await exec.getExecOutput('git', ['rev-parse', 'HEAD'])
+    ).stdout.trim()
+    const shortHash = commitHash.slice(0, 7)
+
+    // Create new branch
+    const newBranch = `qodana/edict-inspections-${shortHash}`
+    await git(['checkout', '-b', newBranch])
+    core.info(`Created new branch ${newBranch}`)
+
+    // Push new branch to origin
+    await git(['push', 'origin', newBranch])
+    core.info(`Pushed ${newBranch} to origin`)
+
+    await createPrWithBody(
+      'Qodana Edict: Update extracted inspections',
+      prBody,
+      `${c.repo.owner}/${c.repo.repo}`,
+      targetBranch,
+      newBranch
+    )
+    core.info(`Created PR from ${newBranch} to ${targetBranch}`)
+  } catch (error) {
+    core.warning(
+      `Failed to publish Edict results – ${(error as Error).message}`
+    )
+  }
 }

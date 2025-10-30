@@ -228,6 +228,9 @@ export interface Inputs {
   commitMessage: string
   useNightly: boolean
   workingDirectory: string
+  // TODO: remove this field later!!!
+  // And don't forget to edit action.yaml as well!!!
+  edictTestDir: string
 }
 
 /**

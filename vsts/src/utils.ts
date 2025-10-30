@@ -79,7 +79,8 @@ export function getInputs(): Inputs {
     useAnnotations: false,
     useCaches: false,
     cacheDefaultBranchOnly: false,
-    githubToken: ''
+    githubToken: '',
+    edictTestDir: ''
   }
 }
 

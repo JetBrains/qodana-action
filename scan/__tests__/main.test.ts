@@ -210,7 +210,8 @@ export function inputsDefaultFixture(): Inputs {
     pushFixes: 'none',
     commitMessage: '',
     useNightly: false,
-    workingDirectory: ''
+    workingDirectory: '',
+    edictTestDir: ''
   }
 }
 

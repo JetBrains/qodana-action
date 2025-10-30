@@ -33,7 +33,8 @@ import {
   restoreCaches,
   uploadCaches,
   uploadArtifacts,
-  pushQuickFixes
+  pushQuickFixes,
+  publishEdictResult
 } from './utils'
 import {publishOutput} from './output'
 
@@ -104,6 +105,7 @@ async function main(): Promise<void> {
         isExecutionSuccessful(exitCode)
       )
     ])
+    await publishEdictResult(inputs)
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)
     } else if (exitCode === QodanaExitCode.FailThreshold) {

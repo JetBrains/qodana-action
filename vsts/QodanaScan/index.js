@@ -79526,7 +79526,8 @@ var require_utils4 = __commonJS({
         useAnnotations: false,
         useCaches: false,
         cacheDefaultBranchOnly: false,
-        githubToken: ""
+        githubToken: "",
+        edictTestDir: ""
       };
     }
     function qodana() {

@@ -50390,7 +50390,8 @@ var require_utils5 = __commonJS({
         cacheDefaultBranchOnly: false,
         githubToken: "",
         artifactName: "",
-        workingDirectory: ""
+        workingDirectory: "",
+        edictTestDir: ""
       };
     }
     __name(getInputs, "getInputs");
