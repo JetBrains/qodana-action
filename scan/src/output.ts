@@ -278,9 +278,26 @@ export function prEdictBody(
     )
     let fixedReport = {problemDescriptions: [] as ProblemDescriptor[]}
     let fixedReportUrl = ''
+    let fixedCommitSha = ''
 
     if (fs.existsSync(fixedSarifPath)) {
       fixedReport = parseSarifCommon(fixedSarifPath, '')
+
+      // Get commit SHA from SARIF metadata
+      try {
+        const fixedSarifContent = JSON.parse(
+          fs.readFileSync(fixedSarifPath, 'utf8')
+        ) as {
+          runs?: {
+            versionControlProvenance?: {revisionId?: string}[]
+          }[]
+        }
+        fixedCommitSha =
+          fixedSarifContent?.runs?.[0]?.versionControlProvenance?.[0]
+            ?.revisionId || ''
+      } catch {
+        // Ignore if unable to read commit SHA
+      }
 
       // Get fixed issues report URL from open-in-ide.json
       const fixedOpenInIdePath = path.join(
@@ -330,7 +347,10 @@ ${mainTable}
 
     if (fixedReport.problemDescriptions.length > 0) {
       const fixedTable = generateProblemsTable(fixedReport.problemDescriptions)
-      body += `**${fixedReport.problemDescriptions.length} problem${fixedReport.problemDescriptions.length !== 1 ? 's' : ''} fixed** in the last 6 months:
+      const commitInfo = fixedCommitSha
+        ? ` from commit \`${fixedCommitSha.substring(0, 8)}\``
+        : ' in the last 6 months'
+      body += `**${fixedReport.problemDescriptions.length} ${fixedReport.problemDescriptions.length !== 1 ? 'issues' : 'issue'} fixed**${commitInfo}:
 
 ${fixedTable}
 `
