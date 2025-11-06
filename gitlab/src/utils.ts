@@ -66,7 +66,7 @@ export function getInputs(): Inputs {
 }
 
 function baseDir(): string {
-  const basePath = process.env.CI_BUILDS_DIR || os.tmpdir()
+  const basePath = os.tmpdir()
   return `${basePath}/.qodana`
 }
 

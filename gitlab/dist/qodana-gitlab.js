@@ -50395,7 +50395,7 @@ var require_utils5 = __commonJS({
     }
     __name(getInputs, "getInputs");
     function baseDir() {
-      const basePath = process.env.CI_BUILDS_DIR || os.tmpdir();
+      const basePath = os.tmpdir();
       return `${basePath}/.qodana`;
     }
     __name(baseDir, "baseDir");
