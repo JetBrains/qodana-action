@@ -41,8 +41,9 @@ export function getInputs(): Inputs {
   return {
     args: argList,
     // user given results and cache dirs are used in uploadCache, prepareCaches and uploadArtifacts
-    resultsDir: `${baseDir()}/results`,
-    cacheDir: `${baseDir()}/cache`,
+    // this hack is needed to move caches outside the project dir
+    resultsDir: path.join(baseDir(), 'results'),
+    cacheDir: path.join(baseDir(), 'cache'),
     uploadResult: getQodanaBooleanArg('UPLOAD_RESULT', false),
     prMode: getQodanaBooleanArg('MR_MODE', true),
     pushFixes: pushFixes,
@@ -78,10 +79,6 @@ function getQodanaBooleanArg(name: string, def: boolean): boolean {
   return def
     ? process.env[`QODANA_${name}`] !== 'false'
     : process.env[`QODANA_${name}`] === 'true'
-}
-
-function getQodanaInputArg(name: string): string | undefined {
-  return process.env[`INPUT_${name}`]
 }
 
 interface CommandOutput {
@@ -135,7 +132,7 @@ function isMergeRequest(): boolean {
 }
 
 async function downloadTool(url: string): Promise<string> {
-  const tempPath = `${os.tmpdir()}/archive`
+  const tempPath = path.join(os.tmpdir(), 'archive')
   const writer = fs.createWriteStream(tempPath)
   const response = await axios({
     url,
@@ -164,7 +161,7 @@ export async function installCli(useNightly: boolean): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
   const temp = await downloadTool(getQodanaUrl(arch, platform, useNightly))
-  const extractRoot = `${os.tmpdir()}/qodana-cli`
+  const extractRoot = path.join(os.tmpdir(), 'qodana-cli')
   fs.mkdirSync(extractRoot, {recursive: true})
   if (process.platform === 'win32') {
     const zip = new AdmZip(temp)
@@ -179,13 +176,14 @@ export async function installCli(useNightly: boolean): Promise<void> {
   process.env.PATH = process.env.PATH + separator + extractRoot
 }
 
-export async function prepareAgent(
-  inputs: Inputs,
-  useNightly: boolean
-): Promise<void> {
+export async function prepareAgent(inputs: Inputs): Promise<void> {
+  // the current implementation runs in docker directly
   if (!(await isCliInstalled())) {
-    await installCli(useNightly)
+    await installCli(inputs.useNightly)
   }
+  // we are already in docker, so we don't need to pull linter
+  if (isLinuxRunner()) return
+
   if (!isNativeMode(inputs.args)) {
     const pull = await qodana(getQodanaPullArgs(inputs.args))
     if (pull !== 0) {
@@ -202,6 +200,8 @@ export async function qodana(args: string[] = []): Promise<number> {
   if (args.length === 0) {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
+    updateArgsForLinuxRunner(args)
+
     if (inputs.prMode && isMergeRequest()) {
       const sha = await getPrSha()
       if (sha !== '') {
@@ -217,6 +217,7 @@ export async function qodana(args: string[] = []): Promise<number> {
       }
     }
   }
+  console.log(`Running Qodana with args: ${args.join(' ')}`)
   return new Promise(resolve => {
     const proc = spawn(EXECUTABLE, args, {stdio: 'inherit'})
     proc.on('close', (code, signal) => {
@@ -233,6 +234,26 @@ export async function qodana(args: string[] = []): Promise<number> {
       resolve(127)
     })
   })
+}
+
+function updateArgsForLinuxRunner(args: string[]): void {
+  if (!isLinuxRunner()) {
+    return
+  }
+  // in gitlab we don't perform pull
+  const indexOfSkipPull = args.indexOf('--skip-pull')
+  if (indexOfSkipPull !== -1) {
+    args.splice(indexOfSkipPull, 1)
+  }
+  // Custom image - run natively
+  if (process.env.QODANA_DOCKER == undefined) {
+    args.push('--within-docker', 'false')
+  }
+}
+
+function isLinuxRunner(): boolean {
+  const os = getQodanaStringArg('RUNNER_OS', '')
+  return os === 'linux'
 }
 
 async function getPrSha(): Promise<string> {
@@ -267,36 +288,49 @@ async function getPrSha(): Promise<string> {
 }
 
 function getInitialCacheLocation(): string {
-  return (
-    getQodanaInputArg('CACHE_DIR') ||
-    `${process.env['CI_PROJECT_DIR']}/.qodana/cache`
-  )
+  const cacheDir = getQodanaStringArg('CACHE_DIR', path.join('qodana', 'cache'))
+  return path.join(process.env['CI_PROJECT_DIR'] || '.', cacheDir)
 }
 
 // at this moment any changes inside .qodana dir may affect analysis results
-export function prepareCaches(cacheDir: string): void {
+export async function prepareCaches(cacheDir: string): Promise<void> {
   const initialCacheLocation = getInitialCacheLocation()
-  if (fs.existsSync(initialCacheLocation)) {
-    fs.cpSync(initialCacheLocation, cacheDir, {recursive: true})
-    fs.rmSync(initialCacheLocation, {recursive: true})
+  if (initialCacheLocation === cacheDir) {
+    return
+  }
+  try {
+    await fs.promises.access(initialCacheLocation)
+    await fs.promises.cp(initialCacheLocation, cacheDir, {recursive: true})
+  } catch (e) {
+    console.debug("Couldn't restore cache:", (e as Error).message)
+    console.warn(
+      `Couldn't restore initial cache in ${initialCacheLocation}, skipping`
+    )
   }
 }
 
-export function uploadCache(cacheDir: string, execute: boolean): void {
+export async function uploadCache(
+  cacheDir: string,
+  execute: boolean
+): Promise<void> {
   if (!execute) {
     return
   }
   try {
     const initialCacheLocation = getInitialCacheLocation()
-    fs.cpSync(cacheDir, initialCacheLocation, {recursive: true})
+    await fs.promises.rm(initialCacheLocation, {recursive: true})
+    await fs.promises.cp(cacheDir, initialCacheLocation, {recursive: true})
   } catch (e) {
     console.error(`Failed to upload cache: ${(e as Error).message}`)
   }
 }
 
-export function uploadArtifacts(resultsDir: string): void {
+export async function uploadArtifacts(resultsDir: string): Promise<void> {
   try {
-    const resultDir = getQodanaInputArg('RESULTS_DIR')
+    const resultDir = getQodanaStringArg(
+      'RESULTS_DIR',
+      path.join('.qodana', 'results')
+    )
     const ciProjectDir = process.env['CI_PROJECT_DIR']
     if (!ciProjectDir) {
       console.warn('CI_PROJECT_DIR is not defined, skipping artifacts upload')
@@ -304,9 +338,9 @@ export function uploadArtifacts(resultsDir: string): void {
     }
     const resultsArtifactPath = path.join(
       process.env['CI_PROJECT_DIR']!,
-      resultDir ? resultDir : '.qodana/results'
+      resultDir
     )
-    fs.cpSync(resultsDir, resultsArtifactPath, {recursive: true})
+    await fs.promises.cp(resultsDir, resultsArtifactPath, {recursive: true})
   } catch (e) {
     console.error(`Failed to upload artifacts: ${(e as Error).message}`)
   }
@@ -320,7 +354,7 @@ export function getWorkflowRunUrl(): string {
       'CI_PROJECT_URL or CI_PIPELINE_ID is not defined, the pipeline url will be invalid'
     )
   }
-  return `${projectUrl}/pipelines/${pipelineId}`
+  return path.join(projectUrl || '', 'pipelines', pipelineId || '')
 }
 
 export async function postResultsToPRComments(

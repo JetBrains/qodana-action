@@ -10120,7 +10120,7 @@ function extractArg(argShort, argLong, args) {
   return arg;
 }
 function isNativeMode(args) {
-  if (args.includes("--ide") || args.includes("--within-docker=false")) {
+  if (args.includes("--ide") || args.includes("--within-docker false")) {
     return true;
   }
   let index = args.findIndex((arg) => arg == "--within-docker");
@@ -10277,6 +10277,7 @@ var init_qodana = __esm({
     __name(getQodanaUrl, "getQodanaUrl");
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
+      QodanaExitCode2[QodanaExitCode2["UnknownArgument"] = 130] = "UnknownArgument";
       QodanaExitCode2[QodanaExitCode2["FailThreshold"] = 255] = "FailThreshold";
       return QodanaExitCode2;
     })(QodanaExitCode || {});
@@ -50373,8 +50374,9 @@ var require_utils5 = __commonJS({
       return {
         args: argList,
         // user given results and cache dirs are used in uploadCache, prepareCaches and uploadArtifacts
-        resultsDir: `${baseDir()}/results`,
-        cacheDir: `${baseDir()}/cache`,
+        // this hack is needed to move caches outside the project dir
+        resultsDir: path_1.default.join(baseDir(), "results"),
+        cacheDir: path_1.default.join(baseDir(), "cache"),
         uploadResult: getQodanaBooleanArg("UPLOAD_RESULT", false),
         prMode: getQodanaBooleanArg("MR_MODE", true),
         pushFixes,
@@ -50407,10 +50409,6 @@ var require_utils5 = __commonJS({
       return def ? process.env[`QODANA_${name}`] !== "false" : process.env[`QODANA_${name}`] === "true";
     }
     __name(getQodanaBooleanArg, "getQodanaBooleanArg");
-    function getQodanaInputArg(name) {
-      return process.env[`INPUT_${name}`];
-    }
-    __name(getQodanaInputArg, "getQodanaInputArg");
     function execAsync(executable, args, ignoreReturnCode) {
       return __awaiter2(this, void 0, void 0, function* () {
         const command = `${executable} ${args.join(" ")}`;
@@ -50456,7 +50454,7 @@ var require_utils5 = __commonJS({
     __name(isMergeRequest, "isMergeRequest");
     function downloadTool(url) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const tempPath = `${os.tmpdir()}/archive`;
+        const tempPath = path_1.default.join(os.tmpdir(), "archive");
         const writer = fs4.createWriteStream(tempPath);
         const response = yield (0, axios_1.default)({
           url,
@@ -50489,7 +50487,7 @@ var require_utils5 = __commonJS({
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
         const temp = yield downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, useNightly));
-        const extractRoot = `${os.tmpdir()}/qodana-cli`;
+        const extractRoot = path_1.default.join(os.tmpdir(), "qodana-cli");
         fs4.mkdirSync(extractRoot, { recursive: true });
         if (process.platform === "win32") {
           const zip = new adm_zip_1.default(temp);
@@ -50505,11 +50503,13 @@ var require_utils5 = __commonJS({
       });
     }
     __name(installCli, "installCli");
-    function prepareAgent(inputs, useNightly) {
+    function prepareAgent(inputs) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!(yield isCliInstalled())) {
-          yield installCli(useNightly);
+          yield installCli(inputs.useNightly);
         }
+        if (isLinuxRunner())
+          return;
         if (!(0, qodana_12.isNativeMode)(inputs.args)) {
           const pull = yield qodana((0, qodana_12.getQodanaPullArgs)(inputs.args));
           if (pull !== 0) {
@@ -50525,6 +50525,7 @@ var require_utils5 = __commonJS({
         if (args.length === 0) {
           const inputs = getInputs();
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
+          updateArgsForLinuxRunner(args);
           if (inputs.prMode && isMergeRequest()) {
             const sha = yield getPrSha();
             if (sha !== "") {
@@ -50538,6 +50539,7 @@ var require_utils5 = __commonJS({
             }
           }
         }
+        console.log(`Running Qodana with args: ${args.join(" ")}`);
         return new Promise((resolve) => {
           const proc = (0, child_process_1.spawn)(qodana_12.EXECUTABLE, args, { stdio: "inherit" });
           proc.on("close", (code, signal) => {
@@ -50556,6 +50558,24 @@ var require_utils5 = __commonJS({
       });
     }
     __name(qodana, "qodana");
+    function updateArgsForLinuxRunner(args) {
+      if (!isLinuxRunner()) {
+        return;
+      }
+      const indexOfSkipPull = args.indexOf("--skip-pull");
+      if (indexOfSkipPull !== -1) {
+        args.splice(indexOfSkipPull, 1);
+      }
+      if (process.env.QODANA_DOCKER == void 0) {
+        args.push("--within-docker", "false");
+      }
+    }
+    __name(updateArgsForLinuxRunner, "updateArgsForLinuxRunner");
+    function isLinuxRunner() {
+      const os2 = getQodanaStringArg("RUNNER_OS", "");
+      return os2 === "linux";
+    }
+    __name(isLinuxRunner, "isLinuxRunner");
     function getPrSha() {
       return __awaiter2(this, void 0, void 0, function* () {
         try {
@@ -50586,42 +50606,56 @@ var require_utils5 = __commonJS({
     }
     __name(getPrSha, "getPrSha");
     function getInitialCacheLocation() {
-      return getQodanaInputArg("CACHE_DIR") || `${process.env["CI_PROJECT_DIR"]}/.qodana/cache`;
+      const cacheDir = getQodanaStringArg("CACHE_DIR", path_1.default.join("qodana", "cache"));
+      return path_1.default.join(process.env["CI_PROJECT_DIR"] || "", cacheDir);
     }
     __name(getInitialCacheLocation, "getInitialCacheLocation");
     function prepareCaches(cacheDir) {
-      const initialCacheLocation = getInitialCacheLocation();
-      if (fs4.existsSync(initialCacheLocation)) {
-        fs4.cpSync(initialCacheLocation, cacheDir, { recursive: true });
-        fs4.rmSync(initialCacheLocation, { recursive: true });
-      }
+      return __awaiter2(this, void 0, void 0, function* () {
+        const initialCacheLocation = getInitialCacheLocation();
+        if (initialCacheLocation === cacheDir) {
+          return;
+        }
+        try {
+          yield fs4.promises.access(initialCacheLocation);
+          yield fs4.promises.cp(initialCacheLocation, cacheDir, { recursive: true });
+        } catch (e) {
+          console.debug("Couldn't restore cache:", e.message);
+          console.warn(`Couldn't restore initial cache in ${initialCacheLocation}, skipping`);
+        }
+      });
     }
     __name(prepareCaches, "prepareCaches");
     function uploadCache(cacheDir, execute) {
-      if (!execute) {
-        return;
-      }
-      try {
-        const initialCacheLocation = getInitialCacheLocation();
-        fs4.cpSync(cacheDir, initialCacheLocation, { recursive: true });
-      } catch (e) {
-        console.error(`Failed to upload cache: ${e.message}`);
-      }
+      return __awaiter2(this, void 0, void 0, function* () {
+        if (!execute) {
+          return;
+        }
+        try {
+          const initialCacheLocation = getInitialCacheLocation();
+          yield fs4.promises.rm(initialCacheLocation, { recursive: true });
+          yield fs4.promises.cp(cacheDir, initialCacheLocation, { recursive: true });
+        } catch (e) {
+          console.error(`Failed to upload cache: ${e.message}`);
+        }
+      });
     }
     __name(uploadCache, "uploadCache");
     function uploadArtifacts(resultsDir) {
-      try {
-        const resultDir = getQodanaInputArg("RESULTS_DIR");
-        const ciProjectDir = process.env["CI_PROJECT_DIR"];
-        if (!ciProjectDir) {
-          console.warn("CI_PROJECT_DIR is not defined, skipping artifacts upload");
-          return;
+      return __awaiter2(this, void 0, void 0, function* () {
+        try {
+          const resultDir = getQodanaStringArg("RESULTS_DIR", path_1.default.join(".qodana", "results"));
+          const ciProjectDir = process.env["CI_PROJECT_DIR"];
+          if (!ciProjectDir) {
+            console.warn("CI_PROJECT_DIR is not defined, skipping artifacts upload");
+            return;
+          }
+          const resultsArtifactPath = path_1.default.join(process.env["CI_PROJECT_DIR"], resultDir);
+          yield fs4.promises.cp(resultsDir, resultsArtifactPath, { recursive: true });
+        } catch (e) {
+          console.error(`Failed to upload artifacts: ${e.message}`);
         }
-        const resultsArtifactPath = path_1.default.join(process.env["CI_PROJECT_DIR"], resultDir ? resultDir : ".qodana/results");
-        fs4.cpSync(resultsDir, resultsArtifactPath, { recursive: true });
-      } catch (e) {
-        console.error(`Failed to upload artifacts: ${e.message}`);
-      }
+      });
     }
     __name(uploadArtifacts, "uploadArtifacts");
     function getWorkflowRunUrl() {
@@ -50630,7 +50664,7 @@ var require_utils5 = __commonJS({
       if (!projectUrl || !pipelineId) {
         console.warn("CI_PROJECT_URL or CI_PIPELINE_ID is not defined, the pipeline url will be invalid");
       }
-      return `${projectUrl}/pipelines/${pipelineId}`;
+      return path_1.default.join(projectUrl || "", "pipelines", pipelineId || "");
     }
     __name(getWorkflowRunUrl, "getWorkflowRunUrl");
     function postResultsToPRComments(toolName, sourceDir, content, hasIssues, postComment) {
@@ -50859,15 +50893,17 @@ function main() {
       const inputs = (0, utils_1.getInputs)();
       fs3.mkdirSync(inputs.resultsDir, { recursive: true });
       fs3.mkdirSync(inputs.cacheDir, { recursive: true });
-      (0, utils_1.prepareCaches)(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs, inputs.useNightly);
+      yield Promise.all([(0, utils_1.prepareCaches)(inputs.cacheDir), (0, utils_1.prepareAgent)(inputs)]);
       const exitCode = yield (0, utils_1.qodana)();
+      if (exitCode === qodana_1.QodanaExitCode.UnknownArgument) {
+        console.warn("Unknown argument was passed to the action. Please check available arguments in our documentation: https://github.com/JetBrains/qodana-cli#options-1. Note, that docker mode specific arguments not available for Linux because action already executed inside the container. Arguments: ", inputs.args, "");
+      }
       yield Promise.all([
         (0, output_1.publishOutput)((0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode)),
-        (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage)
+        (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage),
+        (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches),
+        (0, utils_1.uploadArtifacts)(inputs.resultsDir)
       ]);
-      (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches);
-      (0, utils_1.uploadArtifacts)(inputs.resultsDir);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`);
       } else if (exitCode === qodana_1.QodanaExitCode.FailThreshold) {

@@ -26,10 +26,21 @@ async function main(): Promise<void> {
     const inputs = getInputs()
     fs.mkdirSync(inputs.resultsDir, {recursive: true})
     fs.mkdirSync(inputs.cacheDir, {recursive: true})
-    prepareCaches(inputs.cacheDir)
-    await prepareAgent(inputs, inputs.useNightly)
+
+    await Promise.all([prepareCaches(inputs.cacheDir), prepareAgent(inputs)])
 
     const exitCode = (await qodana()) as QodanaExitCode
+
+    if (exitCode === QodanaExitCode.UnknownArgument) {
+      console.warn(
+        'Unknown argument was passed to the action. ' +
+          'Please check available arguments in our documentation: https://github.com/JetBrains/qodana-cli#options-1. ' +
+          'Note, that docker mode specific arguments not available for Linux because action already executed inside the container. ' +
+          'Arguments: ',
+        inputs.args,
+        ''
+      )
+    }
 
     await Promise.all([
       publishOutput(
@@ -40,11 +51,10 @@ async function main(): Promise<void> {
         inputs.prMode,
         isExecutionSuccessful(exitCode)
       ),
-      pushQuickFixes(inputs.pushFixes, inputs.commitMessage)
+      pushQuickFixes(inputs.pushFixes, inputs.commitMessage),
+      uploadCache(inputs.cacheDir, inputs.useCaches),
+      uploadArtifacts(inputs.resultsDir)
     ])
-
-    uploadCache(inputs.cacheDir, inputs.useCaches)
-    uploadArtifacts(inputs.resultsDir)
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)
     } else if (exitCode === QodanaExitCode.FailThreshold) {

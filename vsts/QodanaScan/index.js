@@ -9864,7 +9864,7 @@ function extractArg(argShort, argLong, args) {
   return arg;
 }
 function isNativeMode(args) {
-  if (args.includes("--ide") || args.includes("--within-docker=false")) {
+  if (args.includes("--ide") || args.includes("--within-docker false")) {
     return true;
   }
   let index = args.findIndex((arg) => arg == "--within-docker");
@@ -10018,6 +10018,7 @@ var init_qodana = __esm({
     COVERAGE_THRESHOLD = 50;
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
+      QodanaExitCode2[QodanaExitCode2["UnknownArgument"] = 130] = "UnknownArgument";
       QodanaExitCode2[QodanaExitCode2["FailThreshold"] = 255] = "FailThreshold";
       return QodanaExitCode2;
     })(QodanaExitCode || {});

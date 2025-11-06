@@ -97,6 +97,7 @@ export function getQodanaUrl(
 
 export enum QodanaExitCode {
   Success = 0,
+  UnknownArgument = 130,
   FailThreshold = 255
 }
 
@@ -132,7 +133,7 @@ export function extractArg(
 }
 
 export function isNativeMode(args: string[]): boolean {
-  if (args.includes('--ide') || args.includes('--within-docker=false')) {
+  if (args.includes('--ide') || args.includes('--within-docker false')) {
     return true
   }
 
