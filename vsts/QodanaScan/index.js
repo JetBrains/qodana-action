@@ -37,14 +37,14 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2025.2.1";
+    version = "2025.2.2";
     checksum = {
-      windows_x86_64: "134b8248ce23b7e471cdc32c1a917011f510bba9f5bf0ca5be32afcc86bc9547",
-      linux_arm64: "efabe2eb9ec8a1e9794f0fe3e0a0ebf1ce7a20105dedd6baf0161503e84a438d",
-      darwin_arm64: "43a92cc573a425a5ce305f61c675acc75f6bbcfb144649796edf5fc4c08fbfd4",
-      darwin_x86_64: "dd0bd566a4e9eb41ff7e80607105ddd7e9e70c7fbda26771bf1d7608f332c9db",
-      windows_arm64: "17c4e9db6e2d5bf82e63232ac893ff4d56bcbf22bc43fd99c69ab7a41dd2e188",
-      linux_x86_64: "ed06fd82a8c408e12f2290d369cdd689e88bb3bac0a7e1e7808150eb1aedf54c"
+      windows_x86_64: "38be97d7c2a3e6c2c307fb7d776c22ac5e959a9a3ec55ca10b184154aae33b60",
+      linux_arm64: "59c988f19c5732363cbddf4c414a6cf7ffa75027c44d5e22c78b1075c755f1b1",
+      darwin_arm64: "8a5444d1730b2cd93507f0f0bba6f4c37a77ac83d1d083b2dd9d8da6eac748af",
+      darwin_x86_64: "f313ed0f7c13b8a806da6aca4d389acf5dc7687f27653e1ce675babf2a9d3b72",
+      windows_arm64: "d7934295789b5e3661f7b1585b940ecb78dbfe6b210a8c85ca53cb7757e4189a",
+      linux_x86_64: "c99447abd7f82cf75a5047747e72b7833b8445bb7e446ed824c2de9f48c7f67e"
     };
   }
 });
@@ -298,7 +298,7 @@ var require_BufferList = __commonJS({
     function copyBuffer(src, target, offset) {
       src.copy(target, offset);
     }
-    module2.exports = function() {
+    module2.exports = (function() {
       function BufferList() {
         _classCallCheck(this, BufferList);
         this.head = null;
@@ -352,7 +352,7 @@ var require_BufferList = __commonJS({
         return ret;
       };
       return BufferList;
-    }();
+    })();
     if (util && util.inspect && util.inspect.custom) {
       module2.exports.prototype[util.inspect.custom] = function() {
         var obj = util.inspect({ length: this.length });
@@ -1746,11 +1746,11 @@ var require_stream_readable = __commonJS({
       });
       for (var i in stream) {
         if (this[i] === void 0 && typeof stream[i] === "function") {
-          this[i] = /* @__PURE__ */ function(method) {
+          this[i] = /* @__PURE__ */ (function(method) {
             return function() {
               return stream[method].apply(stream, arguments);
             };
-          }(i);
+          })(i);
         }
       }
       for (var n = 0; n < kProxyEvents.length; n++) {
@@ -2791,23 +2791,23 @@ var require_utils = __commonJS({
         /**
          * true if the browser accepts to use String.fromCharCode on Uint8Array
          */
-        uint8array: function() {
+        uint8array: (function() {
           try {
             return support.uint8array && String.fromCharCode.apply(null, new Uint8Array(1)).length === 1;
           } catch (e) {
             return false;
           }
-        }(),
+        })(),
         /**
          * true if the browser accepts to use String.fromCharCode on nodejs Buffer.
          */
-        nodebuffer: function() {
+        nodebuffer: (function() {
           try {
             return support.nodebuffer && String.fromCharCode.apply(null, nodejsUtils.allocBuffer(1)).length === 1;
           } catch (e) {
             return false;
           }
-        }()
+        })()
       }
     };
     function arrayLikeToString(array) {
@@ -11163,7 +11163,7 @@ var require_get_intrinsic = __commonJS({
     var throwTypeError = function() {
       throw new $TypeError();
     };
-    var ThrowTypeError = $gOPD ? function() {
+    var ThrowTypeError = $gOPD ? (function() {
       try {
         arguments.callee;
         return throwTypeError;
@@ -11174,7 +11174,7 @@ var require_get_intrinsic = __commonJS({
           return throwTypeError;
         }
       }
-    }() : throwTypeError;
+    })() : throwTypeError;
     var hasSymbols = require_has_symbols()();
     var getProto = require_get_proto();
     var $ObjectGPO = require_Object_getPrototypeOf();
@@ -11686,13 +11686,13 @@ var require_utils2 = __commonJS({
     var formats = require_formats();
     var has3 = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
-    var hexTable = function() {
+    var hexTable = (function() {
       var array = [];
       for (var i = 0; i < 256; ++i) {
         array.push("%" + ((i < 16 ? "0" : "") + i.toString(16)).toUpperCase());
       }
       return array;
-    }();
+    })();
     var compactQueue = function compactQueue2(queue) {
       while (queue.length > 1) {
         var item = queue.pop();
@@ -79184,7 +79184,7 @@ var require_WebApi = __commonJS({
 var require_gitApiProvider = __commonJS({
   "lib/gitApiProvider.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -79193,16 +79193,16 @@ var require_gitApiProvider = __commonJS({
         } };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ function() {
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
       var ownKeys = function(o) {
         ownKeys = Object.getOwnPropertyNames || function(o2) {
           var ar = [];
@@ -79220,7 +79220,7 @@ var require_gitApiProvider = __commonJS({
         __setModuleDefault2(result2, mod);
         return result2;
       };
-    }();
+    })();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -79281,7 +79281,7 @@ var require_gitApiProvider = __commonJS({
 var require_output = __commonJS({
   "lib/output.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -79290,16 +79290,16 @@ var require_output = __commonJS({
         } };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ function() {
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
       var ownKeys = function(o) {
         ownKeys = Object.getOwnPropertyNames || function(o2) {
           var ar = [];
@@ -79317,7 +79317,7 @@ var require_output = __commonJS({
         __setModuleDefault2(result2, mod);
         return result2;
       };
-    }();
+    })();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -79412,7 +79412,7 @@ Best,
 var require_utils4 = __commonJS({
   "lib/utils.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -79421,16 +79421,16 @@ var require_utils4 = __commonJS({
         } };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ function() {
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
       var ownKeys = function(o) {
         ownKeys = Object.getOwnPropertyNames || function(o2) {
           var ar = [];
@@ -79448,7 +79448,7 @@ var require_utils4 = __commonJS({
         __setModuleDefault2(result2, mod);
         return result2;
       };
-    }();
+    })();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -79858,7 +79858,7 @@ Stderr: ${output.stderr}`);
 });
 
 // lib/main.js
-var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
   if (k2 === void 0) k2 = k;
   var desc = Object.getOwnPropertyDescriptor(m, k);
   if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -79867,16 +79867,16 @@ var __createBinding = exports && exports.__createBinding || (Object.create ? fun
     } };
   }
   Object.defineProperty(o, k2, desc);
-} : function(o, m, k, k2) {
+}) : (function(o, m, k, k2) {
   if (k2 === void 0) k2 = k;
   o[k2] = m[k];
-});
-var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+}));
+var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? (function(o, v) {
   Object.defineProperty(o, "default", { enumerable: true, value: v });
-} : function(o, v) {
+}) : function(o, v) {
   o["default"] = v;
 });
-var __importStar = exports && exports.__importStar || /* @__PURE__ */ function() {
+var __importStar = exports && exports.__importStar || /* @__PURE__ */ (function() {
   var ownKeys = function(o) {
     ownKeys = Object.getOwnPropertyNames || function(o2) {
       var ar = [];
@@ -79894,7 +79894,7 @@ var __importStar = exports && exports.__importStar || /* @__PURE__ */ function()
     __setModuleDefault(result2, mod);
     return result2;
   };
-}();
+})();
 var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
   function adopt(value) {
     return value instanceof P ? value : new P(function(resolve) {
