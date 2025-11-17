@@ -23,7 +23,7 @@
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-jest": "^29.0.1",
     "jest": "latest",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "prettier": "3.6.2",
     "ts-jest": "latest",
     "typescript": "^5.9.3"
