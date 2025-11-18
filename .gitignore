@@ -101,6 +101,7 @@ scan/__tests__/runner/*
 lib/**/*
 
 vsts/QodanaScan/.taskkey
+vsts/.taskkey
 
 .idea/
 .gradle/
