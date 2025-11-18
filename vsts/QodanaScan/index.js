@@ -15099,7 +15099,7 @@ var require_GitInterfaces = __commonJS({
   "../node_modules/azure-devops-node-api/interfaces/GitInterfaces.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.TypeInfo = exports2.VersionControlRecursionType = exports2.VersionControlChangeType = exports2.TfvcVersionType = exports2.TfvcVersionOption = exports2.SupportedIdeType = exports2.RefFavoriteType = exports2.PullRequestTimeRangeType = exports2.PullRequestStatus = exports2.PullRequestMergeFailureType = exports2.PullRequestAsyncStatus = exports2.LineDiffBlockChangeType = exports2.IterationReason = exports2.ItemContentType = exports2.GitVersionType = exports2.GitVersionOptions = exports2.GitStatusState = exports2.GitResolutionWhichAction = exports2.GitResolutionStatus = exports2.GitResolutionRename1to2Action = exports2.GitResolutionPathConflictAction = exports2.GitResolutionMergeType = exports2.GitResolutionError = exports2.GitRefUpdateStatus = exports2.GitRefUpdateMode = exports2.GitRefSearchType = exports2.GitPullRequestReviewFileType = exports2.GitPullRequestQueryType = exports2.GitPullRequestMergeStrategy = exports2.GitPathActions = exports2.GitObjectType = exports2.GitHistoryMode = exports2.GitConflictUpdateStatus = exports2.GitConflictType = exports2.GitAsyncRefOperationFailureStatus = exports2.GitAsyncOperationStatus = exports2.CommentType = exports2.CommentThreadStatus = void 0;
+    exports2.TypeInfo = exports2.VersionControlRecursionType = exports2.VersionControlChangeType = exports2.TfvcVersionType = exports2.TfvcVersionOption = exports2.SupportedIdeType = exports2.RefFavoriteType = exports2.PullRequestTimeRangeType = exports2.PullRequestStatus = exports2.PullRequestMergeFailureType = exports2.PullRequestAsyncStatus = exports2.LineDiffBlockChangeType = exports2.IterationReason = exports2.ItemContentType = exports2.GitVersionType = exports2.GitVersionOptions = exports2.GitStatusState = exports2.GitResolutionWhichAction = exports2.GitResolutionStatus = exports2.GitResolutionRename1to2Action = exports2.GitResolutionPathConflictAction = exports2.GitResolutionMergeType = exports2.GitResolutionError = exports2.GitRefUpdateStatus = exports2.GitRefUpdateMode = exports2.GitRefSearchType = exports2.GitPullRequestReviewFileType = exports2.GitPullRequestQueryType = exports2.GitPullRequestQueryIncludeOptions = exports2.GitPullRequestMergeStrategy = exports2.GitPathActions = exports2.GitObjectType = exports2.GitHistoryMode = exports2.GitConflictUpdateStatus = exports2.GitConflictType = exports2.GitAsyncRefOperationFailureStatus = exports2.GitAsyncOperationStatus = exports2.CommentType = exports2.CommentThreadStatus = void 0;
     var PolicyInterfaces = require_PolicyInterfaces();
     var TfsCoreInterfaces = require_CoreInterfaces();
     var CommentThreadStatus;
@@ -15200,6 +15200,11 @@ var require_GitInterfaces = __commonJS({
       GitPullRequestMergeStrategy2[GitPullRequestMergeStrategy2["Rebase"] = 3] = "Rebase";
       GitPullRequestMergeStrategy2[GitPullRequestMergeStrategy2["RebaseMerge"] = 4] = "RebaseMerge";
     })(GitPullRequestMergeStrategy = exports2.GitPullRequestMergeStrategy || (exports2.GitPullRequestMergeStrategy = {}));
+    var GitPullRequestQueryIncludeOptions;
+    (function(GitPullRequestQueryIncludeOptions2) {
+      GitPullRequestQueryIncludeOptions2[GitPullRequestQueryIncludeOptions2["NotSet"] = 0] = "NotSet";
+      GitPullRequestQueryIncludeOptions2[GitPullRequestQueryIncludeOptions2["Labels"] = 1] = "Labels";
+    })(GitPullRequestQueryIncludeOptions = exports2.GitPullRequestQueryIncludeOptions || (exports2.GitPullRequestQueryIncludeOptions = {}));
     var GitPullRequestQueryType;
     (function(GitPullRequestQueryType2) {
       GitPullRequestQueryType2[GitPullRequestQueryType2["NotSet"] = 0] = "NotSet";
@@ -15594,6 +15599,12 @@ var require_GitInterfaces = __commonJS({
         }
       },
       GitPullRequestQuery: {},
+      GitPullRequestQueryIncludeOptions: {
+        enumValues: {
+          "notSet": 0,
+          "labels": 1
+        }
+      },
       GitPullRequestQueryInput: {},
       GitPullRequestQueryType: {
         enumValues: {
@@ -16717,6 +16728,9 @@ var require_GitInterfaces = __commonJS({
       }
     };
     exports2.TypeInfo.GitPullRequestQueryInput.fields = {
+      include: {
+        enumType: exports2.TypeInfo.GitPullRequestQueryIncludeOptions
+      },
       type: {
         enumType: exports2.TypeInfo.GitPullRequestQueryType
       }
@@ -16822,6 +16836,9 @@ var require_GitInterfaces = __commonJS({
       }
     };
     exports2.TypeInfo.GitRepository.fields = {
+      creationDate: {
+        isDate: true
+      },
       parentRepository: {
         typeInfo: exports2.TypeInfo.GitRepositoryRef
       },
@@ -17551,6 +17568,12 @@ var require_VsoClient = __commonJS({
           return "";
         }
         let queryString = "";
+        if (Array.isArray(queryParams)) {
+          const paramName = prefix.endsWith(".") ? prefix.slice(0, -1) : prefix;
+          const values2 = queryParams.map((value) => value.toString()).join(",");
+          queryString += paramName + "=" + encodeURIComponent(values2) + "&";
+          return queryString;
+        }
         if (typeof queryParams !== "string") {
           for (let property2 in queryParams) {
             if (queryParams.hasOwnProperty(property2)) {
@@ -17562,7 +17585,8 @@ var require_VsoClient = __commonJS({
         }
         if (queryString === "" && prefix.length > 0) {
           const queryValue = typeof queryParams === "object" && "toUTCString" in queryParams ? queryParams.toUTCString() : queryParams.toString();
-          queryString = prefix.slice(0, -1) + "=" + encodeURIComponent(queryValue) + "&";
+          const paramName = prefix.endsWith(".") ? prefix.slice(0, -1) : prefix;
+          queryString = paramName + "=" + encodeURIComponent(queryValue) + "&";
         }
         return queryString;
       }
@@ -18757,14 +18781,35 @@ var require_AlertInterfaces = __commonJS({
   "../node_modules/azure-devops-node-api/interfaces/AlertInterfaces.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.TypeInfo = exports2.State = exports2.Severity = exports2.SarifJobStatus = exports2.ResultType = exports2.MetadataOperation = exports2.MetadataChangeType = exports2.ExpandOption = exports2.DismissalType = exports2.Confidence = exports2.ComponentType = exports2.AnalysisConfigurationType = exports2.AlertType = void 0;
+    exports2.TypeInfo = exports2.ValidationResult = exports2.State = exports2.Severity = exports2.SarifJobStatus = exports2.ResultType = exports2.MetadataOperation = exports2.MetadataChangeType = exports2.LicenseState = exports2.ExpandOption = exports2.DismissalType = exports2.DependencyKind = exports2.Confidence = exports2.ComponentType = exports2.AnalysisConfigurationType = exports2.AlertValidityStatus = exports2.AlertValidationRequestStatus = exports2.AlertType = exports2.AlertListExpandOption = void 0;
+    var AlertListExpandOption;
+    (function(AlertListExpandOption2) {
+      AlertListExpandOption2[AlertListExpandOption2["None"] = 0] = "None";
+      AlertListExpandOption2[AlertListExpandOption2["Minimal"] = 1] = "Minimal";
+    })(AlertListExpandOption = exports2.AlertListExpandOption || (exports2.AlertListExpandOption = {}));
     var AlertType;
     (function(AlertType2) {
       AlertType2[AlertType2["Unknown"] = 0] = "Unknown";
       AlertType2[AlertType2["Dependency"] = 1] = "Dependency";
       AlertType2[AlertType2["Secret"] = 2] = "Secret";
       AlertType2[AlertType2["Code"] = 3] = "Code";
+      AlertType2[AlertType2["License"] = 4] = "License";
     })(AlertType = exports2.AlertType || (exports2.AlertType = {}));
+    var AlertValidationRequestStatus;
+    (function(AlertValidationRequestStatus2) {
+      AlertValidationRequestStatus2[AlertValidationRequestStatus2["None"] = 0] = "None";
+      AlertValidationRequestStatus2[AlertValidationRequestStatus2["Created"] = 1] = "Created";
+      AlertValidationRequestStatus2[AlertValidationRequestStatus2["InProgress"] = 2] = "InProgress";
+      AlertValidationRequestStatus2[AlertValidationRequestStatus2["Completed"] = 3] = "Completed";
+      AlertValidationRequestStatus2[AlertValidationRequestStatus2["Failed"] = 4] = "Failed";
+    })(AlertValidationRequestStatus = exports2.AlertValidationRequestStatus || (exports2.AlertValidationRequestStatus = {}));
+    var AlertValidityStatus;
+    (function(AlertValidityStatus2) {
+      AlertValidityStatus2[AlertValidityStatus2["None"] = 0] = "None";
+      AlertValidityStatus2[AlertValidityStatus2["Unknown"] = 1] = "Unknown";
+      AlertValidityStatus2[AlertValidityStatus2["Active"] = 2] = "Active";
+      AlertValidityStatus2[AlertValidityStatus2["Inactive"] = 3] = "Inactive";
+    })(AlertValidityStatus = exports2.AlertValidityStatus || (exports2.AlertValidityStatus = {}));
     var AnalysisConfigurationType;
     (function(AnalysisConfigurationType2) {
       AnalysisConfigurationType2[AnalysisConfigurationType2["Default"] = 0] = "Default";
@@ -18795,18 +18840,33 @@ var require_AlertInterfaces = __commonJS({
       Confidence2[Confidence2["High"] = 0] = "High";
       Confidence2[Confidence2["Other"] = 1] = "Other";
     })(Confidence = exports2.Confidence || (exports2.Confidence = {}));
+    var DependencyKind;
+    (function(DependencyKind2) {
+      DependencyKind2[DependencyKind2["Unknown"] = 0] = "Unknown";
+      DependencyKind2[DependencyKind2["RootDependency"] = 1] = "RootDependency";
+      DependencyKind2[DependencyKind2["Component"] = 2] = "Component";
+      DependencyKind2[DependencyKind2["VulnerableDependency"] = 3] = "VulnerableDependency";
+    })(DependencyKind = exports2.DependencyKind || (exports2.DependencyKind = {}));
     var DismissalType;
     (function(DismissalType2) {
       DismissalType2[DismissalType2["Unknown"] = 0] = "Unknown";
       DismissalType2[DismissalType2["Fixed"] = 1] = "Fixed";
       DismissalType2[DismissalType2["AcceptedRisk"] = 2] = "AcceptedRisk";
       DismissalType2[DismissalType2["FalsePositive"] = 3] = "FalsePositive";
+      DismissalType2[DismissalType2["AgreedToGuidance"] = 4] = "AgreedToGuidance";
+      DismissalType2[DismissalType2["ToolUpgrade"] = 5] = "ToolUpgrade";
     })(DismissalType = exports2.DismissalType || (exports2.DismissalType = {}));
     var ExpandOption;
     (function(ExpandOption2) {
       ExpandOption2[ExpandOption2["None"] = 0] = "None";
       ExpandOption2[ExpandOption2["ValidationFingerprint"] = 1] = "ValidationFingerprint";
     })(ExpandOption = exports2.ExpandOption || (exports2.ExpandOption = {}));
+    var LicenseState;
+    (function(LicenseState2) {
+      LicenseState2[LicenseState2["Unknown"] = 0] = "Unknown";
+      LicenseState2[LicenseState2["NotHarvested"] = 1] = "NotHarvested";
+      LicenseState2[LicenseState2["Harvested"] = 2] = "Harvested";
+    })(LicenseState = exports2.LicenseState || (exports2.LicenseState = {}));
     var MetadataChangeType;
     (function(MetadataChangeType2) {
       MetadataChangeType2[MetadataChangeType2["None"] = 0] = "None";
@@ -18816,8 +18876,9 @@ var require_AlertInterfaces = __commonJS({
     })(MetadataChangeType = exports2.MetadataChangeType || (exports2.MetadataChangeType = {}));
     var MetadataOperation;
     (function(MetadataOperation2) {
-      MetadataOperation2[MetadataOperation2["Add"] = 0] = "Add";
-      MetadataOperation2[MetadataOperation2["Remove"] = 1] = "Remove";
+      MetadataOperation2[MetadataOperation2["None"] = 0] = "None";
+      MetadataOperation2[MetadataOperation2["Add"] = 1] = "Add";
+      MetadataOperation2[MetadataOperation2["Remove"] = 2] = "Remove";
     })(MetadataOperation = exports2.MetadataOperation || (exports2.MetadataOperation = {}));
     var ResultType;
     (function(ResultType2) {
@@ -18831,6 +18892,7 @@ var require_AlertInterfaces = __commonJS({
       SarifJobStatus2[SarifJobStatus2["Queued"] = 1] = "Queued";
       SarifJobStatus2[SarifJobStatus2["Completed"] = 2] = "Completed";
       SarifJobStatus2[SarifJobStatus2["Failed"] = 3] = "Failed";
+      SarifJobStatus2[SarifJobStatus2["Requeued"] = 4] = "Requeued";
     })(SarifJobStatus = exports2.SarifJobStatus || (exports2.SarifJobStatus = {}));
     var Severity;
     (function(Severity2) {
@@ -18841,6 +18903,7 @@ var require_AlertInterfaces = __commonJS({
       Severity2[Severity2["Note"] = 4] = "Note";
       Severity2[Severity2["Warning"] = 5] = "Warning";
       Severity2[Severity2["Error"] = 6] = "Error";
+      Severity2[Severity2["Undefined"] = 7] = "Undefined";
     })(Severity = exports2.Severity || (exports2.Severity = {}));
     var State;
     (function(State2) {
@@ -18850,9 +18913,22 @@ var require_AlertInterfaces = __commonJS({
       State2[State2["Fixed"] = 4] = "Fixed";
       State2[State2["AutoDismissed"] = 8] = "AutoDismissed";
     })(State = exports2.State || (exports2.State = {}));
+    var ValidationResult;
+    (function(ValidationResult2) {
+      ValidationResult2[ValidationResult2["None"] = 0] = "None";
+      ValidationResult2[ValidationResult2["Exploitable"] = 1] = "Exploitable";
+      ValidationResult2[ValidationResult2["NotExploitable"] = 2] = "NotExploitable";
+      ValidationResult2[ValidationResult2["Inconclusive"] = 3] = "Inconclusive";
+    })(ValidationResult = exports2.ValidationResult || (exports2.ValidationResult = {}));
     exports2.TypeInfo = {
       Alert: {},
       AlertAnalysisInstance: {},
+      AlertListExpandOption: {
+        enumValues: {
+          "none": 0,
+          "minimal": 1
+        }
+      },
       AlertMetadata: {},
       AlertMetadataChange: {},
       AlertStateUpdate: {},
@@ -18861,7 +18937,26 @@ var require_AlertInterfaces = __commonJS({
           "unknown": 0,
           "dependency": 1,
           "secret": 2,
-          "code": 3
+          "code": 3,
+          "license": 4
+        }
+      },
+      AlertValidationRequestStatus: {
+        enumValues: {
+          "none": 0,
+          "created": 1,
+          "inProgress": 2,
+          "completed": 3,
+          "failed": 4
+        }
+      },
+      AlertValidityInfo: {},
+      AlertValidityStatus: {
+        enumValues: {
+          "none": 0,
+          "unknown": 1,
+          "active": 2,
+          "inactive": 3
         }
       },
       AnalysisConfiguration: {},
@@ -18902,6 +18997,14 @@ var require_AlertInterfaces = __commonJS({
         }
       },
       Dependency: {},
+      DependencyKind: {
+        enumValues: {
+          "unknown": 0,
+          "rootDependency": 1,
+          "component": 2,
+          "vulnerableDependency": 3
+        }
+      },
       DependencyResult: {},
       Dismissal: {},
       DismissalType: {
@@ -18909,7 +19012,9 @@ var require_AlertInterfaces = __commonJS({
           "unknown": 0,
           "fixed": 1,
           "acceptedRisk": 2,
-          "falsePositive": 3
+          "falsePositive": 3,
+          "agreedToGuidance": 4,
+          "toolUpgrade": 5
         }
       },
       ExpandOption: {
@@ -18918,6 +19023,15 @@ var require_AlertInterfaces = __commonJS({
           "validationFingerprint": 1
         }
       },
+      License: {},
+      LicenseState: {
+        enumValues: {
+          "unknown": 0,
+          "notHarvested": 1,
+          "harvested": 2
+        }
+      },
+      LogicalLocation: {},
       Metadata: {},
       MetadataChange: {},
       MetadataChangeType: {
@@ -18930,8 +19044,9 @@ var require_AlertInterfaces = __commonJS({
       },
       MetadataOperation: {
         enumValues: {
-          "add": 0,
-          "remove": 1
+          "none": 0,
+          "add": 1,
+          "remove": 2
         }
       },
       Result: {},
@@ -18947,7 +19062,8 @@ var require_AlertInterfaces = __commonJS({
           "new": 0,
           "queued": 1,
           "completed": 2,
-          "failed": 3
+          "failed": 3,
+          "requeued": 4
         }
       },
       SarifUploadStatus: {},
@@ -18960,7 +19076,8 @@ var require_AlertInterfaces = __commonJS({
           "critical": 3,
           "note": 4,
           "warning": 5,
-          "error": 6
+          "error": 6,
+          "undefined": 7
         }
       },
       State: {
@@ -18972,7 +19089,17 @@ var require_AlertInterfaces = __commonJS({
           "autoDismissed": 8
         }
       },
-      UxFilters: {}
+      UxFilters: {},
+      ValidationFingerprint: {},
+      ValidationRequestInfo: {},
+      ValidationResult: {
+        enumValues: {
+          "none": 0,
+          "exploitable": 1,
+          "notExploitable": 2,
+          "inconclusive": 3
+        }
+      }
     };
     exports2.TypeInfo.Alert.fields = {
       alertType: {
@@ -18996,11 +19123,22 @@ var require_AlertInterfaces = __commonJS({
       lastSeenDate: {
         isDate: true
       },
+      logicalLocations: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.LogicalLocation
+      },
       severity: {
         enumType: exports2.TypeInfo.Severity
       },
       state: {
         enumType: exports2.TypeInfo.State
+      },
+      validationFingerprints: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.ValidationFingerprint
+      },
+      validityDetails: {
+        typeInfo: exports2.TypeInfo.AlertValidityInfo
       }
     };
     exports2.TypeInfo.AlertAnalysisInstance.fields = {
@@ -19042,7 +19180,18 @@ var require_AlertInterfaces = __commonJS({
         enumType: exports2.TypeInfo.State
       }
     };
+    exports2.TypeInfo.AlertValidityInfo.fields = {
+      validityLastCheckedDate: {
+        isDate: true
+      },
+      validityStatus: {
+        enumType: exports2.TypeInfo.AlertValidityStatus
+      }
+    };
     exports2.TypeInfo.AnalysisConfiguration.fields = {
+      alertType: {
+        enumType: exports2.TypeInfo.AlertType
+      },
       analysisConfigurationType: {
         enumType: exports2.TypeInfo.AnalysisConfigurationType
       }
@@ -19075,6 +19224,9 @@ var require_AlertInterfaces = __commonJS({
     exports2.TypeInfo.Dependency.fields = {
       componentType: {
         enumType: exports2.TypeInfo.ComponentType
+      },
+      license: {
+        typeInfo: exports2.TypeInfo.License
       }
     };
     exports2.TypeInfo.DependencyResult.fields = {
@@ -19088,6 +19240,19 @@ var require_AlertInterfaces = __commonJS({
       },
       requestedOn: {
         isDate: true
+      }
+    };
+    exports2.TypeInfo.License.fields = {
+      state: {
+        enumType: exports2.TypeInfo.LicenseState
+      }
+    };
+    exports2.TypeInfo.LogicalLocation.fields = {
+      kind: {
+        enumType: exports2.TypeInfo.DependencyKind
+      },
+      license: {
+        typeInfo: exports2.TypeInfo.License
       }
     };
     exports2.TypeInfo.Metadata.fields = {
@@ -19140,6 +19305,10 @@ var require_AlertInterfaces = __commonJS({
       },
       toDate: {
         isDate: true
+      },
+      validity: {
+        isArray: true,
+        enumType: exports2.TypeInfo.AlertValidityStatus
       }
     };
     exports2.TypeInfo.UxFilters.fields = {
@@ -19150,6 +19319,10 @@ var require_AlertInterfaces = __commonJS({
       confidenceLevels: {
         isArray: true,
         enumType: exports2.TypeInfo.Confidence
+      },
+      licenses: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.License
       },
       packages: {
         isArray: true,
@@ -19162,6 +19335,29 @@ var require_AlertInterfaces = __commonJS({
       states: {
         isArray: true,
         enumType: exports2.TypeInfo.State
+      },
+      validity: {
+        isArray: true,
+        enumType: exports2.TypeInfo.AlertValidityStatus
+      }
+    };
+    exports2.TypeInfo.ValidationFingerprint.fields = {
+      validityLastUpdatedDate: {
+        isDate: true
+      },
+      validityResult: {
+        enumType: exports2.TypeInfo.ValidationResult
+      }
+    };
+    exports2.TypeInfo.ValidationRequestInfo.fields = {
+      alertValidationRequestStatus: {
+        enumType: exports2.TypeInfo.AlertValidationRequestStatus
+      },
+      validityLastCheckedDate: {
+        isDate: true
+      },
+      validityStatus: {
+        enumType: exports2.TypeInfo.AlertValidityStatus
       }
     };
   }
@@ -19203,8 +19399,8 @@ var require_AlertApi = __commonJS({
     var basem = require_ClientApiBases();
     var AlertInterfaces = require_AlertInterfaces();
     var AlertApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Alert-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Alert-api", options);
       }
       /**
        * Get an alert.
@@ -19249,9 +19445,10 @@ var require_AlertApi = __commonJS({
        * @param {number} top - The maximum number of alerts to return
        * @param {string} orderBy - Must be "id" "firstSeen" "lastSeen" "fixedOn" or "severity"  Defaults to "id"
        * @param {AlertInterfaces.SearchCriteria} criteria - Options to limit the alerts returned
+       * @param {AlertInterfaces.AlertListExpandOption} expand
        * @param {string} continuationToken - If there are more alerts than can be returned, a continuation token is placed in the "x-ms-continuationtoken" header.  Use that token here to get the next page of alerts
        */
-      getAlerts(project, repository, top, orderBy, criteria, continuationToken) {
+      getAlerts(project, repository, top, orderBy, criteria, expand, continuationToken) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
@@ -19262,6 +19459,7 @@ var require_AlertApi = __commonJS({
               top,
               orderBy,
               criteria,
+              expand,
               continuationToken
             };
             try {
@@ -19344,7 +19542,83 @@ var require_AlertApi = __commonJS({
         });
       }
       /**
-       * Get instances of an alert.
+       * Returns the branches for which analysis results were submitted.
+       *
+       * @param {string} project - Project ID or project name
+       * @param {string} repository
+       * @param {AlertInterfaces.AlertType} alertType - The type of alert: Dependency Scanning (1), Secret (2), Code QL (3), etc.
+       * @param {string} continuationToken - A string variable that represents the branch name and is used to fetch branches that follow it in alphabetical order.
+       * @param {string} branchNameContains - A string variable used to fetch branches that contain this string anywhere in the branch name, case insensitive.
+       * @param {number} top - An int variable used to return the top k branches that satisfy the search criteria.
+       * @param {boolean} includePullRequestBranches - A bool variable indicating whether or not to include pull request branches.
+       */
+      getBranches(project, repository, alertType, continuationToken, branchNameContains, top, includePullRequestBranches) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (alertType == null) {
+            throw new TypeError("alertType can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Branches",
+              project,
+              repository
+            };
+            let queryValues = {
+              alertType,
+              continuationToken,
+              branchNameContains,
+              top,
+              includePullRequestBranches
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Alert", "8f90675b-f794-434d-8f2c-cfae0a11c02a", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, AlertInterfaces.TypeInfo.Branch, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * @param {string} project - Project ID or project name
+       * @param {string} repository
+       * @param {AlertInterfaces.AlertType} alertType
+       */
+      getUxFilters(project, repository, alertType) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (alertType == null) {
+            throw new TypeError("alertType can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Default",
+              project,
+              repository
+            };
+            let queryValues = {
+              alertType
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Alert", "8f90675b-f794-434d-8f2c-cfae0a11c02a", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, AlertInterfaces.TypeInfo.UxFilters, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get instances of an alert on a branch specified with @ref. If @ref is not provided, return instances of an alert on default branch(if the alert exist in default branch) or latest affected branch.
        *
        * @param {string} project - Project ID or project name
        * @param {number} alertId - ID of alert to retrieve
@@ -19369,6 +19643,42 @@ var require_AlertApi = __commonJS({
               let res;
               res = yield this.rest.get(url, options);
               let ret = this.formatResponse(res.result, AlertInterfaces.TypeInfo.AlertAnalysisInstance, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Create legal review. This creates the legal review associated with the alert. It include the review work item url.
+       *
+       * @param {string} project - Project ID or project name
+       * @param {string} repository - Name or id  of a repository for the legal alert
+       * @param {number} alertId - Advance Security alert id of the legal alert to get the legal review
+       * @param {string} ref
+       */
+      createLegalReview(project, repository, alertId, ref) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (alertId == null) {
+            throw new TypeError("alertId can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              repository
+            };
+            let queryValues = {
+              alertId,
+              ref
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Alert", "65de4b84-7519-4ae8-8623-175f79b49b80", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.create(url, null, options);
+              let ret = this.formatResponse(res.result, null, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -19410,8 +19720,9 @@ var require_AlertApi = __commonJS({
        * @param {NodeJS.ReadableStream} contentStream - Content to upload
        * @param {string} project - Project ID or project name
        * @param {string} repository - The name or ID of a repository
+       * @param {String} notificationFlag - Header to signal that this is a progress notification
        */
-      uploadSarif(customHeaders, contentStream, project, repository) {
+      uploadSarif(customHeaders, contentStream, project, repository, notificationFlag) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
@@ -19420,6 +19731,7 @@ var require_AlertApi = __commonJS({
             };
             customHeaders = customHeaders || {};
             customHeaders["Content-Type"] = "application/octet-stream";
+            customHeaders["X-AdvSec-NotificationSarif"] = "notificationFlag";
             try {
               let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Alert", "2a141cae-a50d-4c22-b41b-13f77748d035", routeValues);
               let url = verData.requestUrl;
@@ -19428,38 +19740,6 @@ var require_AlertApi = __commonJS({
               let res;
               res = yield this.rest.uploadStream("POST", url, contentStream, options);
               let ret = this.formatResponse(res.result, null, false);
-              resolve(ret);
-            } catch (err) {
-              reject2(err);
-            }
-          }));
-        });
-      }
-      /**
-       * @param {string} project - Project ID or project name
-       * @param {string} repository
-       * @param {AlertInterfaces.AlertType} alertType
-       */
-      getUxFilters(project, repository, alertType) {
-        return __awaiter2(this, void 0, void 0, function* () {
-          if (alertType == null) {
-            throw new TypeError("alertType can not be null or undefined");
-          }
-          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
-            let routeValues = {
-              project,
-              repository
-            };
-            let queryValues = {
-              alertType
-            };
-            try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Alert", "8f90675b-f794-434d-8f2c-cfae0a11c02a", routeValues, queryValues);
-              let url = verData.requestUrl;
-              let options = this.createRequestOptions("application/json", verData.apiVersion);
-              let res;
-              res = yield this.rest.get(url, options);
-              let ret = this.formatResponse(res.result, AlertInterfaces.TypeInfo.UxFilters, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -19485,6 +19765,64 @@ var require_AlertApi = __commonJS({
               let res;
               res = yield this.rest.get(url, options);
               let ret = this.formatResponse(res.result, AlertInterfaces.TypeInfo.SarifUploadStatus, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get the validity details for an alert.
+       *
+       * @param {string} project - Project ID or project name
+       * @param {string} repository - The name or ID of a repository
+       * @param {number} alertId - The ID of the alert
+       */
+      getValidityData(project, repository, alertId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              repository,
+              alertId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Alert", "2e022520-3508-4b5f-9855-acb954d673ba", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, AlertInterfaces.TypeInfo.ValidationRequestInfo, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Initiate the validation process for a given alert
+       *
+       * @param {string} project - Project ID or project name
+       * @param {string} repository - The name or ID of a repository
+       * @param {number} alertId - The ID of the alert
+       */
+      initiateValidation(project, repository, alertId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              repository,
+              alertId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Alert", "2e022520-3508-4b5f-9855-acb954d673ba", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.create(url, null, options);
+              let ret = this.formatResponse(res.result, AlertInterfaces.TypeInfo.AlertValidationRequestStatus, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -19582,7 +19920,7 @@ var require_TestInterfaces = __commonJS({
   "../node_modules/azure-devops-node-api/interfaces/TestInterfaces.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.TypeInfo = exports2.TestSessionState = exports2.TestSessionSource = exports2.TestRunSubstate = exports2.TestRunState = exports2.TestRunPublishContext = exports2.TestRunOutcome = exports2.TestResultsSettingsType = exports2.TestResultsSessionState = exports2.TestResultsContextType = exports2.TestResultGroupBy = exports2.TestPointState = exports2.TestOutcome = exports2.TestLogType = exports2.TestLogStoreOperationType = exports2.TestLogStoreEndpointType = exports2.TestLogStatusCode = exports2.TestLogScope = exports2.TestConfigurationState = exports2.TCMServiceDataMigrationStatus = exports2.SuiteExpand = exports2.SessionTimelineType = exports2.SessionResult = exports2.Service = exports2.RunType = exports2.ResultObjectType = exports2.ResultMetaDataDetails = exports2.ResultMetadata = exports2.ResultGroupType = exports2.ResultDetails = exports2.OperationType = exports2.Metrics = exports2.FlakyDetectionType = exports2.CustomTestFieldType = exports2.CustomTestFieldScope = exports2.CoverageSummaryStatus = exports2.CoverageStatus = exports2.CoverageQueryFlags = exports2.CoverageDetailedSummaryStatus = exports2.CloneOperationState = exports2.AttachmentType = void 0;
+    exports2.TypeInfo = exports2.TestSessionState = exports2.TestSessionSource = exports2.TestRunSubstate = exports2.TestRunState = exports2.TestRunPublishContext = exports2.TestRunOutcome = exports2.TestResultsSettingsType = exports2.TestResultsSessionState = exports2.TestResultsContextType = exports2.TestResultGroupBy = exports2.TestPointState = exports2.TestOutcome = exports2.TestLogType = exports2.TestLogStoreOperationType = exports2.TestLogStoreEndpointType = exports2.TestLogStatusCode = exports2.TestLogScope = exports2.TestConfigurationState = exports2.TCMServiceDataMigrationStatus = exports2.SuiteExpand = exports2.SessionResult = exports2.Service = exports2.RunType = exports2.ResultObjectType = exports2.ResultMetaDataDetails = exports2.ResultMetadata = exports2.ResultGroupType = exports2.ResultDetails = exports2.OperationType = exports2.Metrics = exports2.FlakyDetectionType = exports2.CustomTestFieldType = exports2.CustomTestFieldScope = exports2.CoverageSummaryStatus = exports2.CoverageStatus = exports2.CoverageQueryFlags = exports2.CoverageDetailedSummaryStatus = exports2.CloneOperationState = exports2.AttachmentType = void 0;
     var SystemData = require_SystemDataInterfaces();
     var TfsCoreInterfaces = require_CoreInterfaces();
     var AttachmentType;
@@ -19659,6 +19997,7 @@ var require_TestInterfaces = __commonJS({
       CustomTestFieldScope2[CustomTestFieldScope2["None"] = 0] = "None";
       CustomTestFieldScope2[CustomTestFieldScope2["TestRun"] = 1] = "TestRun";
       CustomTestFieldScope2[CustomTestFieldScope2["TestResult"] = 2] = "TestResult";
+      CustomTestFieldScope2[CustomTestFieldScope2["TestRunAndTestResult"] = 3] = "TestRunAndTestResult";
       CustomTestFieldScope2[CustomTestFieldScope2["System"] = 4] = "System";
       CustomTestFieldScope2[CustomTestFieldScope2["All"] = 7] = "All";
     })(CustomTestFieldScope = exports2.CustomTestFieldScope || (exports2.CustomTestFieldScope = {}));
@@ -19740,14 +20079,8 @@ var require_TestInterfaces = __commonJS({
       SessionResult2[SessionResult2["None"] = 0] = "None";
       SessionResult2[SessionResult2["Passed"] = 1] = "Passed";
       SessionResult2[SessionResult2["Failed"] = 2] = "Failed";
+      SessionResult2[SessionResult2["Pending"] = 3] = "Pending";
     })(SessionResult = exports2.SessionResult || (exports2.SessionResult = {}));
-    var SessionTimelineType;
-    (function(SessionTimelineType2) {
-      SessionTimelineType2[SessionTimelineType2["None"] = 0] = "None";
-      SessionTimelineType2[SessionTimelineType2["Queued"] = 1] = "Queued";
-      SessionTimelineType2[SessionTimelineType2["Completed"] = 2] = "Completed";
-      SessionTimelineType2[SessionTimelineType2["Started"] = 3] = "Started";
-    })(SessionTimelineType = exports2.SessionTimelineType || (exports2.SessionTimelineType = {}));
     var SuiteExpand;
     (function(SuiteExpand2) {
       SuiteExpand2[SuiteExpand2["Children"] = 1] = "Children";
@@ -20018,6 +20351,7 @@ var require_TestInterfaces = __commonJS({
           "none": 0,
           "testRun": 1,
           "testResult": 2,
+          "testRunAndTestResult": 3,
           "system": 4,
           "all": 7
         }
@@ -20049,6 +20383,7 @@ var require_TestInterfaces = __commonJS({
       LegacyTestCaseResult: {},
       LegacyTestRun: {},
       LegacyTestSettings: {},
+      Machine: {},
       Metrics: {
         enumValues: {
           "all": 1,
@@ -20138,19 +20473,13 @@ var require_TestInterfaces = __commonJS({
           "tfs": 2
         }
       },
+      SessionEnvironmentAndMachine: {},
       SessionResult: {
         enumValues: {
           "none": 0,
           "passed": 1,
-          "failed": 2
-        }
-      },
-      SessionTimelineType: {
-        enumValues: {
-          "none": 0,
-          "queued": 1,
-          "completed": 2,
-          "started": 3
+          "failed": 2,
+          "pending": 3
         }
       },
       SourceViewBuildCoverage: {},
@@ -20247,6 +20576,7 @@ var require_TestInterfaces = __commonJS({
       TestMessageLogDetails: {},
       TestMessageLogEntry: {},
       TestMessageLogEntry2: {},
+      TestMethod: {},
       TestOutcome: {
         enumValues: {
           "unspecified": 0,
@@ -20411,6 +20741,7 @@ var require_TestInterfaces = __commonJS({
       TestSubResult: {},
       TestSuite: {},
       TestSummaryForWorkItem: {},
+      TestToWorkItemLinks: {},
       Timeline: {},
       UpdatedProperties: {},
       UpdateTestRunRequest: {},
@@ -20706,6 +21037,12 @@ var require_TestInterfaces = __commonJS({
         isDate: true
       }
     };
+    exports2.TypeInfo.Machine.fields = {
+      timeline: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.Timeline
+      }
+    };
     exports2.TypeInfo.PipelineTestMetrics.fields = {
       resultSummary: {
         typeInfo: exports2.TypeInfo.ResultSummary
@@ -20874,6 +21211,12 @@ var require_TestInterfaces = __commonJS({
       },
       substate: {
         enumType: exports2.TypeInfo.TestRunSubstate
+      }
+    };
+    exports2.TypeInfo.SessionEnvironmentAndMachine.fields = {
+      machines: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.Machine
       }
     };
     exports2.TypeInfo.SourceViewBuildCoverage.fields = {
@@ -21077,6 +21420,11 @@ var require_TestInterfaces = __commonJS({
         isDate: true
       }
     };
+    exports2.TypeInfo.TestMethod.fields = {
+      testResult: {
+        typeInfo: exports2.TypeInfo.TestCaseResult
+      }
+    };
     exports2.TypeInfo.TestParameter2.fields = {
       creationDate: {
         isDate: true
@@ -21265,6 +21613,10 @@ var require_TestInterfaces = __commonJS({
       },
       state: {
         enumType: exports2.TypeInfo.TestResultsSessionState
+      },
+      timeline: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.Timeline
       }
     };
     exports2.TypeInfo.TestResultsSettings.fields = {
@@ -21467,6 +21819,11 @@ var require_TestInterfaces = __commonJS({
         typeInfo: exports2.TypeInfo.AggregatedDataForResultTrend
       }
     };
+    exports2.TypeInfo.TestToWorkItemLinks.fields = {
+      test: {
+        typeInfo: exports2.TypeInfo.TestMethod
+      }
+    };
     exports2.TypeInfo.Timeline.fields = {
       timestampUTC: {
         isDate: true
@@ -21494,6 +21851,10 @@ var require_TestInterfaces = __commonJS({
     exports2.TypeInfo.WorkItemToTestLinks.fields = {
       executedIn: {
         enumType: exports2.TypeInfo.Service
+      },
+      tests: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.TestMethod
       }
     };
   }
@@ -21717,6 +22078,7 @@ var require_BuildInterfaces = __commonJS({
     (function(StageUpdateType2) {
       StageUpdateType2[StageUpdateType2["Cancel"] = 0] = "Cancel";
       StageUpdateType2[StageUpdateType2["Retry"] = 1] = "Retry";
+      StageUpdateType2[StageUpdateType2["Run"] = 2] = "Run";
     })(StageUpdateType = exports2.StageUpdateType || (exports2.StageUpdateType = {}));
     var SupportLevel;
     (function(SupportLevel2) {
@@ -21732,6 +22094,8 @@ var require_BuildInterfaces = __commonJS({
       TaskResult2[TaskResult2["Canceled"] = 3] = "Canceled";
       TaskResult2[TaskResult2["Skipped"] = 4] = "Skipped";
       TaskResult2[TaskResult2["Abandoned"] = 5] = "Abandoned";
+      TaskResult2[TaskResult2["ManuallyQueued"] = 6] = "ManuallyQueued";
+      TaskResult2[TaskResult2["DependentOnManualQueue"] = 7] = "DependentOnManualQueue";
     })(TaskResult = exports2.TaskResult || (exports2.TaskResult = {}));
     var TimelineRecordState;
     (function(TimelineRecordState2) {
@@ -22034,7 +22398,8 @@ var require_BuildInterfaces = __commonJS({
       StageUpdateType: {
         enumValues: {
           "cancel": 0,
-          "retry": 1
+          "retry": 1,
+          "run": 2
         }
       },
       SupportedTrigger: {},
@@ -22052,7 +22417,9 @@ var require_BuildInterfaces = __commonJS({
           "failed": 2,
           "canceled": 3,
           "skipped": 4,
-          "abandoned": 5
+          "abandoned": 5,
+          "manuallyQueued": 6,
+          "dependentOnManualQueue": 7
         }
       },
       Timeline: {},
@@ -22698,8 +23065,8 @@ var require_BuildApi = __commonJS({
     var basem = require_ClientApiBases();
     var BuildInterfaces = require_BuildInterfaces();
     var BuildApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Build-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Build-api", options);
       }
       /**
        * Associates an artifact with a build.
@@ -25483,7 +25850,7 @@ var require_BuildApi = __commonJS({
               planId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "build", "8baac422-4c6e-4de5-8532-db96d92acffa", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.3", "build", "8baac422-4c6e-4de5-8532-db96d92acffa", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -25787,8 +26154,8 @@ var require_CoreApi = __commonJS({
     var CoreInterfaces = require_CoreInterfaces();
     var OperationsInterfaces = require_OperationsInterfaces();
     var CoreApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Core-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Core-api", options);
       }
       /**
        * Removes the avatar for the project.
@@ -26927,8 +27294,8 @@ var require_DashboardApi = __commonJS({
     var basem = require_ClientApiBases();
     var DashboardInterfaces = require_DashboardInterfaces();
     var DashboardApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Dashboard-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Dashboard-api", options);
       }
       /**
        * Create the supplied dashboard.
@@ -27495,6 +27862,7 @@ var require_GalleryInterfaces = __commonJS({
       ExtensionQueryFlags2[ExtensionQueryFlags2["IncludeLcids"] = 8192] = "IncludeLcids";
       ExtensionQueryFlags2[ExtensionQueryFlags2["IncludeSharedOrganizations"] = 16384] = "IncludeSharedOrganizations";
       ExtensionQueryFlags2[ExtensionQueryFlags2["IncludeNameConflictInfo"] = 32768] = "IncludeNameConflictInfo";
+      ExtensionQueryFlags2[ExtensionQueryFlags2["IncludeLatestPrereleaseAndStableVersionOnly"] = 65536] = "IncludeLatestPrereleaseAndStableVersionOnly";
       ExtensionQueryFlags2[ExtensionQueryFlags2["AllAttributes"] = 16863] = "AllAttributes";
     })(ExtensionQueryFlags = exports2.ExtensionQueryFlags || (exports2.ExtensionQueryFlags = {}));
     var ExtensionStatisticOperation;
@@ -27513,6 +27881,7 @@ var require_GalleryInterfaces = __commonJS({
     (function(ExtensionVersionFlags2) {
       ExtensionVersionFlags2[ExtensionVersionFlags2["None"] = 0] = "None";
       ExtensionVersionFlags2[ExtensionVersionFlags2["Validated"] = 1] = "Validated";
+      ExtensionVersionFlags2[ExtensionVersionFlags2["Prerelease"] = 2] = "Prerelease";
     })(ExtensionVersionFlags = exports2.ExtensionVersionFlags || (exports2.ExtensionVersionFlags = {}));
     var NotificationTemplateType;
     (function(NotificationTemplateType2) {
@@ -27794,6 +28163,7 @@ var require_GalleryInterfaces = __commonJS({
           "includeLcids": 8192,
           "includeSharedOrganizations": 16384,
           "includeNameConflictInfo": 32768,
+          "includeLatestPrereleaseAndStableVersionOnly": 65536,
           "allAttributes": 16863
         }
       },
@@ -27817,7 +28187,8 @@ var require_GalleryInterfaces = __commonJS({
       ExtensionVersionFlags: {
         enumValues: {
           "none": 0,
-          "validated": 1
+          "validated": 1,
+          "prerelease": 2
         }
       },
       NotificationsData: {},
@@ -28440,6 +28811,7 @@ var require_ExtensionManagementInterfaces = __commonJS({
       ExtensionStateFlags2[ExtensionStateFlags2["NeedsReauthorization"] = 128] = "NeedsReauthorization";
       ExtensionStateFlags2[ExtensionStateFlags2["AutoUpgradeError"] = 256] = "AutoUpgradeError";
       ExtensionStateFlags2[ExtensionStateFlags2["Warning"] = 512] = "Warning";
+      ExtensionStateFlags2[ExtensionStateFlags2["Unpublished"] = 1024] = "Unpublished";
     })(ExtensionStateFlags = exports2.ExtensionStateFlags || (exports2.ExtensionStateFlags = {}));
     var ExtensionUpdateType;
     (function(ExtensionUpdateType2) {
@@ -28562,7 +28934,8 @@ var require_ExtensionManagementInterfaces = __commonJS({
           "error": 64,
           "needsReauthorization": 128,
           "autoUpgradeError": 256,
-          "warning": 512
+          "warning": 512,
+          "unpublished": 1024
         }
       },
       ExtensionUpdateType: {
@@ -28798,8 +29171,8 @@ var require_ExtensionManagementApi = __commonJS({
     var ExtensionManagementInterfaces = require_ExtensionManagementInterfaces();
     var GalleryInterfaces = require_GalleryInterfaces();
     var ExtensionManagementApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-ExtensionManagement-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-ExtensionManagement-api", options);
       }
       /**
        * This API is called by acquisition/install page to get possible user actions like Buy/Request
@@ -29155,7 +29528,7 @@ var require_ExtensionManagementApi = __commonJS({
               forceRefresh
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "ExtensionManagement", "92755d3d-9a8a-42b3-8a4d-87359fe5aa93", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "ExtensionManagement", "92755d3d-9a8a-42b3-8a4d-87359fe5aa93", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -29176,7 +29549,7 @@ var require_ExtensionManagementApi = __commonJS({
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {};
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "ExtensionManagement", "046c980f-1345-4ce2-bf85-b46d10ff4cfd", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "ExtensionManagement", "046c980f-1345-4ce2-bf85-b46d10ff4cfd", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -29208,7 +29581,7 @@ var require_ExtensionManagementApi = __commonJS({
               includeInstallationIssues
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "ExtensionManagement", "275424d0-c844-4fe2-bda6-04933a1357d8", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "ExtensionManagement", "275424d0-c844-4fe2-bda6-04933a1357d8", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -29231,7 +29604,7 @@ var require_ExtensionManagementApi = __commonJS({
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {};
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "ExtensionManagement", "275424d0-c844-4fe2-bda6-04933a1357d8", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "ExtensionManagement", "275424d0-c844-4fe2-bda6-04933a1357d8", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -29262,7 +29635,7 @@ var require_ExtensionManagementApi = __commonJS({
               assetTypes: assetTypes && assetTypes.join(":")
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "ExtensionManagement", "fb0da285-f23e-4b56-8b53-3ef5f9f6de66", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "ExtensionManagement", "fb0da285-f23e-4b56-8b53-3ef5f9f6de66", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -29291,7 +29664,7 @@ var require_ExtensionManagementApi = __commonJS({
               version: version2
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "ExtensionManagement", "fb0da285-f23e-4b56-8b53-3ef5f9f6de66", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "ExtensionManagement", "fb0da285-f23e-4b56-8b53-3ef5f9f6de66", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -29324,7 +29697,7 @@ var require_ExtensionManagementApi = __commonJS({
               reasonCode
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "ExtensionManagement", "fb0da285-f23e-4b56-8b53-3ef5f9f6de66", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "ExtensionManagement", "fb0da285-f23e-4b56-8b53-3ef5f9f6de66", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -29598,8 +29971,8 @@ var require_FeatureManagementApi = __commonJS({
     var basem = require_ClientApiBases();
     var FeatureManagementInterfaces = require_FeatureManagementInterfaces();
     var FeatureManagementApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-FeatureManagement-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-FeatureManagement-api", options);
       }
       /**
        * Get a specific feature by its id
@@ -29990,8 +30363,8 @@ var require_FileContainerApiBase = __commonJS({
     var basem = require_ClientApiBases();
     var FileContainerInterfaces = require_FileContainerInterfaces();
     var FileContainerApiBase = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-FileContainer-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-FileContainer-api", options);
       }
       /**
        * Creates the specified items in the referenced container.
@@ -30178,8 +30551,8 @@ var require_FileContainerApi = __commonJS({
     var FileContainerApiBase = require_FileContainerApiBase();
     var FileContainerInterfaces = require_FileContainerInterfaces();
     var FileContainerApi = class extends FileContainerApiBase.FileContainerApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, options, userAgent);
       }
       /**
        * @param {number} containerId
@@ -30540,8 +30913,8 @@ var require_GalleryApi = __commonJS({
     var compatBase = require_GalleryCompatHttpClientBase();
     var GalleryInterfaces = require_GalleryInterfaces();
     var GalleryApi = class extends compatBase.GalleryCompatHttpClientBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Gallery-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Gallery-api", options);
       }
       /**
        * @param {string} extensionId
@@ -31001,29 +31374,6 @@ var require_GalleryApi = __commonJS({
             };
             try {
               let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "gallery", "e905ad6a-3f1f-4d08-9f6d-7d357ff8b7d0", routeValues);
-              let url = verData.requestUrl;
-              let apiVersion = verData.apiVersion;
-              let accept = this.createAcceptHeader("application/octet-stream", apiVersion);
-              resolve((yield this.http.get(url, { "Accept": accept })).message);
-            } catch (err) {
-              reject2(err);
-            }
-          }));
-        });
-      }
-      /**
-       * @param {string} publisherName
-       * @param {string} extensionName
-       */
-      getContentVerificationLog(publisherName, extensionName) {
-        return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
-            let routeValues = {
-              publisherName,
-              extensionName
-            };
-            try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "gallery", "c0f1c7c4-3557-4ffb-b774-1e48c4865e99", routeValues);
               let url = verData.requestUrl;
               let apiVersion = verData.apiVersion;
               let accept = this.createAcceptHeader("application/octet-stream", apiVersion);
@@ -32960,6 +33310,33 @@ var require_GalleryApi = __commonJS({
         });
       }
       /**
+       * Endpoint to get the latest version(s) of a VS Code extension.
+       *
+       * @param {string} publisherName - The name of the publisher of the requested VS Code extension.
+       * @param {string} extensionName - The extension name.
+       */
+      getVSCodeExtensionLatestVersion(publisherName, extensionName) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              publisherName,
+              extensionName
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "gallery", "86037ad5-f601-40fb-b363-6ff262b61521", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, GalleryInterfaces.TypeInfo.PublishedExtension, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
        * @param {string} itemName
        * @param {string} version
        * @param {GalleryInterfaces.VSCodeWebExtensionStatisicsType} statType
@@ -33028,8 +33405,8 @@ var require_GitApi = __commonJS({
     var basem = require_ClientApiBases();
     var GitInterfaces = require_GitInterfaces();
     var GitApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Git-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Git-api", options);
       }
       /**
        * DELETE Deletes Enablement status and BillableCommitters data from DB. Deleting the enablement data will effectively disable it for the repositories affected.
@@ -33555,7 +33932,7 @@ var require_GitApi = __commonJS({
               let url = verData.requestUrl;
               let apiVersion = verData.apiVersion;
               let accept = this.createAcceptHeader("application/zip", apiVersion);
-              resolve((yield this.http.get(url, { "Accept": accept })).message);
+              resolve((yield this.http.post(url, JSON.stringify(blobIds), { "Accept": accept, "Content-Type": "application/json" })).message);
             } catch (err) {
               reject2(err);
             }
@@ -34357,6 +34734,253 @@ var require_GitApi = __commonJS({
               res = yield this.rest.get(url, options);
               let ret = this.formatResponse(res.result, GitInterfaces.TypeInfo.GitForkSyncRequest, true);
               resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get Item Metadata and/or Content for a single item. The download parameter is to indicate whether the content should be available as a download or just sent as a stream in the response. Doesn't apply to zipped content, which is always returned as a download.
+       *
+       * @param {string} repositoryId - The name or ID of the repository.
+       * @param {string} path - The item path.
+       * @param {string} project - Project ID or project name
+       * @param {string} scopePath - The path scope.  The default is null.
+       * @param {GitInterfaces.VersionControlRecursionType} recursionLevel - The recursion level of this request. The default is 'none', no recursion.
+       * @param {boolean} includeContentMetadata - Set to true to include content metadata.  Default is false.
+       * @param {boolean} latestProcessedChange - Set to true to include the latest changes.  Default is false.
+       * @param {boolean} download - Set to true to download the response as a file.  Default is false.
+       * @param {GitInterfaces.GitVersionDescriptor} versionDescriptor - Version descriptor.  Default is the default branch for the repository.
+       * @param {boolean} includeContent - Set to true to include item content when requesting json.  Default is false.
+       * @param {boolean} resolveHfs - Set to true to resolve Git HFS pointer files to return actual content from Git HFS.  Default is true.
+       * @param {boolean} sanitize - Set to true to sanitize an svg file and return it as image. Useful only if requested for svg file. Default is false.
+       */
+      getHfsItem(repositoryId, path2, project, scopePath, recursionLevel, includeContentMetadata, latestProcessedChange, download, versionDescriptor, includeContent, resolveHfs, sanitize) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (path2 == null) {
+            throw new TypeError("path can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              repositoryId
+            };
+            let queryValues = {
+              path: path2,
+              scopePath,
+              recursionLevel,
+              includeContentMetadata,
+              latestProcessedChange,
+              download,
+              versionDescriptor,
+              includeContent,
+              resolveHfs,
+              sanitize
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "17f0a869-1589-43f0-9901-db1b2519087d", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, GitInterfaces.TypeInfo.GitItem, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get Item Metadata and/or Content for a single item. The download parameter is to indicate whether the content should be available as a download or just sent as a stream in the response. Doesn't apply to zipped content, which is always returned as a download.
+       *
+       * @param {string} repositoryId - The name or ID of the repository.
+       * @param {string} path - The item path.
+       * @param {string} project - Project ID or project name
+       * @param {string} scopePath - The path scope.  The default is null.
+       * @param {GitInterfaces.VersionControlRecursionType} recursionLevel - The recursion level of this request. The default is 'none', no recursion.
+       * @param {boolean} includeContentMetadata - Set to true to include content metadata.  Default is false.
+       * @param {boolean} latestProcessedChange - Set to true to include the latest changes.  Default is false.
+       * @param {boolean} download - Set to true to download the response as a file.  Default is false.
+       * @param {GitInterfaces.GitVersionDescriptor} versionDescriptor - Version descriptor.  Default is the default branch for the repository.
+       * @param {boolean} includeContent - Set to true to include item content when requesting json.  Default is false.
+       * @param {boolean} resolveHfs - Set to true to resolve Git HFS pointer files to return actual content from Git HFS.  Default is true.
+       * @param {boolean} sanitize - Set to true to sanitize an svg file and return it as image. Useful only if requested for svg file. Default is false.
+       */
+      getHfsItemContent(repositoryId, path2, project, scopePath, recursionLevel, includeContentMetadata, latestProcessedChange, download, versionDescriptor, includeContent, resolveHfs, sanitize) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (path2 == null) {
+            throw new TypeError("path can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              repositoryId
+            };
+            let queryValues = {
+              path: path2,
+              scopePath,
+              recursionLevel,
+              includeContentMetadata,
+              latestProcessedChange,
+              download,
+              versionDescriptor,
+              includeContent,
+              resolveHfs,
+              sanitize
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "17f0a869-1589-43f0-9901-db1b2519087d", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let apiVersion = verData.apiVersion;
+              let accept = this.createAcceptHeader("application/octet-stream", apiVersion);
+              resolve((yield this.http.get(url, { "Accept": accept })).message);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get Item Metadata and/or Content for a collection of items. The download parameter is to indicate whether the content should be available as a download or just sent as a stream in the response. Doesn't apply to zipped content which is always returned as a download.
+       *
+       * @param {string} repositoryId - The name or ID of the repository.
+       * @param {string} project - Project ID or project name
+       * @param {string} scopePath - The path scope.  The default is null.
+       * @param {GitInterfaces.VersionControlRecursionType} recursionLevel - The recursion level of this request. The default is 'none', no recursion.
+       * @param {boolean} includeContentMetadata - Set to true to include content metadata.  Default is false.
+       * @param {boolean} latestProcessedChange - Set to true to include the latest changes.  Default is false.
+       * @param {boolean} download - Set to true to download the response as a file.  Default is false.
+       * @param {boolean} includeLinks - Set to true to include links to items.  Default is false.
+       * @param {GitInterfaces.GitVersionDescriptor} versionDescriptor - Version descriptor.  Default is the default branch for the repository.
+       * @param {boolean} zipForUnix - Set to true to keep the file permissions for unix (and POSIX) systems like executables and symlinks
+       */
+      getHfsItems(repositoryId, project, scopePath, recursionLevel, includeContentMetadata, latestProcessedChange, download, includeLinks, versionDescriptor, zipForUnix) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              repositoryId
+            };
+            let queryValues = {
+              scopePath,
+              recursionLevel,
+              includeContentMetadata,
+              latestProcessedChange,
+              download,
+              includeLinks,
+              versionDescriptor,
+              zipForUnix
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "17f0a869-1589-43f0-9901-db1b2519087d", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, GitInterfaces.TypeInfo.GitItem, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get Item Metadata and/or Content for a single item. The download parameter is to indicate whether the content should be available as a download or just sent as a stream in the response. Doesn't apply to zipped content, which is always returned as a download.
+       *
+       * @param {string} repositoryId - The name or ID of the repository.
+       * @param {string} path - The item path.
+       * @param {string} project - Project ID or project name
+       * @param {string} scopePath - The path scope.  The default is null.
+       * @param {GitInterfaces.VersionControlRecursionType} recursionLevel - The recursion level of this request. The default is 'none', no recursion.
+       * @param {boolean} includeContentMetadata - Set to true to include content metadata.  Default is false.
+       * @param {boolean} latestProcessedChange - Set to true to include the latest changes.  Default is false.
+       * @param {boolean} download - Set to true to download the response as a file.  Default is false.
+       * @param {GitInterfaces.GitVersionDescriptor} versionDescriptor - Version descriptor.  Default is the default branch for the repository.
+       * @param {boolean} includeContent - Set to true to include item content when requesting json.  Default is false.
+       * @param {boolean} resolveHfs - Set to true to resolve Git HFS pointer files to return actual content from Git HFS.  Default is true.
+       * @param {boolean} sanitize - Set to true to sanitize an svg file and return it as image. Useful only if requested for svg file. Default is false.
+       */
+      getHfsItemText(repositoryId, path2, project, scopePath, recursionLevel, includeContentMetadata, latestProcessedChange, download, versionDescriptor, includeContent, resolveHfs, sanitize) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (path2 == null) {
+            throw new TypeError("path can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              repositoryId
+            };
+            let queryValues = {
+              path: path2,
+              scopePath,
+              recursionLevel,
+              includeContentMetadata,
+              latestProcessedChange,
+              download,
+              versionDescriptor,
+              includeContent,
+              resolveHfs,
+              sanitize
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "17f0a869-1589-43f0-9901-db1b2519087d", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let apiVersion = verData.apiVersion;
+              let accept = this.createAcceptHeader("text/plain", apiVersion);
+              resolve((yield this.http.get(url, { "Accept": accept })).message);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get Item Metadata and/or Content for a single item. The download parameter is to indicate whether the content should be available as a download or just sent as a stream in the response. Doesn't apply to zipped content, which is always returned as a download.
+       *
+       * @param {string} repositoryId - The name or ID of the repository.
+       * @param {string} path - The item path.
+       * @param {string} project - Project ID or project name
+       * @param {string} scopePath - The path scope.  The default is null.
+       * @param {GitInterfaces.VersionControlRecursionType} recursionLevel - The recursion level of this request. The default is 'none', no recursion.
+       * @param {boolean} includeContentMetadata - Set to true to include content metadata.  Default is false.
+       * @param {boolean} latestProcessedChange - Set to true to include the latest changes.  Default is false.
+       * @param {boolean} download - Set to true to download the response as a file.  Default is false.
+       * @param {GitInterfaces.GitVersionDescriptor} versionDescriptor - Version descriptor.  Default is the default branch for the repository.
+       * @param {boolean} includeContent - Set to true to include item content when requesting json.  Default is false.
+       * @param {boolean} resolveHfs - Set to true to resolve Git HFS pointer files to return actual content from Git HFS.  Default is true.
+       * @param {boolean} sanitize - Set to true to sanitize an svg file and return it as image. Useful only if requested for svg file. Default is false.
+       */
+      getHfsItemZip(repositoryId, path2, project, scopePath, recursionLevel, includeContentMetadata, latestProcessedChange, download, versionDescriptor, includeContent, resolveHfs, sanitize) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (path2 == null) {
+            throw new TypeError("path can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              repositoryId
+            };
+            let queryValues = {
+              path: path2,
+              scopePath,
+              recursionLevel,
+              includeContentMetadata,
+              latestProcessedChange,
+              download,
+              versionDescriptor,
+              includeContent,
+              resolveHfs,
+              sanitize
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "17f0a869-1589-43f0-9901-db1b2519087d", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let apiVersion = verData.apiVersion;
+              let accept = this.createAcceptHeader("application/zip", apiVersion);
+              resolve((yield this.http.get(url, { "Accept": accept })).message);
             } catch (err) {
               reject2(err);
             }
@@ -37215,7 +37839,7 @@ var require_GitApi = __commonJS({
               sourceRef
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -37242,7 +37866,7 @@ var require_GitApi = __commonJS({
               repositoryId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -37275,7 +37899,7 @@ var require_GitApi = __commonJS({
               includeHidden
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -37302,7 +37926,7 @@ var require_GitApi = __commonJS({
               repositoryId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -37336,7 +37960,7 @@ var require_GitApi = __commonJS({
               includeParent
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -37364,12 +37988,51 @@ var require_GitApi = __commonJS({
               repositoryId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "git", "225f7195-f9c7-4d14-ab28-a83f7ff77e1f", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
               res = yield this.rest.update(url, newRepositoryInfo, options);
               let ret = this.formatResponse(res.result, GitInterfaces.TypeInfo.GitRepository, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Retrieve git repositories with filter by name and pagination.
+       *
+       * @param {string} projectId - ID or name of the team project.
+       * @param {boolean} includeLinks - [optional] True to include reference links. The default value is false.
+       * @param {boolean} includeAllUrls - [optional] True to include all remote URLs. The default value is false.
+       * @param {boolean} includeHidden - [optional] True to include hidden repositories. The default value is false.
+       * @param {string} filterContains - [optional] A filter to apply to the refs (contains).
+       * @param {number} top - [optional] Maximum number of repositories to return. It cannot be bigger than 500. If it is not provided but continuationToken is, top will default to 100.
+       * @param {string} continuationToken - The continuation token used for pagination.
+       */
+      getRepositoriesPaged(projectId, includeLinks, includeAllUrls, includeHidden, filterContains, top, continuationToken) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              projectId
+            };
+            let queryValues = {
+              includeLinks,
+              includeAllUrls,
+              includeHidden,
+              filterContains,
+              "$top": top,
+              continuationToken
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "git", "82aea7e8-9501-45dd-ac58-b069aa73b926", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, GitInterfaces.TypeInfo.GitRepository, true);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -37783,7 +38446,7 @@ var require_VSSInterfaces = __commonJS({
   "../node_modules/azure-devops-node-api/interfaces/common/VSSInterfaces.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.TypeInfo = exports2.UserProfileSyncState = exports2.UserProfileBackupState = exports2.Operation = exports2.JWTAlgorithm = exports2.DeploymentFlags = exports2.ConnectOptions = void 0;
+    exports2.TypeInfo = exports2.Operation = exports2.JWTAlgorithm = exports2.DeploymentFlags = exports2.ConnectOptions = void 0;
     var ConnectOptions;
     (function(ConnectOptions2) {
       ConnectOptions2[ConnectOptions2["None"] = 0] = "None";
@@ -37813,21 +38476,6 @@ var require_VSSInterfaces = __commonJS({
       Operation2[Operation2["Copy"] = 4] = "Copy";
       Operation2[Operation2["Test"] = 5] = "Test";
     })(Operation = exports2.Operation || (exports2.Operation = {}));
-    var UserProfileBackupState;
-    (function(UserProfileBackupState2) {
-      UserProfileBackupState2[UserProfileBackupState2["Inactive"] = 0] = "Inactive";
-      UserProfileBackupState2[UserProfileBackupState2["Active"] = 1] = "Active";
-    })(UserProfileBackupState = exports2.UserProfileBackupState || (exports2.UserProfileBackupState = {}));
-    var UserProfileSyncState;
-    (function(UserProfileSyncState2) {
-      UserProfileSyncState2[UserProfileSyncState2["None"] = 0] = "None";
-      UserProfileSyncState2[UserProfileSyncState2["Completed"] = 1] = "Completed";
-      UserProfileSyncState2[UserProfileSyncState2["NewProfileDataAndImageRetrieved"] = 2] = "NewProfileDataAndImageRetrieved";
-      UserProfileSyncState2[UserProfileSyncState2["ProfileDataBackupDone"] = 3] = "ProfileDataBackupDone";
-      UserProfileSyncState2[UserProfileSyncState2["NewProfileDataSet"] = 4] = "NewProfileDataSet";
-      UserProfileSyncState2[UserProfileSyncState2["NewProfileDataUpdateFailed"] = 5] = "NewProfileDataUpdateFailed";
-      UserProfileSyncState2[UserProfileSyncState2["NewProfileImageUpdateFailed"] = 6] = "NewProfileImageUpdateFailed";
-    })(UserProfileSyncState = exports2.UserProfileSyncState || (exports2.UserProfileSyncState = {}));
     exports2.TypeInfo = {
       ConnectOptions: {
         enumValues: {
@@ -37865,23 +38513,6 @@ var require_VSSInterfaces = __commonJS({
       },
       SignedUrl: {},
       TraceFilter: {},
-      UserProfileBackupState: {
-        enumValues: {
-          "inactive": 0,
-          "active": 1
-        }
-      },
-      UserProfileSyncState: {
-        enumValues: {
-          "none": 0,
-          "completed": 1,
-          "newProfileDataAndImageRetrieved": 2,
-          "profileDataBackupDone": 3,
-          "newProfileDataSet": 4,
-          "newProfileDataUpdateFailed": 5,
-          "newProfileImageUpdateFailed": 6
-        }
-      },
       VssNotificationEvent: {}
     };
     exports2.TypeInfo.JsonPatchOperation.fields = {
@@ -38029,8 +38660,8 @@ var require_LocationsApi = __commonJS({
     var basem = require_ClientApiBases();
     var LocationsInterfaces = require_LocationsInterfaces();
     var LocationsApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Locations-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Locations-api", options);
       }
       /**
        * This was copied and adapted from TeamFoundationConnectionService.Connect()
@@ -38066,8 +38697,9 @@ var require_LocationsApi = __commonJS({
        * @param {string} areaId
        * @param {string} enterpriseName
        * @param {string} organizationName
+       * @param {string} accessMapping
        */
-      getResourceArea(areaId, enterpriseName, organizationName) {
+      getResourceArea(areaId, enterpriseName, organizationName, accessMapping) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
@@ -38075,7 +38707,8 @@ var require_LocationsApi = __commonJS({
             };
             let queryValues = {
               enterpriseName,
-              organizationName
+              organizationName,
+              accessMapping
             };
             try {
               let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Location", "e81700f7-3be2-46de-8624-2eb35882fcaa", routeValues, queryValues);
@@ -38094,8 +38727,9 @@ var require_LocationsApi = __commonJS({
       /**
        * @param {string} areaId
        * @param {string} hostId
+       * @param {string} accessMapping
        */
-      getResourceAreaByHost(areaId, hostId) {
+      getResourceAreaByHost(areaId, hostId, accessMapping) {
         return __awaiter2(this, void 0, void 0, function* () {
           if (hostId == null) {
             throw new TypeError("hostId can not be null or undefined");
@@ -38105,7 +38739,43 @@ var require_LocationsApi = __commonJS({
               areaId
             };
             let queryValues = {
-              hostId
+              hostId,
+              accessMapping
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Location", "e81700f7-3be2-46de-8624-2eb35882fcaa", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * @param {string} areaId
+       * @param {string} instanceId
+       * @param {string} accessMapping
+       */
+      getResourceAreaByInstanceId(areaId, instanceId, accessMapping) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (instanceId == null) {
+            throw new TypeError("instanceId can not be null or undefined");
+          }
+          if (accessMapping == null) {
+            throw new TypeError("accessMapping can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              areaId
+            };
+            let queryValues = {
+              instanceId,
+              accessMapping
             };
             try {
               let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Location", "e81700f7-3be2-46de-8624-2eb35882fcaa", routeValues, queryValues);
@@ -38286,26 +38956,32 @@ var require_ManagementInterfaces = __commonJS({
   "../node_modules/azure-devops-node-api/interfaces/ManagementInterfaces.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.TypeInfo = exports2.BillingMode = void 0;
-    var BillingMode;
-    (function(BillingMode2) {
-      BillingMode2[BillingMode2["None"] = 0] = "None";
-      BillingMode2[BillingMode2["SingleOrg"] = 1] = "SingleOrg";
-      BillingMode2[BillingMode2["MultiOrg"] = 2] = "MultiOrg";
-    })(BillingMode = exports2.BillingMode || (exports2.BillingMode = {}));
+    exports2.TypeInfo = exports2.Plan = void 0;
+    var Plan;
+    (function(Plan2) {
+      Plan2[Plan2["None"] = 0] = "None";
+      Plan2[Plan2["CodeSecurity"] = 1] = "CodeSecurity";
+      Plan2[Plan2["SecretProtection"] = 2] = "SecretProtection";
+      Plan2[Plan2["All"] = 3] = "All";
+    })(Plan = exports2.Plan || (exports2.Plan = {}));
     exports2.TypeInfo = {
       AdvSecEnablementSettings: {},
       AdvSecEnablementStatus: {},
       BillableCommitterDetails: {},
-      BillingInfo: {},
-      BillingMode: {
+      CodeSecurityFeatures: {},
+      MeterUsage: {},
+      MeterUsageForPlan: {},
+      OrgEnablementSettings: {},
+      Plan: {
         enumValues: {
-          "none": 0,
-          "singleOrg": 1,
-          "multiOrg": 2
+          "codeSecurity": 1,
+          "secretProtection": 2,
+          "all": 3
         }
       },
-      MeterUsage: {}
+      ProjectEnablementSettings: {},
+      RepoEnablementSettings: {},
+      SecretProtectionFeatures: {}
     };
     exports2.TypeInfo.AdvSecEnablementSettings.fields = {
       reposEnablementStatus: {
@@ -38326,19 +39002,55 @@ var require_ManagementInterfaces = __commonJS({
         isDate: true
       }
     };
-    exports2.TypeInfo.BillingInfo.fields = {
-      advSecEnabledChangedOnDate: {
+    exports2.TypeInfo.CodeSecurityFeatures.fields = {
+      codeSecurityEnablementLastChangedDate: {
         isDate: true
-      },
-      advSecEnabledFirstChangedOnDate: {
-        isDate: true
-      },
-      billingMode: {
-        enumType: exports2.TypeInfo.BillingMode
       }
     };
     exports2.TypeInfo.MeterUsage.fields = {
       billingDate: {
+        isDate: true
+      }
+    };
+    exports2.TypeInfo.MeterUsageForPlan.fields = {
+      billingDate: {
+        isDate: true
+      }
+    };
+    exports2.TypeInfo.OrgEnablementSettings.fields = {
+      codeSecurityFeatures: {
+        typeInfo: exports2.TypeInfo.CodeSecurityFeatures
+      },
+      reposEnablementStatus: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.RepoEnablementSettings
+      },
+      secretProtectionFeatures: {
+        typeInfo: exports2.TypeInfo.SecretProtectionFeatures
+      }
+    };
+    exports2.TypeInfo.ProjectEnablementSettings.fields = {
+      codeSecurityFeatures: {
+        typeInfo: exports2.TypeInfo.CodeSecurityFeatures
+      },
+      reposEnablementStatus: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.RepoEnablementSettings
+      },
+      secretProtectionFeatures: {
+        typeInfo: exports2.TypeInfo.SecretProtectionFeatures
+      }
+    };
+    exports2.TypeInfo.RepoEnablementSettings.fields = {
+      codeSecurityFeatures: {
+        typeInfo: exports2.TypeInfo.CodeSecurityFeatures
+      },
+      secretProtectionFeatures: {
+        typeInfo: exports2.TypeInfo.SecretProtectionFeatures
+      }
+    };
+    exports2.TypeInfo.SecretProtectionFeatures.fields = {
+      secretProtectionEnablementLastChangedDate: {
         isDate: true
       }
     };
@@ -38381,80 +39093,33 @@ var require_ManagementApi = __commonJS({
     var basem = require_ClientApiBases();
     var ManagementInterfaces = require_ManagementInterfaces();
     var ManagementApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Management-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Management-api", options);
       }
       /**
-       * Delete the billing info for an organization.
+       * Determines if Code Security, Secret Protection, and their features are enabled for the repository.
        *
-       * @param {string} organizationId
+       * @param {string} project - Project ID or project name
+       * @param {string} repository - The name or ID of the repository
+       * @param {boolean} includeAllProperties - When true, will also determine if pushes are blocked when secrets are detected
        */
-      deleteBillingInfo(organizationId) {
+      getRepoEnablementStatus2(project, repository, includeAllProperties) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
-              action: "Default",
-              organizationId
+              project,
+              repository
+            };
+            let queryValues = {
+              includeAllProperties
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "de45fbc6-60fd-46e2-95ef-490ad08d656a", routeValues);
-              let url = verData.requestUrl;
-              let options = this.createRequestOptions("application/json", verData.apiVersion);
-              let res;
-              res = yield this.rest.del(url, options);
-              let ret = this.formatResponse(res.result, null, false);
-              resolve(ret);
-            } catch (err) {
-              reject2(err);
-            }
-          }));
-        });
-      }
-      /**
-       * Delete the meter usage history from Primary SU for an organization.
-       *
-       * @param {string} organizationId
-       */
-      deleteMeterUsageHistory(organizationId) {
-        return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
-            let routeValues = {
-              action: "MeterUsageHistory",
-              organizationId
-            };
-            try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "de45fbc6-60fd-46e2-95ef-490ad08d656a", routeValues);
-              let url = verData.requestUrl;
-              let options = this.createRequestOptions("application/json", verData.apiVersion);
-              let res;
-              res = yield this.rest.del(url, options);
-              let ret = this.formatResponse(res.result, null, false);
-              resolve(ret);
-            } catch (err) {
-              reject2(err);
-            }
-          }));
-        });
-      }
-      /**
-       * Get the billing info for an organization.
-       *
-       * @param {string} organizationId - Organization ID to get billing info for.
-       */
-      getBillingInfo(organizationId) {
-        return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
-            let routeValues = {
-              action: "Default",
-              organizationId
-            };
-            try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "de45fbc6-60fd-46e2-95ef-490ad08d656a", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "1fcb5ea0-1e19-4c71-ab26-0784bce2d551", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
               res = yield this.rest.get(url, options);
-              let ret = this.formatResponse(res.result, ManagementInterfaces.TypeInfo.BillingInfo, false);
+              let ret = this.formatResponse(res.result, ManagementInterfaces.TypeInfo.RepoEnablementSettings, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -38463,24 +39128,25 @@ var require_ManagementApi = __commonJS({
         });
       }
       /**
-       * Save the billing info for an organization.
+       * Update the enablement status of Code Security and Secret Protection, along with their respective features, for a given repository.
        *
-       * @param {ManagementInterfaces.BillingInfo} billingInfo
-       * @param {string} organizationId
+       * @param {ManagementInterfaces.RepoEnablementSettings} savedAdvSecEnablementStatus - new status
+       * @param {string} project - Project ID or project name
+       * @param {string} repository - Name or ID of the repository
        */
-      saveBillingInfo(billingInfo, organizationId) {
+      updateRepoAdvSecEnablementStatus2(savedAdvSecEnablementStatus, project, repository) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
-              action: "Default",
-              organizationId
+              project,
+              repository
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "de45fbc6-60fd-46e2-95ef-490ad08d656a", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "1fcb5ea0-1e19-4c71-ab26-0784bce2d551", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
-              res = yield this.rest.create(url, billingInfo, options);
+              res = yield this.rest.update(url, savedAdvSecEnablementStatus, options);
               let ret = this.formatResponse(res.result, null, false);
               resolve(ret);
             } catch (err) {
@@ -38593,6 +39259,133 @@ var require_ManagementApi = __commonJS({
         });
       }
       /**
+       * During multi-org billing computation in primary scale unit(EUS21), this API is used to create billing snapshot for a specific org. Primary scale unit will call this API for each org in different scsle units to create billing snapshot. Data will be stored in the org specific partition DB -> billing snapshot table. This is needed as customers will fetch billing data from their org specific partition DB.
+       *
+       * @param {ManagementInterfaces.MeterUsageForPlan} meterUsage
+       * @param {ManagementInterfaces.Plan} plan
+       */
+      createBillingSnapshot2(meterUsage, plan) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (plan == null) {
+            throw new TypeError("plan can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Default"
+            };
+            let queryValues = {
+              plan
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "9615bfcf-d592-4664-9059-4be0150ff16d", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.create(url, meterUsage, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get all billable committers details, including those not matched with a VSID.
+       *
+       * @param {ManagementInterfaces.Plan} plan - The plan to query. Plans supported: CodeSecurity and SecretProtection. This is a mandatory parameter.
+       * @param {Date} billingDate - The date to query, or if not provided, today
+       */
+      getBillableCommitterDetails2(plan, billingDate) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (plan == null) {
+            throw new TypeError("plan can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Details"
+            };
+            let queryValues = {
+              plan,
+              billingDate
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "9615bfcf-d592-4664-9059-4be0150ff16d", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, ManagementInterfaces.TypeInfo.BillableCommitterDetails, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * @param {ManagementInterfaces.Plan} plan
+       */
+      getLastMeterUsage2(plan) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (plan == null) {
+            throw new TypeError("plan can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Last"
+            };
+            let queryValues = {
+              plan
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "9615bfcf-d592-4664-9059-4be0150ff16d", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, ManagementInterfaces.TypeInfo.MeterUsageForPlan, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get commiters used when calculating billing information.
+       *
+       * @param {ManagementInterfaces.Plan} plan - The plan to query. Plans supported: CodeSecurity and SecretProtection. This is a mandatory parameter.
+       * @param {Date} billingDate - The date to query, or if not provided, today
+       */
+      getMeterUsage2(plan, billingDate) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (plan == null) {
+            throw new TypeError("plan can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Default"
+            };
+            let queryValues = {
+              plan,
+              billingDate
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "9615bfcf-d592-4664-9059-4be0150ff16d", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, ManagementInterfaces.TypeInfo.MeterUsageForPlan, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
        * Get the current status of Advanced Security for the organization
        *
        * @param {boolean} includeAllProperties - When true, also determine if pushes are blocked if they contain secrets
@@ -38642,13 +39435,64 @@ var require_ManagementApi = __commonJS({
         });
       }
       /**
-       * Estimate the committers that would be added to the customer's usage if Advanced Security was enabled for this organization.
+       * Get the current status of Advanced Security for the organization
        *
+       * @param {boolean} includeAllProperties - When true, also determine if pushes are blocked if they contain secrets
        */
-      getEstimatedOrgBillablePushers() {
+      getOrgEnablementStatus2(includeAllProperties) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {};
+            let queryValues = {
+              includeAllProperties
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "41d7fd8d-71f1-485f-b48d-f68eb7f04a6b", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, ManagementInterfaces.TypeInfo.OrgEnablementSettings, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Update the status of Advanced Security for the organization
+       *
+       * @param {ManagementInterfaces.OrgEnablementSettings} orgEnablementSettings - The new status
+       */
+      updateOrgEnablementStatus2(orgEnablementSettings) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {};
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "41d7fd8d-71f1-485f-b48d-f68eb7f04a6b", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.update(url, orgEnablementSettings, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Estimate the pushers that would be added to the customer's usage if Advanced Security was enabled for this organization.
+       *
+       */
+      getEstimatedBillablePushersDetailsForOrg() {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Details"
+            };
             try {
               let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "10a9e9c3-89bf-4312-92ed-139ddbcd2e28", routeValues);
               let url = verData.requestUrl;
@@ -38656,6 +39500,61 @@ var require_ManagementApi = __commonJS({
               let res;
               res = yield this.rest.get(url, options);
               let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Estimate the committers that would be added to the customer's usage if Advanced Security was enabled for this organization.
+       *
+       */
+      getEstimatedOrgBillablePushers() {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Default"
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "10a9e9c3-89bf-4312-92ed-139ddbcd2e28", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Estimate the pushers that would be added to the customer's usage if Advanced Security was enabled for this organization.
+       *
+       * @param {ManagementInterfaces.Plan} plan - The plan to query.
+       */
+      getEstimatedBillablePushersDetailsForOrg2(plan) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (plan == null) {
+            throw new TypeError("plan can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Default"
+            };
+            let queryValues = {
+              plan
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "3fae4c8a-0597-45be-bf45-2925fe8036b3", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -38719,14 +39618,70 @@ var require_ManagementApi = __commonJS({
         });
       }
       /**
-       * Estimate the number of committers that would be added to the customer's usage if Advanced Security was enabled for this project.
+       * Get the current status of Advanced Security for a project
        *
        * @param {string} project - Project ID or project name
+       * @param {boolean} includeAllProperties - When true, also determine if pushes are blocked if they contain secrets
        */
-      getEstimatedProjectBillablePushers(project) {
+      getProjectEnablementStatus2(project, includeAllProperties) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
+              project
+            };
+            let queryValues = {
+              includeAllProperties
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "534d98d2-d5a0-4bf4-94b3-1328019302f8", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, ManagementInterfaces.TypeInfo.ProjectEnablementSettings, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Update the status of Advanced Security for the project
+       *
+       * @param {ManagementInterfaces.ProjectEnablementSettings} projectEnablementSettings - The new status
+       * @param {string} project - Project ID or project name
+       */
+      updateProjectEnablementStatus2(projectEnablementSettings, project) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "534d98d2-d5a0-4bf4-94b3-1328019302f8", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.update(url, projectEnablementSettings, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Estimate the pushers that would be added to the customer's usage if Advanced Security was enabled for this project.
+       *
+       * @param {string} project - Project ID or project name
+       */
+      getEstimatedBillablePushersDetailsForProject(project) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Details",
               project
             };
             try {
@@ -38736,6 +39691,62 @@ var require_ManagementApi = __commonJS({
               let res;
               res = yield this.rest.get(url, options);
               let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Estimate the number of committers that would be added to the customer's usage if Advanced Security was enabled for this project.
+       *
+       * @param {string} project - Project ID or project name
+       */
+      getEstimatedBillablePushersForProject(project) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Default",
+              project
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "bf09cb40-ecf4-4496-8cf7-9ec60c64fd3e", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Estimate the pushers that would be added to the customer's usage if Advanced Security was enabled for this project.
+       *
+       * @param {string} project - Project ID or project name
+       * @param {ManagementInterfaces.Plan} plan
+       */
+      getEstimatedBillablePushersDetailsForProject2(project, plan) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Default",
+              project
+            };
+            let queryValues = {
+              plan
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "ffd0d73d-54b4-4f56-9d83-e8b08db8bfcf", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -38806,12 +39817,13 @@ var require_ManagementApi = __commonJS({
        * Estimate the committers that would be added to the customer's usage if Advanced Security was enabled for this repository.
        *
        * @param {string} project - Project ID or project name
-       * @param {string} repository - The name or ID of the repository
+       * @param {string} repository
        */
-      getEstimatedRepoBillableCommitters(project, repository) {
+      getEstimatedBillableCommitersDetailsForRepo(project, repository) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
+              action: "Details",
               project,
               repository
             };
@@ -38822,6 +39834,66 @@ var require_ManagementApi = __commonJS({
               let res;
               res = yield this.rest.get(url, options);
               let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Estimate the committers that would be added to the customer's usage if Advanced Security was enabled for this repository.
+       *
+       * @param {string} project - Project ID or project name
+       * @param {string} repository - The name or ID of the repository
+       */
+      getEstimatedBillableCommittersForRepo(project, repository) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Default",
+              project,
+              repository
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "b60f1ebf-ae77-4557-bd7f-ae3d5598dd1f", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Estimate the pushers that would be added to the customer's usage if Advanced Security was enabled for this repository.
+       *
+       * @param {string} project - Project ID or project name
+       * @param {string} repository - The name or ID of the repository
+       * @param {ManagementInterfaces.Plan} plan - The plan to query.
+       */
+      getEstimatedRepoBillableCommittersDetails2(project, repository, plan) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              action: "Default",
+              project,
+              repository
+            };
+            let queryValues = {
+              plan
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Management", "1a7b7e0d-e0b6-48b4-b0b6-9b6c2a1984e3", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -39543,8 +40615,8 @@ var require_NotificationApi = __commonJS({
     var NotificationInterfaces = require_NotificationInterfaces();
     var VSSInterfaces = require_VSSInterfaces();
     var NotificationApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Notification-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Notification-api", options);
       }
       /**
        * @param {NotificationInterfaces.BatchNotificationOperation} operation
@@ -40181,8 +41253,8 @@ var require_PolicyApi = __commonJS({
     var basem = require_ClientApiBases();
     var PolicyInterfaces = require_PolicyInterfaces();
     var PolicyApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Policy-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Policy-api", options);
       }
       /**
        * Create a policy configuration of a given policy type.
@@ -40686,8 +41758,8 @@ var require_ProfileApi = __commonJS({
     var basem = require_ClientApiBases();
     var ProfileInterfaces = require_ProfileInterfaces();
     var ProfileApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Profile-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Profile-api", options);
       }
       /**
       * @param {string} id
@@ -41252,8 +42324,8 @@ var require_ProjectAnalysisApi = __commonJS({
     var basem = require_ClientApiBases();
     var ProjectAnalysisInterfaces = require_ProjectAnalysisInterfaces();
     var ProjectAnalysisApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-ProjectAnalysis-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-ProjectAnalysis-api", options);
       }
       /**
        * @param {string} project - Project ID or project name
@@ -41538,7 +42610,7 @@ var require_ReleaseInterfaces = __commonJS({
   "../node_modules/azure-devops-node-api/interfaces/ReleaseInterfaces.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.TypeInfo = exports2.YamlFileSourceTypes = exports2.VariableGroupActionFilter = exports2.TaskStatus = exports2.SingleReleaseExpands = exports2.SenderType = exports2.ScheduleDays = exports2.ReleaseTriggerType = exports2.ReleaseStatus = exports2.ReleaseReason = exports2.ReleaseQueryOrder = exports2.ReleaseExpands = exports2.ReleaseEnvironmentExpands = exports2.ReleaseDefinitionSource = exports2.ReleaseDefinitionQueryOrder = exports2.ReleaseDefinitionExpands = exports2.PullRequestSystemType = exports2.PropertySelectorType = exports2.PipelineProcessTypes = exports2.ParallelExecutionTypes = exports2.ManualInterventionStatus = exports2.MailSectionType = exports2.IssueSource = exports2.GateStatus = exports2.FolderPathQueryOrder = exports2.EnvironmentTriggerType = exports2.EnvironmentStatus = exports2.DeployPhaseTypes = exports2.DeployPhaseStatus = exports2.DeploymentStatus = exports2.DeploymentsQueryType = exports2.DeploymentReason = exports2.DeploymentOperationStatus = exports2.DeploymentExpands = exports2.DeploymentAuthorizationOwner = exports2.ConditionType = exports2.AuthorizationHeaderFor = exports2.AuditAction = exports2.ApprovalType = exports2.ApprovalStatus = exports2.ApprovalFilters = exports2.ApprovalExecutionOrder = exports2.AgentArtifactType = void 0;
+    exports2.TypeInfo = exports2.YamlFileSourceTypes = exports2.VariableGroupActionFilter = exports2.TaskStatus = exports2.SingleReleaseExpands = exports2.SenderType = exports2.ScheduleDays = exports2.ReleaseTriggerType = exports2.ReleaseStatus = exports2.ReleaseReason = exports2.ReleaseQueryOrder = exports2.ReleaseExpands = exports2.ReleaseEnvironmentExpands = exports2.ReleaseDefinitionSource = exports2.ReleaseDefinitionQueryOrder = exports2.ReleaseDefinitionExpands = exports2.PullRequestSystemType = exports2.PropertySelectorType = exports2.PipelineProcessTypes = exports2.ParallelExecutionTypes = exports2.ManualInterventionType = exports2.ManualInterventionStatus = exports2.MailSectionType = exports2.IssueSource = exports2.GateStatus = exports2.FolderPathQueryOrder = exports2.EnvironmentTriggerType = exports2.EnvironmentStatus = exports2.DeployPhaseTypes = exports2.DeployPhaseStatus = exports2.DeploymentStatus = exports2.DeploymentsQueryType = exports2.DeploymentReason = exports2.DeploymentOperationStatus = exports2.DeploymentExpands = exports2.DeploymentAuthorizationOwner = exports2.ConditionType = exports2.AuthorizationHeaderFor = exports2.AuditAction = exports2.ApprovalType = exports2.ApprovalStatus = exports2.ApprovalFilters = exports2.ApprovalExecutionOrder = exports2.AgentArtifactType = void 0;
     var FormInputInterfaces = require_FormInputInterfaces();
     var AgentArtifactType;
     (function(AgentArtifactType2) {
@@ -41738,7 +42810,13 @@ var require_ReleaseInterfaces = __commonJS({
       ManualInterventionStatus2[ManualInterventionStatus2["Rejected"] = 2] = "Rejected";
       ManualInterventionStatus2[ManualInterventionStatus2["Approved"] = 4] = "Approved";
       ManualInterventionStatus2[ManualInterventionStatus2["Canceled"] = 8] = "Canceled";
+      ManualInterventionStatus2[ManualInterventionStatus2["Bypassed"] = 16] = "Bypassed";
     })(ManualInterventionStatus = exports2.ManualInterventionStatus || (exports2.ManualInterventionStatus = {}));
+    var ManualInterventionType;
+    (function(ManualInterventionType2) {
+      ManualInterventionType2[ManualInterventionType2["Task"] = 1] = "Task";
+      ManualInterventionType2[ManualInterventionType2["ProofOfPresence"] = 2] = "ProofOfPresence";
+    })(ManualInterventionType = exports2.ManualInterventionType || (exports2.ManualInterventionType = {}));
     var ParallelExecutionTypes;
     (function(ParallelExecutionTypes2) {
       ParallelExecutionTypes2[ParallelExecutionTypes2["None"] = 0] = "None";
@@ -42135,7 +43213,14 @@ var require_ReleaseInterfaces = __commonJS({
           "pending": 1,
           "rejected": 2,
           "approved": 4,
-          "canceled": 8
+          "canceled": 8,
+          "bypassed": 16
+        }
+      },
+      ManualInterventionType: {
+        enumValues: {
+          "task": 1,
+          "proofOfPresence": 2
         }
       },
       ManualInterventionUpdateMetadata: {},
@@ -42687,6 +43772,9 @@ var require_ReleaseInterfaces = __commonJS({
       },
       status: {
         enumType: exports2.TypeInfo.ManualInterventionStatus
+      },
+      type: {
+        enumType: exports2.TypeInfo.ManualInterventionType
       }
     };
     exports2.TypeInfo.ManualInterventionUpdateMetadata.fields = {
@@ -43224,8 +44312,8 @@ var require_ReleaseApi = __commonJS({
     var basem = require_ClientApiBases();
     var ReleaseInterfaces = require_ReleaseInterfaces();
     var ReleaseApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Release-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Release-api", options);
       }
       /**
        * Returns the artifact details that automation agent requires
@@ -43751,8 +44839,9 @@ var require_ReleaseApi = __commonJS({
        * @param {string} project - Project ID or project name
        * @param {number} definitionId - Id of the release definition.
        * @param {string[]} propertyFilters - A comma-delimited list of extended properties to be retrieved. If set, the returned Release Definition will contain values for the specified property Ids (if they exist). If not set, properties will not be included.
+       * @param {boolean} includeDisabled - Boolean flag to include disabled definitions.
        */
-      getReleaseDefinition(project, definitionId, propertyFilters) {
+      getReleaseDefinition(project, definitionId, propertyFilters, includeDisabled) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
@@ -43760,7 +44849,8 @@ var require_ReleaseApi = __commonJS({
               definitionId
             };
             let queryValues = {
-              propertyFilters: propertyFilters && propertyFilters.join(",")
+              propertyFilters: propertyFilters && propertyFilters.join(","),
+              includeDisabled
             };
             try {
               let verData = yield this.vsoClient.getVersioningData("7.2-preview.4", "Release", "d8f96f24-8ea7-4cb6-baab-2df8fc515665", routeValues, queryValues);
@@ -43896,15 +44986,19 @@ var require_ReleaseApi = __commonJS({
        *
        * @param {ReleaseInterfaces.ReleaseDefinition} releaseDefinition - Release definition object to update.
        * @param {string} project - Project ID or project name
+       * @param {boolean} skipTasksValidation - Skip task validation boolean flag
        */
-      updateReleaseDefinition(releaseDefinition, project) {
+      updateReleaseDefinition(releaseDefinition, project, skipTasksValidation) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
               project
             };
+            let queryValues = {
+              skipTasksValidation
+            };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.4", "Release", "d8f96f24-8ea7-4cb6-baab-2df8fc515665", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.4", "Release", "d8f96f24-8ea7-4cb6-baab-2df8fc515665", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -43926,7 +45020,7 @@ var require_ReleaseApi = __commonJS({
        * @param {string} createdBy - List the deployments for which deployments are created as identity specified.
        * @param {Date} minModifiedTime - List the deployments with LastModified time >= minModifiedTime.
        * @param {Date} maxModifiedTime - List the deployments with LastModified time <= maxModifiedTime.
-       * @param {ReleaseInterfaces.DeploymentStatus} deploymentStatus - List the deployments with given deployment status. Defult is 'All'.
+       * @param {ReleaseInterfaces.DeploymentStatus} deploymentStatus - List the deployments with given deployment status. Default is 'All'.
        * @param {ReleaseInterfaces.DeploymentOperationStatus} operationStatus - List the deployments with given operation status. Default is 'All'.
        * @param {boolean} latestAttemptsOnly - 'true' to include deployments with latest attempt only. Default is 'false'.
        * @param {ReleaseInterfaces.ReleaseQueryOrder} queryOrder - List the deployments with given query order. Default is 'Descending'.
@@ -44018,7 +45112,7 @@ var require_ReleaseApi = __commonJS({
               "$expand": expand
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.7", "Release", "a7e426b1-03dc-48af-9dfe-c98bac612dcb", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a7e426b1-03dc-48af-9dfe-c98bac612dcb", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -44048,7 +45142,7 @@ var require_ReleaseApi = __commonJS({
               environmentId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.7", "Release", "a7e426b1-03dc-48af-9dfe-c98bac612dcb", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a7e426b1-03dc-48af-9dfe-c98bac612dcb", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -44727,7 +45821,7 @@ var require_ReleaseApi = __commonJS({
               manualInterventionId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Release", "616c46e4-f370-4456-adaa-fbaf79c7b79e", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "Release", "616c46e4-f370-4456-adaa-fbaf79c7b79e", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -44754,7 +45848,7 @@ var require_ReleaseApi = __commonJS({
               releaseId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Release", "616c46e4-f370-4456-adaa-fbaf79c7b79e", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "Release", "616c46e4-f370-4456-adaa-fbaf79c7b79e", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -44784,7 +45878,7 @@ var require_ReleaseApi = __commonJS({
               manualInterventionId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "Release", "616c46e4-f370-4456-adaa-fbaf79c7b79e", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "Release", "616c46e4-f370-4456-adaa-fbaf79c7b79e", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -44971,7 +46065,7 @@ var require_ReleaseApi = __commonJS({
        * @param {string} artifactTypeId - Releases with given artifactTypeId will be returned. Values can be Build, Jenkins, GitHub, Nuget, Team Build (external), ExternalTFSBuild, Git, TFVC, ExternalTfsXamlBuild.
        * @param {string} sourceId - Unique identifier of the artifact used. e.g. For build it would be {projectGuid}:{BuildDefinitionId}, for Jenkins it would be {JenkinsConnectionId}:{JenkinsDefinitionId}, for TfsOnPrem it would be {TfsOnPremConnectionId}:{ProjectName}:{TfsOnPremDefinitionId}. For third-party artifacts e.g. TeamCity, BitBucket you may refer 'uniqueSourceIdentifier' inside vss-extension.json https://github.com/Microsoft/vsts-rm-extensions/blob/master/Extensions.
        * @param {string} artifactVersionId - Releases with given artifactVersionId will be returned. E.g. in case of Build artifactType, it is buildId.
-       * @param {string} sourceBranchFilter - Releases with given sourceBranchFilter will be returned.
+       * @param {string} sourceBranchFilter - Releases with given sourceBranchFilter will be returned (Not to be used with environmentStatusFilter).
        * @param {boolean} isDeleted - Gets the soft deleted releases, if true.
        * @param {string[]} tagFilter - A comma-delimited list of tags. Only releases with these tags will be returned.
        * @param {string[]} propertyFilters - A comma-delimited list of extended properties to be retrieved. If set, the returned Releases will contain values for the specified property Ids (if they exist). If not set, properties will not be included. Note that this will not filter out any Release from results irrespective of whether it has property set or not.
@@ -45008,7 +46102,7 @@ var require_ReleaseApi = __commonJS({
               path: path2
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.9", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -45034,7 +46128,7 @@ var require_ReleaseApi = __commonJS({
               project
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.9", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -45065,7 +46159,7 @@ var require_ReleaseApi = __commonJS({
               comment
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.9", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -45087,8 +46181,9 @@ var require_ReleaseApi = __commonJS({
        * @param {string[]} propertyFilters - A comma-delimited list of extended properties to be retrieved. If set, the returned Release will contain values for the specified property Ids (if they exist). If not set, properties will not be included.
        * @param {ReleaseInterfaces.SingleReleaseExpands} expand - A property that should be expanded in the release.
        * @param {number} topGateRecords - Number of release gate records to get. Default is 5.
+       * @param {boolean} includeDisabledDefinitions - Include disabled definitions (if set to 'false' returns error, default is 'true')
        */
-      getRelease(project, releaseId, approvalFilters, propertyFilters, expand, topGateRecords) {
+      getRelease(project, releaseId, approvalFilters, propertyFilters, expand, topGateRecords, includeDisabledDefinitions) {
         return __awaiter2(this, void 0, void 0, function* () {
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
@@ -45099,10 +46194,11 @@ var require_ReleaseApi = __commonJS({
               approvalFilters,
               propertyFilters: propertyFilters && propertyFilters.join(","),
               "$expand": expand,
-              "$topGateRecords": topGateRecords
+              "$topGateRecords": topGateRecords,
+              includeDisabledDefinitions
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.9", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -45143,7 +46239,7 @@ var require_ReleaseApi = __commonJS({
               definitionEnvironmentIdsFilter: definitionEnvironmentIdsFilter && definitionEnvironmentIdsFilter.join(",")
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.9", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -45177,7 +46273,7 @@ var require_ReleaseApi = __commonJS({
               definitionSnapshotRevision
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.9", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
               let url = verData.requestUrl;
               let apiVersion = verData.apiVersion;
               let accept = this.createAcceptHeader("text/plain", apiVersion);
@@ -45209,7 +46305,7 @@ var require_ReleaseApi = __commonJS({
               comment
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.9", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -45237,7 +46333,7 @@ var require_ReleaseApi = __commonJS({
               releaseId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.9", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -45265,7 +46361,7 @@ var require_ReleaseApi = __commonJS({
               releaseId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.8", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.9", "Release", "a166fde7-27ad-408e-ba75-703c2cc9d500", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -45979,8 +47075,8 @@ var require_SecurityRolesApi = __commonJS({
     var basem = require_ClientApiBases();
     var SecurityRolesInterfaces = require_SecurityRolesInterfaces();
     var SecurityRolesApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-SecurityRoles-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-SecurityRoles-api", options);
       }
       /**
        * @param {string} scopeId
@@ -46147,7 +47243,7 @@ var require_TaskAgentInterfaces = __commonJS({
   "../node_modules/azure-devops-node-api/interfaces/TaskAgentInterfaces.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.TypeInfo = exports2.VariableGroupQueryOrder = exports2.VariableGroupActionFilter = exports2.TimelineRecordState = exports2.TaskResult = exports2.TaskOrchestrationPlanState = exports2.TaskOrchestrationItemType = exports2.TaskGroupQueryOrder = exports2.TaskGroupExpands = exports2.TaskDefinitionStatus = exports2.TaskCommandMode = exports2.TaskAgentUpdateReasonType = exports2.TaskAgentStatusFilter = exports2.TaskAgentStatus = exports2.TaskAgentRequestUpdateOptions = exports2.TaskAgentQueueActionFilter = exports2.TaskAgentPoolType = exports2.TaskAgentPoolOptions = exports2.TaskAgentPoolMaintenanceScheduleDays = exports2.TaskAgentPoolMaintenanceJobStatus = exports2.TaskAgentPoolMaintenanceJobResult = exports2.TaskAgentPoolActionFilter = exports2.TaskAgentJobStepType = exports2.TaskAgentJobResultFilter = exports2.SecureFileActionFilter = exports2.ResourceLockStatus = exports2.PlanGroupStatusFilter = exports2.PlanGroupStatus = exports2.OrchestrationType = exports2.OperationType = exports2.OperatingSystemType = exports2.MaskType = exports2.MachineGroupActionFilter = exports2.LogLevel = exports2.IssueType = exports2.ExclusiveLockType = exports2.EnvironmentResourceType = exports2.EnvironmentExpands = exports2.EnvironmentActionFilter = exports2.ElasticPoolState = exports2.ElasticNodeState = exports2.ElasticComputeState = exports2.ElasticAgentState = exports2.DeploymentTargetExpands = exports2.DeploymentPoolSummaryExpands = exports2.DeploymentMachineExpands = exports2.DeploymentGroupExpands = exports2.DeploymentGroupActionFilter = exports2.DemandSourceType = exports2.AuditAction = exports2.AadLoginPromptOption = void 0;
+    exports2.TypeInfo = exports2.VariableGroupQueryOrder = exports2.VariableGroupActionFilter = exports2.TimelineRecordState = exports2.TaskResult = exports2.TaskOrchestrationPlanState = exports2.TaskOrchestrationItemType = exports2.TaskGroupQueryOrder = exports2.TaskGroupExpands = exports2.TaskDefinitionStatus = exports2.TaskCommandMode = exports2.TaskAgentUpdateReasonType = exports2.TaskAgentStatusFilter = exports2.TaskAgentStatus = exports2.TaskAgentRequestUpdateOptions = exports2.TaskAgentQueueActionFilter = exports2.TaskAgentPoolType = exports2.TaskAgentPoolOptions = exports2.TaskAgentPoolMaintenanceScheduleDays = exports2.TaskAgentPoolMaintenanceJobStatus = exports2.TaskAgentPoolMaintenanceJobResult = exports2.TaskAgentPoolActionFilter = exports2.TaskAgentJobStepType = exports2.TaskAgentJobResultFilter = exports2.StageTriggerType = exports2.SecureFileActionFilter = exports2.ResourceLockStatus = exports2.PlanGroupStatusFilter = exports2.PlanGroupStatus = exports2.OrchestrationType = exports2.OperationType = exports2.OperatingSystemType = exports2.MaskType = exports2.MachineGroupActionFilter = exports2.LogLevel = exports2.IssueType = exports2.ExclusiveLockType = exports2.EnvironmentResourceType = exports2.EnvironmentExpands = exports2.EnvironmentActionFilter = exports2.ElasticPoolState = exports2.ElasticNodeState = exports2.ElasticComputeState = exports2.ElasticAgentState = exports2.DeploymentTargetExpands = exports2.DeploymentPoolSummaryExpands = exports2.DeploymentMachineExpands = exports2.DeploymentGroupExpands = exports2.DeploymentGroupActionFilter = exports2.DemandSourceType = exports2.AuditAction = exports2.AadLoginPromptOption = void 0;
     var FormInputInterfaces = require_FormInputInterfaces();
     var AadLoginPromptOption;
     (function(AadLoginPromptOption2) {
@@ -46243,6 +47339,7 @@ var require_TaskAgentInterfaces = __commonJS({
       ElasticNodeState2[ElasticNodeState2["RetryDelete"] = 19] = "RetryDelete";
       ElasticNodeState2[ElasticNodeState2["UnhealthyVm"] = 20] = "UnhealthyVm";
       ElasticNodeState2[ElasticNodeState2["UnhealthyVmPendingDelete"] = 21] = "UnhealthyVmPendingDelete";
+      ElasticNodeState2[ElasticNodeState2["PendingReimageCandidate"] = 22] = "PendingReimageCandidate";
     })(ElasticNodeState = exports2.ElasticNodeState || (exports2.ElasticNodeState = {}));
     var ElasticPoolState;
     (function(ElasticPoolState2) {
@@ -46344,6 +47441,11 @@ var require_TaskAgentInterfaces = __commonJS({
       SecureFileActionFilter2[SecureFileActionFilter2["Manage"] = 2] = "Manage";
       SecureFileActionFilter2[SecureFileActionFilter2["Use"] = 16] = "Use";
     })(SecureFileActionFilter = exports2.SecureFileActionFilter || (exports2.SecureFileActionFilter = {}));
+    var StageTriggerType;
+    (function(StageTriggerType2) {
+      StageTriggerType2[StageTriggerType2["Automatic"] = 0] = "Automatic";
+      StageTriggerType2[StageTriggerType2["Manual"] = 1] = "Manual";
+    })(StageTriggerType = exports2.StageTriggerType || (exports2.StageTriggerType = {}));
     var TaskAgentJobResultFilter;
     (function(TaskAgentJobResultFilter2) {
       TaskAgentJobResultFilter2[TaskAgentJobResultFilter2["Failed"] = 1] = "Failed";
@@ -46474,6 +47576,8 @@ var require_TaskAgentInterfaces = __commonJS({
       TaskResult2[TaskResult2["Canceled"] = 3] = "Canceled";
       TaskResult2[TaskResult2["Skipped"] = 4] = "Skipped";
       TaskResult2[TaskResult2["Abandoned"] = 5] = "Abandoned";
+      TaskResult2[TaskResult2["ManuallyQueued"] = 6] = "ManuallyQueued";
+      TaskResult2[TaskResult2["DependentOnManualQueue"] = 7] = "DependentOnManualQueue";
     })(TaskResult = exports2.TaskResult || (exports2.TaskResult = {}));
     var TimelineRecordState;
     (function(TimelineRecordState2) {
@@ -46616,7 +47720,8 @@ var require_TaskAgentInterfaces = __commonJS({
           "assignedPendingDelete": 18,
           "retryDelete": 19,
           "unhealthyVm": 20,
-          "unhealthyVmPendingDelete": 21
+          "unhealthyVmPendingDelete": 21,
+          "pendingReimageCandidate": 22
         }
       },
       ElasticPool: {},
@@ -46677,6 +47782,7 @@ var require_TaskAgentInterfaces = __commonJS({
       JobEnvironment: {},
       JobRequestMessage: {},
       KubernetesResource: {},
+      KubernetesResourceCreateParametersNewEndpoint: {},
       LogLevel: {
         enumValues: {
           "error": 0,
@@ -46758,12 +47864,19 @@ var require_TaskAgentInterfaces = __commonJS({
       },
       SecureFileEvent: {},
       ServerTaskRequestMessage: {},
+      ServiceEndpoint: {},
       ServiceEndpointAuthenticationScheme: {},
       ServiceEndpointExecutionData: {},
       ServiceEndpointExecutionRecord: {},
       ServiceEndpointExecutionRecordsInput: {},
       ServiceEndpointRequestResult: {},
       ServiceEndpointType: {},
+      StageTriggerType: {
+        enumValues: {
+          "automatic": 0,
+          "manual": 1
+        }
+      },
       TaskAgent: {},
       TaskAgentCloudRequest: {},
       TaskAgentCloudType: {},
@@ -46950,7 +48063,9 @@ var require_TaskAgentInterfaces = __commonJS({
           "failed": 2,
           "canceled": 3,
           "skipped": 4,
-          "abandoned": 5
+          "abandoned": 5,
+          "manuallyQueued": 6,
+          "dependentOnManualQueue": 7
         }
       },
       Timeline: {},
@@ -47236,6 +48351,10 @@ var require_TaskAgentInterfaces = __commonJS({
       }
     };
     exports2.TypeInfo.JobEnvironment.fields = {
+      endpoints: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.ServiceEndpoint
+      },
       mask: {
         isArray: true,
         typeInfo: exports2.TypeInfo.MaskHint
@@ -47243,6 +48362,9 @@ var require_TaskAgentInterfaces = __commonJS({
       secureFiles: {
         isArray: true,
         typeInfo: exports2.TypeInfo.SecureFile
+      },
+      systemConnection: {
+        typeInfo: exports2.TypeInfo.ServiceEndpoint
       }
     };
     exports2.TypeInfo.JobRequestMessage.fields = {
@@ -47259,6 +48381,11 @@ var require_TaskAgentInterfaces = __commonJS({
       },
       type: {
         enumType: exports2.TypeInfo.EnvironmentResourceType
+      }
+    };
+    exports2.TypeInfo.KubernetesResourceCreateParametersNewEndpoint.fields = {
+      endpoint: {
+        typeInfo: exports2.TypeInfo.ServiceEndpoint
       }
     };
     exports2.TypeInfo.MaskHint.fields = {
@@ -47320,6 +48447,14 @@ var require_TaskAgentInterfaces = __commonJS({
       },
       taskDefinition: {
         typeInfo: exports2.TypeInfo.TaskDefinition
+      }
+    };
+    exports2.TypeInfo.ServiceEndpoint.fields = {
+      creationDate: {
+        isDate: true
+      },
+      modificationDate: {
+        isDate: true
       }
     };
     exports2.TypeInfo.ServiceEndpointAuthenticationScheme.fields = {
@@ -47817,8 +48952,8 @@ var require_TaskAgentApiBase = __commonJS({
     var basem = require_ClientApiBases();
     var TaskAgentInterfaces = require_TaskAgentInterfaces();
     var TaskAgentApiBase = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-TaskAgent-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-TaskAgent-api", options);
       }
       /**
        * @param {TaskAgentInterfaces.TaskAgentCloud} agentCloud
@@ -51683,12 +52818,15 @@ var require_TaskAgentApiBase = __commonJS({
        */
       getTaskContentZip(taskId, versionString, visibility, scopeLocal) {
         return __awaiter2(this, void 0, void 0, function* () {
+          if (versionString == null) {
+            throw new TypeError("versionString can not be null or undefined");
+          }
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
-              taskId,
-              versionString
+              taskId
             };
             let queryValues = {
+              versionString,
               visibility,
               scopeLocal
             };
@@ -51712,12 +52850,15 @@ var require_TaskAgentApiBase = __commonJS({
        */
       getTaskDefinition(taskId, versionString, visibility, scopeLocal) {
         return __awaiter2(this, void 0, void 0, function* () {
+          if (versionString == null) {
+            throw new TypeError("versionString can not be null or undefined");
+          }
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
-              taskId,
-              versionString
+              taskId
             };
             let queryValues = {
+              versionString,
               visibility,
               scopeLocal
             };
@@ -52004,7 +53145,7 @@ var require_TaskAgentApiBase = __commonJS({
        *
        * @param {string} project - Project ID or project name
        * @param {number[]} groupIds - Comma separated list of Ids of variable groups.
-       * @param {boolean} loadSecrets
+       * @param {boolean} loadSecrets - Flag indicating if the secrets within variable groups should be loaded.
        */
       getVariableGroupsById(project, groupIds, loadSecrets) {
         return __awaiter2(this, void 0, void 0, function* () {
@@ -52332,8 +53473,8 @@ var require_TaskAgentApi = __commonJS({
     var taskagentbasem = require_TaskAgentApiBase();
     var url = require("url");
     var TaskAgentApi = class _TaskAgentApi extends taskagentbasem.TaskAgentApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, options, userAgent);
         this._handlers = handlers;
         this._options = options;
       }
@@ -52521,8 +53662,8 @@ var require_TaskApi = __commonJS({
     var basem = require_ClientApiBases();
     var TaskAgentInterfaces = require_TaskAgentInterfaces();
     var TaskApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Task-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Task-api", options);
       }
       /**
        * @param {string} scopeIdentifier - The project GUID to scope the request
@@ -53177,7 +54318,7 @@ var require_TaskApi = __commonJS({
               changeId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "distributedtask", "8893bc5b-35b2-4be7-83cb-99e683551db4", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "distributedtask", "8893bc5b-35b2-4be7-83cb-99e683551db4", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -53209,7 +54350,7 @@ var require_TaskApi = __commonJS({
               timelineId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "distributedtask", "8893bc5b-35b2-4be7-83cb-99e683551db4", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "distributedtask", "8893bc5b-35b2-4be7-83cb-99e683551db4", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -53237,7 +54378,7 @@ var require_TaskApi = __commonJS({
               planId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "distributedtask", "83597576-cc2c-453c-bea6-2882ae6a1653", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "distributedtask", "83597576-cc2c-453c-bea6-2882ae6a1653", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -53266,7 +54407,7 @@ var require_TaskApi = __commonJS({
               timelineId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "distributedtask", "83597576-cc2c-453c-bea6-2882ae6a1653", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "distributedtask", "83597576-cc2c-453c-bea6-2882ae6a1653", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -53301,7 +54442,7 @@ var require_TaskApi = __commonJS({
               includeRecords
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "distributedtask", "83597576-cc2c-453c-bea6-2882ae6a1653", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "distributedtask", "83597576-cc2c-453c-bea6-2882ae6a1653", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -53328,7 +54469,7 @@ var require_TaskApi = __commonJS({
               planId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "distributedtask", "83597576-cc2c-453c-bea6-2882ae6a1653", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "distributedtask", "83597576-cc2c-453c-bea6-2882ae6a1653", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -53382,8 +54523,8 @@ var require_TestApi = __commonJS({
     var basem = require_ClientApiBases();
     var TestInterfaces = require_TestInterfaces();
     var TestApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Test-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Test-api", options);
       }
       /**
        * Attach a file to test step result
@@ -55754,7 +56895,7 @@ var require_TestApi = __commonJS({
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
               res = yield this.rest.create(url, null, options);
-              let ret = this.formatResponse(res.result, null, false);
+              let ret = this.formatResponse(res.result, TestInterfaces.TypeInfo.TestToWorkItemLinks, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -56048,7 +57189,9 @@ var require_TestPlanInterfaces = __commonJS({
       },
       TestCase: {},
       TestCaseAssociatedResult: {},
+      TestCaseAssociatedResultExtended: {},
       TestCaseResultsData: {},
+      TestCaseResultsDataExtended: {},
       TestConfiguration: {},
       TestConfigurationCreateUpdateParameters: {},
       TestEntityTypes: {
@@ -56229,10 +57372,24 @@ var require_TestPlanInterfaces = __commonJS({
         enumType: exports2.TypeInfo.UserFriendlyTestOutcome
       }
     };
+    exports2.TypeInfo.TestCaseAssociatedResultExtended.fields = {
+      completedDate: {
+        isDate: true
+      },
+      outcome: {
+        enumType: exports2.TypeInfo.UserFriendlyTestOutcome
+      }
+    };
     exports2.TypeInfo.TestCaseResultsData.fields = {
       results: {
         isArray: true,
         typeInfo: exports2.TypeInfo.TestCaseAssociatedResult
+      }
+    };
+    exports2.TypeInfo.TestCaseResultsDataExtended.fields = {
+      results: {
+        isArray: true,
+        typeInfo: exports2.TypeInfo.TestCaseAssociatedResultExtended
       }
     };
     exports2.TypeInfo.TestConfiguration.fields = {
@@ -56419,8 +57576,8 @@ var require_TestPlanApi = __commonJS({
     var basem = require_ClientApiBases();
     var TestPlanInterfaces = require_TestPlanInterfaces();
     var TestPlanApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-TestPlan-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-TestPlan-api", options);
       }
       /**
        * Create a test configuration.
@@ -57308,7 +58465,7 @@ var require_TestPlanApi = __commonJS({
               let url = verData.requestUrl;
               let apiVersion = verData.apiVersion;
               let accept = this.createAcceptHeader("application/octet-stream", apiVersion);
-              resolve((yield this.http.get(url, { "Accept": accept })).message);
+              resolve((yield this.http.post(url, JSON.stringify(exportTestCaseRequestBody), { "Accept": accept, "Content-Type": "application/json" })).message);
             } catch (err) {
               reject2(err);
             }
@@ -57334,6 +58491,63 @@ var require_TestPlanApi = __commonJS({
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
               res = yield this.rest.del(url, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get a list of deleted test plans
+       *
+       * @param {string} project - Project ID or project name
+       * @param {string} continuationToken - If the list of plans returned is not complete, a continuation token to query next batch of plans is included in the response header as "x-ms-continuationtoken". Omit this parameter to get the first batch of test plans.
+       */
+      getDeletedTestPlans(project, continuationToken) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project
+            };
+            let queryValues = {
+              continuationToken
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testplan", "04c64b80-239e-426c-b79d-b1ca8951ce26", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, TestPlanInterfaces.TypeInfo.TestPlan, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Restores the deleted test plan
+       *
+       * @param {TestPlanInterfaces.TestPlanAndSuiteRestoreModel} restoreModel - The model containing the restore information
+       * @param {string} project - Project ID or project name
+       * @param {number} planId - The ID of the test plan to restore
+       */
+      restoreDeletedTestPlan(restoreModel, project, planId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              planId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testplan", "04c64b80-239e-426c-b79d-b1ca8951ce26", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.update(url, restoreModel, options);
               let ret = this.formatResponse(res.result, null, false);
               resolve(ret);
             } catch (err) {
@@ -57511,6 +58725,102 @@ var require_TestPlanApi = __commonJS({
               let res;
               res = yield this.rest.update(url, testPointUpdateParams, options);
               let ret = this.formatResponse(res.result, TestPlanInterfaces.TypeInfo.TestPoint, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get Deleted Test Suites for a Test Plan.
+       *
+       * @param {string} project - Project ID or project name
+       * @param {number} planId - ID of the test plan for which suites are requested.
+       * @param {TestPlanInterfaces.SuiteExpand} expand - Include the children suites and testers details.
+       * @param {string} continuationToken - If the list of suites returned is not complete, a continuation token to query next batch of suites is included in the response header as "x-ms-continuationtoken". Omit this parameter to get the first batch of test suites.
+       * @param {boolean} asTreeView - If the suites returned should be in a tree structure.
+       */
+      getDeletedTestSuitesForPlan(project, planId, expand, continuationToken, asTreeView) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              planId
+            };
+            let queryValues = {
+              expand,
+              continuationToken,
+              asTreeView
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testplan", "d2f1e8a4-3b6e-4f8b-9c8e-2d4f6e4b5a7c", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, TestPlanInterfaces.TypeInfo.TestSuite, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Get Deleted Test Suites within a Project.
+       *
+       * @param {string} project - Project ID or project name
+       * @param {TestPlanInterfaces.SuiteExpand} expand - Include the children suites and testers details.
+       * @param {string} continuationToken - If the list of suites returned is not complete, a continuation token to query next batch of suites is included in the response header as "x-ms-continuationtoken". Omit this parameter to get the first batch of test suites.
+       * @param {boolean} asTreeView - If the suites returned should be in a tree structure.
+       */
+      getDeletedTestSuitesForProject(project, expand, continuationToken, asTreeView) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project
+            };
+            let queryValues = {
+              expand,
+              continuationToken,
+              asTreeView
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testplan", "f40ae369-855d-4d5e-bee0-5e99c5c42fcb", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, TestPlanInterfaces.TypeInfo.TestSuite, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Restores the deleted test suite
+       *
+       * @param {TestPlanInterfaces.TestPlanAndSuiteRestoreModel} payload - The model containing the restore information
+       * @param {string} project - Project ID or project name
+       * @param {number} suiteId - The ID of the test suite to restore
+       */
+      restoreDeletedTestSuite(payload, project, suiteId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              suiteId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testplan", "f40ae369-855d-4d5e-bee0-5e99c5c42fcb", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.update(url, payload, options);
+              let ret = this.formatResponse(res.result, null, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -57753,8 +59063,8 @@ var require_TestResultsApi = __commonJS({
     var basem = require_ClientApiBases();
     var Contracts = require_TestInterfaces();
     var TestResultsApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-testResults-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-testResults-api", options);
       }
       /**
        * @param {Contracts.TestAttachmentRequestModel} attachmentRequestModel
@@ -58474,7 +59784,9 @@ var require_TestResultsApi = __commonJS({
         });
       }
       /**
-       * @param {Contracts.CustomTestFieldDefinition[]} newFields
+       * Creates custom test fields based on the data provided.
+       *
+       * @param {Contracts.CustomTestFieldDefinition[]} newFields - NewFields is an array of type CustomTestFieldDefinition.
        * @param {string} project - Project ID or project name
        */
       addCustomFields(newFields, project) {
@@ -58498,8 +59810,10 @@ var require_TestResultsApi = __commonJS({
         });
       }
       /**
+       * Returns List of custom test fields for the given custom test field scope.
+       *
        * @param {string} project - Project ID or project name
-       * @param {Contracts.CustomTestFieldScope} scopeFilter
+       * @param {Contracts.CustomTestFieldScope} scopeFilter - Scope of custom test fields which are to be returned.
        */
       queryCustomFields(project, scopeFilter) {
         return __awaiter2(this, void 0, void 0, function* () {
@@ -58528,6 +59842,59 @@ var require_TestResultsApi = __commonJS({
         });
       }
       /**
+       * Returns details of the custom test field for the specified testExtensionFieldId.
+       *
+       * @param {string} project - Project ID or project name
+       * @param {number} testExtensionFieldId - Custom test field id which has to be deleted.
+       */
+      deleteCustomFieldById(project, testExtensionFieldId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              testExtensionFieldId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "75653fea-8649-4e07-b296-ca20e1bb5633", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.del(url, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Returns details of the custom test field which is updated.
+       *
+       * @param {Contracts.CustomTestFieldUpdateDefinition} updateCustomTestField - Custom test field which has to be updated.
+       * @param {string} project - Project ID or project name
+       */
+      updateCustomField(updateCustomTestField, project) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "75653fea-8649-4e07-b296-ca20e1bb5633", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.update(url, updateCustomTestField, options);
+              let ret = this.formatResponse(res.result, Contracts.TypeInfo.CustomTestFieldDefinition, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
        * Get file coverage for the specified file
        *
        * @param {Contracts.FileCoverageRequest} fileCoverageRequest - File details with pull request iteration context
@@ -58544,7 +59911,7 @@ var require_TestResultsApi = __commonJS({
               let url = verData.requestUrl;
               let apiVersion = verData.apiVersion;
               let accept = this.createAcceptHeader("text/plain", apiVersion);
-              resolve((yield this.http.get(url, { "Accept": accept })).message);
+              resolve((yield this.http.post(url, JSON.stringify(fileCoverageRequest), { "Accept": accept, "Content-Type": "application/json" })).message);
             } catch (err) {
               reject2(err);
             }
@@ -59182,10 +60549,11 @@ var require_TestResultsApi = __commonJS({
        * @param {string} phaseName - Name of the phase. Maximum supported length for name is 256 character.
        * @param {string} jobName - Matrixing in YAML generates copies of a job with different inputs in matrix. JobName is the name of those input. Maximum supported length for name is 256 character.
        * @param {Contracts.TestOutcome[]} outcomes - List of outcome of results
+       * @param {boolean} includeAllBuildRuns - Whether to include Test Runs from from all the build runs or not.
        * @param {number} top - Maximum number of results to return
        * @param {String} continuationToken - Header to pass the continuationToken
        */
-      getTestResultsByPipeline(customHeaders, project, pipelineId, stageName, phaseName, jobName, outcomes, top, continuationToken) {
+      getTestResultsByPipeline(customHeaders, project, pipelineId, stageName, phaseName, jobName, outcomes, includeAllBuildRuns, top, continuationToken) {
         return __awaiter2(this, void 0, void 0, function* () {
           if (pipelineId == null) {
             throw new TypeError("pipelineId can not be null or undefined");
@@ -59200,6 +60568,7 @@ var require_TestResultsApi = __commonJS({
               phaseName,
               jobName,
               outcomes: outcomes && outcomes.join(","),
+              includeAllBuildRuns,
               "$top": top
             };
             customHeaders = customHeaders || {};
@@ -60851,33 +62220,6 @@ var require_TestResultsApi = __commonJS({
         });
       }
       /**
-       * Retrieves Test runs associated to a session
-       *
-       * @param {string} project - Project ID or project name
-       * @param {number} sessionId - Id of TestResults session to obtain Test Runs for.
-       */
-      getTestRunsBySessionId(project, sessionId) {
-        return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
-            let routeValues = {
-              project,
-              sessionId
-            };
-            try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "6efc2c12-d4bf-4e86-ae37-b502e57a84c7", routeValues);
-              let url = verData.requestUrl;
-              let options = this.createRequestOptions("application/json", verData.apiVersion);
-              let res;
-              res = yield this.rest.get(url, options);
-              let ret = this.formatResponse(res.result, null, true);
-              resolve(ret);
-            } catch (err) {
-              reject2(err);
-            }
-          }));
-        });
-      }
-      /**
        * Creates TestResultsSession object in TCM data store
        *
        * @param {Contracts.TestResultsSession} session - Received session object.
@@ -60890,7 +62232,7 @@ var require_TestResultsApi = __commonJS({
               project
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "531e61ce-580d-4962-8591-0b2942b6bf78", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "531e61ce-580d-4962-8591-0b2942b6bf78", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -60922,7 +62264,7 @@ var require_TestResultsApi = __commonJS({
               buildId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "531e61ce-580d-4962-8591-0b2942b6bf78", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "531e61ce-580d-4962-8591-0b2942b6bf78", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -60943,22 +62285,73 @@ var require_TestResultsApi = __commonJS({
        */
       getTestSessionLayout(project, sessionId) {
         return __awaiter2(this, void 0, void 0, function* () {
-          if (sessionId == null) {
-            throw new TypeError("sessionId can not be null or undefined");
-          }
           return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
             let routeValues = {
-              project
-            };
-            let queryValues = {
+              project,
               sessionId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "531e61ce-580d-4962-8591-0b2942b6bf78", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "531e61ce-580d-4962-8591-0b2942b6bf78", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
               res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Updates Test session object associated to a sessionId
+       *
+       * @param {Contracts.TestResultsSession} session - Update Session object
+       * @param {string} project - Project ID or project name
+       * @param {number} sessionId - Id of TestResults session to update Test session object for.
+       */
+      updateTestSession(session, project, sessionId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              sessionId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "531e61ce-580d-4962-8591-0b2942b6bf78", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.update(url, session, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Creates Session Analysis object in TCM data store for a given session
+       *
+       * @param {Contracts.TestSessionAnalysis[]} analysis - Session Analysis details
+       * @param {string} project - Project ID or project name
+       * @param {number} sessionId - ID of Session to add Notification
+       */
+      createAnalysis(analysis, project, sessionId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              sessionId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "c83eaf52-edf3-4034-ae11-17d38f25404c", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.create(url, analysis, options);
               let ret = this.formatResponse(res.result, null, true);
               resolve(ret);
             } catch (err) {
@@ -60980,12 +62373,67 @@ var require_TestResultsApi = __commonJS({
               project
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "f9c2e9e4-9c9a-4c1d-9a7d-2b4c8a6f0d5f", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "f9c2e9e4-9c9a-4c1d-9a7d-2b4c8a6f0d5f", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
               res = yield this.rest.create(url, environments, options);
               let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * For the provided sessionId, creates environment, configuration, and machine objects in TCM data store
+       *
+       * @param {Contracts.SessionEnvironmentAndMachine} sessionEnvironmentAndMachine
+       * @param {string} project - Project ID or project name
+       * @param {number} sessionId
+       */
+      createEnvironmentAndMachine(sessionEnvironmentAndMachine, project, sessionId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              sessionId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "502ab173-18a6-427a-bee1-4068126b3e9b", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.create(url, sessionEnvironmentAndMachine, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Retrieves TestResultsSession Layout object in TCM data store
+       *
+       * @param {string} project - Project ID or project name
+       * @param {number} sessionId - Retrieve session object.
+       */
+      getTestSessionLayoutBySessionId(project, sessionId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              sessionId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "815d3979-81bd-4018-94fd-62000fc43163", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, true);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -61008,7 +62456,7 @@ var require_TestResultsApi = __commonJS({
               sessionId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "ebff1c56-2188-4082-9d0e-1838a396f0c8", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "ebff1c56-2188-4082-9d0e-1838a396f0c8", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -61035,7 +62483,7 @@ var require_TestResultsApi = __commonJS({
               sessionId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "ebff1c56-2188-4082-9d0e-1838a396f0c8", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "ebff1c56-2188-4082-9d0e-1838a396f0c8", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -61063,7 +62511,7 @@ var require_TestResultsApi = __commonJS({
               runId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "ee6d95bf-7506-4c47-8100-9fed82cdc2f7", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "ee6d95bf-7506-4c47-8100-9fed82cdc2f7", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -61100,7 +62548,7 @@ var require_TestResultsApi = __commonJS({
               "$newTestsOnly": newTestsOnly
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "ee6d95bf-7506-4c47-8100-9fed82cdc2f7", routeValues, queryValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "ee6d95bf-7506-4c47-8100-9fed82cdc2f7", routeValues, queryValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
@@ -61128,11 +62576,169 @@ var require_TestResultsApi = __commonJS({
               runId
             };
             try {
-              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "testresults", "ee6d95bf-7506-4c47-8100-9fed82cdc2f7", routeValues);
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "ee6d95bf-7506-4c47-8100-9fed82cdc2f7", routeValues);
               let url = verData.requestUrl;
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
               res = yield this.rest.update(url, results, options);
+              let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Creates test result machines for the provided TestRunId
+       *
+       * @param {Contracts.TestResultMachine[]} testResultMachines - List of machines for test results in the run
+       * @param {string} project - Project ID or project name
+       * @param {number} runId - ID of the TestRun to add machines for
+       */
+      createTestResultMachines(testResultMachines, project, runId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              runId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "6485f27f-50a7-401e-828f-a8ee90978817", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.create(url, testResultMachines, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Gets test result machines for the provided TestRunId
+       *
+       * @param {string} project - Project ID or project name
+       * @param {number} runId - ID of the TestRun to add machines for
+       */
+      getTestResultMachines(project, runId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              runId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "6485f27f-50a7-401e-828f-a8ee90978817", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Gets full TestCaseResult objects with 1MRX details for the provided pipelineId
+       *
+       * @param {string} project - Project ID or project name
+       * @param {number} pipelineId - Pipeline Id. This is same as build Id.
+       * @param {string} stageName - Name of the stage. Maximum supported length for name is 256 character.
+       * @param {string} phaseName - Name of the phase. Maximum supported length for name is 256 character.
+       * @param {string} jobName - Matrixing in YAML generates copies of a job with different inputs in matrix. JobName is the name of those input. Maximum supported length for name is 256 character.
+       * @param {Contracts.TestOutcome[]} outcomes - List of outcome of results
+       * @param {boolean} includeAllBuildRuns - Whether to include Test Runs from from all the build runs or not. Defaults to false.
+       * @param {number} top - Maximum number of results to return. Defaults to 10000.
+       * @param {String} continuationToken - Header to pass the continuationToken
+       */
+      getTestResultsByPipelineMRX(customHeaders, project, pipelineId, stageName, phaseName, jobName, outcomes, includeAllBuildRuns, top, continuationToken) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          if (pipelineId == null) {
+            throw new TypeError("pipelineId can not be null or undefined");
+          }
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project
+            };
+            let queryValues = {
+              pipelineId,
+              stageName,
+              phaseName,
+              jobName,
+              outcomes: outcomes && outcomes.join(","),
+              includeAllBuildRuns,
+              "$top": top
+            };
+            customHeaders = customHeaders || {};
+            customHeaders["x-ms-continuationtoken"] = "continuationToken";
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "607f51d4-91a2-4ea4-a496-b3d58a7baea1", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              options.additionalHeaders = customHeaders;
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, Contracts.TypeInfo.TestCaseResult, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Retrieves Test runs associated to a session
+       *
+       * @param {string} project - Project ID or project name
+       * @param {number} sessionId - Id of TestResults session to obtain Test Runs for.
+       */
+      getTestRunsBySessionId(project, sessionId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              sessionId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "6efc2c12-d4bf-4e86-ae37-b502e57a84c7", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Updates Test runs associated to a session
+       *
+       * @param {Contracts.TestSessionTestRun} testRunIds
+       * @param {string} project - Project ID or project name
+       * @param {number} sessionId - Id of TestResults session to update Test Runs for.
+       */
+      updateTestRunsBySessionId(testRunIds, project, sessionId) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              sessionId
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.2", "testresults", "6efc2c12-d4bf-4e86-ae37-b502e57a84c7", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.update(url, testRunIds, options);
               let ret = this.formatResponse(res.result, null, true);
               resolve(ret);
             } catch (err) {
@@ -61306,7 +62912,7 @@ var require_TestResultsApi = __commonJS({
               let options = this.createRequestOptions("application/json", verData.apiVersion);
               let res;
               res = yield this.rest.create(url, null, options);
-              let ret = this.formatResponse(res.result, null, false);
+              let ret = this.formatResponse(res.result, Contracts.TypeInfo.TestToWorkItemLinks, false);
               resolve(ret);
             } catch (err) {
               reject2(err);
@@ -61524,6 +63130,9 @@ var require_TfvcInterfaces = __commonJS({
       }
     };
     exports2.TypeInfo.GitRepository.fields = {
+      creationDate: {
+        isDate: true
+      },
       parentRepository: {
         typeInfo: exports2.TypeInfo.GitRepositoryRef
       },
@@ -61682,8 +63291,8 @@ var require_TfvcApi = __commonJS({
     var basem = require_ClientApiBases();
     var TfvcInterfaces = require_TfvcInterfaces();
     var TfvcApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Tfvc-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Tfvc-api", options);
       }
       /**
        * Get a single branch hierarchy at the given path with parents or children as specified.
@@ -62024,7 +63633,7 @@ var require_TfvcApi = __commonJS({
               let url = verData.requestUrl;
               let apiVersion = verData.apiVersion;
               let accept = this.createAcceptHeader("application/zip", apiVersion);
-              resolve((yield this.http.get(url, { "Accept": accept })).message);
+              resolve((yield this.http.post(url, JSON.stringify(itemRequestData), { "Accept": accept, "Content-Type": "application/json" })).message);
             } catch (err) {
               reject2(err);
             }
@@ -62775,8 +64384,8 @@ var require_WikiApi = __commonJS({
     var Comments_Contracts = require_CommentsInterfaces();
     var WikiInterfaces = require_WikiInterfaces();
     var WikiApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Wiki-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Wiki-api", options);
       }
       /**
        * Uploads an attachment on a comment on a wiki page.
@@ -64025,8 +65634,8 @@ var require_WorkApi = __commonJS({
     var basem = require_ClientApiBases();
     var WorkInterfaces = require_WorkInterfaces();
     var WorkApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Work-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Work-api", options);
       }
       /**
        * Creates/updates an automation rules settings
@@ -65392,6 +67001,64 @@ var require_WorkApi = __commonJS({
         });
       }
       /**
+       * Retrieves the set of known queries
+       *
+       * @param {string} project - Project ID or project name
+       */
+      getPredefinedQueries(project) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "work", "9cbba37c-6cc6-4f70-b903-709be86acbf0", routeValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, true);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
+       * Retrieves the specified predefined query including the query results
+       *
+       * @param {string} project - Project ID or project name
+       * @param {string} id - Id of the query to run
+       * @param {number} top - The maximum number of items to return
+       * @param {boolean} includeCompleted - Whether or not to retrieve the 'completed' work items (work items in the 'completed' meta state)
+       */
+      getPredefinedQueryResults(project, id, top, includeCompleted) {
+        return __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
+            let routeValues = {
+              project,
+              id
+            };
+            let queryValues = {
+              "$top": top,
+              includeCompleted
+            };
+            try {
+              let verData = yield this.vsoClient.getVersioningData("7.2-preview.1", "work", "9cbba37c-6cc6-4f70-b903-709be86acbf0", routeValues, queryValues);
+              let url = verData.requestUrl;
+              let options = this.createRequestOptions("application/json", verData.apiVersion);
+              let res;
+              res = yield this.rest.get(url, options);
+              let ret = this.formatResponse(res.result, null, false);
+              resolve(ret);
+            } catch (err) {
+              reject2(err);
+            }
+          }));
+        });
+      }
+      /**
        * Get process configuration
        *
        * @param {string} project - Project ID or project name
@@ -65951,6 +67618,7 @@ var require_PipelinesInterfaces = __commonJS({
       RepositoryType2[RepositoryType2["GitHub"] = 1] = "GitHub";
       RepositoryType2[RepositoryType2["AzureReposGit"] = 2] = "AzureReposGit";
       RepositoryType2[RepositoryType2["GitHubEnterprise"] = 3] = "GitHubEnterprise";
+      RepositoryType2[RepositoryType2["BitBucket"] = 4] = "BitBucket";
       RepositoryType2[RepositoryType2["AzureReposGitHyphenated"] = 2] = "AzureReposGitHyphenated";
     })(RepositoryType = exports2.RepositoryType || (exports2.RepositoryType = {}));
     var RunResult;
@@ -66004,6 +67672,7 @@ var require_PipelinesInterfaces = __commonJS({
           "gitHub": 1,
           "azureReposGit": 2,
           "gitHubEnterprise": 3,
+          "bitBucket": 4,
           "azureReposGitHyphenated": 2
         }
       },
@@ -66149,8 +67818,8 @@ var require_PipelinesApi = __commonJS({
     var basem = require_ClientApiBases();
     var PipelinesInterfaces = require_PipelinesInterfaces();
     var PipelinesApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Pipelines-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Pipelines-api", options);
       }
       /**
        * Get a specific artifact from a pipeline run
@@ -66508,8 +68177,8 @@ var require_CIXApi = __commonJS({
     exports2.CixApi = void 0;
     var basem = require_ClientApiBases();
     var CixApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-Pipelines-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-Pipelines-api", options);
       }
       /**
        * Gets a list of existing configuration files for the given repository.
@@ -67309,8 +68978,8 @@ var require_WorkItemTrackingApi = __commonJS({
     var basem = require_ClientApiBases();
     var WorkItemTrackingInterfaces = require_WorkItemTrackingInterfaces();
     var WorkItemTrackingApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-WorkItemTracking-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-WorkItemTracking-api", options);
       }
       /**
        * INTERNAL ONLY: USED BY ACCOUNT MY WORK PAGE. This returns Doing, Done, Follows and activity work items details.
@@ -70436,8 +72105,8 @@ var require_WorkItemTrackingProcessApi = __commonJS({
     var basem = require_ClientApiBases();
     var WorkItemTrackingProcessInterfaces = require_WorkItemTrackingProcessInterfaces();
     var WorkItemTrackingProcessApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-WorkItemTracking-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-WorkItemTracking-api", options);
       }
       /**
        * Creates a single behavior in the given process.
@@ -72259,8 +73928,8 @@ var require_WorkItemTrackingProcessDefinitionsApi = __commonJS({
     var basem = require_ClientApiBases();
     var WorkItemTrackingProcessDefinitionsInterfaces = require_WorkItemTrackingProcessDefinitionsInterfaces();
     var WorkItemTrackingProcessDefinitionsApi = class extends basem.ClientApiBase {
-      constructor(baseUrl, handlers, options) {
-        super(baseUrl, handlers, "node-WorkItemTracking-api", options);
+      constructor(baseUrl, handlers, options, userAgent) {
+        super(baseUrl, handlers, userAgent || "node-WorkItemTracking-api", options);
       }
       /**
        * Creates a single behavior in the given process.
@@ -78868,7 +80537,10 @@ var require_WebApi = __commonJS({
         }
         let userAgent;
         const nodeApiName = "azure-devops-node-api";
-        if (isBrowser) {
+        if (requestSettings && requestSettings.userAgent) {
+          userAgent = requestSettings.userAgent;
+          this.userAgent = requestSettings.userAgent;
+        } else if (isBrowser) {
           if (requestSettings) {
             userAgent = `${requestSettings.productName}/${requestSettings.productVersion} (${nodeApiName}; ${window.navigator.userAgent})`;
           } else {
@@ -78921,63 +80593,63 @@ var require_WebApi = __commonJS({
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "0f2ca920-f269-4545-b1f4-5b4173aa784e");
           handlers = handlers || [this.authHandler];
-          return new alertm.AlertApi(serverUrl, handlers, this.options);
+          return new alertm.AlertApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getBuildApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, buildm.BuildApi.RESOURCE_AREA_ID);
           handlers = handlers || [this.authHandler];
-          return new buildm.BuildApi(serverUrl, handlers, this.options);
+          return new buildm.BuildApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getCoreApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "79134c72-4a58-4b42-976c-04e7115f32bf");
           handlers = handlers || [this.authHandler];
-          return new corem.CoreApi(serverUrl, handlers, this.options);
+          return new corem.CoreApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getDashboardApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "31c84e0a-3ece-48fd-a29d-100849af99ba");
           handlers = handlers || [this.authHandler];
-          return new dashboardm.DashboardApi(serverUrl, handlers, this.options);
+          return new dashboardm.DashboardApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getExtensionManagementApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "6c2b0933-3600-42ae-bf8b-93d4f7e83594");
           handlers = handlers || [this.authHandler];
-          return new extmgmtm.ExtensionManagementApi(serverUrl, handlers, this.options);
+          return new extmgmtm.ExtensionManagementApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getFeatureManagementApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "");
           handlers = handlers || [this.authHandler];
-          return new featuremgmtm.FeatureManagementApi(serverUrl, handlers, this.options);
+          return new featuremgmtm.FeatureManagementApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getFileContainerApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "");
           handlers = handlers || [this.authHandler];
-          return new filecontainerm.FileContainerApi(serverUrl, handlers, this.options);
+          return new filecontainerm.FileContainerApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getGalleryApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, gallerym.GalleryApi.RESOURCE_AREA_ID);
           handlers = handlers || [this.authHandler];
-          return new gallerym.GalleryApi(serverUrl, handlers, this.options);
+          return new gallerym.GalleryApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getGitApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, gitm.GitApi.RESOURCE_AREA_ID);
           handlers = handlers || [this.authHandler];
-          return new gitm.GitApi(serverUrl, handlers, this.options);
+          return new gitm.GitApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       // TODO: Don't call resource area here? Will cause infinite loop?
@@ -78988,147 +80660,147 @@ var require_WebApi = __commonJS({
           optionsClone.maxRetries = 5;
           serverUrl = (yield serverUrl) || this.serverUrl;
           handlers = handlers || [this.authHandler];
-          return new locationsm.LocationsApi(serverUrl, handlers, optionsClone);
+          return new locationsm.LocationsApi(serverUrl, handlers, optionsClone, this.userAgent);
         });
       }
       getManagementApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "f101720c-9790-45a6-9fb3-494a09fddeeb");
           handlers = handlers || [this.authHandler];
-          return new managementm.ManagementApi(serverUrl, handlers, this.options);
+          return new managementm.ManagementApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getNotificationApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "");
           handlers = handlers || [this.authHandler];
-          return new notificationm.NotificationApi(serverUrl, handlers, this.options);
+          return new notificationm.NotificationApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getPolicyApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "fb13a388-40dd-4a04-b530-013a739c72ef");
           handlers = handlers || [this.authHandler];
-          return new policym.PolicyApi(serverUrl, handlers, this.options);
+          return new policym.PolicyApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getProfileApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "8ccfef3d-2b87-4e99-8ccb-66e343d2daa8");
           handlers = handlers || [this.authHandler];
-          return new profilem.ProfileApi(serverUrl, handlers, this.options);
+          return new profilem.ProfileApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getProjectAnalysisApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "7658fa33-b1bf-4580-990f-fac5896773d3");
           handlers = handlers || [this.authHandler];
-          return new projectm.ProjectAnalysisApi(serverUrl, handlers, this.options);
+          return new projectm.ProjectAnalysisApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getSecurityRolesApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "");
           handlers = handlers || [this.authHandler];
-          return new securityrolesm.SecurityRolesApi(serverUrl, handlers, this.options);
+          return new securityrolesm.SecurityRolesApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getReleaseApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "efc2f575-36ef-48e9-b672-0c6fb4a48ac5");
           handlers = handlers || [this.authHandler];
-          return new releasem.ReleaseApi(serverUrl, handlers, this.options);
+          return new releasem.ReleaseApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getTaskApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "");
           handlers = handlers || [this.authHandler];
-          return new taskm.TaskApi(serverUrl, handlers, this.options);
+          return new taskm.TaskApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getTaskAgentApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "a85b8835-c1a1-4aac-ae97-1c3d0ba72dbd");
           handlers = handlers || [this.authHandler];
-          return new taskagentm.TaskAgentApi(serverUrl, handlers, this.options);
+          return new taskagentm.TaskAgentApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getTestApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "c2aa639c-3ccc-4740-b3b6-ce2a1e1d984e");
           handlers = handlers || [this.authHandler];
-          return new testm.TestApi(serverUrl, handlers, this.options);
+          return new testm.TestApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getTestPlanApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "e4c27205-9d23-4c98-b958-d798bc3f9cd4");
           handlers = handlers || [this.authHandler];
-          return new testplanm.TestPlanApi(serverUrl, handlers, this.options);
+          return new testplanm.TestPlanApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getTestResultsApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "c83eaf52-edf3-4034-ae11-17d38f25404c");
           handlers = handlers || [this.authHandler];
-          return new testresultsm.TestResultsApi(serverUrl, handlers, this.options);
+          return new testresultsm.TestResultsApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getTfvcApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "8aa40520-446d-40e6-89f6-9c9f9ce44c48");
           handlers = handlers || [this.authHandler];
-          return new tfvcm.TfvcApi(serverUrl, handlers, this.options);
+          return new tfvcm.TfvcApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getWikiApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "bf7d82a0-8aa5-4613-94ef-6172a5ea01f3");
           handlers = handlers || [this.authHandler];
-          return new wikim.WikiApi(serverUrl, handlers, this.options);
+          return new wikim.WikiApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getWorkApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "1d4f49f9-02b9-4e26-b826-2cdb6195f2a9");
           handlers = handlers || [this.authHandler];
-          return new workm.WorkApi(serverUrl, handlers, this.options);
+          return new workm.WorkApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getWorkItemTrackingApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, workitemtrackingm.WorkItemTrackingApi.RESOURCE_AREA_ID);
           handlers = handlers || [this.authHandler];
-          return new workitemtrackingm.WorkItemTrackingApi(serverUrl, handlers, this.options);
+          return new workitemtrackingm.WorkItemTrackingApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getWorkItemTrackingProcessApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "5264459e-e5e0-4bd8-b118-0985e68a4ec5");
           handlers = handlers || [this.authHandler];
-          return new workitemtrackingprocessm.WorkItemTrackingProcessApi(serverUrl, handlers, this.options);
+          return new workitemtrackingprocessm.WorkItemTrackingProcessApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getWorkItemTrackingProcessDefinitionApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "5264459e-e5e0-4bd8-b118-0985e68a4ec5");
           handlers = handlers || [this.authHandler];
-          return new workitemtrackingprocessdefinitionm.WorkItemTrackingProcessDefinitionsApi(serverUrl, handlers, this.options);
+          return new workitemtrackingprocessdefinitionm.WorkItemTrackingProcessDefinitionsApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getPipelinesApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "5264459e-e5e0-4bd8-b118-0985e68a4ec5");
           handlers = handlers || [this.authHandler];
-          return new pipelinesm.PipelinesApi(serverUrl, handlers, this.options);
+          return new pipelinesm.PipelinesApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       getCixApi(serverUrl, handlers) {
         return __awaiter2(this, void 0, void 0, function* () {
           serverUrl = yield this._getResourceAreaUrl(serverUrl || this.serverUrl, "5264459e-e5e0-4bd8-b118-0985e68a4ec5");
           handlers = handlers || [this.authHandler];
-          return new cixm.CixApi(serverUrl, handlers, this.options);
+          return new cixm.CixApi(serverUrl, handlers, this.options, this.userAgent);
         });
       }
       _getResourceAreaUrl(serverUrl, resourceId) {
