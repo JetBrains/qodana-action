@@ -38,14 +38,14 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2025.2.1";
+    version = "2025.2.2";
     checksum = {
-      windows_x86_64: "9b6b30b295b1cc0e60c2be04f4f0054d19a35b79e13c3544c054c1bd052da164",
-      linux_arm64: "656527c02c9a12351949f96064a9599c591de2eec856d218f23ad0ea49445602",
-      darwin_arm64: "c2e365bb218413fcef4279463823d42ebce8472d12ecff0ad4266d5ad26e0cdc",
-      darwin_x86_64: "81cd002d9fcc560596ac35172ccea6958f1645030fde8111c628b98391d16761",
-      windows_arm64: "fb474395342443afa57eb9fa019544a487119b4e418cec1b823bbf238bd9e85f",
-      linux_x86_64: "785dac6b5e1d78f96b20e9ba5600590c1779d5b6daa9d57c003430adb27377e2"
+      windows_x86_64: "38be97d7c2a3e6c2c307fb7d776c22ac5e959a9a3ec55ca10b184154aae33b60",
+      linux_arm64: "59c988f19c5732363cbddf4c414a6cf7ffa75027c44d5e22c78b1075c755f1b1",
+      darwin_arm64: "8a5444d1730b2cd93507f0f0bba6f4c37a77ac83d1d083b2dd9d8da6eac748af",
+      darwin_x86_64: "f313ed0f7c13b8a806da6aca4d389acf5dc7687f27653e1ce675babf2a9d3b72",
+      windows_arm64: "d7934295789b5e3661f7b1585b940ecb78dbfe6b210a8c85ca53cb7757e4189a",
+      linux_x86_64: "c99447abd7f82cf75a5047747e72b7833b8445bb7e446ed824c2de9f48c7f67e"
     };
   }
 });
@@ -319,7 +319,7 @@ var require_BufferList = __commonJS({
       src.copy(target, offset);
     }
     __name(copyBuffer, "copyBuffer");
-    module2.exports = function() {
+    module2.exports = (function() {
       function BufferList() {
         _classCallCheck(this, BufferList);
         this.head = null;
@@ -374,7 +374,7 @@ var require_BufferList = __commonJS({
         return ret;
       }, "concat");
       return BufferList;
-    }();
+    })();
     if (util && util.inspect && util.inspect.custom) {
       module2.exports.prototype[util.inspect.custom] = function() {
         var obj = util.inspect({ length: this.length });
@@ -1841,11 +1841,11 @@ var require_stream_readable = __commonJS({
       });
       for (var i in stream) {
         if (this[i] === void 0 && typeof stream[i] === "function") {
-          this[i] = /* @__PURE__ */ function(method) {
+          this[i] = /* @__PURE__ */ (function(method) {
             return function() {
               return stream[method].apply(stream, arguments);
             };
-          }(i);
+          })(i);
         }
       }
       for (var n = 0; n < kProxyEvents.length; n++) {
@@ -2934,23 +2934,23 @@ var require_utils = __commonJS({
         /**
          * true if the browser accepts to use String.fromCharCode on Uint8Array
          */
-        uint8array: function() {
+        uint8array: (function() {
           try {
             return support.uint8array && String.fromCharCode.apply(null, new Uint8Array(1)).length === 1;
           } catch (e) {
             return false;
           }
-        }(),
+        })(),
         /**
          * true if the browser accepts to use String.fromCharCode on nodejs Buffer.
          */
-        nodebuffer: function() {
+        nodebuffer: (function() {
           try {
             return support.nodebuffer && String.fromCharCode.apply(null, nodejsUtils.allocBuffer(1)).length === 1;
           } catch (e) {
             return false;
           }
-        }()
+        })()
       }
     };
     function arrayLikeToString(array) {
@@ -10327,15 +10327,24 @@ function parseRawArguments(rawArgs) {
   const result = [];
   let i = 0;
   while (i < initialSplit.length) {
-    let currentArg = initialSplit[i];
-    if (currentArg.startsWith("--property=")) {
-      let propertyValue = currentArg;
+    const currentArg = initialSplit[i];
+    if (currentArg === "--property") {
+      result.push(currentArg);
+      const propertyValues = [];
       i++;
       while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
-        propertyValue += "," + initialSplit[i];
+        propertyValues.push(initialSplit[i]);
         i++;
       }
-      result.push(propertyValue);
+      result.push(propertyValues.join(","));
+    } else if (currentArg.startsWith("--property ")) {
+      const fullPropertyArg = [currentArg];
+      i++;
+      while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
+        fullPropertyArg.push(initialSplit[i]);
+        i++;
+      }
+      result.push(fullPropertyArg.join(","));
     } else {
       result.push(currentArg);
       i++;
@@ -11791,7 +11800,7 @@ var require_get_intrinsic = __commonJS({
     var throwTypeError = /* @__PURE__ */ __name(function() {
       throw new $TypeError();
     }, "throwTypeError");
-    var ThrowTypeError = $gOPD ? function() {
+    var ThrowTypeError = $gOPD ? (function() {
       try {
         arguments.callee;
         return throwTypeError;
@@ -11802,7 +11811,7 @@ var require_get_intrinsic = __commonJS({
           return throwTypeError;
         }
       }
-    }() : throwTypeError;
+    })() : throwTypeError;
     var hasSymbols = require_has_symbols()();
     var getProto = require_get_proto();
     var $ObjectGPO = require_Object_getPrototypeOf();
@@ -12314,13 +12323,13 @@ var require_utils2 = __commonJS({
     var formats = require_formats();
     var has = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
-    var hexTable = function() {
+    var hexTable = (function() {
       var array = [];
       for (var i = 0; i < 256; ++i) {
         array.push("%" + ((i < 16 ? "0" : "") + i.toString(16)).toUpperCase());
       }
       return array;
-    }();
+    })();
     var compactQueue = /* @__PURE__ */ __name(function compactQueue2(queue) {
       while (queue.length > 1) {
         var item = queue.pop();
@@ -13931,12 +13940,13 @@ var require_RateLimiterRedis = __commonJS({
         super(opts);
         this.client = opts.storeClient;
         this._rejectIfRedisNotReady = !!opts.rejectIfRedisNotReady;
+        this._incrTtlLuaScript = opts.customIncrTtlLuaScript || incrTtlLuaScript;
         this.useRedisPackage = opts.useRedisPackage || this.client.constructor.name === "Commander" || false;
         this.useRedis3AndLowerPackage = opts.useRedis3AndLowerPackage;
         if (typeof this.client.defineCommand === "function") {
           this.client.defineCommand("rlflxIncr", {
             numberOfKeys: 1,
-            lua: incrTtlLuaScript
+            lua: this._incrTtlLuaScript
           });
         }
       }
@@ -13944,18 +13954,34 @@ var require_RateLimiterRedis = __commonJS({
        * Prevent actual redis call if redis connection is not ready
        * Because of different connection state checks for ioredis and node-redis, only this clients would be actually checked.
        * For any other clients all the requests would be passed directly to redis client
+       * @param {String} rlKey
+       * @param {Boolean} isReadonly
        * @return {boolean}
        * @private
        */
-      _isRedisReady() {
+      _isRedisReady(rlKey, isReadonly) {
         if (!this._rejectIfRedisNotReady) {
           return true;
         }
-        if (this.client.status && this.client.status !== "ready") {
-          return false;
+        if (this.client.status) {
+          return this.client.status === "ready";
         }
-        if (typeof this.client.isReady === "function" && !this.client.isReady()) {
-          return false;
+        if (typeof this.client.isReady === "function") {
+          return this.client.isReady();
+        }
+        if (typeof this.client.isReady === "boolean") {
+          return this.client.isReady === true;
+        }
+        if (this.client._slots && typeof this.client._slots.getClient === "function") {
+          if (typeof this.client.isOpen === "boolean" && this.client.isOpen !== true) {
+            return false;
+          }
+          try {
+            const slotClient = this.client._slots.getClient(rlKey, isReadonly);
+            return slotClient && slotClient.isReady === true;
+          } catch (error) {
+            return false;
+          }
         }
         return true;
       }
@@ -13973,7 +13999,14 @@ var require_RateLimiterRedis = __commonJS({
         return res;
       }
       async _upsert(rlKey, points, msDuration, forceExpire = false) {
-        if (!this._isRedisReady()) {
+        if (typeof points == "string") {
+          if (!RegExp("^[1-9][0-9]*$").test(points)) {
+            throw new Error("Consuming string different than integer values is not supported by this package");
+          }
+        } else if (!Number.isInteger(points)) {
+          throw new Error("Consuming decimal number of points is not supported by this package");
+        }
+        if (!this._isRedisReady(rlKey, false)) {
           throw new Error("Redis connection is not ready");
         }
         const secDuration = Math.floor(msDuration / 1e3);
@@ -13996,7 +14029,7 @@ var require_RateLimiterRedis = __commonJS({
         if (secDuration > 0) {
           if (!this.useRedisPackage && !this.useRedis3AndLowerPackage) {
             return this.client.rlflxIncr(
-              [rlKey].concat([String(points), String(secDuration)])
+              [rlKey].concat([String(points), String(secDuration), String(this.points), String(this.duration)])
             );
           }
           if (this.useRedis3AndLowerPackage) {
@@ -14008,15 +14041,15 @@ var require_RateLimiterRedis = __commonJS({
                 return resolve(result);
               }, "incrCallback");
               if (typeof this.client.rlflxIncr === "function") {
-                this.client.rlflxIncr(rlKey, points, secDuration, incrCallback);
+                this.client.rlflxIncr(rlKey, points, secDuration, this.points, this.duration, incrCallback);
               } else {
-                this.client.eval(incrTtlLuaScript, 1, rlKey, points, secDuration, incrCallback);
+                this.client.eval(this._incrTtlLuaScript, 1, rlKey, points, secDuration, this.points, this.duration, incrCallback);
               }
             });
           } else {
-            return this.client.eval(incrTtlLuaScript, {
+            return this.client.eval(this._incrTtlLuaScript, {
               keys: [rlKey],
-              arguments: [String(points), String(secDuration)]
+              arguments: [String(points), String(secDuration), String(this.points), String(this.duration)]
             });
           }
         } else {
@@ -14027,7 +14060,7 @@ var require_RateLimiterRedis = __commonJS({
         }
       }
       async _get(rlKey) {
-        if (!this._isRedisReady()) {
+        if (!this._isRedisReady(rlKey, true)) {
           throw new Error("Redis connection is not ready");
         }
         if (!this.useRedisPackage && !this.useRedis3AndLowerPackage) {
@@ -14096,6 +14129,7 @@ var require_RateLimiterMongo = __commonJS({
         this.dbName = opts.dbName;
         this.tableName = opts.tableName;
         this.indexKeyPrefix = opts.indexKeyPrefix;
+        this.disableIndexesCreation = opts.disableIndexesCreation;
         if (opts.mongo) {
           this.client = opts.mongo;
         } else {
@@ -14142,11 +14176,26 @@ var require_RateLimiterMongo = __commonJS({
       set indexKeyPrefix(obj) {
         this._indexKeyPrefix = obj || {};
       }
+      get disableIndexesCreation() {
+        return this._disableIndexesCreation;
+      }
+      set disableIndexesCreation(value) {
+        this._disableIndexesCreation = !!value;
+      }
+      async createIndexes() {
+        const db = typeof this.client.db === "function" ? this.client.db(this.dbName) : this.client;
+        const collection = db.collection(this.tableName);
+        await collection.createIndex({ expire: -1 }, { expireAfterSeconds: 0 });
+        await collection.createIndex(Object.assign({}, this.indexKeyPrefix, { key: 1 }), { unique: true });
+      }
       _initCollection() {
         const db = typeof this.client.db === "function" ? this.client.db(this.dbName) : this.client;
         const collection = db.collection(this.tableName);
-        collection.createIndex({ expire: -1 }, { expireAfterSeconds: 0 });
-        collection.createIndex(Object.assign({}, this.indexKeyPrefix, { key: 1 }), { unique: true });
+        if (!this.disableIndexesCreation) {
+          this.createIndexes().catch((err) => {
+            console.error(`Cannot create indexes for mongo collection ${this.tableName}`, err);
+          });
+        }
         this._collection = collection;
       }
       _getRateLimiterRes(rlKey, changedPoints, result) {
@@ -16025,6 +16074,7 @@ var require_RateLimiterDynamo = __commonJS({
         this.client = opts.storeClient;
         this.tableName = opts.tableName;
         this.tableCreated = opts.tableCreated;
+        this.ttlManuallySet = opts.ttlSet;
         if (!this.tableCreated) {
           this._createTable(opts.dynamoTableOpts).then((data) => {
             this.tableCreated = true;
@@ -16277,6 +16327,9 @@ var require_RateLimiterDynamo = __commonJS({
         if (!this.tableCreated) {
           throw new Error("Table is not created yet");
         }
+        if (this.ttlManuallySet) {
+          return true;
+        }
         try {
           const res = await this.client.describeTimeToLive({ TableName: this.tableName });
           return res.$metadata.httpStatusCode == 200 && res.TimeToLiveDescription.TimeToLiveStatus === "ENABLED" && res.TimeToLiveDescription.AttributeName === "expire";
@@ -16305,6 +16358,1202 @@ var require_RateLimiterDynamo = __commonJS({
   }
 });
 
+// ../node_modules/rate-limiter-flexible/lib/RateLimiterPrisma.js
+var require_RateLimiterPrisma = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/RateLimiterPrisma.js"(exports2, module2) {
+    var RateLimiterStoreAbstract = require_RateLimiterStoreAbstract();
+    var RateLimiterRes = require_RateLimiterRes();
+    var RateLimiterPrisma = class extends RateLimiterStoreAbstract {
+      static {
+        __name(this, "RateLimiterPrisma");
+      }
+      /**
+       * Constructor for the rate limiter
+       * @param {Object} opts - Options for the rate limiter
+       */
+      constructor(opts) {
+        super(opts);
+        this.modelName = opts.tableName || "RateLimiterFlexible";
+        this.prismaClient = opts.storeClient;
+        this.clearExpiredByTimeout = opts.clearExpiredByTimeout || true;
+        if (!this.prismaClient) {
+          throw new Error("Prisma client is not provided");
+        }
+        if (this.clearExpiredByTimeout) {
+          this._clearExpiredHourAgo();
+        }
+      }
+      _getRateLimiterRes(rlKey, changedPoints, result) {
+        const res = new RateLimiterRes();
+        let doc = result;
+        res.isFirstInDuration = doc.points === changedPoints;
+        res.consumedPoints = doc.points;
+        res.remainingPoints = Math.max(this.points - res.consumedPoints, 0);
+        res.msBeforeNext = doc.expire !== null ? Math.max(new Date(doc.expire).getTime() - Date.now(), 0) : -1;
+        return res;
+      }
+      _upsert(key, points, msDuration, forceExpire = false) {
+        if (!this.prismaClient) {
+          return Promise.reject(new Error("Prisma client is not established"));
+        }
+        const now = /* @__PURE__ */ new Date();
+        const newExpire = msDuration > 0 ? new Date(now.getTime() + msDuration) : null;
+        return this.prismaClient.$transaction(async (prisma) => {
+          const existingRecord = await prisma[this.modelName].findFirst({
+            where: { key }
+          });
+          if (existingRecord) {
+            const shouldUpdateExpire = forceExpire || !existingRecord.expire || existingRecord.expire <= now || newExpire === null;
+            return prisma[this.modelName].update({
+              where: { key },
+              data: {
+                points: !shouldUpdateExpire ? existingRecord.points + points : points,
+                ...shouldUpdateExpire && { expire: newExpire }
+              }
+            });
+          } else {
+            return prisma[this.modelName].create({
+              data: {
+                key,
+                points,
+                expire: newExpire
+              }
+            });
+          }
+        });
+      }
+      _get(rlKey) {
+        if (!this.prismaClient) {
+          return Promise.reject(new Error("Prisma client is not established"));
+        }
+        return this.prismaClient[this.modelName].findFirst({
+          where: {
+            AND: [
+              { key: rlKey },
+              {
+                OR: [
+                  { expire: { gt: /* @__PURE__ */ new Date() } },
+                  { expire: null }
+                ]
+              }
+            ]
+          }
+        });
+      }
+      _delete(rlKey) {
+        if (!this.prismaClient) {
+          return Promise.reject(new Error("Prisma client is not established"));
+        }
+        return this.prismaClient[this.modelName].deleteMany({
+          where: {
+            key: rlKey
+          }
+        }).then((res) => res.count > 0);
+      }
+      _clearExpiredHourAgo() {
+        if (this._clearExpiredTimeoutId) {
+          clearTimeout(this._clearExpiredTimeoutId);
+        }
+        this._clearExpiredTimeoutId = setTimeout(async () => {
+          await this.prismaClient[this.modelName].deleteMany({
+            where: {
+              expire: {
+                lt: new Date(Date.now() - 36e5)
+              }
+            }
+          });
+          this._clearExpiredHourAgo();
+        }, 3e5);
+        this._clearExpiredTimeoutId.unref();
+      }
+    };
+    module2.exports = RateLimiterPrisma;
+  }
+});
+
+// ../node_modules/rate-limiter-flexible/lib/RateLimiterDrizzle.js
+var require_RateLimiterDrizzle = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/RateLimiterDrizzle.js"(exports2, module2) {
+    var drizzleOperators = null;
+    var CLEANUP_INTERVAL_MS = 3e5;
+    var EXPIRED_THRESHOLD_MS = 36e5;
+    var RateLimiterDrizzleError = class extends Error {
+      static {
+        __name(this, "RateLimiterDrizzleError");
+      }
+      constructor(message) {
+        super(message);
+        this.name = "RateLimiterDrizzleError";
+      }
+    };
+    async function getDrizzleOperators() {
+      if (drizzleOperators) return drizzleOperators;
+      try {
+        let getPackageName2 = function() {
+          return ["drizzle", "orm"].join("-");
+        };
+        var getPackageName = getPackageName2;
+        __name(getPackageName2, "getPackageName");
+        const drizzleOrm = await import(`${getPackageName2()}`);
+        const { and, or, gt, lt, eq, isNull, sql } = drizzleOrm.default || drizzleOrm;
+        drizzleOperators = { and, or, gt, lt, eq, isNull, sql };
+        return drizzleOperators;
+      } catch (error) {
+        throw new RateLimiterDrizzleError(
+          "drizzle-orm is not installed. Please install drizzle-orm to use RateLimiterDrizzle."
+        );
+      }
+    }
+    __name(getDrizzleOperators, "getDrizzleOperators");
+    var RateLimiterStoreAbstract = require_RateLimiterStoreAbstract();
+    var RateLimiterRes = require_RateLimiterRes();
+    var RateLimiterDrizzle = class extends RateLimiterStoreAbstract {
+      static {
+        __name(this, "RateLimiterDrizzle");
+      }
+      constructor(opts) {
+        super(opts);
+        if (!opts?.schema) {
+          throw new RateLimiterDrizzleError("Drizzle schema is required");
+        }
+        if (!opts?.storeClient) {
+          throw new RateLimiterDrizzleError("Drizzle client is required");
+        }
+        this.schema = opts.schema;
+        this.drizzleClient = opts.storeClient;
+        this.clearExpiredByTimeout = opts.clearExpiredByTimeout ?? true;
+        if (this.clearExpiredByTimeout) {
+          this._clearExpiredHourAgo();
+        }
+      }
+      _getRateLimiterRes(rlKey, changedPoints, result) {
+        const res = new RateLimiterRes();
+        let doc = result;
+        res.isFirstInDuration = doc.points === changedPoints;
+        res.consumedPoints = doc.points;
+        res.remainingPoints = Math.max(this.points - res.consumedPoints, 0);
+        res.msBeforeNext = doc.expire !== null ? Math.max(new Date(doc.expire).getTime() - Date.now(), 0) : -1;
+        return res;
+      }
+      async _upsert(key, points, msDuration, forceExpire = false) {
+        if (!this.drizzleClient) {
+          return Promise.reject(new RateLimiterDrizzleError("Drizzle client is not established"));
+        }
+        const { eq, sql } = await getDrizzleOperators();
+        const now = /* @__PURE__ */ new Date();
+        const newExpire = msDuration > 0 ? new Date(now.getTime() + msDuration) : null;
+        const query = await this.drizzleClient.transaction(async (tx) => {
+          const [existingRecord] = await tx.select().from(this.schema).where(eq(this.schema.key, key)).limit(1);
+          const shouldUpdateExpire = forceExpire || !existingRecord?.expire || existingRecord?.expire <= now || newExpire === null;
+          const [data] = await tx.insert(this.schema).values({
+            key,
+            points,
+            expire: newExpire
+          }).onConflictDoUpdate({
+            target: this.schema.key,
+            set: {
+              points: !shouldUpdateExpire ? sql`${this.schema.points} + ${points}` : points,
+              ...shouldUpdateExpire && { expire: newExpire }
+            }
+          }).returning();
+          return data;
+        });
+        return query;
+      }
+      async _get(rlKey) {
+        if (!this.drizzleClient) {
+          return Promise.reject(new RateLimiterDrizzleError("Drizzle client is not established"));
+        }
+        const { and, or, gt, eq, isNull } = await getDrizzleOperators();
+        const [response] = await this.drizzleClient.select().from(this.schema).where(
+          and(
+            eq(this.schema.key, rlKey),
+            or(gt(this.schema.expire, /* @__PURE__ */ new Date()), isNull(this.schema.expire))
+          )
+        ).limit(1);
+        return response || null;
+      }
+      async _delete(rlKey) {
+        if (!this.drizzleClient) {
+          return Promise.reject(new RateLimiterDrizzleError("Drizzle client is not established"));
+        }
+        const { eq } = await getDrizzleOperators();
+        const [result] = await this.drizzleClient.delete(this.schema).where(eq(this.schema.key, rlKey)).returning({ key: this.schema.key });
+        return !!result?.key;
+      }
+      _clearExpiredHourAgo() {
+        if (this._clearExpiredTimeoutId) {
+          clearTimeout(this._clearExpiredTimeoutId);
+        }
+        this._clearExpiredTimeoutId = setTimeout(async () => {
+          try {
+            const { lt } = await getDrizzleOperators();
+            await this.drizzleClient.delete(this.schema).where(lt(this.schema.expire, new Date(Date.now() - EXPIRED_THRESHOLD_MS)));
+          } catch (error) {
+            console.warn("Failed to clear expired records:", error);
+          }
+          this._clearExpiredHourAgo();
+        }, CLEANUP_INTERVAL_MS);
+        this._clearExpiredTimeoutId.unref();
+      }
+    };
+    module2.exports = RateLimiterDrizzle;
+  }
+});
+
+// ../node_modules/rate-limiter-flexible/lib/RateLimiterDrizzleNonAtomic.js
+var require_RateLimiterDrizzleNonAtomic = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/RateLimiterDrizzleNonAtomic.js"(exports2, module2) {
+    var drizzleOperators = null;
+    var CLEANUP_INTERVAL_MS = 3e5;
+    var EXPIRED_THRESHOLD_MS = 36e5;
+    var RateLimiterDrizzleError = class extends Error {
+      static {
+        __name(this, "RateLimiterDrizzleError");
+      }
+      constructor(message) {
+        super(message);
+        this.name = "RateLimiterDrizzleError";
+      }
+    };
+    async function getDrizzleOperators() {
+      if (drizzleOperators) return drizzleOperators;
+      try {
+        let getPackageName2 = function() {
+          return ["drizzle", "orm"].join("-");
+        };
+        var getPackageName = getPackageName2;
+        __name(getPackageName2, "getPackageName");
+        const drizzleOrm = await import(`${getPackageName2()}`);
+        const { and, or, gt, lt, eq, isNull, sql } = drizzleOrm.default || drizzleOrm;
+        drizzleOperators = { and, or, gt, lt, eq, isNull, sql };
+        return drizzleOperators;
+      } catch (error) {
+        throw new RateLimiterDrizzleError(
+          "drizzle-orm is not installed. Please install drizzle-orm to use RateLimiterDrizzleNonAtomic."
+        );
+      }
+    }
+    __name(getDrizzleOperators, "getDrizzleOperators");
+    var RateLimiterStoreAbstract = require_RateLimiterStoreAbstract();
+    var RateLimiterRes = require_RateLimiterRes();
+    var RateLimiterDrizzleNonAtomic = class extends RateLimiterStoreAbstract {
+      static {
+        __name(this, "RateLimiterDrizzleNonAtomic");
+      }
+      constructor(opts) {
+        super(opts);
+        if (!opts?.schema) {
+          throw new RateLimiterDrizzleError("Drizzle schema is required");
+        }
+        if (!opts?.storeClient) {
+          throw new RateLimiterDrizzleError("Drizzle client is required");
+        }
+        this.schema = opts.schema;
+        this.drizzleClient = opts.storeClient;
+        this.clearExpiredByTimeout = opts.clearExpiredByTimeout ?? true;
+        if (this.clearExpiredByTimeout) {
+          this._clearExpiredHourAgo();
+        }
+      }
+      _getRateLimiterRes(rlKey, changedPoints, result) {
+        const res = new RateLimiterRes();
+        let doc = result;
+        res.isFirstInDuration = doc.points === changedPoints;
+        res.consumedPoints = doc.points;
+        res.remainingPoints = Math.max(this.points - res.consumedPoints, 0);
+        res.msBeforeNext = doc.expire !== null ? Math.max(new Date(doc.expire).getTime() - Date.now(), 0) : -1;
+        return res;
+      }
+      async _upsert(key, points, msDuration, forceExpire = false) {
+        if (!this.drizzleClient) {
+          return Promise.reject(new RateLimiterDrizzleError("Drizzle client is not established"));
+        }
+        const { eq } = await getDrizzleOperators();
+        const now = /* @__PURE__ */ new Date();
+        const newExpire = msDuration > 0 ? new Date(now.getTime() + msDuration) : null;
+        const [existingRecord] = await this.drizzleClient.select().from(this.schema).where(eq(this.schema.key, key)).limit(1);
+        const shouldUpdateExpire = forceExpire || !existingRecord || !existingRecord.expire || existingRecord.expire <= now || newExpire === null;
+        let newPoints;
+        if (existingRecord && !shouldUpdateExpire) {
+          newPoints = existingRecord.points + points;
+        } else {
+          newPoints = points;
+        }
+        const [data] = await this.drizzleClient.insert(this.schema).values({
+          key,
+          points: newPoints,
+          expire: newExpire
+        }).onConflictDoUpdate({
+          target: this.schema.key,
+          set: {
+            points: newPoints,
+            ...shouldUpdateExpire && { expire: newExpire }
+          }
+        }).returning();
+        return data;
+      }
+      async _get(rlKey) {
+        if (!this.drizzleClient) {
+          return Promise.reject(new RateLimiterDrizzleError("Drizzle client is not established"));
+        }
+        const { and, or, gt, eq, isNull } = await getDrizzleOperators();
+        const [response] = await this.drizzleClient.select().from(this.schema).where(
+          and(
+            eq(this.schema.key, rlKey),
+            or(gt(this.schema.expire, /* @__PURE__ */ new Date()), isNull(this.schema.expire))
+          )
+        ).limit(1);
+        return response || null;
+      }
+      async _delete(rlKey) {
+        if (!this.drizzleClient) {
+          return Promise.reject(new RateLimiterDrizzleError("Drizzle client is not established"));
+        }
+        const { eq } = await getDrizzleOperators();
+        const [result] = await this.drizzleClient.delete(this.schema).where(eq(this.schema.key, rlKey)).returning({ key: this.schema.key });
+        return !!(result && result.key);
+      }
+      _clearExpiredHourAgo() {
+        if (this._clearExpiredTimeoutId) {
+          clearTimeout(this._clearExpiredTimeoutId);
+        }
+        this._clearExpiredTimeoutId = setTimeout(async () => {
+          try {
+            const { lt } = await getDrizzleOperators();
+            await this.drizzleClient.delete(this.schema).where(lt(this.schema.expire, new Date(Date.now() - EXPIRED_THRESHOLD_MS)));
+          } catch (error) {
+            console.warn("Failed to clear expired records:", error);
+          }
+          this._clearExpiredHourAgo();
+        }, CLEANUP_INTERVAL_MS);
+        this._clearExpiredTimeoutId.unref();
+      }
+    };
+    module2.exports = RateLimiterDrizzleNonAtomic;
+  }
+});
+
+// ../node_modules/rate-limiter-flexible/lib/RateLimiterValkey.js
+var require_RateLimiterValkey = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/RateLimiterValkey.js"(exports2, module2) {
+    var RateLimiterStoreAbstract = require_RateLimiterStoreAbstract();
+    var RateLimiterRes = require_RateLimiterRes();
+    var incrTtlLuaScript = `
+server.call('set', KEYS[1], 0, 'EX', ARGV[2], 'NX')
+local consumed = server.call('incrby', KEYS[1], ARGV[1])
+local ttl = server.call('pttl', KEYS[1])
+return {consumed, ttl}
+`;
+    var RateLimiterValkey = class extends RateLimiterStoreAbstract {
+      static {
+        __name(this, "RateLimiterValkey");
+      }
+      /**
+       *
+       * @param {Object} opts
+       * Defaults {
+       *   ... see other in RateLimiterStoreAbstract
+       *
+       *   storeClient: ValkeyClient
+       *   rejectIfValkeyNotReady: boolean = false - reject / invoke insuranceLimiter immediately when valkey connection is not "ready"
+       * }
+       */
+      constructor(opts) {
+        super(opts);
+        this.client = opts.storeClient;
+        this._rejectIfValkeyNotReady = !!opts.rejectIfValkeyNotReady;
+        this._incrTtlLuaScript = opts.customIncrTtlLuaScript || incrTtlLuaScript;
+        this.client.defineCommand("rlflxIncr", {
+          numberOfKeys: 1,
+          lua: this._incrTtlLuaScript
+        });
+      }
+      /**
+       * Prevent actual valkey call if valkey connection is not ready
+       * @return {boolean}
+       * @private
+       */
+      _isValkeyReady() {
+        if (!this._rejectIfValkeyNotReady) {
+          return true;
+        }
+        return this.client.status === "ready";
+      }
+      _getRateLimiterRes(rlKey, changedPoints, result) {
+        let consumed;
+        let resTtlMs;
+        if (Array.isArray(result[0])) {
+          [[, consumed], [, resTtlMs]] = result;
+        } else {
+          [consumed, resTtlMs] = result;
+        }
+        const res = new RateLimiterRes();
+        res.consumedPoints = +consumed;
+        res.isFirstInDuration = res.consumedPoints === changedPoints;
+        res.remainingPoints = Math.max(this.points - res.consumedPoints, 0);
+        res.msBeforeNext = resTtlMs;
+        return res;
+      }
+      _upsert(rlKey, points, msDuration, forceExpire = false) {
+        if (!this._isValkeyReady()) {
+          throw new Error("Valkey connection is not ready");
+        }
+        const secDuration = Math.floor(msDuration / 1e3);
+        if (forceExpire) {
+          const multi = this.client.multi();
+          if (secDuration > 0) {
+            multi.set(rlKey, points, "EX", secDuration);
+          } else {
+            multi.set(rlKey, points);
+          }
+          return multi.pttl(rlKey).exec();
+        }
+        if (secDuration > 0) {
+          return this.client.rlflxIncr([rlKey, String(points), String(secDuration), String(this.points), String(this.duration)]);
+        }
+        return this.client.multi().incrby(rlKey, points).pttl(rlKey).exec();
+      }
+      _get(rlKey) {
+        if (!this._isValkeyReady()) {
+          throw new Error("Valkey connection is not ready");
+        }
+        return this.client.multi().get(rlKey).pttl(rlKey).exec().then((result) => {
+          const [[, points]] = result;
+          if (points === null) return null;
+          return result;
+        });
+      }
+      _delete(rlKey) {
+        return this.client.del(rlKey).then((result) => result > 0);
+      }
+    };
+    module2.exports = RateLimiterValkey;
+  }
+});
+
+// ../node_modules/rate-limiter-flexible/lib/RateLimiterValkeyGlide.js
+var require_RateLimiterValkeyGlide = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/RateLimiterValkeyGlide.js"(exports2, module2) {
+    var RateLimiterStoreAbstract = require_RateLimiterStoreAbstract();
+    var RateLimiterRes = require_RateLimiterRes();
+    var DEFAULT_LIBRARY_NAME = "ratelimiterflexible";
+    var DEFAULT_VALKEY_SCRIPT = `local key = KEYS[1]
+local pointsToConsume = tonumber(ARGV[1])
+if tonumber(ARGV[2]) > 0 then
+  server.call('set', key, "0", 'EX', ARGV[2], 'NX')
+  local consumed = server.call('incrby', key, pointsToConsume)
+  local pttl = server.call('pttl', key)
+  return {consumed, pttl}
+end
+local consumed = server.call('incrby', key, pointsToConsume)
+local pttl = server.call('pttl', key)
+return {consumed, pttl}`;
+    var GET_VALKEY_SCRIPT = `local key = KEYS[1]
+local value = server.call('get', key)
+if value == nil then
+  return value
+end
+local pttl = server.call('pttl', key)
+return {tonumber(value), pttl}`;
+    var RateLimiterValkeyGlide = class extends RateLimiterStoreAbstract {
+      static {
+        __name(this, "RateLimiterValkeyGlide");
+      }
+      /**
+       * Constructor for RateLimiterValkeyGlide
+       *
+       * @param {Object} opts - Configuration options
+       * @param {GlideClient|GlideClusterClient} opts.storeClient - Valkey Glide client instance (required)
+       * @param {number} [opts.points=4] - Maximum number of points that can be consumed over duration
+       * @param {number} [opts.duration=1] - Duration in seconds before points are reset
+       * @param {number} [opts.blockDuration=0] - Duration in seconds that a key will be blocked for if consumed more than points
+       * @param {boolean} [opts.rejectIfValkeyNotReady=false] - Whether to reject requests if Valkey is not ready
+       * @param {boolean} [opts.execEvenly=false] - Delay actions to distribute them evenly over duration
+       * @param {number} [opts.execEvenlyMinDelayMs] - Minimum delay between actions when execEvenly is true
+       * @param {string} [opts.customFunction] - Custom Lua script for rate limiting logic
+       * @param {number} [opts.inMemoryBlockOnConsumed] - Points threshold for in-memory blocking
+       * @param {number} [opts.inMemoryBlockDuration] - Duration in seconds for in-memory blocking
+       * @param {string} [opts.customFunctionLibName] - Custom name for the function library, defaults to 'ratelimiter'.
+       * The name is used to identify the library of the lua function. An custom name should be used only if you
+       * you want to use different libraries for different rate limiters, otherwise it is not needed.
+       * @param {RateLimiterAbstract} [opts.insuranceLimiter] - Backup limiter to use when the primary client fails
+       *
+       * @example
+       * const rateLimiter = new RateLimiterValkeyGlide({
+       *   storeClient: glideClient,
+       *   points: 5,
+       *   duration: 1
+       * });
+       *
+       * @example <caption>With custom Lua function</caption>
+       * const customScript = `local key = KEYS[1]
+       * local pointsToConsume = tonumber(ARGV[1]) or 0
+       * local secDuration = tonumber(ARGV[2]) or 0
+       *
+       * -- Custom implementation
+       * -- ...
+       *
+       * -- Must return exactly two values: [consumed_points, ttl_in_ms]
+       * return {consumed, ttl}`
+       *
+       * const rateLimiter = new RateLimiterValkeyGlide({
+       *   storeClient: glideClient,
+       *   points: 5,
+       *   customFunction: customScript
+       * });
+       *
+       * @example <caption>With insurance limiter</caption>
+       * const rateLimiter = new RateLimiterValkeyGlide({
+       *   storeClient: primaryGlideClient,
+       *   points: 5,
+       *   duration: 2,
+       *   insuranceLimiter: new RateLimiterMemory({
+       *     points: 5,
+       *     duration: 2
+       *   })
+       * });
+       *
+       * @description
+       * When providing a custom Lua script via `opts.customFunction`, it must:
+       *
+       * 1. Accept parameters:
+       *    - KEYS[1]: The key being rate limited
+       *    - ARGV[1]: Points to consume (as string, use tonumber() to convert)
+       *    - ARGV[2]: Duration in seconds (as string, use tonumber() to convert)
+       *
+       * 2. Return an array with exactly two elements:
+       *    - [0]: Consumed points (number)
+       *    - [1]: TTL in milliseconds (number)
+       *
+       * 3. Handle scenarios:
+       *    - New key creation: Initialize with expiry for fixed windows
+       *    - Key updates: Increment existing counters
+       */
+      constructor(opts) {
+        super(opts);
+        this.client = opts.storeClient;
+        this._scriptLoaded = false;
+        this._getScriptLoaded = false;
+        this._rejectIfValkeyNotReady = !!opts.rejectIfValkeyNotReady;
+        this._luaScript = opts.customFunction || DEFAULT_VALKEY_SCRIPT;
+        this._libraryName = opts.customFunctionLibName || DEFAULT_LIBRARY_NAME;
+      }
+      /**
+       * Ensure scripts are loaded in the Valkey server
+       * @returns {Promise<boolean>} True if scripts are loaded
+       * @private
+       */
+      async _loadScripts() {
+        if (this._scriptLoaded && this._getScriptLoaded) {
+          return true;
+        }
+        if (!this.client) {
+          throw new Error("Valkey client is not set");
+        }
+        const promises = [];
+        if (!this._scriptLoaded) {
+          const script = Buffer.from(`#!lua name=${this._libraryName}
+        local function consume(KEYS, ARGV)
+          ${this._luaScript.trim()}
+        end
+        server.register_function('consume', consume)`);
+          promises.push(this.client.functionLoad(script, { replace: true }));
+        } else promises.push(Promise.resolve(this._libraryName));
+        if (!this._getScriptLoaded) {
+          const script = Buffer.from(`#!lua name=ratelimiter_get
+        local function getValue(KEYS, ARGV)
+          ${GET_VALKEY_SCRIPT.trim()}
+        end
+        server.register_function('getValue', getValue)`);
+          promises.push(this.client.functionLoad(script, { replace: true }));
+        } else promises.push(Promise.resolve("ratelimiter_get"));
+        const results = await Promise.all(promises);
+        this._scriptLoaded = results[0] === this._libraryName;
+        this._getScriptLoaded = results[1] === "ratelimiter_get";
+        if (!this._scriptLoaded || !this._getScriptLoaded) {
+          throw new Error("Valkey connection is not ready, scripts not loaded");
+        }
+        return true;
+      }
+      /**
+       * Update or insert the rate limiter record
+       *
+       * @param {string} rlKey - The rate limiter key
+       * @param {number} pointsToConsume - Points to be consumed
+       * @param {number} msDuration - Duration in milliseconds
+       * @param {boolean} [forceExpire=false] - Whether to force expiration
+       * @param {Object} [options={}] - Additional options
+       * @returns {Promise<Array>} Array containing consumed points and TTL
+       * @private
+       */
+      async _upsert(rlKey, pointsToConsume, msDuration, forceExpire = false, options = {}) {
+        await this._loadScripts();
+        const secDuration = Math.floor(msDuration / 1e3);
+        if (forceExpire) {
+          if (secDuration > 0) {
+            await this.client.set(
+              rlKey,
+              String(pointsToConsume),
+              { expiry: { type: "EX", count: secDuration } }
+            );
+            return [pointsToConsume, secDuration * 1e3];
+          }
+          await this.client.set(rlKey, String(pointsToConsume));
+          return [pointsToConsume, -1];
+        }
+        const result = await this.client.fcall(
+          "consume",
+          [rlKey],
+          [String(pointsToConsume), String(secDuration)]
+        );
+        return result;
+      }
+      /**
+       * Get the rate limiter record
+       *
+       * @param {string} rlKey - The rate limiter key
+       * @param {Object} [options={}] - Additional options
+       * @returns {Promise<Array|null>} Array containing consumed points and TTL, or null if not found
+       * @private
+       */
+      async _get(rlKey, options = {}) {
+        await this._loadScripts();
+        const res = await this.client.fcall("getValue", [rlKey], []);
+        return res.length > 0 ? res : null;
+      }
+      /**
+       * Delete the rate limiter record
+       *
+       * @param {string} rlKey - The rate limiter key
+       * @param {Object} [options={}] - Additional options
+       * @returns {Promise<boolean>} True if successful, false otherwise
+       * @private
+       */
+      async _delete(rlKey, options = {}) {
+        const result = await this.client.del([rlKey]);
+        return result > 0;
+      }
+      /**
+       * Convert raw result to RateLimiterRes object
+       *
+       * @param {string} rlKey - The rate limiter key
+       * @param {number} changedPoints - Points changed in this operation
+       * @param {Array|null} result - Result from Valkey operation
+       * @returns {RateLimiterRes|null} RateLimiterRes object or null if result is null
+       * @private
+       */
+      _getRateLimiterRes(rlKey, changedPoints, result) {
+        if (result === null) {
+          return null;
+        }
+        const res = new RateLimiterRes();
+        const [consumedPointsStr, pttl] = result;
+        const consumedPoints = Number(consumedPointsStr);
+        res.isFirstInDuration = consumedPoints === changedPoints;
+        res.consumedPoints = consumedPoints;
+        res.remainingPoints = Math.max(this.points - res.consumedPoints, 0);
+        res.msBeforeNext = pttl;
+        return res;
+      }
+      /**
+       * Close the rate limiter and release resources
+       * Note: The method won't going to close the Valkey client, as it may be shared with other instances.
+       * @returns {Promise<void>} Promise that resolves when the rate limiter is closed
+       */
+      async close() {
+        if (this._scriptLoaded) {
+          await this.client.functionDelete(this._libraryName);
+          this._scriptLoaded = false;
+        }
+        if (this._getScriptLoaded) {
+          await this.client.functionDelete("ratelimiter_get");
+          this._getScriptLoaded = false;
+        }
+        if (this.insuranceLimiter) {
+          try {
+            await this.insuranceLimiter.close();
+          } catch (e) {
+          }
+        }
+        this.client = null;
+        this._scriptLoaded = false;
+        this._getScriptLoaded = false;
+        this._rejectIfValkeyNotReady = false;
+        this._luaScript = null;
+        this._libraryName = null;
+        this.insuranceLimiter = null;
+      }
+    };
+    module2.exports = RateLimiterValkeyGlide;
+  }
+});
+
+// ../node_modules/rate-limiter-flexible/lib/RateLimiterSQLite.js
+var require_RateLimiterSQLite = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/RateLimiterSQLite.js"(exports2, module2) {
+    var RateLimiterStoreAbstract = require_RateLimiterStoreAbstract();
+    var RateLimiterRes = require_RateLimiterRes();
+    var RateLimiterSQLite = class extends RateLimiterStoreAbstract {
+      static {
+        __name(this, "RateLimiterSQLite");
+      }
+      /**
+       * Internal store type used to determine the SQLite client in use.
+       * It can be one of the following:
+       * - `"sqlite3".
+       * - `"better-sqlite3".
+       *
+       * @type {("sqlite3" | "better-sqlite3" | null)}
+       * @private
+       */
+      _internalStoreType = null;
+      /**
+       * @callback callback
+       * @param {Object} err
+       *
+       * @param {Object} opts
+       * @param {callback} cb
+       * Defaults {
+       *   ... see other in RateLimiterStoreAbstract
+       *   storeClient: sqliteClient, // SQLite database instance (sqlite3, better-sqlite3, or knex instance)
+       *   storeType: 'sqlite3' | 'better-sqlite3' | 'knex', // Optional, defaults to 'sqlite3'
+       *   tableName: 'string',
+       *   tableCreated: boolean,
+       *   clearExpiredByTimeout: boolean,
+       * }
+       */
+      constructor(opts, cb = null) {
+        super(opts);
+        this.client = opts.storeClient;
+        this.storeType = opts.storeType || "sqlite3";
+        this.tableName = opts.tableName;
+        this.tableCreated = opts.tableCreated || false;
+        this.clearExpiredByTimeout = opts.clearExpiredByTimeout;
+        this._validateStoreTypes(cb);
+        this._validateStoreClient(cb);
+        this._setInternalStoreType(cb);
+        this._validateTableName(cb);
+        if (!this.tableCreated) {
+          this._createDbAndTable().then(() => {
+            this.tableCreated = true;
+            if (this.clearExpiredByTimeout) this._clearExpiredHourAgo();
+            if (typeof cb === "function") cb();
+          }).catch((err) => {
+            if (typeof cb === "function") cb(err);
+            else throw err;
+          });
+        } else {
+          if (this.clearExpiredByTimeout) this._clearExpiredHourAgo();
+          if (typeof cb === "function") cb();
+        }
+      }
+      _validateStoreTypes(cb) {
+        const validStoreTypes = ["sqlite3", "better-sqlite3", "knex"];
+        if (!validStoreTypes.includes(this.storeType)) {
+          const err = new Error(
+            `storeType must be one of: ${validStoreTypes.join(", ")}`
+          );
+          if (typeof cb === "function") return cb(err);
+          throw err;
+        }
+      }
+      _validateStoreClient(cb) {
+        if (this.storeType === "sqlite3") {
+          if (typeof this.client.run !== "function") {
+            const err = new Error(
+              "storeClient must be an instance of sqlite3.Database when storeType is 'sqlite3' or no storeType was provided"
+            );
+            if (typeof cb === "function") return cb(err);
+            throw err;
+          }
+        } else if (this.storeType === "better-sqlite3") {
+          if (typeof this.client.prepare !== "function" || typeof this.client.run !== "undefined") {
+            const err = new Error(
+              "storeClient must be an instance of better-sqlite3.Database when storeType is 'better-sqlite3'"
+            );
+            if (typeof cb === "function") return cb(err);
+            throw err;
+          }
+        } else if (this.storeType === "knex") {
+          if (typeof this.client.raw !== "function") {
+            const err = new Error(
+              "storeClient must be an instance of Knex when storeType is 'knex'"
+            );
+            if (typeof cb === "function") return cb(err);
+            throw err;
+          }
+        }
+      }
+      _setInternalStoreType(cb) {
+        if (this.storeType === "knex") {
+          const knexClientType = this.client.client.config.client;
+          if (knexClientType === "sqlite3") {
+            this._internalStoreType = "sqlite3";
+          } else if (knexClientType === "better-sqlite3") {
+            this._internalStoreType = "better-sqlite3";
+          } else {
+            const err = new Error(
+              "Knex must be configured with 'sqlite3' or 'better-sqlite3' for RateLimiterSQLite"
+            );
+            if (typeof cb === "function") return cb(err);
+            throw err;
+          }
+        } else {
+          this._internalStoreType = this.storeType;
+        }
+      }
+      _validateTableName(cb) {
+        if (!/^[A-Za-z0-9_]*$/.test(this.tableName)) {
+          const err = new Error("Table name must contain only letters and numbers");
+          if (typeof cb === "function") return cb(err);
+          throw err;
+        }
+      }
+      /**
+       * Acquires the database connection based on the storeType.
+       * @returns {Promise<Object>} The database client or connection
+       */
+      async _getConnection() {
+        if (this.storeType === "knex") {
+          return this.client.client.acquireConnection();
+        }
+        return this.client;
+      }
+      /**
+       * Releases the database connection if necessary.
+       * @param {Object} conn The database client or connection
+       */
+      _releaseConnection(conn) {
+        if (this.storeType === "knex") {
+          this.client.client.releaseConnection(conn);
+        }
+      }
+      async _createDbAndTable() {
+        const conn = await this._getConnection();
+        try {
+          switch (this._internalStoreType) {
+            case "sqlite3":
+              await new Promise((resolve, reject) => {
+                conn.run(
+                  this._getCreateTableSQL(),
+                  (err) => err ? reject(err) : resolve()
+                );
+              });
+              break;
+            case "better-sqlite3":
+              conn.prepare(this._getCreateTableSQL()).run();
+              break;
+            default:
+              throw new Error("Unsupported internalStoreType");
+          }
+        } finally {
+          this._releaseConnection(conn);
+        }
+      }
+      _getCreateTableSQL() {
+        return `CREATE TABLE IF NOT EXISTS ${this.tableName} (
+      key TEXT PRIMARY KEY,
+      points INTEGER NOT NULL DEFAULT 0,
+      expire INTEGER
+    )`;
+      }
+      _clearExpiredHourAgo() {
+        if (this._clearExpiredTimeoutId) clearTimeout(this._clearExpiredTimeoutId);
+        this._clearExpiredTimeoutId = setTimeout(() => {
+          this.clearExpired(Date.now() - 36e5).then(() => this._clearExpiredHourAgo());
+        }, 3e5);
+        this._clearExpiredTimeoutId.unref();
+      }
+      async clearExpired(nowMs) {
+        const sql = `DELETE FROM ${this.tableName} WHERE expire < ?`;
+        const conn = await this._getConnection();
+        try {
+          switch (this._internalStoreType) {
+            case "sqlite3":
+              await new Promise((resolve, reject) => {
+                conn.run(sql, [nowMs], (err) => err ? reject(err) : resolve());
+              });
+              break;
+            case "better-sqlite3":
+              conn.prepare(sql).run(nowMs);
+              break;
+            default:
+              throw new Error("Unsupported internalStoreType");
+          }
+        } finally {
+          this._releaseConnection(conn);
+        }
+      }
+      _getRateLimiterRes(rlKey, changedPoints, result) {
+        const res = new RateLimiterRes();
+        res.isFirstInDuration = changedPoints === result.points;
+        res.consumedPoints = res.isFirstInDuration ? changedPoints : result.points;
+        res.remainingPoints = Math.max(this.points - res.consumedPoints, 0);
+        res.msBeforeNext = result.expire ? Math.max(result.expire - Date.now(), 0) : -1;
+        return res;
+      }
+      async _upsertTransactionSQLite3(conn, upsertQuery, upsertParams) {
+        return await new Promise((resolve, reject) => {
+          conn.serialize(() => {
+            conn.run("SAVEPOINT rate_limiter_trx;", (err) => {
+              if (err) return reject(err);
+              conn.get(upsertQuery, upsertParams, (err2, row) => {
+                if (err2) {
+                  conn.run(
+                    "ROLLBACK TO SAVEPOINT rate_limiter_trx;",
+                    () => reject(err2)
+                  );
+                  return;
+                }
+                conn.run("RELEASE SAVEPOINT rate_limiter_trx;", () => resolve(row));
+              });
+            });
+          });
+        });
+      }
+      async _upsertTransactionBetterSQLite3(conn, upsertQuery, upsertParams) {
+        return conn.transaction(
+          () => conn.prepare(upsertQuery).get(...upsertParams)
+        )();
+      }
+      async _upsertTransaction(rlKey, points, msDuration, forceExpire) {
+        const dateNow = Date.now();
+        const newExpire = msDuration > 0 ? dateNow + msDuration : null;
+        const upsertQuery = forceExpire ? `INSERT OR REPLACE INTO ${this.tableName} (key, points, expire) VALUES (?, ?, ?) RETURNING points, expire` : `INSERT INTO ${this.tableName} (key, points, expire)
+         VALUES (?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET
+           points = CASE WHEN expire IS NULL OR expire > ? THEN points + excluded.points ELSE excluded.points END,
+           expire = CASE WHEN expire IS NULL OR expire > ? THEN expire ELSE excluded.expire END
+         RETURNING points, expire`;
+        const upsertParams = forceExpire ? [rlKey, points, newExpire] : [rlKey, points, newExpire, dateNow, dateNow];
+        const conn = await this._getConnection();
+        try {
+          switch (this._internalStoreType) {
+            case "sqlite3":
+              return this._upsertTransactionSQLite3(
+                conn,
+                upsertQuery,
+                upsertParams
+              );
+            case "better-sqlite3":
+              return this._upsertTransactionBetterSQLite3(
+                conn,
+                upsertQuery,
+                upsertParams
+              );
+            default:
+              throw new Error("Unsupported internalStoreType");
+          }
+        } finally {
+          this._releaseConnection(conn);
+        }
+      }
+      _upsert(rlKey, points, msDuration, forceExpire = false) {
+        if (!this.tableCreated) {
+          return Promise.reject(new Error("Table is not created yet"));
+        }
+        return this._upsertTransaction(rlKey, points, msDuration, forceExpire);
+      }
+      async _get(rlKey) {
+        const sql = `SELECT points, expire FROM ${this.tableName} WHERE key = ? AND (expire > ? OR expire IS NULL)`;
+        const now = Date.now();
+        const conn = await this._getConnection();
+        try {
+          switch (this._internalStoreType) {
+            case "sqlite3":
+              return await new Promise((resolve, reject) => {
+                conn.get(
+                  sql,
+                  [rlKey, now],
+                  (err, row) => err ? reject(err) : resolve(row || null)
+                );
+              });
+            case "better-sqlite3":
+              return conn.prepare(sql).get(rlKey, now) || null;
+            default:
+              throw new Error("Unsupported internalStoreType");
+          }
+        } finally {
+          this._releaseConnection(conn);
+        }
+      }
+      async _delete(rlKey) {
+        if (!this.tableCreated) {
+          return Promise.reject(new Error("Table is not created yet"));
+        }
+        const sql = `DELETE FROM ${this.tableName} WHERE key = ?`;
+        const conn = await this._getConnection();
+        try {
+          switch (this._internalStoreType) {
+            case "sqlite3":
+              return await new Promise((resolve, reject) => {
+                conn.run(sql, [rlKey], function(err) {
+                  if (err) reject(err);
+                  else resolve(this.changes > 0);
+                });
+              });
+            case "better-sqlite3":
+              const result = conn.prepare(sql).run(rlKey);
+              return result.changes > 0;
+            default:
+              throw new Error("Unsupported internalStoreType");
+          }
+        } finally {
+          this._releaseConnection(conn);
+        }
+      }
+    };
+    module2.exports = RateLimiterSQLite;
+  }
+});
+
+// ../node_modules/rate-limiter-flexible/lib/component/RateLimiterEtcdTransactionFailedError.js
+var require_RateLimiterEtcdTransactionFailedError = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/component/RateLimiterEtcdTransactionFailedError.js"(exports2, module2) {
+    module2.exports = class RateLimiterEtcdTransactionFailedError extends Error {
+      static {
+        __name(this, "RateLimiterEtcdTransactionFailedError");
+      }
+      constructor(message) {
+        super();
+        if (Error.captureStackTrace) {
+          Error.captureStackTrace(this, this.constructor);
+        }
+        this.name = "RateLimiterEtcdTransactionFailedError";
+        this.message = message;
+      }
+    };
+  }
+});
+
+// ../node_modules/rate-limiter-flexible/lib/component/RateLimiterSetupError.js
+var require_RateLimiterSetupError = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/component/RateLimiterSetupError.js"(exports2, module2) {
+    module2.exports = class RateLimiterSetupError extends Error {
+      static {
+        __name(this, "RateLimiterSetupError");
+      }
+      constructor(message) {
+        super();
+        if (Error.captureStackTrace) {
+          Error.captureStackTrace(this, this.constructor);
+        }
+        this.name = "RateLimiterSetupError";
+        this.message = message;
+      }
+    };
+  }
+});
+
+// ../node_modules/rate-limiter-flexible/lib/RateLimiterEtcdNonAtomic.js
+var require_RateLimiterEtcdNonAtomic = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/RateLimiterEtcdNonAtomic.js"(exports2, module2) {
+    var RateLimiterStoreAbstract = require_RateLimiterStoreAbstract();
+    var RateLimiterRes = require_RateLimiterRes();
+    var RateLimiterSetupError = require_RateLimiterSetupError();
+    var RateLimiterEtcdNonAtomic = class extends RateLimiterStoreAbstract {
+      static {
+        __name(this, "RateLimiterEtcdNonAtomic");
+      }
+      /**
+       * @param {Object} opts
+       */
+      constructor(opts) {
+        super(opts);
+        if (!opts.storeClient) {
+          throw new RateLimiterSetupError('You need to set the option "storeClient" to an instance of class "Etcd3".');
+        }
+        this.client = opts.storeClient;
+      }
+      /**
+       * Get RateLimiterRes object filled depending on storeResult, which specific for exact store.
+       */
+      _getRateLimiterRes(rlKey, changedPoints, result) {
+        const res = new RateLimiterRes();
+        res.isFirstInDuration = changedPoints === result.points;
+        res.consumedPoints = res.isFirstInDuration ? changedPoints : result.points;
+        res.remainingPoints = Math.max(this.points - res.consumedPoints, 0);
+        res.msBeforeNext = result.expire ? Math.max(result.expire - Date.now(), 0) : -1;
+        return res;
+      }
+      /**
+       * Resolve with object used for {@link _getRateLimiterRes} to generate {@link RateLimiterRes}.
+       */
+      async _upsert(rlKey, points, msDuration, forceExpire = false) {
+        const expire = msDuration > 0 ? Date.now() + msDuration : null;
+        let newValue = { points, expire };
+        if (forceExpire) {
+          await this.client.put(rlKey).value(JSON.stringify(newValue));
+        } else {
+          const oldValue = await this._get(rlKey);
+          newValue = { points: (oldValue !== null ? oldValue.points : 0) + points, expire };
+          await this.client.put(rlKey).value(JSON.stringify(newValue));
+        }
+        return newValue;
+      }
+      /**
+       * Resolve with raw result from Store OR null if rlKey is not set
+       * or Reject with error
+       */
+      async _get(rlKey) {
+        return this.client.get(rlKey).string().then((result) => result !== null ? JSON.parse(result) : null);
+      }
+      /**
+       * Resolve with true OR false if rlKey doesn't exist.
+       * or Reject with error.
+       */
+      async _delete(rlKey) {
+        return this.client.delete().key(rlKey).then((result) => result.deleted === "1");
+      }
+    };
+    module2.exports = RateLimiterEtcdNonAtomic;
+  }
+});
+
+// ../node_modules/rate-limiter-flexible/lib/RateLimiterEtcd.js
+var require_RateLimiterEtcd = __commonJS({
+  "../node_modules/rate-limiter-flexible/lib/RateLimiterEtcd.js"(exports2, module2) {
+    var RateLimiterEtcdTransactionFailedError = require_RateLimiterEtcdTransactionFailedError();
+    var RateLimiterEtcdNonAtomic = require_RateLimiterEtcdNonAtomic();
+    var MAX_TRANSACTION_TRIES = 5;
+    var RateLimiterEtcd = class extends RateLimiterEtcdNonAtomic {
+      static {
+        __name(this, "RateLimiterEtcd");
+      }
+      /**
+       * Resolve with object used for {@link _getRateLimiterRes} to generate {@link RateLimiterRes}.
+       */
+      async _upsert(rlKey, points, msDuration, forceExpire = false) {
+        const expire = msDuration > 0 ? Date.now() + msDuration : null;
+        let newValue = { points, expire };
+        let oldValue;
+        if (forceExpire) {
+          await this.client.put(rlKey).value(JSON.stringify(newValue));
+        } else {
+          const added = await this.client.if(rlKey, "Version", "===", "0").then(this.client.put(rlKey).value(JSON.stringify(newValue))).commit().then((result) => !!result.succeeded);
+          if (!added) {
+            let success = false;
+            for (let i = 0; i < MAX_TRANSACTION_TRIES; i++) {
+              oldValue = await this._get(rlKey);
+              newValue = { points: oldValue.points + points, expire };
+              success = await this.client.if(rlKey, "Value", "===", JSON.stringify(oldValue)).then(this.client.put(rlKey).value(JSON.stringify(newValue))).commit().then((result) => !!result.succeeded);
+              if (success) {
+                break;
+              }
+            }
+            if (!success) {
+              throw new RateLimiterEtcdTransactionFailedError("Could not set new value in a transaction.");
+            }
+          }
+        }
+        return newValue;
+      }
+    };
+    module2.exports = RateLimiterEtcd;
+  }
+});
+
 // ../node_modules/rate-limiter-flexible/index.js
 var require_rate_limiter_flexible = __commonJS({
   "../node_modules/rate-limiter-flexible/index.js"(exports2, module2) {
@@ -16321,6 +17570,16 @@ var require_rate_limiter_flexible = __commonJS({
     var BurstyRateLimiter = require_BurstyRateLimiter();
     var RateLimiterRes = require_RateLimiterRes();
     var RateLimiterDynamo = require_RateLimiterDynamo();
+    var RateLimiterPrisma = require_RateLimiterPrisma();
+    var RateLimiterDrizzle = require_RateLimiterDrizzle();
+    var RateLimiterDrizzleNonAtomic = require_RateLimiterDrizzleNonAtomic();
+    var RateLimiterValkey = require_RateLimiterValkey();
+    var RateLimiterValkeyGlide = require_RateLimiterValkeyGlide();
+    var RateLimiterSQLite = require_RateLimiterSQLite();
+    var RateLimiterEtcd = require_RateLimiterEtcd();
+    var RateLimiterEtcdNonAtomic = require_RateLimiterEtcdNonAtomic();
+    var RateLimiterQueueError = require_RateLimiterQueueError();
+    var RateLimiterEtcdTransactionFailedError = require_RateLimiterEtcdTransactionFailedError();
     module2.exports = {
       RateLimiterRedis,
       RateLimiterMongo,
@@ -16336,7 +17595,17 @@ var require_rate_limiter_flexible = __commonJS({
       RateLimiterQueue,
       BurstyRateLimiter,
       RateLimiterRes,
-      RateLimiterDynamo
+      RateLimiterDynamo,
+      RateLimiterPrisma,
+      RateLimiterValkey,
+      RateLimiterValkeyGlide,
+      RateLimiterSQLite,
+      RateLimiterEtcd,
+      RateLimiterDrizzle,
+      RateLimiterDrizzleNonAtomic,
+      RateLimiterEtcdNonAtomic,
+      RateLimiterQueueError,
+      RateLimiterEtcdTransactionFailedError
     };
   }
 });
@@ -17881,12 +19150,13 @@ var require_dist = __commonJS({
       asStream = false,
       method = "GET"
     } = {}) {
-      const { headers: preconfiguredHeaders, authHeaders, url } = resourceOptions;
+      const { headers: preconfiguredHeaders, authHeaders, url, agent } = resourceOptions;
       const defaultOptions = {
         method,
         asStream,
         signal,
-        prefixUrl: url
+        prefixUrl: url,
+        agent
       };
       defaultOptions.headers = { ...preconfiguredHeaders };
       if (sudo) defaultOptions.headers.sudo = `${sudo}`;
@@ -17907,14 +19177,15 @@ var require_dist = __commonJS({
       return Promise.resolve(defaultOptions);
     }
     __name(defaultOptionsHandler, "defaultOptionsHandler");
-    function createRateLimiters(rateLimitOptions = {}) {
+    function createRateLimiters(rateLimitOptions = {}, rateLimitDuration = 60) {
       const rateLimiters = {};
       Object.entries(rateLimitOptions).forEach(([key, config]) => {
-        if (typeof config === "number") rateLimiters[key] = generateRateLimiterFn(config, 60);
+        if (typeof config === "number")
+          rateLimiters[key] = generateRateLimiterFn(config, rateLimitDuration);
         else
           rateLimiters[key] = {
             method: config.method.toUpperCase(),
-            limit: generateRateLimiterFn(config.limit, 60)
+            limit: generateRateLimiterFn(config.limit, rateLimitDuration)
           };
       });
       return rateLimiters;
@@ -17924,7 +19195,10 @@ var require_dist = __commonJS({
       const methods = ["get", "post", "put", "patch", "delete"];
       return (serviceOptions) => {
         const requester = {};
-        const rateLimiters = createRateLimiters(serviceOptions.rateLimits);
+        const rateLimiters = createRateLimiters(
+          serviceOptions.rateLimits,
+          serviceOptions.rateLimitDuration
+        );
         methods.forEach((m) => {
           requester[m] = async (endpoint, options) => {
             const defaultRequestOptions = await defaultOptionsHandler(serviceOptions, {
@@ -17939,21 +19213,28 @@ var require_dist = __commonJS({
       };
     }
     __name(createRequesterFn, "createRequesterFn");
-    function extendClass(Base, customConfig) {
-      return class extends Base {
-        constructor(...options) {
-          const [config, ...opts] = options;
-          super({ ...customConfig, ...config }, ...opts);
+    function createPresetConstructor(Constructor, presetConfig) {
+      return class extends Constructor {
+        constructor(...args) {
+          const [config, ...rest] = args;
+          super({ ...presetConfig, ...config }, ...rest);
         }
       };
     }
-    __name(extendClass, "extendClass");
+    __name(createPresetConstructor, "createPresetConstructor");
     function presetResourceArguments(resources, customConfig = {}) {
-      const updated = {};
-      Object.entries(resources).filter(([, s]) => typeof s === "function").forEach(([k, r]) => {
-        updated[k] = extendClass(r, customConfig);
+      const result = {};
+      Object.entries(resources).forEach(([key, Constructor]) => {
+        if (typeof Constructor === "function") {
+          result[key] = createPresetConstructor(
+            Constructor,
+            customConfig
+          );
+        } else {
+          result[key] = Constructor;
+        }
       });
-      return updated;
+      return result;
     }
     __name(presetResourceArguments, "presetResourceArguments");
     function getMatchingRateLimiter(endpoint, rateLimiters = {}, method = "GET") {
@@ -18016,17 +19297,17 @@ var require_dist = __commonJS({
       headers;
       authHeaders;
       camelize;
-      rejectUnauthorized;
       constructor({
         sudo,
         profileToken,
         camelize,
         requesterFn,
+        agent,
         profileMode = "execution",
         host = "https://gitlab.com",
         prefixUrl = "",
-        rejectUnauthorized = true,
         queryTimeout = 3e5,
+        rateLimitDuration = 60,
         rateLimits = DEFAULT_RATE_LIMITS,
         ...tokens
       }) {
@@ -18034,7 +19315,6 @@ var require_dist = __commonJS({
         this.url = [host, "api", "v4", prefixUrl].join("/");
         this.headers = {};
         this.authHeaders = {};
-        this.rejectUnauthorized = rejectUnauthorized;
         this.camelize = camelize;
         this.queryTimeout = queryTimeout;
         if ("oauthToken" in tokens)
@@ -18051,7 +19331,7 @@ var require_dist = __commonJS({
           this.headers["X-Profile-Mode"] = profileMode;
         }
         if (sudo) this.headers.Sudo = `${sudo}`;
-        this.requester = requesterFn({ ...this, rateLimits });
+        this.requester = requesterFn({ ...this, rateLimits, rateLimitDuration, agent });
       }
     };
     var GitbeakerRequestError = class extends Error {
@@ -19356,11 +20636,11 @@ var require_dist2 = __commonJS({
         super({ prefixUrl: resourceType, ...options });
         this.resource2Type = resource2Type;
       }
-      addNote(resourceId, resource2Id, discussionId, noteId, body, options) {
+      addNote(resourceId, resource2Id, discussionId, body, options) {
         return RequestHelper.post()(
           this,
           endpoint`${resourceId}/${this.resource2Type}/${resource2Id}/discussions/${discussionId}/notes`,
-          { ...options, body, noteId }
+          { ...options, body }
         );
       }
       all(resourceId, resource2Id, options) {
@@ -19553,11 +20833,29 @@ var require_dist2 = __commonJS({
           options
         );
       }
-      download(resourceId, uploadId, options) {
-        return RequestHelper.get()(this, endpoint`${resourceId}/uploads/${uploadId}`, options);
+      download(resourceId, uploadIdOrSecret, filename, options) {
+        if (filename && typeof filename === "string") {
+          return RequestHelper.get()(
+            this,
+            endpoint`${resourceId}/uploads/${uploadIdOrSecret}/${filename}`,
+            options
+          );
+        }
+        return RequestHelper.get()(
+          this,
+          endpoint`${resourceId}/uploads/${uploadIdOrSecret}`,
+          options
+        );
       }
-      remove(resourceId, uploadId, options) {
-        return RequestHelper.del()(this, endpoint`${resourceId}/uploads/${uploadId}`, options);
+      remove(resourceId, uploadIdOrSecret, filename, options) {
+        if (filename && typeof filename === "string") {
+          return RequestHelper.del()(
+            this,
+            endpoint`${resourceId}/uploads/${uploadIdOrSecret}/${filename}`,
+            options
+          );
+        }
+        return RequestHelper.del()(this, endpoint`${resourceId}/uploads/${uploadIdOrSecret}`, options);
       }
     };
     var ResourceMembers = class extends requesterUtils.BaseResource {
@@ -21142,6 +22440,13 @@ var require_dist2 = __commonJS({
           options
         );
       }
+      showSequence(projectId, sha, options) {
+        return RequestHelper.get()(
+          this,
+          endpoint`projects/${projectId}/repository/commits/${sha}/sequence`,
+          options
+        );
+      }
     };
     var ContainerRegistry = class extends requesterUtils.BaseResource {
       static {
@@ -22559,7 +23864,7 @@ var require_dist2 = __commonJS({
       }
       showChanges(projectId, mergerequestIId, options) {
         process.emitWarning(
-          'This endpoint was deprecated in Gitlab API 15.7 and will be removed in API v5. Please use the "allDiffs" function instead.',
+          'This endpoint was deprecated in GitLab API 15.7 and will be removed in API v5. Please use the "allDiffs" function instead.',
           "DeprecationWarning"
         );
         return RequestHelper.get()(
@@ -25549,6 +26854,22 @@ var require_dist2 = __commonJS({
         return RequestHelper.post()(this, endpoint`users/${userId}/unfollow`, options);
       }
     };
+    var MergeRequestStateEvents = class extends ResourceStateEvents {
+      static {
+        __name(this, "MergeRequestStateEvents");
+      }
+      constructor(options) {
+        super("projects", "merge_requests", options);
+      }
+    };
+    var EpicStateEvents = class extends ResourceStateEvents {
+      static {
+        __name(this, "EpicStateEvents");
+      }
+      constructor(options) {
+        super("groups", "epics", options);
+      }
+    };
     var resources = {
       Agents,
       AlertManagement,
@@ -25640,6 +26961,7 @@ var require_dist2 = __commonJS({
       MergeRequestDiscussions,
       MergeRequestLabelEvents,
       MergeRequestMilestoneEvents,
+      MergeRequestStateEvents,
       MergeRequestDraftNotes,
       MergeRequestNotes,
       MergeRequestNoteAwardEmojis,
@@ -25704,6 +27026,7 @@ var require_dist2 = __commonJS({
       EpicLinks,
       EpicNotes,
       Epics,
+      EpicStateEvents,
       GroupAccessRequests,
       GroupAccessTokens,
       GroupActivityAnalytics,
@@ -26044,7 +27367,7 @@ var require_dist3 = __commonJS({
     async function defaultRequestHandler(endpoint, options) {
       const retryCodes = [429, 502];
       const maxRetries = 10;
-      const { prefixUrl, asStream, searchParams, rateLimiters, method, ...opts } = options || {};
+      const { rateLimiters, agent, asStream, prefixUrl, searchParams, method, ...opts } = options || {};
       const rateLimit = requesterUtils.getMatchingRateLimiter(endpoint, rateLimiters, method);
       let lastStatus;
       let baseUrl;
@@ -26054,8 +27377,10 @@ var require_dist3 = __commonJS({
       const mode = getConditionalMode(endpoint);
       for (let i = 0; i < maxRetries; i += 1) {
         const request = new Request(url, { ...opts, method, mode });
+        const fetchArgs = [request];
+        if (agent) fetchArgs.push({ dispatcher: agent });
         await rateLimit();
-        const response = await fetch(request).catch((e) => {
+        const response = await fetch(...fetchArgs).catch((e) => {
           if (e.name === "TimeoutError" || e.name === "AbortError") {
             throw new requesterUtils.GitbeakerTimeoutError("Query timeout was reached");
           }
@@ -26076,203 +27401,200 @@ var require_dist3 = __commonJS({
       (_, reqo) => Promise.resolve(reqo),
       defaultRequestHandler
     );
-    var { AccessLevel: AL, ...Resources } = CORE__namespace;
+    var { AccessLevel, ...Resources } = CORE__namespace;
     var API = requesterUtils.presetResourceArguments(Resources, { requesterFn });
-    var AccessLevel = AL;
-    var {
-      Agents,
-      AlertManagement,
-      ApplicationAppearance,
-      ApplicationPlanLimits,
-      Applications,
-      ApplicationSettings,
-      ApplicationStatistics,
-      AuditEvents,
-      Avatar,
-      BroadcastMessages,
-      CodeSuggestions,
-      Composer,
-      Conan,
-      DashboardAnnotations,
-      Debian,
-      DependencyProxy,
-      DeployKeys,
-      DeployTokens,
-      DockerfileTemplates,
-      Events,
-      Experiments,
-      GeoNodes,
-      GeoSites,
-      GitignoreTemplates,
-      GitLabCIYMLTemplates,
-      Import,
-      InstanceLevelCICDVariables,
-      Keys,
-      License,
-      LicenseTemplates,
-      Lint,
-      Markdown,
-      Maven,
-      Metadata,
-      Migrations,
-      Namespaces,
-      NotificationSettings,
-      NPM,
-      NuGet,
-      PersonalAccessTokens,
-      PyPI,
-      RubyGems,
-      Search,
-      SearchAdmin,
-      ServiceAccounts,
-      ServiceData,
-      SidekiqMetrics,
-      SidekiqQueues,
-      SnippetRepositoryStorageMoves,
-      Snippets,
-      Suggestions,
-      SystemHooks,
-      TodoLists,
-      Topics,
-      Branches,
-      CommitDiscussions,
-      Commits,
-      ContainerRegistry,
-      Deployments,
-      Environments,
-      ErrorTrackingClientKeys,
-      ErrorTrackingSettings,
-      ExternalStatusChecks,
-      FeatureFlags,
-      FeatureFlagUserLists,
-      FreezePeriods,
-      GitlabPages,
-      GoProxy,
-      Helm,
-      Integrations,
-      IssueAwardEmojis,
-      IssueDiscussions,
-      IssueIterationEvents,
-      IssueLabelEvents,
-      IssueLinks,
-      IssueMilestoneEvents,
-      IssueNoteAwardEmojis,
-      IssueNotes,
-      Issues,
-      IssuesStatistics,
-      IssueStateEvents,
-      IssueWeightEvents,
-      JobArtifacts,
-      Jobs,
-      MergeRequestApprovals,
-      MergeRequestAwardEmojis,
-      MergeRequestContextCommits,
-      MergeRequestDiscussions,
-      MergeRequestLabelEvents,
-      MergeRequestMilestoneEvents,
-      MergeRequestDraftNotes,
-      MergeRequestNotes,
-      MergeRequestNoteAwardEmojis,
-      MergeRequests,
-      MergeTrains,
-      PackageRegistry,
-      Packages,
-      PagesDomains,
-      Pipelines,
-      PipelineSchedules,
-      PipelineScheduleVariables,
-      PipelineTriggerTokens,
-      ProductAnalytics,
-      ProjectAccessRequests,
-      ProjectAccessTokens,
-      ProjectAliases,
-      ProjectBadges,
-      ProjectCustomAttributes,
-      ProjectDORA4Metrics,
-      ProjectHooks,
-      ProjectImportExports,
-      ProjectInvitations,
-      ProjectIssueBoards,
-      ProjectIterations,
-      ProjectJobTokenScopes,
-      ProjectLabels,
-      ProjectMarkdownUploads,
-      ProjectMembers,
-      ProjectMilestones,
-      ProjectProtectedEnvironments,
-      ProjectPushRules,
-      ProjectRelationsExport,
-      ProjectReleases,
-      ProjectRemoteMirrors,
-      ProjectRepositoryStorageMoves,
-      Projects,
-      ProjectSnippetAwardEmojis,
-      ProjectSnippetDiscussions,
-      ProjectSnippetNotes,
-      ProjectSnippets,
-      ProjectStatistics,
-      ProjectTemplates,
-      ProjectTerraformState,
-      ProjectVariables,
-      ProjectVulnerabilities,
-      ProjectWikis,
-      ProtectedBranches,
-      ProtectedTags,
-      ReleaseLinks,
-      Repositories,
-      RepositoryFiles,
-      RepositorySubmodules,
-      ResourceGroups,
-      Runners,
-      SecureFiles,
-      Tags,
-      UserStarredMetricsDashboard,
-      EpicAwardEmojis,
-      EpicDiscussions,
-      EpicIssues,
-      EpicLabelEvents,
-      EpicLinks,
-      EpicNotes,
-      Epics,
-      GroupAccessRequests,
-      GroupAccessTokens,
-      GroupActivityAnalytics,
-      GroupBadges,
-      GroupCustomAttributes,
-      GroupDORA4Metrics,
-      GroupEpicBoards,
-      GroupHooks,
-      GroupImportExports,
-      GroupInvitations,
-      GroupIssueBoards,
-      GroupIterations,
-      GroupLabels,
-      GroupLDAPLinks,
-      GroupMarkdownUploads,
-      GroupMembers,
-      GroupMemberRoles,
-      GroupMilestones,
-      GroupProtectedEnvironments,
-      GroupPushRules,
-      GroupRelationExports,
-      GroupReleases,
-      GroupRepositoryStorageMoves,
-      Groups,
-      GroupSAMLIdentities,
-      GroupSAMLLinks,
-      GroupSCIMIdentities,
-      GroupServiceAccounts,
-      GroupVariables,
-      GroupWikis,
-      LinkedEpics,
-      UserCustomAttributes,
-      UserEmails,
-      UserGPGKeys,
-      UserImpersonationTokens,
-      Users,
-      UserSSHKeys,
-      Gitlab
-    } = API;
+    var { Agents } = API;
+    var { AlertManagement } = API;
+    var { ApplicationAppearance } = API;
+    var { ApplicationPlanLimits } = API;
+    var { Applications } = API;
+    var { ApplicationSettings } = API;
+    var { ApplicationStatistics } = API;
+    var { AuditEvents } = API;
+    var { Avatar } = API;
+    var { Branches } = API;
+    var { BroadcastMessages } = API;
+    var { CodeSuggestions } = API;
+    var { CommitDiscussions } = API;
+    var { Commits } = API;
+    var { Composer } = API;
+    var { Conan } = API;
+    var { ContainerRegistry } = API;
+    var { DashboardAnnotations } = API;
+    var { Debian } = API;
+    var { DependencyProxy } = API;
+    var { DeployKeys } = API;
+    var { DeployTokens } = API;
+    var { Deployments } = API;
+    var { DockerfileTemplates } = API;
+    var { Environments } = API;
+    var { EpicAwardEmojis } = API;
+    var { EpicDiscussions } = API;
+    var { EpicIssues } = API;
+    var { EpicLabelEvents } = API;
+    var { EpicLinks } = API;
+    var { EpicNotes } = API;
+    var { Epics } = API;
+    var { ErrorTrackingClientKeys } = API;
+    var { ErrorTrackingSettings } = API;
+    var { Events } = API;
+    var { Experiments } = API;
+    var { ExternalStatusChecks } = API;
+    var { FeatureFlags } = API;
+    var { FeatureFlagUserLists } = API;
+    var { FreezePeriods } = API;
+    var { GeoNodes } = API;
+    var { GeoSites } = API;
+    var { GitignoreTemplates } = API;
+    var { GitLabCIYMLTemplates } = API;
+    var { GitlabPages } = API;
+    var { GoProxy } = API;
+    var { GroupAccessRequests } = API;
+    var { GroupAccessTokens } = API;
+    var { GroupActivityAnalytics } = API;
+    var { GroupBadges } = API;
+    var { GroupCustomAttributes } = API;
+    var { GroupDORA4Metrics } = API;
+    var { GroupEpicBoards } = API;
+    var { GroupHooks } = API;
+    var { GroupImportExports } = API;
+    var { GroupInvitations } = API;
+    var { GroupIssueBoards } = API;
+    var { GroupIterations } = API;
+    var { GroupLabels } = API;
+    var { GroupLDAPLinks } = API;
+    var { GroupMarkdownUploads } = API;
+    var { GroupMemberRoles } = API;
+    var { GroupMembers } = API;
+    var { GroupMilestones } = API;
+    var { GroupProtectedEnvironments } = API;
+    var { GroupPushRules } = API;
+    var { GroupRelationExports } = API;
+    var { GroupReleases } = API;
+    var { GroupRepositoryStorageMoves } = API;
+    var { Groups } = API;
+    var { GroupSAMLIdentities } = API;
+    var { GroupSAMLLinks } = API;
+    var { GroupSCIMIdentities } = API;
+    var { GroupServiceAccounts } = API;
+    var { GroupVariables } = API;
+    var { GroupWikis } = API;
+    var { Helm } = API;
+    var { Import } = API;
+    var { InstanceLevelCICDVariables } = API;
+    var { Integrations } = API;
+    var { IssueAwardEmojis } = API;
+    var { IssueDiscussions } = API;
+    var { IssueIterationEvents } = API;
+    var { IssueLabelEvents } = API;
+    var { IssueLinks } = API;
+    var { IssueMilestoneEvents } = API;
+    var { IssueNoteAwardEmojis } = API;
+    var { IssueNotes } = API;
+    var { Issues } = API;
+    var { IssuesStatistics } = API;
+    var { IssueStateEvents } = API;
+    var { IssueWeightEvents } = API;
+    var { JobArtifacts } = API;
+    var { Jobs } = API;
+    var { Keys } = API;
+    var { License } = API;
+    var { LicenseTemplates } = API;
+    var { LinkedEpics } = API;
+    var { Lint } = API;
+    var { Markdown } = API;
+    var { Maven } = API;
+    var { MergeRequestApprovals } = API;
+    var { MergeRequestAwardEmojis } = API;
+    var { MergeRequestContextCommits } = API;
+    var { MergeRequestDiscussions } = API;
+    var { MergeRequestDraftNotes } = API;
+    var { MergeRequestLabelEvents } = API;
+    var { MergeRequestMilestoneEvents } = API;
+    var { MergeRequestNoteAwardEmojis } = API;
+    var { MergeRequestNotes } = API;
+    var { MergeRequests } = API;
+    var { MergeTrains } = API;
+    var { Metadata } = API;
+    var { Migrations } = API;
+    var { Namespaces } = API;
+    var { NotificationSettings } = API;
+    var { NPM } = API;
+    var { NuGet } = API;
+    var { PackageRegistry } = API;
+    var { Packages } = API;
+    var { PagesDomains } = API;
+    var { PersonalAccessTokens } = API;
+    var { PipelineSchedules } = API;
+    var { PipelineScheduleVariables } = API;
+    var { Pipelines } = API;
+    var { PipelineTriggerTokens } = API;
+    var { ProductAnalytics } = API;
+    var { ProjectAccessRequests } = API;
+    var { ProjectAccessTokens } = API;
+    var { ProjectAliases } = API;
+    var { ProjectBadges } = API;
+    var { ProjectCustomAttributes } = API;
+    var { ProjectDORA4Metrics } = API;
+    var { ProjectHooks } = API;
+    var { ProjectImportExports } = API;
+    var { ProjectInvitations } = API;
+    var { ProjectIssueBoards } = API;
+    var { ProjectIterations } = API;
+    var { ProjectJobTokenScopes } = API;
+    var { ProjectLabels } = API;
+    var { ProjectMarkdownUploads } = API;
+    var { ProjectMembers } = API;
+    var { ProjectMilestones } = API;
+    var { ProjectProtectedEnvironments } = API;
+    var { ProjectPushRules } = API;
+    var { ProjectRelationsExport } = API;
+    var { ProjectReleases } = API;
+    var { ProjectRemoteMirrors } = API;
+    var { ProjectRepositoryStorageMoves } = API;
+    var { Projects } = API;
+    var { ProjectSnippetAwardEmojis } = API;
+    var { ProjectSnippetDiscussions } = API;
+    var { ProjectSnippetNotes } = API;
+    var { ProjectSnippets } = API;
+    var { ProjectStatistics } = API;
+    var { ProjectTemplates } = API;
+    var { ProjectTerraformState } = API;
+    var { ProjectVariables } = API;
+    var { ProjectVulnerabilities } = API;
+    var { ProjectWikis } = API;
+    var { ProtectedBranches } = API;
+    var { ProtectedTags } = API;
+    var { PyPI } = API;
+    var { ReleaseLinks } = API;
+    var { Repositories } = API;
+    var { RepositoryFiles } = API;
+    var { RepositorySubmodules } = API;
+    var { ResourceGroups } = API;
+    var { RubyGems } = API;
+    var { Runners } = API;
+    var { Search } = API;
+    var { SearchAdmin } = API;
+    var { SecureFiles } = API;
+    var { ServiceAccounts } = API;
+    var { ServiceData } = API;
+    var { SidekiqMetrics } = API;
+    var { SidekiqQueues } = API;
+    var { SnippetRepositoryStorageMoves } = API;
+    var { Snippets } = API;
+    var { Suggestions } = API;
+    var { SystemHooks } = API;
+    var { Tags } = API;
+    var { TodoLists } = API;
+    var { Topics } = API;
+    var { UserCustomAttributes } = API;
+    var { UserEmails } = API;
+    var { UserGPGKeys } = API;
+    var { UserImpersonationTokens } = API;
+    var { Users } = API;
+    var { UserSSHKeys } = API;
+    var { UserStarredMetricsDashboard } = API;
+    var { Gitlab } = API;
     Object.defineProperty(exports2, "GitbeakerRequestError", {
       enumerable: true,
       get: /* @__PURE__ */ __name(function() {
@@ -35740,9 +37062,53 @@ var require_asynckit = __commonJS({
   }
 });
 
+// ../node_modules/has-tostringtag/shams.js
+var require_shams2 = __commonJS({
+  "../node_modules/has-tostringtag/shams.js"(exports2, module2) {
+    "use strict";
+    var hasSymbols = require_shams();
+    module2.exports = /* @__PURE__ */ __name(function hasToStringTagShams() {
+      return hasSymbols() && !!Symbol.toStringTag;
+    }, "hasToStringTagShams");
+  }
+});
+
+// ../node_modules/es-set-tostringtag/index.js
+var require_es_set_tostringtag = __commonJS({
+  "../node_modules/es-set-tostringtag/index.js"(exports2, module2) {
+    "use strict";
+    var GetIntrinsic = require_get_intrinsic();
+    var $defineProperty = GetIntrinsic("%Object.defineProperty%", true);
+    var hasToStringTag = require_shams2()();
+    var hasOwn = require_hasown();
+    var $TypeError = require_type();
+    var toStringTag = hasToStringTag ? Symbol.toStringTag : null;
+    module2.exports = /* @__PURE__ */ __name(function setToStringTag(object, value) {
+      var overrideIfSet = arguments.length > 2 && !!arguments[2] && arguments[2].force;
+      var nonConfigurable = arguments.length > 2 && !!arguments[2] && arguments[2].nonConfigurable;
+      if (typeof overrideIfSet !== "undefined" && typeof overrideIfSet !== "boolean" || typeof nonConfigurable !== "undefined" && typeof nonConfigurable !== "boolean") {
+        throw new $TypeError("if provided, the `overrideIfSet` and `nonConfigurable` options must be booleans");
+      }
+      if (toStringTag && (overrideIfSet || !hasOwn(object, toStringTag))) {
+        if ($defineProperty) {
+          $defineProperty(object, toStringTag, {
+            configurable: !nonConfigurable,
+            enumerable: false,
+            value,
+            writable: false
+          });
+        } else {
+          object[toStringTag] = value;
+        }
+      }
+    }, "setToStringTag");
+  }
+});
+
 // ../node_modules/axios/node_modules/form-data/lib/populate.js
 var require_populate = __commonJS({
   "../node_modules/axios/node_modules/form-data/lib/populate.js"(exports2, module2) {
+    "use strict";
     module2.exports = function(dst, src) {
       Object.keys(src).forEach(function(prop) {
         dst[prop] = dst[prop] || src[prop];
@@ -35755,6 +37121,7 @@ var require_populate = __commonJS({
 // ../node_modules/axios/node_modules/form-data/lib/form_data.js
 var require_form_data = __commonJS({
   "../node_modules/axios/node_modules/form-data/lib/form_data.js"(exports2, module2) {
+    "use strict";
     var CombinedStream = require_combined_stream();
     var util = require("util");
     var path2 = require("path");
@@ -35763,11 +37130,12 @@ var require_form_data = __commonJS({
     var parseUrl = require("url").parse;
     var fs4 = require("fs");
     var Stream = require("stream").Stream;
+    var crypto = require("crypto");
     var mime = require_mime_types();
     var asynckit = require_asynckit();
+    var setToStringTag = require_es_set_tostringtag();
+    var hasOwn = require_hasown();
     var populate = require_populate();
-    module2.exports = FormData2;
-    util.inherits(FormData2, CombinedStream);
     function FormData2(options) {
       if (!(this instanceof FormData2)) {
         return new FormData2(options);
@@ -35782,18 +37150,19 @@ var require_form_data = __commonJS({
       }
     }
     __name(FormData2, "FormData");
+    util.inherits(FormData2, CombinedStream);
     FormData2.LINE_BREAK = "\r\n";
     FormData2.DEFAULT_CONTENT_TYPE = "application/octet-stream";
     FormData2.prototype.append = function(field, value, options) {
       options = options || {};
-      if (typeof options == "string") {
+      if (typeof options === "string") {
         options = { filename: options };
       }
       var append = CombinedStream.prototype.append.bind(this);
-      if (typeof value == "number") {
-        value = "" + value;
+      if (typeof value === "number" || value == null) {
+        value = String(value);
       }
-      if (util.isArray(value)) {
+      if (Array.isArray(value)) {
         this._error(new Error("Arrays are not supported."));
         return;
       }
@@ -35807,7 +37176,7 @@ var require_form_data = __commonJS({
     FormData2.prototype._trackLength = function(header, value, options) {
       var valueLength = 0;
       if (options.knownLength != null) {
-        valueLength += +options.knownLength;
+        valueLength += Number(options.knownLength);
       } else if (Buffer.isBuffer(value)) {
         valueLength = value.length;
       } else if (typeof value === "string") {
@@ -35815,7 +37184,7 @@ var require_form_data = __commonJS({
       }
       this._valueLength += valueLength;
       this._overheadLength += Buffer.byteLength(header) + FormData2.LINE_BREAK.length;
-      if (!value || !value.path && !(value.readable && value.hasOwnProperty("httpVersion")) && !(value instanceof Stream)) {
+      if (!value || !value.path && !(value.readable && hasOwn(value, "httpVersion")) && !(value instanceof Stream)) {
         return;
       }
       if (!options.knownLength) {
@@ -35823,26 +37192,25 @@ var require_form_data = __commonJS({
       }
     };
     FormData2.prototype._lengthRetriever = function(value, callback) {
-      if (value.hasOwnProperty("fd")) {
+      if (hasOwn(value, "fd")) {
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
           fs4.stat(value.path, function(err, stat3) {
-            var fileSize;
             if (err) {
               callback(err);
               return;
             }
-            fileSize = stat3.size - (value.start ? value.start : 0);
+            var fileSize = stat3.size - (value.start ? value.start : 0);
             callback(null, fileSize);
           });
         }
-      } else if (value.hasOwnProperty("httpVersion")) {
-        callback(null, +value.headers["content-length"]);
-      } else if (value.hasOwnProperty("httpModule")) {
+      } else if (hasOwn(value, "httpVersion")) {
+        callback(null, Number(value.headers["content-length"]));
+      } else if (hasOwn(value, "httpModule")) {
         value.on("response", function(response) {
           value.pause();
-          callback(null, +response.headers["content-length"]);
+          callback(null, Number(response.headers["content-length"]));
         });
         value.resume();
       } else {
@@ -35850,7 +37218,7 @@ var require_form_data = __commonJS({
       }
     };
     FormData2.prototype._multiPartHeader = function(field, value, options) {
-      if (typeof options.header == "string") {
+      if (typeof options.header === "string") {
         return options.header;
       }
       var contentDisposition = this._getContentDisposition(value, options);
@@ -35862,54 +37230,54 @@ var require_form_data = __commonJS({
         // if no content type. allow it to be empty array
         "Content-Type": [].concat(contentType || [])
       };
-      if (typeof options.header == "object") {
+      if (typeof options.header === "object") {
         populate(headers, options.header);
       }
       var header;
       for (var prop in headers) {
-        if (!headers.hasOwnProperty(prop)) continue;
-        header = headers[prop];
-        if (header == null) {
-          continue;
-        }
-        if (!Array.isArray(header)) {
-          header = [header];
-        }
-        if (header.length) {
-          contents += prop + ": " + header.join("; ") + FormData2.LINE_BREAK;
+        if (hasOwn(headers, prop)) {
+          header = headers[prop];
+          if (header == null) {
+            continue;
+          }
+          if (!Array.isArray(header)) {
+            header = [header];
+          }
+          if (header.length) {
+            contents += prop + ": " + header.join("; ") + FormData2.LINE_BREAK;
+          }
         }
       }
       return "--" + this.getBoundary() + FormData2.LINE_BREAK + contents + FormData2.LINE_BREAK;
     };
     FormData2.prototype._getContentDisposition = function(value, options) {
-      var filename, contentDisposition;
+      var filename;
       if (typeof options.filepath === "string") {
         filename = path2.normalize(options.filepath).replace(/\\/g, "/");
-      } else if (options.filename || value.name || value.path) {
-        filename = path2.basename(options.filename || value.name || value.path);
-      } else if (value.readable && value.hasOwnProperty("httpVersion")) {
+      } else if (options.filename || value && (value.name || value.path)) {
+        filename = path2.basename(options.filename || value && (value.name || value.path));
+      } else if (value && value.readable && hasOwn(value, "httpVersion")) {
         filename = path2.basename(value.client._httpMessage.path || "");
       }
       if (filename) {
-        contentDisposition = 'filename="' + filename + '"';
+        return 'filename="' + filename + '"';
       }
-      return contentDisposition;
     };
     FormData2.prototype._getContentType = function(value, options) {
       var contentType = options.contentType;
-      if (!contentType && value.name) {
+      if (!contentType && value && value.name) {
         contentType = mime.lookup(value.name);
       }
-      if (!contentType && value.path) {
+      if (!contentType && value && value.path) {
         contentType = mime.lookup(value.path);
       }
-      if (!contentType && value.readable && value.hasOwnProperty("httpVersion")) {
+      if (!contentType && value && value.readable && hasOwn(value, "httpVersion")) {
         contentType = value.headers["content-type"];
       }
       if (!contentType && (options.filepath || options.filename)) {
         contentType = mime.lookup(options.filepath || options.filename);
       }
-      if (!contentType && typeof value == "object") {
+      if (!contentType && value && typeof value === "object") {
         contentType = FormData2.DEFAULT_CONTENT_TYPE;
       }
       return contentType;
@@ -35933,13 +37301,16 @@ var require_form_data = __commonJS({
         "content-type": "multipart/form-data; boundary=" + this.getBoundary()
       };
       for (header in userHeaders) {
-        if (userHeaders.hasOwnProperty(header)) {
+        if (hasOwn(userHeaders, header)) {
           formHeaders[header.toLowerCase()] = userHeaders[header];
         }
       }
       return formHeaders;
     };
     FormData2.prototype.setBoundary = function(boundary) {
+      if (typeof boundary !== "string") {
+        throw new TypeError("FormData boundary must be a string");
+      }
       this._boundary = boundary;
     };
     FormData2.prototype.getBoundary = function() {
@@ -35966,11 +37337,7 @@ var require_form_data = __commonJS({
       return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
     };
     FormData2.prototype._generateBoundary = function() {
-      var boundary = "--------------------------";
-      for (var i = 0; i < 24; i++) {
-        boundary += Math.floor(Math.random() * 10).toString(16);
-      }
-      this._boundary = boundary;
+      this._boundary = "--------------------------" + crypto.randomBytes(12).toString("hex");
     };
     FormData2.prototype.getLengthSync = function() {
       var knownLength = this._overheadLength + this._valueLength;
@@ -36010,8 +37377,10 @@ var require_form_data = __commonJS({
       });
     };
     FormData2.prototype.submit = function(params, cb) {
-      var request, options, defaults = { method: "post" };
-      if (typeof params == "string") {
+      var request;
+      var options;
+      var defaults = { method: "post" };
+      if (typeof params === "string") {
         params = parseUrl(params);
         options = populate({
           port: params.port,
@@ -36022,11 +37391,11 @@ var require_form_data = __commonJS({
       } else {
         options = populate(params, defaults);
         if (!options.port) {
-          options.port = options.protocol == "https:" ? 443 : 80;
+          options.port = options.protocol === "https:" ? 443 : 80;
         }
       }
       options.headers = this.getHeaders(params.headers);
-      if (options.protocol == "https:") {
+      if (options.protocol === "https:") {
         request = https.request(options);
       } else {
         request = http.request(options);
@@ -36064,6 +37433,8 @@ var require_form_data = __commonJS({
     FormData2.prototype.toString = function() {
       return "[object FormData]";
     };
+    setToStringTag(FormData2, "FormData");
+    module2.exports = FormData2;
   }
 });
 
@@ -37467,6 +38838,7 @@ var require_axios = __commonJS({
     var FormData$1 = require_form_data();
     var crypto = require("crypto");
     var url = require("url");
+    var http2 = require("http2");
     var proxyFromEnv = require_proxy_from_env();
     var http = require("http");
     var https = require("https");
@@ -37510,7 +38882,7 @@ var require_axios = __commonJS({
     var { isArray } = Array;
     var isUndefined = typeOfTest("undefined");
     function isBuffer(val) {
-      return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) && isFunction(val.constructor.isBuffer) && val.constructor.isBuffer(val);
+      return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) && isFunction$1(val.constructor.isBuffer) && val.constructor.isBuffer(val);
     }
     __name(isBuffer, "isBuffer");
     var isArrayBuffer = kindOfTest("ArrayBuffer");
@@ -37525,7 +38897,7 @@ var require_axios = __commonJS({
     }
     __name(isArrayBufferView, "isArrayBufferView");
     var isString = typeOfTest("string");
-    var isFunction = typeOfTest("function");
+    var isFunction$1 = typeOfTest("function");
     var isNumber = typeOfTest("number");
     var isObject = /* @__PURE__ */ __name((thing) => thing !== null && typeof thing === "object", "isObject");
     var isBoolean = /* @__PURE__ */ __name((thing) => thing === true || thing === false, "isBoolean");
@@ -37536,15 +38908,25 @@ var require_axios = __commonJS({
       const prototype2 = getPrototypeOf(val);
       return (prototype2 === null || prototype2 === Object.prototype || Object.getPrototypeOf(prototype2) === null) && !(toStringTag in val) && !(iterator in val);
     }, "isPlainObject");
+    var isEmptyObject = /* @__PURE__ */ __name((val) => {
+      if (!isObject(val) || isBuffer(val)) {
+        return false;
+      }
+      try {
+        return Object.keys(val).length === 0 && Object.getPrototypeOf(val) === Object.prototype;
+      } catch (e) {
+        return false;
+      }
+    }, "isEmptyObject");
     var isDate = kindOfTest("Date");
     var isFile = kindOfTest("File");
     var isBlob = kindOfTest("Blob");
     var isFileList = kindOfTest("FileList");
-    var isStream = /* @__PURE__ */ __name((val) => isObject(val) && isFunction(val.pipe), "isStream");
+    var isStream = /* @__PURE__ */ __name((val) => isObject(val) && isFunction$1(val.pipe), "isStream");
     var isFormData = /* @__PURE__ */ __name((thing) => {
       let kind;
-      return thing && (typeof FormData === "function" && thing instanceof FormData || isFunction(thing.append) && ((kind = kindOf(thing)) === "formdata" || // detect form-data instance
-      kind === "object" && isFunction(thing.toString) && thing.toString() === "[object FormData]"));
+      return thing && (typeof FormData === "function" && thing instanceof FormData || isFunction$1(thing.append) && ((kind = kindOf(thing)) === "formdata" || // detect form-data instance
+      kind === "object" && isFunction$1(thing.toString) && thing.toString() === "[object FormData]"));
     }, "isFormData");
     var isURLSearchParams = kindOfTest("URLSearchParams");
     var [isReadableStream, isRequest, isResponse, isHeaders] = ["ReadableStream", "Request", "Response", "Headers"].map(kindOfTest);
@@ -37563,6 +38945,9 @@ var require_axios = __commonJS({
           fn.call(null, obj[i], i, obj);
         }
       } else {
+        if (isBuffer(obj)) {
+          return;
+        }
         const keys = allOwnKeys ? Object.getOwnPropertyNames(obj) : Object.keys(obj);
         const len = keys.length;
         let key;
@@ -37574,6 +38959,9 @@ var require_axios = __commonJS({
     }
     __name(forEach, "forEach");
     function findKey(obj, key) {
+      if (isBuffer(obj)) {
+        return null;
+      }
       key = key.toLowerCase();
       const keys = Object.keys(obj);
       let i = keys.length;
@@ -37593,7 +38981,7 @@ var require_axios = __commonJS({
     })();
     var isContextDefined = /* @__PURE__ */ __name((context) => !isUndefined(context) && context !== _global, "isContextDefined");
     function merge() {
-      const { caseless } = isContextDefined(this) && this || {};
+      const { caseless, skipUndefined } = isContextDefined(this) && this || {};
       const result = {};
       const assignValue = /* @__PURE__ */ __name((val, key) => {
         const targetKey = caseless && findKey(result, key) || key;
@@ -37603,7 +38991,7 @@ var require_axios = __commonJS({
           result[targetKey] = merge({}, val);
         } else if (isArray(val)) {
           result[targetKey] = val.slice();
-        } else {
+        } else if (!skipUndefined || !isUndefined(val)) {
           result[targetKey] = val;
         }
       }, "assignValue");
@@ -37615,7 +39003,7 @@ var require_axios = __commonJS({
     __name(merge, "merge");
     var extend = /* @__PURE__ */ __name((a, b, thisArg, { allOwnKeys } = {}) => {
       forEach(b, (val, key) => {
-        if (thisArg && isFunction(val)) {
+        if (thisArg && isFunction$1(val)) {
           a[key] = bind(val, thisArg);
         } else {
           a[key] = val;
@@ -37724,11 +39112,11 @@ var require_axios = __commonJS({
     }, "reduceDescriptors");
     var freezeMethods = /* @__PURE__ */ __name((obj) => {
       reduceDescriptors(obj, (descriptor, name) => {
-        if (isFunction(obj) && ["arguments", "caller", "callee"].indexOf(name) !== -1) {
+        if (isFunction$1(obj) && ["arguments", "caller", "callee"].indexOf(name) !== -1) {
           return false;
         }
         const value = obj[name];
-        if (!isFunction(value)) return;
+        if (!isFunction$1(value)) return;
         descriptor.enumerable = false;
         if ("writable" in descriptor) {
           descriptor.writable = false;
@@ -37757,7 +39145,7 @@ var require_axios = __commonJS({
       return value != null && Number.isFinite(value = +value) ? value : defaultValue;
     }, "toFiniteNumber");
     function isSpecCompliantForm(thing) {
-      return !!(thing && isFunction(thing.append) && thing[toStringTag] === "FormData" && thing[iterator]);
+      return !!(thing && isFunction$1(thing.append) && thing[toStringTag] === "FormData" && thing[iterator]);
     }
     __name(isSpecCompliantForm, "isSpecCompliantForm");
     var toJSONObject = /* @__PURE__ */ __name((obj) => {
@@ -37766,6 +39154,9 @@ var require_axios = __commonJS({
         if (isObject(source)) {
           if (stack.indexOf(source) >= 0) {
             return;
+          }
+          if (isBuffer(source)) {
+            return source;
           }
           if (!("toJSON" in source)) {
             stack[i] = source;
@@ -37783,7 +39174,7 @@ var require_axios = __commonJS({
       return visit(obj, 0);
     }, "toJSONObject");
     var isAsyncFn = kindOfTest("AsyncFunction");
-    var isThenable = /* @__PURE__ */ __name((thing) => thing && (isObject(thing) || isFunction(thing)) && isFunction(thing.then) && isFunction(thing.catch), "isThenable");
+    var isThenable = /* @__PURE__ */ __name((thing) => thing && (isObject(thing) || isFunction$1(thing)) && isFunction$1(thing.then) && isFunction$1(thing.catch), "isThenable");
     var _setImmediate = ((setImmediateSupported, postMessageSupported) => {
       if (setImmediateSupported) {
         return setImmediate;
@@ -37801,10 +39192,10 @@ var require_axios = __commonJS({
       })(`axios@${Math.random()}`, []) : (cb) => setTimeout(cb);
     })(
       typeof setImmediate === "function",
-      isFunction(_global.postMessage)
+      isFunction$1(_global.postMessage)
     );
     var asap = typeof queueMicrotask !== "undefined" ? queueMicrotask.bind(_global) : typeof process !== "undefined" && process.nextTick || _setImmediate;
-    var isIterable = /* @__PURE__ */ __name((thing) => thing != null && isFunction(thing[iterator]), "isIterable");
+    var isIterable = /* @__PURE__ */ __name((thing) => thing != null && isFunction$1(thing[iterator]), "isIterable");
     var utils$1 = {
       isArray,
       isArrayBuffer,
@@ -37816,6 +39207,7 @@ var require_axios = __commonJS({
       isBoolean,
       isObject,
       isPlainObject,
+      isEmptyObject,
       isReadableStream,
       isRequest,
       isResponse,
@@ -37825,7 +39217,7 @@ var require_axios = __commonJS({
       isFile,
       isBlob,
       isRegExp,
-      isFunction,
+      isFunction: isFunction$1,
       isStream,
       isURLSearchParams,
       isTypedArray,
@@ -37931,9 +39323,13 @@ var require_axios = __commonJS({
       }, "filter"), (prop) => {
         return prop !== "isAxiosError";
       });
-      AxiosError.call(axiosError, error.message, code, config, request, response);
-      axiosError.cause = error;
-      axiosError.name = error.name;
+      const msg = error && error.message ? error.message : "Error";
+      const errCode = code == null && error ? error.code : code;
+      AxiosError.call(axiosError, msg, errCode, config, request, response);
+      if (error && axiosError.cause == null) {
+        Object.defineProperty(axiosError, "cause", { value: error, configurable: true });
+      }
+      axiosError.name = error && error.name || "Error";
       customProps && Object.assign(axiosError, customProps);
       return axiosError;
     };
@@ -38090,7 +39486,7 @@ var require_axios = __commonJS({
       }, "each"), "").join("&");
     }, "toString");
     function encode(val) {
-      return encodeURIComponent(val).replace(/%3A/gi, ":").replace(/%24/g, "$").replace(/%2C/gi, ",").replace(/%20/g, "+").replace(/%5B/gi, "[").replace(/%5D/gi, "]");
+      return encodeURIComponent(val).replace(/%3A/gi, ":").replace(/%24/g, "$").replace(/%2C/gi, ",").replace(/%20/g, "+");
     }
     __name(encode, "encode");
     function buildURL(url2, params, options) {
@@ -38149,7 +39545,7 @@ var require_axios = __commonJS({
        *
        * @param {Number} id The ID that was returned by `use`
        *
-       * @returns {Boolean} `true` if the interceptor was removed, `false` otherwise
+       * @returns {void}
        */
       eject(id) {
         if (this.handlers[id]) {
@@ -38240,15 +39636,16 @@ var require_axios = __commonJS({
       ...platform$1
     };
     function toURLEncodedForm(data, options) {
-      return toFormData(data, new platform.classes.URLSearchParams(), Object.assign({
+      return toFormData(data, new platform.classes.URLSearchParams(), {
         visitor: /* @__PURE__ */ __name(function(value, key, path2, helpers) {
           if (platform.isNode && utils$1.isBuffer(value)) {
             this.append(key, value.toString("base64"));
             return false;
           }
           return helpers.defaultVisitor.apply(this, arguments);
-        }, "visitor")
-      }, options));
+        }, "visitor"),
+        ...options
+      });
     }
     __name(toURLEncodedForm, "toURLEncodedForm");
     function parsePropPath(name) {
@@ -38374,7 +39771,7 @@ var require_axios = __commonJS({
           const silentJSONParsing = transitional && transitional.silentJSONParsing;
           const strictJSONParsing = !silentJSONParsing && JSONRequested;
           try {
-            return JSON.parse(data);
+            return JSON.parse(data, this.parseReviver);
           } catch (e) {
             if (strictJSONParsing) {
               if (e.name === "SyntaxError") {
@@ -38750,7 +40147,7 @@ var require_axios = __commonJS({
       return requestedURL;
     }
     __name(buildFullPath, "buildFullPath");
-    var VERSION2 = "1.10.0";
+    var VERSION2 = "1.13.1";
     function parseProtocol(url2) {
       const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
       return match && match[1] || "";
@@ -38983,13 +40380,13 @@ var require_axios = __commonJS({
         computedHeaders["Content-Length"] = contentLength;
       }
       headersHandler && headersHandler(computedHeaders);
-      return stream.Readable.from(async function* () {
+      return stream.Readable.from((async function* () {
         for (const part of parts) {
           yield boundaryBytes;
           yield* part.encode();
         }
         yield footerBytes;
-      }());
+      })());
     }, "formDataToStream");
     var formDataToStream$1 = formDataToStream;
     var ZlibHeaderTransformStream = class extends stream__default["default"].Transform {
@@ -39073,7 +40470,7 @@ var require_axios = __commonJS({
           clearTimeout(timer);
           timer = null;
         }
-        fn.apply(null, args);
+        fn(...args);
       }, "invoke");
       const throttled = /* @__PURE__ */ __name((...args) => {
         const now = Date.now();
@@ -39127,6 +40524,56 @@ var require_axios = __commonJS({
       }), throttled[1]];
     }, "progressEventDecorator");
     var asyncDecorator = /* @__PURE__ */ __name((fn) => (...args) => utils$1.asap(() => fn(...args)), "asyncDecorator");
+    function estimateDataURLDecodedBytes(url2) {
+      if (!url2 || typeof url2 !== "string") return 0;
+      if (!url2.startsWith("data:")) return 0;
+      const comma = url2.indexOf(",");
+      if (comma < 0) return 0;
+      const meta = url2.slice(5, comma);
+      const body = url2.slice(comma + 1);
+      const isBase64 = /;base64/i.test(meta);
+      if (isBase64) {
+        let effectiveLen = body.length;
+        const len = body.length;
+        for (let i = 0; i < len; i++) {
+          if (body.charCodeAt(i) === 37 && i + 2 < len) {
+            const a = body.charCodeAt(i + 1);
+            const b = body.charCodeAt(i + 2);
+            const isHex = (a >= 48 && a <= 57 || a >= 65 && a <= 70 || a >= 97 && a <= 102) && (b >= 48 && b <= 57 || b >= 65 && b <= 70 || b >= 97 && b <= 102);
+            if (isHex) {
+              effectiveLen -= 2;
+              i += 2;
+            }
+          }
+        }
+        let pad = 0;
+        let idx = len - 1;
+        const tailIsPct3D = /* @__PURE__ */ __name((j) => j >= 2 && body.charCodeAt(j - 2) === 37 && // '%'
+        body.charCodeAt(j - 1) === 51 && // '3'
+        (body.charCodeAt(j) === 68 || body.charCodeAt(j) === 100), "tailIsPct3D");
+        if (idx >= 0) {
+          if (body.charCodeAt(idx) === 61) {
+            pad++;
+            idx--;
+          } else if (tailIsPct3D(idx)) {
+            pad++;
+            idx -= 3;
+          }
+        }
+        if (pad === 1 && idx >= 0) {
+          if (body.charCodeAt(idx) === 61) {
+            pad++;
+          } else if (tailIsPct3D(idx)) {
+            pad++;
+          }
+        }
+        const groups = Math.floor(effectiveLen / 4);
+        const bytes = groups * 3 - (pad || 0);
+        return bytes > 0 ? bytes : 0;
+      }
+      return Buffer.byteLength(body, "utf8");
+    }
+    __name(estimateDataURLDecodedBytes, "estimateDataURLDecodedBytes");
     var zlibOptions = {
       flush: zlib__default["default"].constants.Z_SYNC_FLUSH,
       finishFlush: zlib__default["default"].constants.Z_SYNC_FLUSH
@@ -39135,6 +40582,12 @@ var require_axios = __commonJS({
       flush: zlib__default["default"].constants.BROTLI_OPERATION_FLUSH,
       finishFlush: zlib__default["default"].constants.BROTLI_OPERATION_FLUSH
     };
+    var {
+      HTTP2_HEADER_SCHEME,
+      HTTP2_HEADER_METHOD,
+      HTTP2_HEADER_PATH,
+      HTTP2_HEADER_STATUS
+    } = http2.constants;
     var isBrotliSupported = utils$1.isFunction(zlib__default["default"].createBrotliDecompress);
     var { http: httpFollow, https: httpsFollow } = followRedirects__default["default"];
     var isHttps = /https:?/;
@@ -39145,6 +40598,78 @@ var require_axios = __commonJS({
       stream2.on("end", flush).on("error", flush);
       return throttled;
     }, "flushOnFinish");
+    var Http2Sessions = class {
+      static {
+        __name(this, "Http2Sessions");
+      }
+      constructor() {
+        this.sessions = /* @__PURE__ */ Object.create(null);
+      }
+      getSession(authority, options) {
+        options = Object.assign({
+          sessionTimeout: 1e3
+        }, options);
+        let authoritySessions;
+        if (authoritySessions = this.sessions[authority]) {
+          let len = authoritySessions.length;
+          for (let i = 0; i < len; i++) {
+            const [sessionHandle, sessionOptions] = authoritySessions[i];
+            if (!sessionHandle.destroyed && !sessionHandle.closed && util__default["default"].isDeepStrictEqual(sessionOptions, options)) {
+              return sessionHandle;
+            }
+          }
+        }
+        const session = http2.connect(authority, options);
+        let removed;
+        const removeSession = /* @__PURE__ */ __name(() => {
+          if (removed) {
+            return;
+          }
+          removed = true;
+          let entries2 = authoritySessions, len = entries2.length, i = len;
+          while (i--) {
+            if (entries2[i][0] === session) {
+              entries2.splice(i, 1);
+              if (len === 1) {
+                delete this.sessions[authority];
+                return;
+              }
+            }
+          }
+        }, "removeSession");
+        const originalRequestFn = session.request;
+        const { sessionTimeout } = options;
+        if (sessionTimeout != null) {
+          let timer;
+          let streamsCount = 0;
+          session.request = function() {
+            const stream2 = originalRequestFn.apply(this, arguments);
+            streamsCount++;
+            if (timer) {
+              clearTimeout(timer);
+              timer = null;
+            }
+            stream2.once("close", () => {
+              if (!--streamsCount) {
+                timer = setTimeout(() => {
+                  timer = null;
+                  removeSession();
+                }, sessionTimeout);
+              }
+            });
+            return stream2;
+          };
+        }
+        session.once("close", removeSession);
+        let entries = this.sessions[authority], entry = [
+          session,
+          options
+        ];
+        entries ? this.sessions[authority].push(entry) : authoritySessions = this.sessions[authority] = [entry];
+        return session;
+      }
+    };
+    var http2Sessions = new Http2Sessions();
     function dispatchBeforeRedirect(options, responseDetails) {
       if (options.beforeRedirects.proxy) {
         options.beforeRedirects.proxy(options);
@@ -39219,14 +40744,48 @@ var require_axios = __commonJS({
       };
     }, "resolveFamily");
     var buildAddressEntry = /* @__PURE__ */ __name((address, family) => resolveFamily(utils$1.isObject(address) ? address : { address, family }), "buildAddressEntry");
+    var http2Transport = {
+      request(options, cb) {
+        const authority = options.protocol + "//" + options.hostname + ":" + (options.port || 80);
+        const { http2Options, headers } = options;
+        const session = http2Sessions.getSession(authority, http2Options);
+        const http2Headers = {
+          [HTTP2_HEADER_SCHEME]: options.protocol.replace(":", ""),
+          [HTTP2_HEADER_METHOD]: options.method,
+          [HTTP2_HEADER_PATH]: options.path
+        };
+        utils$1.forEach(headers, (header, name) => {
+          name.charAt(0) !== ":" && (http2Headers[name] = header);
+        });
+        const req = session.request(http2Headers);
+        req.once("response", (responseHeaders) => {
+          const response = req;
+          responseHeaders = Object.assign({}, responseHeaders);
+          const status = responseHeaders[HTTP2_HEADER_STATUS];
+          delete responseHeaders[HTTP2_HEADER_STATUS];
+          response.headers = responseHeaders;
+          response.statusCode = +status;
+          cb(response);
+        });
+        return req;
+      }
+    };
     var httpAdapter = isHttpAdapterSupported && /* @__PURE__ */ __name(function httpAdapter2(config) {
       return wrapAsync(/* @__PURE__ */ __name(async function dispatchHttpRequest(resolve, reject, onDone) {
-        let { data, lookup, family } = config;
+        let { data, lookup, family, httpVersion = 1, http2Options } = config;
         const { responseType, responseEncoding } = config;
         const method = config.method.toUpperCase();
         let isDone;
         let rejected = false;
         let req;
+        httpVersion = +httpVersion;
+        if (Number.isNaN(httpVersion)) {
+          throw TypeError(`Invalid protocol version: '${config.httpVersion}' is not a number`);
+        }
+        if (httpVersion !== 1 && httpVersion !== 2) {
+          throw TypeError(`Unsupported protocol version '${httpVersion}'`);
+        }
+        const isHttp2 = httpVersion === 2;
         if (lookup) {
           const _lookup = callbackify$1(lookup, (value) => utils$1.isArray(value) ? value : [value]);
           lookup = /* @__PURE__ */ __name((hostname, opt, cb) => {
@@ -39239,7 +40798,16 @@ var require_axios = __commonJS({
             });
           }, "lookup");
         }
-        const emitter = new events.EventEmitter();
+        const abortEmitter = new events.EventEmitter();
+        function abort(reason) {
+          try {
+            abortEmitter.emit("abort", !reason || reason.type ? new CanceledError(null, config, req) : reason);
+          } catch (err) {
+            console.warn("emit error", err);
+          }
+        }
+        __name(abort, "abort");
+        abortEmitter.once("abort", reject);
         const onFinished = /* @__PURE__ */ __name(() => {
           if (config.cancelToken) {
             config.cancelToken.unsubscribe(abort);
@@ -39247,30 +40815,46 @@ var require_axios = __commonJS({
           if (config.signal) {
             config.signal.removeEventListener("abort", abort);
           }
-          emitter.removeAllListeners();
+          abortEmitter.removeAllListeners();
         }, "onFinished");
-        onDone((value, isRejected) => {
-          isDone = true;
-          if (isRejected) {
-            rejected = true;
-            onFinished();
-          }
-        });
-        function abort(reason) {
-          emitter.emit("abort", !reason || reason.type ? new CanceledError(null, config, req) : reason);
-        }
-        __name(abort, "abort");
-        emitter.once("abort", reject);
         if (config.cancelToken || config.signal) {
           config.cancelToken && config.cancelToken.subscribe(abort);
           if (config.signal) {
             config.signal.aborted ? abort() : config.signal.addEventListener("abort", abort);
           }
         }
+        onDone((response, isRejected) => {
+          isDone = true;
+          if (isRejected) {
+            rejected = true;
+            onFinished();
+            return;
+          }
+          const { data: data2 } = response;
+          if (data2 instanceof stream__default["default"].Readable || data2 instanceof stream__default["default"].Duplex) {
+            const offListeners = stream__default["default"].finished(data2, () => {
+              offListeners();
+              onFinished();
+            });
+          } else {
+            onFinished();
+          }
+        });
         const fullPath = buildFullPath(config.baseURL, config.url, config.allowAbsoluteUrls);
         const parsed = new URL(fullPath, platform.hasBrowserEnv ? platform.origin : void 0);
         const protocol = parsed.protocol || supportedProtocols[0];
         if (protocol === "data:") {
+          if (config.maxContentLength > -1) {
+            const dataUrl = String(config.url || fullPath || "");
+            const estimated = estimateDataURLDecodedBytes(dataUrl);
+            if (estimated > config.maxContentLength) {
+              return reject(new AxiosError(
+                "maxContentLength size of " + config.maxContentLength + " exceeded",
+                AxiosError.ERR_BAD_RESPONSE,
+                config
+              ));
+            }
+          }
           let convertedData;
           if (method !== "GET") {
             return settle(resolve, reject, {
@@ -39421,7 +41005,8 @@ var require_axios = __commonJS({
           protocol,
           family,
           beforeRedirect: dispatchBeforeRedirect,
-          beforeRedirects: {}
+          beforeRedirects: {},
+          http2Options
         };
         !utils$1.isUndefined(lookup) && (options.lookup = lookup);
         if (config.socketPath) {
@@ -39434,18 +41019,22 @@ var require_axios = __commonJS({
         let transport;
         const isHttpsRequest = isHttps.test(options.protocol);
         options.agent = isHttpsRequest ? config.httpsAgent : config.httpAgent;
-        if (config.transport) {
-          transport = config.transport;
-        } else if (config.maxRedirects === 0) {
-          transport = isHttpsRequest ? https__default["default"] : http__default["default"];
+        if (isHttp2) {
+          transport = http2Transport;
         } else {
-          if (config.maxRedirects) {
-            options.maxRedirects = config.maxRedirects;
+          if (config.transport) {
+            transport = config.transport;
+          } else if (config.maxRedirects === 0) {
+            transport = isHttpsRequest ? https__default["default"] : http__default["default"];
+          } else {
+            if (config.maxRedirects) {
+              options.maxRedirects = config.maxRedirects;
+            }
+            if (config.beforeRedirect) {
+              options.beforeRedirects.config = config.beforeRedirect;
+            }
+            transport = isHttpsRequest ? httpsFollow : httpFollow;
           }
-          if (config.beforeRedirect) {
-            options.beforeRedirects.config = config.beforeRedirect;
-          }
-          transport = isHttpsRequest ? httpsFollow : httpFollow;
         }
         if (config.maxBodyLength > -1) {
           options.maxBodyLength = config.maxBodyLength;
@@ -39458,7 +41047,7 @@ var require_axios = __commonJS({
         req = transport.request(options, /* @__PURE__ */ __name(function handleResponse(res) {
           if (req.destroyed) return;
           const streams = [res];
-          const responseLength = +res.headers["content-length"];
+          const responseLength = utils$1.toFiniteNumber(res.headers["content-length"]);
           if (onDownloadProgress || maxDownloadRate) {
             const transformStream = new AxiosTransformStream$1({
               maxRate: utils$1.toFiniteNumber(maxDownloadRate)
@@ -39500,10 +41089,6 @@ var require_axios = __commonJS({
             }
           }
           responseStream = streams.length > 1 ? stream__default["default"].pipeline(streams, utils$1.noop) : streams[0];
-          const offListeners = stream__default["default"].finished(responseStream, () => {
-            offListeners();
-            onFinished();
-          });
           const response = {
             status: res.statusCode,
             statusText: res.statusMessage,
@@ -39523,7 +41108,7 @@ var require_axios = __commonJS({
               if (config.maxContentLength > -1 && totalResponseBytes > config.maxContentLength) {
                 rejected = true;
                 responseStream.destroy();
-                reject(new AxiosError(
+                abort(new AxiosError(
                   "maxContentLength size of " + config.maxContentLength + " exceeded",
                   AxiosError.ERR_BAD_RESPONSE,
                   config,
@@ -39564,16 +41149,19 @@ var require_axios = __commonJS({
               settle(resolve, reject, response);
             }, "handleStreamEnd"));
           }
-          emitter.once("abort", (err) => {
+          abortEmitter.once("abort", (err) => {
             if (!responseStream.destroyed) {
               responseStream.emit("error", err);
               responseStream.destroy();
             }
           });
         }, "handleResponse"));
-        emitter.once("abort", (err) => {
-          reject(err);
-          req.destroy(err);
+        abortEmitter.once("abort", (err) => {
+          if (req.close) {
+            req.close();
+          } else {
+            req.destroy(err);
+          }
         });
         req.on("error", /* @__PURE__ */ __name(function handleRequestError(err) {
           reject(AxiosError.from(err, null, config, req));
@@ -39584,7 +41172,7 @@ var require_axios = __commonJS({
         if (config.timeout) {
           const timeout = parseInt(config.timeout, 10);
           if (Number.isNaN(timeout)) {
-            reject(new AxiosError(
+            abort(new AxiosError(
               "error trying to parse `config.timeout` to int",
               AxiosError.ERR_BAD_OPTION_VALUE,
               config,
@@ -39599,13 +41187,12 @@ var require_axios = __commonJS({
             if (config.timeoutErrorMessage) {
               timeoutErrorMessage = config.timeoutErrorMessage;
             }
-            reject(new AxiosError(
+            abort(new AxiosError(
               timeoutErrorMessage,
               transitional.clarifyTimeoutError ? AxiosError.ETIMEDOUT : AxiosError.ECONNABORTED,
               config,
               req
             ));
-            abort();
           }, "handleRequestTimeout"));
         }
         if (utils$1.isStream(data)) {
@@ -39625,7 +41212,8 @@ var require_axios = __commonJS({
           });
           data.pipe(req);
         } else {
-          req.end(data);
+          data && req.write(data);
+          req.end();
         }
       }, "dispatchHttpRequest"));
     }, "httpAdapter");
@@ -39639,20 +41227,33 @@ var require_axios = __commonJS({
     var cookies = platform.hasStandardBrowserEnv ? (
       // Standard browser envs support document.cookie
       {
-        write(name, value, expires, path2, domain, secure) {
-          const cookie = [name + "=" + encodeURIComponent(value)];
-          utils$1.isNumber(expires) && cookie.push("expires=" + new Date(expires).toGMTString());
-          utils$1.isString(path2) && cookie.push("path=" + path2);
-          utils$1.isString(domain) && cookie.push("domain=" + domain);
-          secure === true && cookie.push("secure");
+        write(name, value, expires, path2, domain, secure, sameSite) {
+          if (typeof document === "undefined") return;
+          const cookie = [`${name}=${encodeURIComponent(value)}`];
+          if (utils$1.isNumber(expires)) {
+            cookie.push(`expires=${new Date(expires).toUTCString()}`);
+          }
+          if (utils$1.isString(path2)) {
+            cookie.push(`path=${path2}`);
+          }
+          if (utils$1.isString(domain)) {
+            cookie.push(`domain=${domain}`);
+          }
+          if (secure === true) {
+            cookie.push("secure");
+          }
+          if (utils$1.isString(sameSite)) {
+            cookie.push(`SameSite=${sameSite}`);
+          }
           document.cookie = cookie.join("; ");
         },
         read(name) {
-          const match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
-          return match ? decodeURIComponent(match[3]) : null;
+          if (typeof document === "undefined") return null;
+          const match = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+          return match ? decodeURIComponent(match[1]) : null;
         },
         remove(name) {
-          this.write(name, "", Date.now() - 864e5);
+          this.write(name, "", Date.now() - 864e5, "/");
         }
       }
     ) : (
@@ -39743,7 +41344,7 @@ var require_axios = __commonJS({
         validateStatus: mergeDirectKeys,
         headers: /* @__PURE__ */ __name((a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop, true), "headers")
       };
-      utils$1.forEach(Object.keys(Object.assign({}, config1, config2)), /* @__PURE__ */ __name(function computeConfigValue(prop) {
+      utils$1.forEach(Object.keys({ ...config1, ...config2 }), /* @__PURE__ */ __name(function computeConfigValue(prop) {
         const merge2 = mergeMap[prop] || mergeDeepProperties;
         const configValue = merge2(config1[prop], config2[prop], prop);
         utils$1.isUndefined(configValue) && merge2 !== mergeDirectKeys || (config[prop] = configValue);
@@ -39762,13 +41363,17 @@ var require_axios = __commonJS({
           "Basic " + btoa((auth.username || "") + ":" + (auth.password ? unescape(encodeURIComponent(auth.password)) : ""))
         );
       }
-      let contentType;
       if (utils$1.isFormData(data)) {
         if (platform.hasStandardBrowserEnv || platform.hasStandardBrowserWebWorkerEnv) {
           headers.setContentType(void 0);
-        } else if ((contentType = headers.getContentType()) !== false) {
-          const [type, ...tokens] = contentType ? contentType.split(";").map((token) => token.trim()).filter(Boolean) : [];
-          headers.setContentType([type || "multipart/form-data", ...tokens].join("; "));
+        } else if (utils$1.isFunction(data.getHeaders)) {
+          const formHeaders = data.getHeaders();
+          const allowedHeaders = ["content-type", "content-length"];
+          Object.entries(formHeaders).forEach(([key, val]) => {
+            if (allowedHeaders.includes(key.toLowerCase())) {
+              headers.set(key, val);
+            }
+          });
         }
       }
       if (platform.hasStandardBrowserEnv) {
@@ -39848,8 +41453,11 @@ var require_axios = __commonJS({
           reject(new AxiosError("Request aborted", AxiosError.ECONNABORTED, config, request));
           request = null;
         }, "handleAbort");
-        request.onerror = /* @__PURE__ */ __name(function handleError() {
-          reject(new AxiosError("Network Error", AxiosError.ERR_NETWORK, config, request));
+        request.onerror = /* @__PURE__ */ __name(function handleError(event) {
+          const msg = event && event.message ? event.message : "Network Error";
+          const err = new AxiosError(msg, AxiosError.ERR_NETWORK, config, request);
+          err.event = event || null;
+          reject(err);
           request = null;
         }, "handleError");
         request.ontimeout = /* @__PURE__ */ __name(function handleTimeout() {
@@ -40018,9 +41626,16 @@ var require_axios = __commonJS({
         highWaterMark: 2
       });
     }, "trackStream");
-    var isFetchSupported = typeof fetch === "function" && typeof Request === "function" && typeof Response === "function";
-    var isReadableStreamSupported = isFetchSupported && typeof ReadableStream === "function";
-    var encodeText = isFetchSupported && (typeof TextEncoder === "function" ? /* @__PURE__ */ ((encoder) => (str) => encoder.encode(str))(new TextEncoder()) : async (str) => new Uint8Array(await new Response(str).arrayBuffer()));
+    var DEFAULT_CHUNK_SIZE = 64 * 1024;
+    var { isFunction } = utils$1;
+    var globalFetchAPI = (({ Request: Request2, Response }) => ({
+      Request: Request2,
+      Response
+    }))(utils$1.global);
+    var {
+      ReadableStream: ReadableStream$1,
+      TextEncoder: TextEncoder$1
+    } = utils$1.global;
     var test = /* @__PURE__ */ __name((fn, ...args) => {
       try {
         return !!fn(...args);
@@ -40028,162 +41643,202 @@ var require_axios = __commonJS({
         return false;
       }
     }, "test");
-    var supportsRequestStream = isReadableStreamSupported && test(() => {
-      let duplexAccessed = false;
-      const hasContentType = new Request(platform.origin, {
-        body: new ReadableStream(),
-        method: "POST",
-        get duplex() {
-          duplexAccessed = true;
-          return "half";
-        }
-      }).headers.has("Content-Type");
-      return duplexAccessed && !hasContentType;
-    });
-    var DEFAULT_CHUNK_SIZE = 64 * 1024;
-    var supportsResponseStream = isReadableStreamSupported && test(() => utils$1.isReadableStream(new Response("").body));
-    var resolvers = {
-      stream: supportsResponseStream && ((res) => res.body)
-    };
-    isFetchSupported && ((res) => {
-      ["text", "arrayBuffer", "blob", "formData", "stream"].forEach((type) => {
-        !resolvers[type] && (resolvers[type] = utils$1.isFunction(res[type]) ? (res2) => res2[type]() : (_, config) => {
-          throw new AxiosError(`Response type '${type}' is not supported`, AxiosError.ERR_NOT_SUPPORT, config);
-        });
-      });
-    })(new Response());
-    var getBodyLength = /* @__PURE__ */ __name(async (body) => {
-      if (body == null) {
-        return 0;
+    var factory = /* @__PURE__ */ __name((env) => {
+      env = utils$1.merge.call({
+        skipUndefined: true
+      }, globalFetchAPI, env);
+      const { fetch: envFetch, Request: Request2, Response } = env;
+      const isFetchSupported = envFetch ? isFunction(envFetch) : typeof fetch === "function";
+      const isRequestSupported = isFunction(Request2);
+      const isResponseSupported = isFunction(Response);
+      if (!isFetchSupported) {
+        return false;
       }
-      if (utils$1.isBlob(body)) {
-        return body.size;
-      }
-      if (utils$1.isSpecCompliantForm(body)) {
-        const _request = new Request(platform.origin, {
+      const isReadableStreamSupported = isFetchSupported && isFunction(ReadableStream$1);
+      const encodeText = isFetchSupported && (typeof TextEncoder$1 === "function" ? /* @__PURE__ */ ((encoder) => (str) => encoder.encode(str))(new TextEncoder$1()) : async (str) => new Uint8Array(await new Request2(str).arrayBuffer()));
+      const supportsRequestStream = isRequestSupported && isReadableStreamSupported && test(() => {
+        let duplexAccessed = false;
+        const hasContentType = new Request2(platform.origin, {
+          body: new ReadableStream$1(),
           method: "POST",
-          body
-        });
-        return (await _request.arrayBuffer()).byteLength;
-      }
-      if (utils$1.isArrayBufferView(body) || utils$1.isArrayBuffer(body)) {
-        return body.byteLength;
-      }
-      if (utils$1.isURLSearchParams(body)) {
-        body = body + "";
-      }
-      if (utils$1.isString(body)) {
-        return (await encodeText(body)).byteLength;
-      }
-    }, "getBodyLength");
-    var resolveBodyLength = /* @__PURE__ */ __name(async (headers, body) => {
-      const length = utils$1.toFiniteNumber(headers.getContentLength());
-      return length == null ? getBodyLength(body) : length;
-    }, "resolveBodyLength");
-    var fetchAdapter = isFetchSupported && (async (config) => {
-      let {
-        url: url2,
-        method,
-        data,
-        signal,
-        cancelToken,
-        timeout,
-        onDownloadProgress,
-        onUploadProgress,
-        responseType,
-        headers,
-        withCredentials = "same-origin",
-        fetchOptions
-      } = resolveConfig(config);
-      responseType = responseType ? (responseType + "").toLowerCase() : "text";
-      let composedSignal = composeSignals$1([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
-      let request;
-      const unsubscribe = composedSignal && composedSignal.unsubscribe && (() => {
-        composedSignal.unsubscribe();
+          get duplex() {
+            duplexAccessed = true;
+            return "half";
+          }
+        }).headers.has("Content-Type");
+        return duplexAccessed && !hasContentType;
       });
-      let requestContentLength;
-      try {
-        if (onUploadProgress && supportsRequestStream && method !== "get" && method !== "head" && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
-          let _request = new Request(url2, {
-            method: "POST",
-            body: data,
-            duplex: "half"
-          });
-          let contentTypeHeader;
-          if (utils$1.isFormData(data) && (contentTypeHeader = _request.headers.get("content-type"))) {
-            headers.setContentType(contentTypeHeader);
-          }
-          if (_request.body) {
-            const [onProgress, flush] = progressEventDecorator(
-              requestContentLength,
-              progressEventReducer(asyncDecorator(onUploadProgress))
-            );
-            data = trackStream(_request.body, DEFAULT_CHUNK_SIZE, onProgress, flush);
-          }
-        }
-        if (!utils$1.isString(withCredentials)) {
-          withCredentials = withCredentials ? "include" : "omit";
-        }
-        const isCredentialsSupported = "credentials" in Request.prototype;
-        request = new Request(url2, {
-          ...fetchOptions,
-          signal: composedSignal,
-          method: method.toUpperCase(),
-          headers: headers.normalize().toJSON(),
-          body: data,
-          duplex: "half",
-          credentials: isCredentialsSupported ? withCredentials : void 0
-        });
-        let response = await fetch(request, fetchOptions);
-        const isStreamResponse = supportsResponseStream && (responseType === "stream" || responseType === "response");
-        if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
-          const options = {};
-          ["status", "statusText", "headers"].forEach((prop) => {
-            options[prop] = response[prop];
-          });
-          const responseContentLength = utils$1.toFiniteNumber(response.headers.get("content-length"));
-          const [onProgress, flush] = onDownloadProgress && progressEventDecorator(
-            responseContentLength,
-            progressEventReducer(asyncDecorator(onDownloadProgress), true)
-          ) || [];
-          response = new Response(
-            trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
-              flush && flush();
-              unsubscribe && unsubscribe();
-            }),
-            options
-          );
-        }
-        responseType = responseType || "text";
-        let responseData = await resolvers[utils$1.findKey(resolvers, responseType) || "text"](response, config);
-        !isStreamResponse && unsubscribe && unsubscribe();
-        return await new Promise((resolve, reject) => {
-          settle(resolve, reject, {
-            data: responseData,
-            headers: AxiosHeaders$1.from(response.headers),
-            status: response.status,
-            statusText: response.statusText,
-            config,
-            request
-          });
-        });
-      } catch (err) {
-        unsubscribe && unsubscribe();
-        if (err && err.name === "TypeError" && /Load failed|fetch/i.test(err.message)) {
-          throw Object.assign(
-            new AxiosError("Network Error", AxiosError.ERR_NETWORK, config, request),
-            {
-              cause: err.cause || err
+      const supportsResponseStream = isResponseSupported && isReadableStreamSupported && test(() => utils$1.isReadableStream(new Response("").body));
+      const resolvers = {
+        stream: supportsResponseStream && ((res) => res.body)
+      };
+      isFetchSupported && (() => {
+        ["text", "arrayBuffer", "blob", "formData", "stream"].forEach((type) => {
+          !resolvers[type] && (resolvers[type] = (res, config) => {
+            let method = res && res[type];
+            if (method) {
+              return method.call(res);
             }
-          );
+            throw new AxiosError(`Response type '${type}' is not supported`, AxiosError.ERR_NOT_SUPPORT, config);
+          });
+        });
+      })();
+      const getBodyLength = /* @__PURE__ */ __name(async (body) => {
+        if (body == null) {
+          return 0;
         }
-        throw AxiosError.from(err, err && err.code, config, request);
+        if (utils$1.isBlob(body)) {
+          return body.size;
+        }
+        if (utils$1.isSpecCompliantForm(body)) {
+          const _request = new Request2(platform.origin, {
+            method: "POST",
+            body
+          });
+          return (await _request.arrayBuffer()).byteLength;
+        }
+        if (utils$1.isArrayBufferView(body) || utils$1.isArrayBuffer(body)) {
+          return body.byteLength;
+        }
+        if (utils$1.isURLSearchParams(body)) {
+          body = body + "";
+        }
+        if (utils$1.isString(body)) {
+          return (await encodeText(body)).byteLength;
+        }
+      }, "getBodyLength");
+      const resolveBodyLength = /* @__PURE__ */ __name(async (headers, body) => {
+        const length = utils$1.toFiniteNumber(headers.getContentLength());
+        return length == null ? getBodyLength(body) : length;
+      }, "resolveBodyLength");
+      return async (config) => {
+        let {
+          url: url2,
+          method,
+          data,
+          signal,
+          cancelToken,
+          timeout,
+          onDownloadProgress,
+          onUploadProgress,
+          responseType,
+          headers,
+          withCredentials = "same-origin",
+          fetchOptions
+        } = resolveConfig(config);
+        let _fetch = envFetch || fetch;
+        responseType = responseType ? (responseType + "").toLowerCase() : "text";
+        let composedSignal = composeSignals$1([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
+        let request = null;
+        const unsubscribe = composedSignal && composedSignal.unsubscribe && (() => {
+          composedSignal.unsubscribe();
+        });
+        let requestContentLength;
+        try {
+          if (onUploadProgress && supportsRequestStream && method !== "get" && method !== "head" && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
+            let _request = new Request2(url2, {
+              method: "POST",
+              body: data,
+              duplex: "half"
+            });
+            let contentTypeHeader;
+            if (utils$1.isFormData(data) && (contentTypeHeader = _request.headers.get("content-type"))) {
+              headers.setContentType(contentTypeHeader);
+            }
+            if (_request.body) {
+              const [onProgress, flush] = progressEventDecorator(
+                requestContentLength,
+                progressEventReducer(asyncDecorator(onUploadProgress))
+              );
+              data = trackStream(_request.body, DEFAULT_CHUNK_SIZE, onProgress, flush);
+            }
+          }
+          if (!utils$1.isString(withCredentials)) {
+            withCredentials = withCredentials ? "include" : "omit";
+          }
+          const isCredentialsSupported = isRequestSupported && "credentials" in Request2.prototype;
+          const resolvedOptions = {
+            ...fetchOptions,
+            signal: composedSignal,
+            method: method.toUpperCase(),
+            headers: headers.normalize().toJSON(),
+            body: data,
+            duplex: "half",
+            credentials: isCredentialsSupported ? withCredentials : void 0
+          };
+          request = isRequestSupported && new Request2(url2, resolvedOptions);
+          let response = await (isRequestSupported ? _fetch(request, fetchOptions) : _fetch(url2, resolvedOptions));
+          const isStreamResponse = supportsResponseStream && (responseType === "stream" || responseType === "response");
+          if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
+            const options = {};
+            ["status", "statusText", "headers"].forEach((prop) => {
+              options[prop] = response[prop];
+            });
+            const responseContentLength = utils$1.toFiniteNumber(response.headers.get("content-length"));
+            const [onProgress, flush] = onDownloadProgress && progressEventDecorator(
+              responseContentLength,
+              progressEventReducer(asyncDecorator(onDownloadProgress), true)
+            ) || [];
+            response = new Response(
+              trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
+                flush && flush();
+                unsubscribe && unsubscribe();
+              }),
+              options
+            );
+          }
+          responseType = responseType || "text";
+          let responseData = await resolvers[utils$1.findKey(resolvers, responseType) || "text"](response, config);
+          !isStreamResponse && unsubscribe && unsubscribe();
+          return await new Promise((resolve, reject) => {
+            settle(resolve, reject, {
+              data: responseData,
+              headers: AxiosHeaders$1.from(response.headers),
+              status: response.status,
+              statusText: response.statusText,
+              config,
+              request
+            });
+          });
+        } catch (err) {
+          unsubscribe && unsubscribe();
+          if (err && err.name === "TypeError" && /Load failed|fetch/i.test(err.message)) {
+            throw Object.assign(
+              new AxiosError("Network Error", AxiosError.ERR_NETWORK, config, request),
+              {
+                cause: err.cause || err
+              }
+            );
+          }
+          throw AxiosError.from(err, err && err.code, config, request);
+        }
+      };
+    }, "factory");
+    var seedCache = /* @__PURE__ */ new Map();
+    var getFetch = /* @__PURE__ */ __name((config) => {
+      let env = config && config.env || {};
+      const { fetch: fetch2, Request: Request2, Response } = env;
+      const seeds = [
+        Request2,
+        Response,
+        fetch2
+      ];
+      let len = seeds.length, i = len, seed, target, map = seedCache;
+      while (i--) {
+        seed = seeds[i];
+        target = map.get(seed);
+        target === void 0 && map.set(seed, target = i ? /* @__PURE__ */ new Map() : factory(env));
+        map = target;
       }
-    });
+      return target;
+    }, "getFetch");
+    getFetch();
     var knownAdapters = {
       http: httpAdapter,
       xhr: xhrAdapter,
-      fetch: fetchAdapter
+      fetch: {
+        get: getFetch
+      }
     };
     utils$1.forEach(knownAdapters, (fn, value) => {
       if (fn) {
@@ -40196,40 +41851,50 @@ var require_axios = __commonJS({
     });
     var renderReason = /* @__PURE__ */ __name((reason) => `- ${reason}`, "renderReason");
     var isResolvedHandle = /* @__PURE__ */ __name((adapter) => utils$1.isFunction(adapter) || adapter === null || adapter === false, "isResolvedHandle");
+    function getAdapter(adapters2, config) {
+      adapters2 = utils$1.isArray(adapters2) ? adapters2 : [adapters2];
+      const { length } = adapters2;
+      let nameOrAdapter;
+      let adapter;
+      const rejectedReasons = {};
+      for (let i = 0; i < length; i++) {
+        nameOrAdapter = adapters2[i];
+        let id;
+        adapter = nameOrAdapter;
+        if (!isResolvedHandle(nameOrAdapter)) {
+          adapter = knownAdapters[(id = String(nameOrAdapter)).toLowerCase()];
+          if (adapter === void 0) {
+            throw new AxiosError(`Unknown adapter '${id}'`);
+          }
+        }
+        if (adapter && (utils$1.isFunction(adapter) || (adapter = adapter.get(config)))) {
+          break;
+        }
+        rejectedReasons[id || "#" + i] = adapter;
+      }
+      if (!adapter) {
+        const reasons = Object.entries(rejectedReasons).map(
+          ([id, state]) => `adapter ${id} ` + (state === false ? "is not supported by the environment" : "is not available in the build")
+        );
+        let s = length ? reasons.length > 1 ? "since :\n" + reasons.map(renderReason).join("\n") : " " + renderReason(reasons[0]) : "as no adapter specified";
+        throw new AxiosError(
+          `There is no suitable adapter to dispatch the request ` + s,
+          "ERR_NOT_SUPPORT"
+        );
+      }
+      return adapter;
+    }
+    __name(getAdapter, "getAdapter");
     var adapters = {
-      getAdapter: /* @__PURE__ */ __name((adapters2) => {
-        adapters2 = utils$1.isArray(adapters2) ? adapters2 : [adapters2];
-        const { length } = adapters2;
-        let nameOrAdapter;
-        let adapter;
-        const rejectedReasons = {};
-        for (let i = 0; i < length; i++) {
-          nameOrAdapter = adapters2[i];
-          let id;
-          adapter = nameOrAdapter;
-          if (!isResolvedHandle(nameOrAdapter)) {
-            adapter = knownAdapters[(id = String(nameOrAdapter)).toLowerCase()];
-            if (adapter === void 0) {
-              throw new AxiosError(`Unknown adapter '${id}'`);
-            }
-          }
-          if (adapter) {
-            break;
-          }
-          rejectedReasons[id || "#" + i] = adapter;
-        }
-        if (!adapter) {
-          const reasons = Object.entries(rejectedReasons).map(
-            ([id, state]) => `adapter ${id} ` + (state === false ? "is not supported by the environment" : "is not available in the build")
-          );
-          let s = length ? reasons.length > 1 ? "since :\n" + reasons.map(renderReason).join("\n") : " " + renderReason(reasons[0]) : "as no adapter specified";
-          throw new AxiosError(
-            `There is no suitable adapter to dispatch the request ` + s,
-            "ERR_NOT_SUPPORT"
-          );
-        }
-        return adapter;
-      }, "getAdapter"),
+      /**
+       * Resolve an adapter from a list of adapter names or functions.
+       * @type {Function}
+       */
+      getAdapter,
+      /**
+       * Exposes all known adapters
+       * @type {Object<string, Function|Object>}
+       */
       adapters: knownAdapters
     };
     function throwIfCancellationRequested(config) {
@@ -40251,7 +41916,7 @@ var require_axios = __commonJS({
       if (["post", "put", "patch"].indexOf(config.method) !== -1) {
         config.headers.setContentType("application/x-www-form-urlencoded", false);
       }
-      const adapter = adapters.getAdapter(config.adapter || defaults$1.adapter);
+      const adapter = adapters.getAdapter(config.adapter || defaults$1.adapter, config);
       return adapter(config).then(/* @__PURE__ */ __name(function onAdapterResolution(response) {
         throwIfCancellationRequested(config);
         response.data = transformData.call(
@@ -40449,8 +42114,8 @@ var require_axios = __commonJS({
         let len;
         if (!synchronousRequestInterceptors) {
           const chain = [dispatchRequest.bind(this), void 0];
-          chain.unshift.apply(chain, requestInterceptorChain);
-          chain.push.apply(chain, responseInterceptorChain);
+          chain.unshift(...requestInterceptorChain);
+          chain.push(...responseInterceptorChain);
           len = chain.length;
           promise = Promise.resolve(config);
           while (i < len) {
@@ -40460,7 +42125,6 @@ var require_axios = __commonJS({
         }
         len = requestInterceptorChain.length;
         let newConfig = config;
-        i = 0;
         while (i < len) {
           const onFulfilled = requestInterceptorChain[i++];
           const onRejected = requestInterceptorChain[i++];
@@ -40688,7 +42352,13 @@ var require_axios = __commonJS({
       InsufficientStorage: 507,
       LoopDetected: 508,
       NotExtended: 510,
-      NetworkAuthenticationRequired: 511
+      NetworkAuthenticationRequired: 511,
+      WebServerIsDown: 521,
+      ConnectionTimedOut: 522,
+      OriginIsUnreachable: 523,
+      TimeoutOccurred: 524,
+      SslHandshakeFailed: 525,
+      InvalidSslCertificate: 526
     };
     Object.entries(HttpStatusCode).forEach(([key, value]) => {
       HttpStatusCode[value] = key;
@@ -42687,11 +44357,11 @@ var require_adm_zip = __commonJS({
       __name(fixPath, "fixPath");
       function filenameFilter(filterfn) {
         if (filterfn instanceof RegExp) {
-          return /* @__PURE__ */ function(rx) {
+          return /* @__PURE__ */ (function(rx) {
             return function(filename) {
               return rx.test(filename);
             };
-          }(filterfn);
+          })(filterfn);
         } else if ("function" !== typeof filterfn) {
           return () => true;
         }
@@ -43023,11 +44693,11 @@ var require_adm_zip = __commonJS({
           localPath = pth.resolve(fixPath(options2.localPath));
           let { zipPath, filter, namefix } = options2;
           if (filter instanceof RegExp) {
-            filter = /* @__PURE__ */ function(rx) {
+            filter = /* @__PURE__ */ (function(rx) {
               return function(filename) {
                 return rx.test(filename);
               };
-            }(filter);
+            })(filter);
           } else if ("function" !== typeof filter) {
             filter = /* @__PURE__ */ __name(function() {
               return true;
@@ -44972,21 +46642,64 @@ var require_constants4 = __commonJS({
 var require_commonjs3 = __commonJS({
   "../node_modules/minizlib/dist/commonjs/index.js"(exports2) {
     "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc2 = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc2 || ("get" in desc2 ? !m.__esModule : desc2.writable || desc2.configurable)) {
+        desc2 = { enumerable: true, get: /* @__PURE__ */ __name(function() {
+          return m[k];
+        }, "get") };
+      }
+      Object.defineProperty(o, k2, desc2);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = /* @__PURE__ */ __name(function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      }, "ownKeys");
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    })();
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.BrotliDecompress = exports2.BrotliCompress = exports2.Brotli = exports2.Unzip = exports2.InflateRaw = exports2.DeflateRaw = exports2.Gunzip = exports2.Gzip = exports2.Inflate = exports2.Deflate = exports2.Zlib = exports2.ZlibError = exports2.constants = void 0;
+    exports2.ZstdDecompress = exports2.ZstdCompress = exports2.BrotliDecompress = exports2.BrotliCompress = exports2.Unzip = exports2.InflateRaw = exports2.DeflateRaw = exports2.Gunzip = exports2.Gzip = exports2.Inflate = exports2.Deflate = exports2.Zlib = exports2.ZlibError = exports2.constants = void 0;
     var assert_1 = __importDefault(require("assert"));
     var buffer_1 = require("buffer");
     var minipass_1 = require_commonjs();
-    var zlib_1 = __importDefault(require("zlib"));
+    var realZlib = __importStar2(require("zlib"));
     var constants_js_1 = require_constants4();
     var constants_js_2 = require_constants4();
     Object.defineProperty(exports2, "constants", { enumerable: true, get: /* @__PURE__ */ __name(function() {
       return constants_js_2.constants;
     }, "get") });
     var OriginalBufferConcat = buffer_1.Buffer.concat;
+    var desc = Object.getOwnPropertyDescriptor(buffer_1.Buffer, "concat");
+    var noop = /* @__PURE__ */ __name((args) => args, "noop");
+    var passthroughBufferConcat = desc?.writable === true || desc?.set !== void 0 ? (makeNoOp) => {
+      buffer_1.Buffer.concat = makeNoOp ? noop : OriginalBufferConcat;
+    } : (_) => {
+    };
     var _superWrite = Symbol("_superWrite");
     var ZlibError = class extends Error {
       static {
@@ -44994,14 +46707,14 @@ var require_commonjs3 = __commonJS({
       }
       code;
       errno;
-      constructor(err) {
-        super("zlib: " + err.message);
+      constructor(err, origin) {
+        super("zlib: " + err.message, { cause: err });
         this.code = err.code;
         this.errno = err.errno;
         if (!this.code)
           this.code = "ZLIB_ERROR";
         this.message = "zlib: " + err.message;
-        Error.captureStackTrace(this, this.constructor);
+        Error.captureStackTrace(this, origin ?? this.constructor);
       }
       get name() {
         return "ZlibError";
@@ -45038,10 +46751,13 @@ var require_commonjs3 = __commonJS({
         this.#flushFlag = opts.flush ?? 0;
         this.#finishFlushFlag = opts.finishFlush ?? 0;
         this.#fullFlushFlag = opts.fullFlushFlag ?? 0;
+        if (typeof realZlib[mode] !== "function") {
+          throw new TypeError("Compression method not supported: " + mode);
+        }
         try {
-          this.#handle = new zlib_1.default[mode](opts);
+          this.#handle = new realZlib[mode](opts);
         } catch (er) {
-          throw new ZlibError(er);
+          throw new ZlibError(er, this.constructor);
         }
         this.#onError = (err) => {
           if (this.#sawError)
@@ -45115,15 +46831,15 @@ var require_commonjs3 = __commonJS({
         const originalClose = this.#handle.close;
         this.#handle.close = () => {
         };
-        buffer_1.Buffer.concat = (args) => args;
+        passthroughBufferConcat(true);
         let result = void 0;
         try {
           const flushFlag = typeof chunk[_flushFlag] === "number" ? chunk[_flushFlag] : this.#flushFlag;
           result = this.#handle._processChunk(chunk, flushFlag);
-          buffer_1.Buffer.concat = OriginalBufferConcat;
+          passthroughBufferConcat(false);
         } catch (err) {
-          buffer_1.Buffer.concat = OriginalBufferConcat;
-          this.#onError(new ZlibError(err));
+          passthroughBufferConcat(false);
+          this.#onError(new ZlibError(err, this.write));
         } finally {
           if (this.#handle) {
             ;
@@ -45134,7 +46850,7 @@ var require_commonjs3 = __commonJS({
           }
         }
         if (this.#handle)
-          this.#handle.on("error", (er) => this.#onError(new ZlibError(er)));
+          this.#handle.on("error", (er) => this.#onError(new ZlibError(er, this.write)));
         let writeReturn;
         if (result) {
           if (Array.isArray(result) && result.length > 0) {
@@ -45284,7 +47000,6 @@ var require_commonjs3 = __commonJS({
         super(opts, mode);
       }
     };
-    exports2.Brotli = Brotli;
     var BrotliCompress = class extends Brotli {
       static {
         __name(this, "BrotliCompress");
@@ -45303,393 +47018,36 @@ var require_commonjs3 = __commonJS({
       }
     };
     exports2.BrotliDecompress = BrotliDecompress;
-  }
-});
-
-// ../node_modules/yallist/dist/commonjs/index.js
-var require_commonjs4 = __commonJS({
-  "../node_modules/yallist/dist/commonjs/index.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.Node = exports2.Yallist = void 0;
-    var Yallist = class _Yallist {
+    var Zstd = class extends ZlibBase {
       static {
-        __name(this, "Yallist");
+        __name(this, "Zstd");
       }
-      tail;
-      head;
-      length = 0;
-      static create(list = []) {
-        return new _Yallist(list);
-      }
-      constructor(list = []) {
-        for (const item of list) {
-          this.push(item);
-        }
-      }
-      *[Symbol.iterator]() {
-        for (let walker = this.head; walker; walker = walker.next) {
-          yield walker.value;
-        }
-      }
-      removeNode(node) {
-        if (node.list !== this) {
-          throw new Error("removing node which does not belong to this list");
-        }
-        const next = node.next;
-        const prev = node.prev;
-        if (next) {
-          next.prev = prev;
-        }
-        if (prev) {
-          prev.next = next;
-        }
-        if (node === this.head) {
-          this.head = next;
-        }
-        if (node === this.tail) {
-          this.tail = prev;
-        }
-        this.length--;
-        node.next = void 0;
-        node.prev = void 0;
-        node.list = void 0;
-        return next;
-      }
-      unshiftNode(node) {
-        if (node === this.head) {
-          return;
-        }
-        if (node.list) {
-          node.list.removeNode(node);
-        }
-        const head = this.head;
-        node.list = this;
-        node.next = head;
-        if (head) {
-          head.prev = node;
-        }
-        this.head = node;
-        if (!this.tail) {
-          this.tail = node;
-        }
-        this.length++;
-      }
-      pushNode(node) {
-        if (node === this.tail) {
-          return;
-        }
-        if (node.list) {
-          node.list.removeNode(node);
-        }
-        const tail = this.tail;
-        node.list = this;
-        node.prev = tail;
-        if (tail) {
-          tail.next = node;
-        }
-        this.tail = node;
-        if (!this.head) {
-          this.head = node;
-        }
-        this.length++;
-      }
-      push(...args) {
-        for (let i = 0, l = args.length; i < l; i++) {
-          push(this, args[i]);
-        }
-        return this.length;
-      }
-      unshift(...args) {
-        for (var i = 0, l = args.length; i < l; i++) {
-          unshift(this, args[i]);
-        }
-        return this.length;
-      }
-      pop() {
-        if (!this.tail) {
-          return void 0;
-        }
-        const res = this.tail.value;
-        const t = this.tail;
-        this.tail = this.tail.prev;
-        if (this.tail) {
-          this.tail.next = void 0;
-        } else {
-          this.head = void 0;
-        }
-        t.list = void 0;
-        this.length--;
-        return res;
-      }
-      shift() {
-        if (!this.head) {
-          return void 0;
-        }
-        const res = this.head.value;
-        const h = this.head;
-        this.head = this.head.next;
-        if (this.head) {
-          this.head.prev = void 0;
-        } else {
-          this.tail = void 0;
-        }
-        h.list = void 0;
-        this.length--;
-        return res;
-      }
-      forEach(fn, thisp) {
-        thisp = thisp || this;
-        for (let walker = this.head, i = 0; !!walker; i++) {
-          fn.call(thisp, walker.value, i, this);
-          walker = walker.next;
-        }
-      }
-      forEachReverse(fn, thisp) {
-        thisp = thisp || this;
-        for (let walker = this.tail, i = this.length - 1; !!walker; i--) {
-          fn.call(thisp, walker.value, i, this);
-          walker = walker.prev;
-        }
-      }
-      get(n) {
-        let i = 0;
-        let walker = this.head;
-        for (; !!walker && i < n; i++) {
-          walker = walker.next;
-        }
-        if (i === n && !!walker) {
-          return walker.value;
-        }
-      }
-      getReverse(n) {
-        let i = 0;
-        let walker = this.tail;
-        for (; !!walker && i < n; i++) {
-          walker = walker.prev;
-        }
-        if (i === n && !!walker) {
-          return walker.value;
-        }
-      }
-      map(fn, thisp) {
-        thisp = thisp || this;
-        const res = new _Yallist();
-        for (let walker = this.head; !!walker; ) {
-          res.push(fn.call(thisp, walker.value, this));
-          walker = walker.next;
-        }
-        return res;
-      }
-      mapReverse(fn, thisp) {
-        thisp = thisp || this;
-        var res = new _Yallist();
-        for (let walker = this.tail; !!walker; ) {
-          res.push(fn.call(thisp, walker.value, this));
-          walker = walker.prev;
-        }
-        return res;
-      }
-      reduce(fn, initial) {
-        let acc;
-        let walker = this.head;
-        if (arguments.length > 1) {
-          acc = initial;
-        } else if (this.head) {
-          walker = this.head.next;
-          acc = this.head.value;
-        } else {
-          throw new TypeError("Reduce of empty list with no initial value");
-        }
-        for (var i = 0; !!walker; i++) {
-          acc = fn(acc, walker.value, i);
-          walker = walker.next;
-        }
-        return acc;
-      }
-      reduceReverse(fn, initial) {
-        let acc;
-        let walker = this.tail;
-        if (arguments.length > 1) {
-          acc = initial;
-        } else if (this.tail) {
-          walker = this.tail.prev;
-          acc = this.tail.value;
-        } else {
-          throw new TypeError("Reduce of empty list with no initial value");
-        }
-        for (let i = this.length - 1; !!walker; i--) {
-          acc = fn(acc, walker.value, i);
-          walker = walker.prev;
-        }
-        return acc;
-      }
-      toArray() {
-        const arr = new Array(this.length);
-        for (let i = 0, walker = this.head; !!walker; i++) {
-          arr[i] = walker.value;
-          walker = walker.next;
-        }
-        return arr;
-      }
-      toArrayReverse() {
-        const arr = new Array(this.length);
-        for (let i = 0, walker = this.tail; !!walker; i++) {
-          arr[i] = walker.value;
-          walker = walker.prev;
-        }
-        return arr;
-      }
-      slice(from = 0, to = this.length) {
-        if (to < 0) {
-          to += this.length;
-        }
-        if (from < 0) {
-          from += this.length;
-        }
-        const ret = new _Yallist();
-        if (to < from || to < 0) {
-          return ret;
-        }
-        if (from < 0) {
-          from = 0;
-        }
-        if (to > this.length) {
-          to = this.length;
-        }
-        let walker = this.head;
-        let i = 0;
-        for (i = 0; !!walker && i < from; i++) {
-          walker = walker.next;
-        }
-        for (; !!walker && i < to; i++, walker = walker.next) {
-          ret.push(walker.value);
-        }
-        return ret;
-      }
-      sliceReverse(from = 0, to = this.length) {
-        if (to < 0) {
-          to += this.length;
-        }
-        if (from < 0) {
-          from += this.length;
-        }
-        const ret = new _Yallist();
-        if (to < from || to < 0) {
-          return ret;
-        }
-        if (from < 0) {
-          from = 0;
-        }
-        if (to > this.length) {
-          to = this.length;
-        }
-        let i = this.length;
-        let walker = this.tail;
-        for (; !!walker && i > to; i--) {
-          walker = walker.prev;
-        }
-        for (; !!walker && i > from; i--, walker = walker.prev) {
-          ret.push(walker.value);
-        }
-        return ret;
-      }
-      splice(start, deleteCount = 0, ...nodes) {
-        if (start > this.length) {
-          start = this.length - 1;
-        }
-        if (start < 0) {
-          start = this.length + start;
-        }
-        let walker = this.head;
-        for (let i = 0; !!walker && i < start; i++) {
-          walker = walker.next;
-        }
-        const ret = [];
-        for (let i = 0; !!walker && i < deleteCount; i++) {
-          ret.push(walker.value);
-          walker = this.removeNode(walker);
-        }
-        if (!walker) {
-          walker = this.tail;
-        } else if (walker !== this.tail) {
-          walker = walker.prev;
-        }
-        for (const v of nodes) {
-          walker = insertAfter(this, walker, v);
-        }
-        return ret;
-      }
-      reverse() {
-        const head = this.head;
-        const tail = this.tail;
-        for (let walker = head; !!walker; walker = walker.prev) {
-          const p = walker.prev;
-          walker.prev = walker.next;
-          walker.next = p;
-        }
-        this.head = tail;
-        this.tail = head;
-        return this;
+      constructor(opts, mode) {
+        opts = opts || {};
+        opts.flush = opts.flush || constants_js_1.constants.ZSTD_e_continue;
+        opts.finishFlush = opts.finishFlush || constants_js_1.constants.ZSTD_e_end;
+        opts.fullFlushFlag = constants_js_1.constants.ZSTD_e_flush;
+        super(opts, mode);
       }
     };
-    exports2.Yallist = Yallist;
-    function insertAfter(self2, node, value) {
-      const prev = node;
-      const next = node ? node.next : self2.head;
-      const inserted = new Node(value, prev, next, self2);
-      if (inserted.next === void 0) {
-        self2.tail = inserted;
-      }
-      if (inserted.prev === void 0) {
-        self2.head = inserted;
-      }
-      self2.length++;
-      return inserted;
-    }
-    __name(insertAfter, "insertAfter");
-    function push(self2, item) {
-      self2.tail = new Node(item, self2.tail, void 0, self2);
-      if (!self2.head) {
-        self2.head = self2.tail;
-      }
-      self2.length++;
-    }
-    __name(push, "push");
-    function unshift(self2, item) {
-      self2.head = new Node(item, void 0, self2.head, self2);
-      if (!self2.tail) {
-        self2.tail = self2.head;
-      }
-      self2.length++;
-    }
-    __name(unshift, "unshift");
-    var Node = class {
+    var ZstdCompress = class extends Zstd {
       static {
-        __name(this, "Node");
+        __name(this, "ZstdCompress");
       }
-      list;
-      next;
-      prev;
-      value;
-      constructor(value, prev, next, list) {
-        this.list = list;
-        this.value = value;
-        if (prev) {
-          prev.next = this;
-          this.prev = prev;
-        } else {
-          this.prev = void 0;
-        }
-        if (next) {
-          next.prev = this;
-          this.next = next;
-        } else {
-          this.next = void 0;
-        }
+      constructor(opts) {
+        super(opts, "ZstdCompress");
       }
     };
-    exports2.Node = Node;
+    exports2.ZstdCompress = ZstdCompress;
+    var ZstdDecompress = class extends Zstd {
+      static {
+        __name(this, "ZstdDecompress");
+      }
+      constructor(opts) {
+        super(opts, "ZstdDecompress");
+      }
+    };
+    exports2.ZstdDecompress = ZstdDecompress;
   }
 });
 
@@ -45840,7 +47198,7 @@ var require_types = __commonJS({
 var require_header = __commonJS({
   "../node_modules/tar/dist/commonjs/header.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -45849,13 +47207,13 @@ var require_header = __commonJS({
         }, "get") };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
     var __importStar2 = exports2 && exports2.__importStar || function(mod) {
@@ -45911,12 +47269,12 @@ var require_header = __commonJS({
         if (!buf || !(buf.length >= off + 512)) {
           throw new Error("need 512 bytes for header");
         }
-        this.path = decString(buf, off, 100);
-        this.mode = decNumber(buf, off + 100, 8);
-        this.uid = decNumber(buf, off + 108, 8);
-        this.gid = decNumber(buf, off + 116, 8);
-        this.size = decNumber(buf, off + 124, 12);
-        this.mtime = decDate(buf, off + 136, 12);
+        this.path = ex?.path ?? decString(buf, off, 100);
+        this.mode = ex?.mode ?? gex?.mode ?? decNumber(buf, off + 100, 8);
+        this.uid = ex?.uid ?? gex?.uid ?? decNumber(buf, off + 108, 8);
+        this.gid = ex?.gid ?? gex?.gid ?? decNumber(buf, off + 116, 8);
+        this.size = ex?.size ?? gex?.size ?? decNumber(buf, off + 124, 12);
+        this.mtime = ex?.mtime ?? gex?.mtime ?? decDate(buf, off + 136, 12);
         this.cksum = decNumber(buf, off + 148, 12);
         if (gex)
           this.#slurp(gex, true);
@@ -45934,10 +47292,10 @@ var require_header = __commonJS({
         }
         this.linkpath = decString(buf, off + 157, 100);
         if (buf.subarray(off + 257, off + 265).toString() === "ustar\x0000") {
-          this.uname = decString(buf, off + 265, 32);
-          this.gname = decString(buf, off + 297, 32);
-          this.devmaj = decNumber(buf, off + 329, 8) ?? 0;
-          this.devmin = decNumber(buf, off + 337, 8) ?? 0;
+          this.uname = ex?.uname ?? gex?.uname ?? decString(buf, off + 265, 32);
+          this.gname = ex?.gname ?? gex?.gname ?? decString(buf, off + 297, 32);
+          this.devmaj = ex?.devmaj ?? gex?.devmaj ?? decNumber(buf, off + 329, 8) ?? 0;
+          this.devmin = ex?.devmin ?? gex?.devmin ?? decNumber(buf, off + 337, 8) ?? 0;
           if (buf[off + 475] !== 0) {
             const prefix = decString(buf, off + 345, 155);
             this.path = prefix + "/" + this.path;
@@ -45946,8 +47304,8 @@ var require_header = __commonJS({
             if (prefix) {
               this.path = prefix + "/" + this.path;
             }
-            this.atime = decDate(buf, off + 476, 12);
-            this.ctime = decDate(buf, off + 488, 12);
+            this.atime = ex?.atime ?? gex?.atime ?? decDate(buf, off + 476, 12);
+            this.ctime = ex?.ctime ?? gex?.ctime ?? decDate(buf, off + 488, 12);
           }
         }
         let sum = 8 * 32;
@@ -46389,13 +47747,14 @@ var require_parse3 = __commonJS({
     exports2.Parser = void 0;
     var events_1 = require("events");
     var minizlib_1 = require_commonjs3();
-    var yallist_1 = require_commonjs4();
     var header_js_1 = require_header();
     var pax_js_1 = require_pax();
     var read_entry_js_1 = require_read_entry();
     var warn_method_js_1 = require_warn_method();
     var maxMetaEntrySize = 1024 * 1024;
     var gzipHeader = Buffer.from([31, 139]);
+    var zstdHeader = Buffer.from([40, 181, 47, 253]);
+    var ZIP_HEADER_LEN = Math.max(gzipHeader.length, zstdHeader.length);
     var STATE = Symbol("state");
     var WRITEENTRY = Symbol("writeEntry");
     var READENTRY = Symbol("readEntry");
@@ -46436,9 +47795,10 @@ var require_parse3 = __commonJS({
       maxMetaEntrySize;
       filter;
       brotli;
+      zstd;
       writable = true;
       readable = false;
-      [QUEUE] = new yallist_1.Yallist();
+      [QUEUE] = [];
       [BUFFER];
       [READENTRY];
       [WRITEENTRY];
@@ -46476,7 +47836,9 @@ var require_parse3 = __commonJS({
         this.maxMetaEntrySize = opt.maxMetaEntrySize || maxMetaEntrySize;
         this.filter = typeof opt.filter === "function" ? opt.filter : noop;
         const isTBR = opt.file && (opt.file.endsWith(".tar.br") || opt.file.endsWith(".tbr"));
-        this.brotli = !opt.gzip && opt.brotli !== void 0 ? opt.brotli : isTBR ? void 0 : false;
+        this.brotli = !(opt.gzip || opt.zstd) && opt.brotli !== void 0 ? opt.brotli : isTBR ? void 0 : false;
+        const isTZST = opt.file && (opt.file.endsWith(".tar.zst") || opt.file.endsWith(".tzst"));
+        this.zstd = !(opt.gzip || opt.brotli) && opt.zstd !== void 0 ? opt.zstd : isTZST ? true : void 0;
         this.on("end", () => this[CLOSESTREAM]());
         if (typeof opt.onwarn === "function") {
           this.on("warn", opt.onwarn);
@@ -46697,7 +48059,7 @@ var require_parse3 = __commonJS({
             chunk = Buffer.concat([this[BUFFER], chunk]);
             this[BUFFER] = void 0;
           }
-          if (chunk.length < gzipHeader.length) {
+          if (chunk.length < ZIP_HEADER_LEN) {
             this[BUFFER] = chunk;
             cb?.();
             return true;
@@ -46707,7 +48069,17 @@ var require_parse3 = __commonJS({
               this[UNZIP] = false;
             }
           }
-          const maybeBrotli = this.brotli === void 0;
+          let isZstd = false;
+          if (this[UNZIP] === false && this.zstd !== false) {
+            isZstd = true;
+            for (let i = 0; i < zstdHeader.length; i++) {
+              if (chunk[i] !== zstdHeader[i]) {
+                isZstd = false;
+                break;
+              }
+            }
+          }
+          const maybeBrotli = this.brotli === void 0 && !isZstd;
           if (this[UNZIP] === false && maybeBrotli) {
             if (chunk.length < 512) {
               if (this[ENDED]) {
@@ -46726,10 +48098,10 @@ var require_parse3 = __commonJS({
               }
             }
           }
-          if (this[UNZIP] === void 0 || this[UNZIP] === false && this.brotli) {
+          if (this[UNZIP] === void 0 || this[UNZIP] === false && (this.brotli || isZstd)) {
             const ended = this[ENDED];
             this[ENDED] = false;
-            this[UNZIP] = this[UNZIP] === void 0 ? new minizlib_1.Unzip({}) : new minizlib_1.BrotliDecompress({});
+            this[UNZIP] = this[UNZIP] === void 0 ? new minizlib_1.Unzip({}) : isZstd ? new minizlib_1.ZstdDecompress({}) : new minizlib_1.BrotliDecompress({});
             this[UNZIP].on("data", (chunk2) => this[CONSUMECHUNK](chunk2));
             this[UNZIP].on("error", (er) => this.abort(er));
             this[UNZIP].on("end", () => {
@@ -46858,7 +48230,7 @@ var require_parse3 = __commonJS({
             this[UNZIP].end();
           } else {
             this[ENDED] = true;
-            if (this.brotli === void 0)
+            if (this.brotli === void 0 || this.zstd === void 0)
               chunk = chunk || Buffer.alloc(0);
             if (chunk)
               this.write(chunk);
@@ -46895,7 +48267,7 @@ var require_strip_trailing_slashes = __commonJS({
 var require_list = __commonJS({
   "../node_modules/tar/dist/commonjs/list.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -46904,13 +48276,13 @@ var require_list = __commonJS({
         }, "get") };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
     var __importStar2 = exports2 && exports2.__importStar || function(mod) {
@@ -46967,16 +48339,20 @@ var require_list = __commonJS({
       const file = opt.file;
       let fd;
       try {
-        const stat3 = node_fs_1.default.statSync(file);
+        fd = node_fs_1.default.openSync(file, "r");
+        const stat3 = node_fs_1.default.fstatSync(fd);
         const readSize = opt.maxReadSize || 16 * 1024 * 1024;
         if (stat3.size < readSize) {
-          p.end(node_fs_1.default.readFileSync(file));
+          const buf = Buffer.allocUnsafe(stat3.size);
+          const read = node_fs_1.default.readSync(fd, buf, 0, stat3.size, 0);
+          p.end(read === buf.byteLength ? buf : buf.subarray(0, read));
         } else {
           let pos = 0;
           const buf = Buffer.allocUnsafe(readSize);
-          fd = node_fs_1.default.openSync(file, "r");
           while (pos < stat3.size) {
             const bytesRead = node_fs_1.default.readSync(fd, buf, 0, readSize, pos);
+            if (bytesRead === 0)
+              break;
             pos += bytesRead;
             p.write(buf.subarray(0, bytesRead));
           }
@@ -47094,7 +48470,7 @@ var require_winchars = __commonJS({
 var require_write_entry = __commonJS({
   "../node_modules/tar/dist/commonjs/write-entry.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -47103,13 +48479,13 @@ var require_write_entry = __commonJS({
         }, "get") };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
     var __importStar2 = exports2 && exports2.__importStar || function(mod) {
@@ -47729,11 +49105,398 @@ var require_write_entry = __commonJS({
   }
 });
 
+// ../node_modules/yallist/dist/commonjs/index.js
+var require_commonjs4 = __commonJS({
+  "../node_modules/yallist/dist/commonjs/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Node = exports2.Yallist = void 0;
+    var Yallist = class _Yallist {
+      static {
+        __name(this, "Yallist");
+      }
+      tail;
+      head;
+      length = 0;
+      static create(list = []) {
+        return new _Yallist(list);
+      }
+      constructor(list = []) {
+        for (const item of list) {
+          this.push(item);
+        }
+      }
+      *[Symbol.iterator]() {
+        for (let walker = this.head; walker; walker = walker.next) {
+          yield walker.value;
+        }
+      }
+      removeNode(node) {
+        if (node.list !== this) {
+          throw new Error("removing node which does not belong to this list");
+        }
+        const next = node.next;
+        const prev = node.prev;
+        if (next) {
+          next.prev = prev;
+        }
+        if (prev) {
+          prev.next = next;
+        }
+        if (node === this.head) {
+          this.head = next;
+        }
+        if (node === this.tail) {
+          this.tail = prev;
+        }
+        this.length--;
+        node.next = void 0;
+        node.prev = void 0;
+        node.list = void 0;
+        return next;
+      }
+      unshiftNode(node) {
+        if (node === this.head) {
+          return;
+        }
+        if (node.list) {
+          node.list.removeNode(node);
+        }
+        const head = this.head;
+        node.list = this;
+        node.next = head;
+        if (head) {
+          head.prev = node;
+        }
+        this.head = node;
+        if (!this.tail) {
+          this.tail = node;
+        }
+        this.length++;
+      }
+      pushNode(node) {
+        if (node === this.tail) {
+          return;
+        }
+        if (node.list) {
+          node.list.removeNode(node);
+        }
+        const tail = this.tail;
+        node.list = this;
+        node.prev = tail;
+        if (tail) {
+          tail.next = node;
+        }
+        this.tail = node;
+        if (!this.head) {
+          this.head = node;
+        }
+        this.length++;
+      }
+      push(...args) {
+        for (let i = 0, l = args.length; i < l; i++) {
+          push(this, args[i]);
+        }
+        return this.length;
+      }
+      unshift(...args) {
+        for (var i = 0, l = args.length; i < l; i++) {
+          unshift(this, args[i]);
+        }
+        return this.length;
+      }
+      pop() {
+        if (!this.tail) {
+          return void 0;
+        }
+        const res = this.tail.value;
+        const t = this.tail;
+        this.tail = this.tail.prev;
+        if (this.tail) {
+          this.tail.next = void 0;
+        } else {
+          this.head = void 0;
+        }
+        t.list = void 0;
+        this.length--;
+        return res;
+      }
+      shift() {
+        if (!this.head) {
+          return void 0;
+        }
+        const res = this.head.value;
+        const h = this.head;
+        this.head = this.head.next;
+        if (this.head) {
+          this.head.prev = void 0;
+        } else {
+          this.tail = void 0;
+        }
+        h.list = void 0;
+        this.length--;
+        return res;
+      }
+      forEach(fn, thisp) {
+        thisp = thisp || this;
+        for (let walker = this.head, i = 0; !!walker; i++) {
+          fn.call(thisp, walker.value, i, this);
+          walker = walker.next;
+        }
+      }
+      forEachReverse(fn, thisp) {
+        thisp = thisp || this;
+        for (let walker = this.tail, i = this.length - 1; !!walker; i--) {
+          fn.call(thisp, walker.value, i, this);
+          walker = walker.prev;
+        }
+      }
+      get(n) {
+        let i = 0;
+        let walker = this.head;
+        for (; !!walker && i < n; i++) {
+          walker = walker.next;
+        }
+        if (i === n && !!walker) {
+          return walker.value;
+        }
+      }
+      getReverse(n) {
+        let i = 0;
+        let walker = this.tail;
+        for (; !!walker && i < n; i++) {
+          walker = walker.prev;
+        }
+        if (i === n && !!walker) {
+          return walker.value;
+        }
+      }
+      map(fn, thisp) {
+        thisp = thisp || this;
+        const res = new _Yallist();
+        for (let walker = this.head; !!walker; ) {
+          res.push(fn.call(thisp, walker.value, this));
+          walker = walker.next;
+        }
+        return res;
+      }
+      mapReverse(fn, thisp) {
+        thisp = thisp || this;
+        var res = new _Yallist();
+        for (let walker = this.tail; !!walker; ) {
+          res.push(fn.call(thisp, walker.value, this));
+          walker = walker.prev;
+        }
+        return res;
+      }
+      reduce(fn, initial) {
+        let acc;
+        let walker = this.head;
+        if (arguments.length > 1) {
+          acc = initial;
+        } else if (this.head) {
+          walker = this.head.next;
+          acc = this.head.value;
+        } else {
+          throw new TypeError("Reduce of empty list with no initial value");
+        }
+        for (var i = 0; !!walker; i++) {
+          acc = fn(acc, walker.value, i);
+          walker = walker.next;
+        }
+        return acc;
+      }
+      reduceReverse(fn, initial) {
+        let acc;
+        let walker = this.tail;
+        if (arguments.length > 1) {
+          acc = initial;
+        } else if (this.tail) {
+          walker = this.tail.prev;
+          acc = this.tail.value;
+        } else {
+          throw new TypeError("Reduce of empty list with no initial value");
+        }
+        for (let i = this.length - 1; !!walker; i--) {
+          acc = fn(acc, walker.value, i);
+          walker = walker.prev;
+        }
+        return acc;
+      }
+      toArray() {
+        const arr = new Array(this.length);
+        for (let i = 0, walker = this.head; !!walker; i++) {
+          arr[i] = walker.value;
+          walker = walker.next;
+        }
+        return arr;
+      }
+      toArrayReverse() {
+        const arr = new Array(this.length);
+        for (let i = 0, walker = this.tail; !!walker; i++) {
+          arr[i] = walker.value;
+          walker = walker.prev;
+        }
+        return arr;
+      }
+      slice(from = 0, to = this.length) {
+        if (to < 0) {
+          to += this.length;
+        }
+        if (from < 0) {
+          from += this.length;
+        }
+        const ret = new _Yallist();
+        if (to < from || to < 0) {
+          return ret;
+        }
+        if (from < 0) {
+          from = 0;
+        }
+        if (to > this.length) {
+          to = this.length;
+        }
+        let walker = this.head;
+        let i = 0;
+        for (i = 0; !!walker && i < from; i++) {
+          walker = walker.next;
+        }
+        for (; !!walker && i < to; i++, walker = walker.next) {
+          ret.push(walker.value);
+        }
+        return ret;
+      }
+      sliceReverse(from = 0, to = this.length) {
+        if (to < 0) {
+          to += this.length;
+        }
+        if (from < 0) {
+          from += this.length;
+        }
+        const ret = new _Yallist();
+        if (to < from || to < 0) {
+          return ret;
+        }
+        if (from < 0) {
+          from = 0;
+        }
+        if (to > this.length) {
+          to = this.length;
+        }
+        let i = this.length;
+        let walker = this.tail;
+        for (; !!walker && i > to; i--) {
+          walker = walker.prev;
+        }
+        for (; !!walker && i > from; i--, walker = walker.prev) {
+          ret.push(walker.value);
+        }
+        return ret;
+      }
+      splice(start, deleteCount = 0, ...nodes) {
+        if (start > this.length) {
+          start = this.length - 1;
+        }
+        if (start < 0) {
+          start = this.length + start;
+        }
+        let walker = this.head;
+        for (let i = 0; !!walker && i < start; i++) {
+          walker = walker.next;
+        }
+        const ret = [];
+        for (let i = 0; !!walker && i < deleteCount; i++) {
+          ret.push(walker.value);
+          walker = this.removeNode(walker);
+        }
+        if (!walker) {
+          walker = this.tail;
+        } else if (walker !== this.tail) {
+          walker = walker.prev;
+        }
+        for (const v of nodes) {
+          walker = insertAfter(this, walker, v);
+        }
+        return ret;
+      }
+      reverse() {
+        const head = this.head;
+        const tail = this.tail;
+        for (let walker = head; !!walker; walker = walker.prev) {
+          const p = walker.prev;
+          walker.prev = walker.next;
+          walker.next = p;
+        }
+        this.head = tail;
+        this.tail = head;
+        return this;
+      }
+    };
+    exports2.Yallist = Yallist;
+    function insertAfter(self2, node, value) {
+      const prev = node;
+      const next = node ? node.next : self2.head;
+      const inserted = new Node(value, prev, next, self2);
+      if (inserted.next === void 0) {
+        self2.tail = inserted;
+      }
+      if (inserted.prev === void 0) {
+        self2.head = inserted;
+      }
+      self2.length++;
+      return inserted;
+    }
+    __name(insertAfter, "insertAfter");
+    function push(self2, item) {
+      self2.tail = new Node(item, self2.tail, void 0, self2);
+      if (!self2.head) {
+        self2.head = self2.tail;
+      }
+      self2.length++;
+    }
+    __name(push, "push");
+    function unshift(self2, item) {
+      self2.head = new Node(item, void 0, self2.head, self2);
+      if (!self2.tail) {
+        self2.tail = self2.head;
+      }
+      self2.length++;
+    }
+    __name(unshift, "unshift");
+    var Node = class {
+      static {
+        __name(this, "Node");
+      }
+      list;
+      next;
+      prev;
+      value;
+      constructor(value, prev, next, list) {
+        this.list = list;
+        this.value = value;
+        if (prev) {
+          prev.next = this;
+          this.prev = prev;
+        } else {
+          this.prev = void 0;
+        }
+        if (next) {
+          next.prev = this;
+          this.next = next;
+        } else {
+          this.next = void 0;
+        }
+      }
+    };
+    exports2.Node = Node;
+  }
+});
+
 // ../node_modules/tar/dist/commonjs/pack.js
 var require_pack = __commonJS({
   "../node_modules/tar/dist/commonjs/pack.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -47742,13 +49505,13 @@ var require_pack = __commonJS({
         }, "get") };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
     var __importStar2 = exports2 && exports2.__importStar || function(mod) {
@@ -47838,6 +49601,14 @@ var require_pack = __commonJS({
       jobs;
       [WRITEENTRYCLASS];
       onWriteEntry;
+      // Note: we actually DO need a linked list here, because we
+      // shift() to update the head of the list where we start, but still
+      // while that happens, need to know what the next item in the queue
+      // will be. Since we do multiple jobs in parallel, it's not as simple
+      // as just an Array.shift(), since that would lose the information about
+      // the next job in the list. We could add a .next field on the PackJob
+      // class, but then we'd have to be tracking the tail of the queue the
+      // whole time, and Yallist just does that for us anyway.
       [QUEUE];
       [JOBS] = 0;
       [PROCESSING] = false;
@@ -47861,9 +49632,9 @@ var require_pack = __commonJS({
           this.on("warn", opt.onwarn);
         }
         this.portable = !!opt.portable;
-        if (opt.gzip || opt.brotli) {
-          if (opt.gzip && opt.brotli) {
-            throw new TypeError("gzip and brotli are mutually exclusive");
+        if (opt.gzip || opt.brotli || opt.zstd) {
+          if ((opt.gzip ? 1 : 0) + (opt.brotli ? 1 : 0) + (opt.zstd ? 1 : 0) > 1) {
+            throw new TypeError("gzip, brotli, zstd are mutually exclusive");
           }
           if (opt.gzip) {
             if (typeof opt.gzip !== "object") {
@@ -47879,6 +49650,12 @@ var require_pack = __commonJS({
               opt.brotli = {};
             }
             this.zip = new zlib.BrotliCompress(opt.brotli);
+          }
+          if (opt.zstd) {
+            if (typeof opt.zstd !== "object") {
+              opt.zstd = {};
+            }
+            this.zip = new zlib.ZstdCompress(opt.zstd);
           }
           if (!this.zip)
             throw new Error("impossible");
@@ -48387,317 +50164,6 @@ var require_commonjs5 = __commonJS({
   }
 });
 
-// ../node_modules/tar/node_modules/mkdirp/dist/cjs/src/opts-arg.js
-var require_opts_arg = __commonJS({
-  "../node_modules/tar/node_modules/mkdirp/dist/cjs/src/opts-arg.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.optsArg = void 0;
-    var fs_1 = require("fs");
-    var optsArg = /* @__PURE__ */ __name((opts) => {
-      if (!opts) {
-        opts = { mode: 511 };
-      } else if (typeof opts === "object") {
-        opts = { mode: 511, ...opts };
-      } else if (typeof opts === "number") {
-        opts = { mode: opts };
-      } else if (typeof opts === "string") {
-        opts = { mode: parseInt(opts, 8) };
-      } else {
-        throw new TypeError("invalid options argument");
-      }
-      const resolved = opts;
-      const optsFs = opts.fs || {};
-      opts.mkdir = opts.mkdir || optsFs.mkdir || fs_1.mkdir;
-      opts.mkdirAsync = opts.mkdirAsync ? opts.mkdirAsync : async (path2, options) => {
-        return new Promise((res, rej) => resolved.mkdir(path2, options, (er, made) => er ? rej(er) : res(made)));
-      };
-      opts.stat = opts.stat || optsFs.stat || fs_1.stat;
-      opts.statAsync = opts.statAsync ? opts.statAsync : async (path2) => new Promise((res, rej) => resolved.stat(path2, (err, stats) => err ? rej(err) : res(stats)));
-      opts.statSync = opts.statSync || optsFs.statSync || fs_1.statSync;
-      opts.mkdirSync = opts.mkdirSync || optsFs.mkdirSync || fs_1.mkdirSync;
-      return resolved;
-    }, "optsArg");
-    exports2.optsArg = optsArg;
-  }
-});
-
-// ../node_modules/tar/node_modules/mkdirp/dist/cjs/src/mkdirp-manual.js
-var require_mkdirp_manual = __commonJS({
-  "../node_modules/tar/node_modules/mkdirp/dist/cjs/src/mkdirp-manual.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.mkdirpManual = exports2.mkdirpManualSync = void 0;
-    var path_1 = require("path");
-    var opts_arg_js_1 = require_opts_arg();
-    var mkdirpManualSync = /* @__PURE__ */ __name((path2, options, made) => {
-      const parent = (0, path_1.dirname)(path2);
-      const opts = { ...(0, opts_arg_js_1.optsArg)(options), recursive: false };
-      if (parent === path2) {
-        try {
-          return opts.mkdirSync(path2, opts);
-        } catch (er) {
-          const fer = er;
-          if (fer && fer.code !== "EISDIR") {
-            throw er;
-          }
-          return;
-        }
-      }
-      try {
-        opts.mkdirSync(path2, opts);
-        return made || path2;
-      } catch (er) {
-        const fer = er;
-        if (fer && fer.code === "ENOENT") {
-          return (0, exports2.mkdirpManualSync)(path2, opts, (0, exports2.mkdirpManualSync)(parent, opts, made));
-        }
-        if (fer && fer.code !== "EEXIST" && fer && fer.code !== "EROFS") {
-          throw er;
-        }
-        try {
-          if (!opts.statSync(path2).isDirectory())
-            throw er;
-        } catch (_) {
-          throw er;
-        }
-      }
-    }, "mkdirpManualSync");
-    exports2.mkdirpManualSync = mkdirpManualSync;
-    exports2.mkdirpManual = Object.assign(async (path2, options, made) => {
-      const opts = (0, opts_arg_js_1.optsArg)(options);
-      opts.recursive = false;
-      const parent = (0, path_1.dirname)(path2);
-      if (parent === path2) {
-        return opts.mkdirAsync(path2, opts).catch((er) => {
-          const fer = er;
-          if (fer && fer.code !== "EISDIR") {
-            throw er;
-          }
-        });
-      }
-      return opts.mkdirAsync(path2, opts).then(() => made || path2, async (er) => {
-        const fer = er;
-        if (fer && fer.code === "ENOENT") {
-          return (0, exports2.mkdirpManual)(parent, opts).then((made2) => (0, exports2.mkdirpManual)(path2, opts, made2));
-        }
-        if (fer && fer.code !== "EEXIST" && fer.code !== "EROFS") {
-          throw er;
-        }
-        return opts.statAsync(path2).then((st) => {
-          if (st.isDirectory()) {
-            return made;
-          } else {
-            throw er;
-          }
-        }, () => {
-          throw er;
-        });
-      });
-    }, { sync: exports2.mkdirpManualSync });
-  }
-});
-
-// ../node_modules/tar/node_modules/mkdirp/dist/cjs/src/find-made.js
-var require_find_made = __commonJS({
-  "../node_modules/tar/node_modules/mkdirp/dist/cjs/src/find-made.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.findMadeSync = exports2.findMade = void 0;
-    var path_1 = require("path");
-    var findMade = /* @__PURE__ */ __name(async (opts, parent, path2) => {
-      if (path2 === parent) {
-        return;
-      }
-      return opts.statAsync(parent).then(
-        (st) => st.isDirectory() ? path2 : void 0,
-        // will fail later
-        // will fail later
-        (er) => {
-          const fer = er;
-          return fer && fer.code === "ENOENT" ? (0, exports2.findMade)(opts, (0, path_1.dirname)(parent), parent) : void 0;
-        }
-      );
-    }, "findMade");
-    exports2.findMade = findMade;
-    var findMadeSync = /* @__PURE__ */ __name((opts, parent, path2) => {
-      if (path2 === parent) {
-        return void 0;
-      }
-      try {
-        return opts.statSync(parent).isDirectory() ? path2 : void 0;
-      } catch (er) {
-        const fer = er;
-        return fer && fer.code === "ENOENT" ? (0, exports2.findMadeSync)(opts, (0, path_1.dirname)(parent), parent) : void 0;
-      }
-    }, "findMadeSync");
-    exports2.findMadeSync = findMadeSync;
-  }
-});
-
-// ../node_modules/tar/node_modules/mkdirp/dist/cjs/src/mkdirp-native.js
-var require_mkdirp_native = __commonJS({
-  "../node_modules/tar/node_modules/mkdirp/dist/cjs/src/mkdirp-native.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.mkdirpNative = exports2.mkdirpNativeSync = void 0;
-    var path_1 = require("path");
-    var find_made_js_1 = require_find_made();
-    var mkdirp_manual_js_1 = require_mkdirp_manual();
-    var opts_arg_js_1 = require_opts_arg();
-    var mkdirpNativeSync = /* @__PURE__ */ __name((path2, options) => {
-      const opts = (0, opts_arg_js_1.optsArg)(options);
-      opts.recursive = true;
-      const parent = (0, path_1.dirname)(path2);
-      if (parent === path2) {
-        return opts.mkdirSync(path2, opts);
-      }
-      const made = (0, find_made_js_1.findMadeSync)(opts, path2);
-      try {
-        opts.mkdirSync(path2, opts);
-        return made;
-      } catch (er) {
-        const fer = er;
-        if (fer && fer.code === "ENOENT") {
-          return (0, mkdirp_manual_js_1.mkdirpManualSync)(path2, opts);
-        } else {
-          throw er;
-        }
-      }
-    }, "mkdirpNativeSync");
-    exports2.mkdirpNativeSync = mkdirpNativeSync;
-    exports2.mkdirpNative = Object.assign(async (path2, options) => {
-      const opts = { ...(0, opts_arg_js_1.optsArg)(options), recursive: true };
-      const parent = (0, path_1.dirname)(path2);
-      if (parent === path2) {
-        return await opts.mkdirAsync(path2, opts);
-      }
-      return (0, find_made_js_1.findMade)(opts, path2).then((made) => opts.mkdirAsync(path2, opts).then((m) => made || m).catch((er) => {
-        const fer = er;
-        if (fer && fer.code === "ENOENT") {
-          return (0, mkdirp_manual_js_1.mkdirpManual)(path2, opts);
-        } else {
-          throw er;
-        }
-      }));
-    }, { sync: exports2.mkdirpNativeSync });
-  }
-});
-
-// ../node_modules/tar/node_modules/mkdirp/dist/cjs/src/path-arg.js
-var require_path_arg = __commonJS({
-  "../node_modules/tar/node_modules/mkdirp/dist/cjs/src/path-arg.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.pathArg = void 0;
-    var platform = process.env.__TESTING_MKDIRP_PLATFORM__ || process.platform;
-    var path_1 = require("path");
-    var pathArg = /* @__PURE__ */ __name((path2) => {
-      if (/\0/.test(path2)) {
-        throw Object.assign(new TypeError("path must be a string without null bytes"), {
-          path: path2,
-          code: "ERR_INVALID_ARG_VALUE"
-        });
-      }
-      path2 = (0, path_1.resolve)(path2);
-      if (platform === "win32") {
-        const badWinChars = /[*|"<>?:]/;
-        const { root } = (0, path_1.parse)(path2);
-        if (badWinChars.test(path2.substring(root.length))) {
-          throw Object.assign(new Error("Illegal characters in path."), {
-            path: path2,
-            code: "EINVAL"
-          });
-        }
-      }
-      return path2;
-    }, "pathArg");
-    exports2.pathArg = pathArg;
-  }
-});
-
-// ../node_modules/tar/node_modules/mkdirp/dist/cjs/src/use-native.js
-var require_use_native = __commonJS({
-  "../node_modules/tar/node_modules/mkdirp/dist/cjs/src/use-native.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.useNative = exports2.useNativeSync = void 0;
-    var fs_1 = require("fs");
-    var opts_arg_js_1 = require_opts_arg();
-    var version2 = process.env.__TESTING_MKDIRP_NODE_VERSION__ || process.version;
-    var versArr = version2.replace(/^v/, "").split(".");
-    var hasNative = +versArr[0] > 10 || +versArr[0] === 10 && +versArr[1] >= 12;
-    exports2.useNativeSync = !hasNative ? () => false : (opts) => (0, opts_arg_js_1.optsArg)(opts).mkdirSync === fs_1.mkdirSync;
-    exports2.useNative = Object.assign(!hasNative ? () => false : (opts) => (0, opts_arg_js_1.optsArg)(opts).mkdir === fs_1.mkdir, {
-      sync: exports2.useNativeSync
-    });
-  }
-});
-
-// ../node_modules/tar/node_modules/mkdirp/dist/cjs/src/index.js
-var require_src2 = __commonJS({
-  "../node_modules/tar/node_modules/mkdirp/dist/cjs/src/index.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.mkdirp = exports2.nativeSync = exports2.native = exports2.manualSync = exports2.manual = exports2.sync = exports2.mkdirpSync = exports2.useNativeSync = exports2.useNative = exports2.mkdirpNativeSync = exports2.mkdirpNative = exports2.mkdirpManualSync = exports2.mkdirpManual = void 0;
-    var mkdirp_manual_js_1 = require_mkdirp_manual();
-    var mkdirp_native_js_1 = require_mkdirp_native();
-    var opts_arg_js_1 = require_opts_arg();
-    var path_arg_js_1 = require_path_arg();
-    var use_native_js_1 = require_use_native();
-    var mkdirp_manual_js_2 = require_mkdirp_manual();
-    Object.defineProperty(exports2, "mkdirpManual", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return mkdirp_manual_js_2.mkdirpManual;
-    }, "get") });
-    Object.defineProperty(exports2, "mkdirpManualSync", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return mkdirp_manual_js_2.mkdirpManualSync;
-    }, "get") });
-    var mkdirp_native_js_2 = require_mkdirp_native();
-    Object.defineProperty(exports2, "mkdirpNative", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return mkdirp_native_js_2.mkdirpNative;
-    }, "get") });
-    Object.defineProperty(exports2, "mkdirpNativeSync", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return mkdirp_native_js_2.mkdirpNativeSync;
-    }, "get") });
-    var use_native_js_2 = require_use_native();
-    Object.defineProperty(exports2, "useNative", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return use_native_js_2.useNative;
-    }, "get") });
-    Object.defineProperty(exports2, "useNativeSync", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return use_native_js_2.useNativeSync;
-    }, "get") });
-    var mkdirpSync = /* @__PURE__ */ __name((path2, opts) => {
-      path2 = (0, path_arg_js_1.pathArg)(path2);
-      const resolved = (0, opts_arg_js_1.optsArg)(opts);
-      return (0, use_native_js_1.useNativeSync)(resolved) ? (0, mkdirp_native_js_1.mkdirpNativeSync)(path2, resolved) : (0, mkdirp_manual_js_1.mkdirpManualSync)(path2, resolved);
-    }, "mkdirpSync");
-    exports2.mkdirpSync = mkdirpSync;
-    exports2.sync = exports2.mkdirpSync;
-    exports2.manual = mkdirp_manual_js_1.mkdirpManual;
-    exports2.manualSync = mkdirp_manual_js_1.mkdirpManualSync;
-    exports2.native = mkdirp_native_js_1.mkdirpNative;
-    exports2.nativeSync = mkdirp_native_js_1.mkdirpNativeSync;
-    exports2.mkdirp = Object.assign(async (path2, opts) => {
-      path2 = (0, path_arg_js_1.pathArg)(path2);
-      const resolved = (0, opts_arg_js_1.optsArg)(opts);
-      return (0, use_native_js_1.useNative)(resolved) ? (0, mkdirp_native_js_1.mkdirpNative)(path2, resolved) : (0, mkdirp_manual_js_1.mkdirpManual)(path2, resolved);
-    }, {
-      mkdirpSync: exports2.mkdirpSync,
-      mkdirpNative: mkdirp_native_js_1.mkdirpNative,
-      mkdirpNativeSync: mkdirp_native_js_1.mkdirpNativeSync,
-      mkdirpManual: mkdirp_manual_js_1.mkdirpManual,
-      mkdirpManualSync: mkdirp_manual_js_1.mkdirpManualSync,
-      sync: exports2.mkdirpSync,
-      native: mkdirp_native_js_1.mkdirpNative,
-      nativeSync: mkdirp_native_js_1.mkdirpNativeSync,
-      manual: mkdirp_manual_js_1.mkdirpManual,
-      manualSync: mkdirp_manual_js_1.mkdirpManualSync,
-      useNative: use_native_js_1.useNative,
-      useNativeSync: use_native_js_1.useNativeSync
-    });
-  }
-});
-
 // ../node_modules/tar/dist/commonjs/cwd-error.js
 var require_cwd_error = __commonJS({
   "../node_modules/tar/dist/commonjs/cwd-error.js"(exports2) {
@@ -48761,16 +50227,14 @@ var require_mkdir = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.mkdirSync = exports2.mkdir = void 0;
     var chownr_1 = require_commonjs5();
-    var fs_1 = __importDefault(require("fs"));
-    var mkdirp_1 = require_src2();
+    var node_fs_1 = __importDefault(require("node:fs"));
+    var promises_1 = __importDefault(require("node:fs/promises"));
     var node_path_1 = __importDefault(require("node:path"));
     var cwd_error_js_1 = require_cwd_error();
     var normalize_windows_path_js_1 = require_normalize_windows_path();
     var symlink_error_js_1 = require_symlink_error();
-    var cGet = /* @__PURE__ */ __name((cache, key) => cache.get((0, normalize_windows_path_js_1.normalizeWindowsPath)(key)), "cGet");
-    var cSet = /* @__PURE__ */ __name((cache, key, val) => cache.set((0, normalize_windows_path_js_1.normalizeWindowsPath)(key), val), "cSet");
     var checkCwd = /* @__PURE__ */ __name((dir, cb) => {
-      fs_1.default.stat(dir, (er, st) => {
+      node_fs_1.default.stat(dir, (er, st) => {
         if (er || !st.isDirectory()) {
           er = new cwd_error_js_1.CwdError(dir, er?.code || "ENOTDIR");
         }
@@ -48787,30 +50251,25 @@ var require_mkdir = __commonJS({
       const doChown = typeof uid === "number" && typeof gid === "number" && (uid !== opt.processUid || gid !== opt.processGid);
       const preserve = opt.preserve;
       const unlink = opt.unlink;
-      const cache = opt.cache;
       const cwd = (0, normalize_windows_path_js_1.normalizeWindowsPath)(opt.cwd);
       const done = /* @__PURE__ */ __name((er, created) => {
         if (er) {
           cb(er);
         } else {
-          cSet(cache, dir, true);
           if (created && doChown) {
             (0, chownr_1.chownr)(created, uid, gid, (er2) => done(er2));
           } else if (needChmod) {
-            fs_1.default.chmod(dir, mode, cb);
+            node_fs_1.default.chmod(dir, mode, cb);
           } else {
             cb();
           }
         }
       }, "done");
-      if (cache && cGet(cache, dir) === true) {
-        return done();
-      }
       if (dir === cwd) {
         return checkCwd(dir, done);
       }
       if (preserve) {
-        return (0, mkdirp_1.mkdirp)(dir, { mode }).then(
+        return promises_1.default.mkdir(dir, { mode, recursive: true }).then(
           (made) => done(null, made ?? void 0),
           // oh, ts
           done
@@ -48818,34 +50277,31 @@ var require_mkdir = __commonJS({
       }
       const sub = (0, normalize_windows_path_js_1.normalizeWindowsPath)(node_path_1.default.relative(cwd, dir));
       const parts = sub.split("/");
-      mkdir_(cwd, parts, mode, cache, unlink, cwd, void 0, done);
+      mkdir_(cwd, parts, mode, unlink, cwd, void 0, done);
     }, "mkdir");
     exports2.mkdir = mkdir3;
-    var mkdir_ = /* @__PURE__ */ __name((base, parts, mode, cache, unlink, cwd, created, cb) => {
+    var mkdir_ = /* @__PURE__ */ __name((base, parts, mode, unlink, cwd, created, cb) => {
       if (!parts.length) {
         return cb(null, created);
       }
       const p = parts.shift();
       const part = (0, normalize_windows_path_js_1.normalizeWindowsPath)(node_path_1.default.resolve(base + "/" + p));
-      if (cGet(cache, part)) {
-        return mkdir_(part, parts, mode, cache, unlink, cwd, created, cb);
-      }
-      fs_1.default.mkdir(part, mode, onmkdir(part, parts, mode, cache, unlink, cwd, created, cb));
+      node_fs_1.default.mkdir(part, mode, onmkdir(part, parts, mode, unlink, cwd, created, cb));
     }, "mkdir_");
-    var onmkdir = /* @__PURE__ */ __name((part, parts, mode, cache, unlink, cwd, created, cb) => (er) => {
+    var onmkdir = /* @__PURE__ */ __name((part, parts, mode, unlink, cwd, created, cb) => (er) => {
       if (er) {
-        fs_1.default.lstat(part, (statEr, st) => {
+        node_fs_1.default.lstat(part, (statEr, st) => {
           if (statEr) {
             statEr.path = statEr.path && (0, normalize_windows_path_js_1.normalizeWindowsPath)(statEr.path);
             cb(statEr);
           } else if (st.isDirectory()) {
-            mkdir_(part, parts, mode, cache, unlink, cwd, created, cb);
+            mkdir_(part, parts, mode, unlink, cwd, created, cb);
           } else if (unlink) {
-            fs_1.default.unlink(part, (er2) => {
+            node_fs_1.default.unlink(part, (er2) => {
               if (er2) {
                 return cb(er2);
               }
-              fs_1.default.mkdir(part, mode, onmkdir(part, parts, mode, cache, unlink, cwd, created, cb));
+              node_fs_1.default.mkdir(part, mode, onmkdir(part, parts, mode, unlink, cwd, created, cb));
             });
           } else if (st.isSymbolicLink()) {
             return cb(new symlink_error_js_1.SymlinkError(part, part + "/" + parts.join("/")));
@@ -48855,14 +50311,14 @@ var require_mkdir = __commonJS({
         });
       } else {
         created = created || part;
-        mkdir_(part, parts, mode, cache, unlink, cwd, created, cb);
+        mkdir_(part, parts, mode, unlink, cwd, created, cb);
       }
     }, "onmkdir");
     var checkCwdSync = /* @__PURE__ */ __name((dir) => {
       let ok = false;
       let code = void 0;
       try {
-        ok = fs_1.default.statSync(dir).isDirectory();
+        ok = node_fs_1.default.statSync(dir).isDirectory();
       } catch (er) {
         code = er?.code;
       } finally {
@@ -48881,49 +50337,38 @@ var require_mkdir = __commonJS({
       const doChown = typeof uid === "number" && typeof gid === "number" && (uid !== opt.processUid || gid !== opt.processGid);
       const preserve = opt.preserve;
       const unlink = opt.unlink;
-      const cache = opt.cache;
       const cwd = (0, normalize_windows_path_js_1.normalizeWindowsPath)(opt.cwd);
       const done = /* @__PURE__ */ __name((created2) => {
-        cSet(cache, dir, true);
         if (created2 && doChown) {
           (0, chownr_1.chownrSync)(created2, uid, gid);
         }
         if (needChmod) {
-          fs_1.default.chmodSync(dir, mode);
+          node_fs_1.default.chmodSync(dir, mode);
         }
       }, "done");
-      if (cache && cGet(cache, dir) === true) {
-        return done();
-      }
       if (dir === cwd) {
         checkCwdSync(cwd);
         return done();
       }
       if (preserve) {
-        return done((0, mkdirp_1.mkdirpSync)(dir, mode) ?? void 0);
+        return done(node_fs_1.default.mkdirSync(dir, { mode, recursive: true }) ?? void 0);
       }
       const sub = (0, normalize_windows_path_js_1.normalizeWindowsPath)(node_path_1.default.relative(cwd, dir));
       const parts = sub.split("/");
       let created = void 0;
       for (let p = parts.shift(), part = cwd; p && (part += "/" + p); p = parts.shift()) {
         part = (0, normalize_windows_path_js_1.normalizeWindowsPath)(node_path_1.default.resolve(part));
-        if (cGet(cache, part)) {
-          continue;
-        }
         try {
-          fs_1.default.mkdirSync(part, mode);
+          node_fs_1.default.mkdirSync(part, mode);
           created = created || part;
-          cSet(cache, part, true);
         } catch (er) {
-          const st = fs_1.default.lstatSync(part);
+          const st = node_fs_1.default.lstatSync(part);
           if (st.isDirectory()) {
-            cSet(cache, part, true);
             continue;
           } else if (unlink) {
-            fs_1.default.unlinkSync(part);
-            fs_1.default.mkdirSync(part, mode);
+            node_fs_1.default.unlinkSync(part);
+            node_fs_1.default.mkdirSync(part, mode);
             created = created || part;
-            cSet(cache, part, true);
             continue;
           } else if (st.isSymbolicLink()) {
             return new symlink_error_js_1.SymlinkError(part, part + "/" + parts.join("/"));
@@ -48943,12 +50388,26 @@ var require_normalize_unicode = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.normalizeUnicode = void 0;
     var normalizeCache = /* @__PURE__ */ Object.create(null);
-    var { hasOwnProperty } = Object.prototype;
+    var MAX = 1e4;
+    var cache = /* @__PURE__ */ new Set();
     var normalizeUnicode = /* @__PURE__ */ __name((s) => {
-      if (!hasOwnProperty.call(normalizeCache, s)) {
+      if (!cache.has(s)) {
         normalizeCache[s] = s.normalize("NFD");
+      } else {
+        cache.delete(s);
       }
-      return normalizeCache[s];
+      cache.add(s);
+      const ret = normalizeCache[s];
+      let i = cache.size - MAX;
+      if (i > MAX / 10) {
+        for (const s2 of cache) {
+          cache.delete(s2);
+          delete normalizeCache[s2];
+          if (--i <= 0)
+            break;
+        }
+      }
+      return ret;
     }, "normalizeUnicode");
     exports2.normalizeUnicode = normalizeUnicode;
   }
@@ -49104,7 +50563,7 @@ var require_path_reservations = __commonJS({
 var require_unpack = __commonJS({
   "../node_modules/tar/dist/commonjs/unpack.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -49113,13 +50572,13 @@ var require_unpack = __commonJS({
         }, "get") };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
     var __importStar2 = exports2 && exports2.__importStar || function(mod) {
@@ -49143,17 +50602,14 @@ var require_unpack = __commonJS({
     var node_path_1 = __importDefault(require("node:path"));
     var get_write_flag_js_1 = require_get_write_flag();
     var mkdir_js_1 = require_mkdir();
-    var normalize_unicode_js_1 = require_normalize_unicode();
     var normalize_windows_path_js_1 = require_normalize_windows_path();
     var parse_js_1 = require_parse3();
     var strip_absolute_path_js_1 = require_strip_absolute_path();
-    var strip_trailing_slashes_js_1 = require_strip_trailing_slashes();
     var wc = __importStar2(require_winchars());
     var path_reservations_js_1 = require_path_reservations();
     var ONENTRY = Symbol("onEntry");
     var CHECKFS = Symbol("checkFs");
     var CHECKFS2 = Symbol("checkFs2");
-    var PRUNECACHE = Symbol("pruneCache");
     var ISREUSABLE = Symbol("isReusable");
     var MAKEFS = Symbol("makeFs");
     var FILE = Symbol("file");
@@ -49199,21 +50655,6 @@ var require_unpack = __commonJS({
       node_fs_1.default.unlinkSync(name);
     }, "unlinkFileSync");
     var uint32 = /* @__PURE__ */ __name((a, b, c) => a !== void 0 && a === a >>> 0 ? a : b !== void 0 && b === b >>> 0 ? b : c, "uint32");
-    var cacheKeyNormalize = /* @__PURE__ */ __name((path2) => (0, strip_trailing_slashes_js_1.stripTrailingSlashes)((0, normalize_windows_path_js_1.normalizeWindowsPath)((0, normalize_unicode_js_1.normalizeUnicode)(path2))).toLowerCase(), "cacheKeyNormalize");
-    var pruneCache = /* @__PURE__ */ __name((cache, abs) => {
-      abs = cacheKeyNormalize(abs);
-      for (const path2 of cache.keys()) {
-        const pnorm = cacheKeyNormalize(path2);
-        if (pnorm === abs || pnorm.indexOf(abs + "/") === 0) {
-          cache.delete(path2);
-        }
-      }
-    }, "pruneCache");
-    var dropCache = /* @__PURE__ */ __name((cache) => {
-      for (const key of cache.keys()) {
-        cache.delete(key);
-      }
-    }, "dropCache");
     var Unpack = class extends parse_js_1.Parser {
       static {
         __name(this, "Unpack");
@@ -49225,7 +50666,6 @@ var require_unpack = __commonJS({
       transform;
       writable = true;
       readable = false;
-      dirCache;
       uid;
       gid;
       setOwner;
@@ -49254,7 +50694,6 @@ var require_unpack = __commonJS({
         };
         super(opt);
         this.transform = opt.transform;
-        this.dirCache = opt.dirCache || /* @__PURE__ */ new Map();
         this.chmod = !!opt.chmod;
         if (typeof opt.uid === "number" || typeof opt.gid === "number") {
           if (typeof opt.uid !== "number" || typeof opt.gid !== "number") {
@@ -49423,7 +50862,6 @@ var require_unpack = __commonJS({
           umask: this.processUmask,
           preserve: this.preservePaths,
           unlink: this.unlink,
-          cache: this.dirCache,
           cwd: this.cwd,
           mode
         }, cb);
@@ -49572,17 +51010,8 @@ var require_unpack = __commonJS({
         }
         this.reservations.reserve(paths, (done) => this[CHECKFS2](entry, done));
       }
-      [PRUNECACHE](entry) {
-        if (entry.type === "SymbolicLink") {
-          dropCache(this.dirCache);
-        } else if (entry.type !== "Directory") {
-          pruneCache(this.dirCache, String(entry.absolute));
-        }
-      }
       [CHECKFS2](entry, fullyDone) {
-        this[PRUNECACHE](entry);
         const done = /* @__PURE__ */ __name((er) => {
-          this[PRUNECACHE](entry);
           fullyDone(er);
         }, "done");
         const checkCwd = /* @__PURE__ */ __name(() => {
@@ -49698,7 +51127,6 @@ var require_unpack = __commonJS({
         });
       }
       [CHECKFS](entry) {
-        this[PRUNECACHE](entry);
         if (!this[CHECKED_CWD]) {
           const er2 = this[MKDIR](this.cwd, this.dmode);
           if (er2) {
@@ -49833,7 +51261,6 @@ var require_unpack = __commonJS({
             umask: this.processUmask,
             preserve: this.preservePaths,
             unlink: this.unlink,
-            cache: this.dirCache,
             cwd: this.cwd,
             mode
           });
@@ -49860,7 +51287,7 @@ var require_unpack = __commonJS({
 var require_extract = __commonJS({
   "../node_modules/tar/dist/commonjs/extract.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -49869,13 +51296,13 @@ var require_extract = __commonJS({
         }, "get") };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
     var __importStar2 = exports2 && exports2.__importStar || function(mod) {
@@ -50143,7 +51570,7 @@ var require_replace = __commonJS({
         if (!(0, options_js_1.isFile)(opt)) {
           throw new TypeError("file is required");
         }
-        if (opt.gzip || opt.brotli || opt.file.endsWith(".br") || opt.file.endsWith(".tbr")) {
+        if (opt.gzip || opt.brotli || opt.zstd || opt.file.endsWith(".br") || opt.file.endsWith(".tbr")) {
           throw new TypeError("cannot append to compressed archives");
         }
         if (!entries?.length) {
@@ -50182,7 +51609,7 @@ var require_update = __commonJS({
 var require_commonjs6 = __commonJS({
   "../node_modules/tar/dist/commonjs/index.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -50191,13 +51618,13 @@ var require_commonjs6 = __commonJS({
         }, "get") };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
     var __exportStar = exports2 && exports2.__exportStar || function(m, exports3) {
@@ -50254,7 +51681,7 @@ var require_commonjs6 = __commonJS({
 var require_utils5 = __commonJS({
   "lib/utils.js"(exports2) {
     "use strict";
-    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -50263,16 +51690,16 @@ var require_utils5 = __commonJS({
         }, "get") };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ function() {
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
       var ownKeys = /* @__PURE__ */ __name(function(o) {
         ownKeys = Object.getOwnPropertyNames || function(o2) {
           var ar = [];
@@ -50290,7 +51717,7 @@ var require_utils5 = __commonJS({
         __setModuleDefault2(result, mod);
         return result;
       };
-    }();
+    })();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
         return value instanceof P ? value : new P(function(resolve) {
@@ -50766,7 +52193,7 @@ ${comment_tag_pattern}`;
 });
 
 // lib/main.js
-var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
   if (k2 === void 0) k2 = k;
   var desc = Object.getOwnPropertyDescriptor(m, k);
   if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -50775,16 +52202,16 @@ var __createBinding = exports && exports.__createBinding || (Object.create ? fun
     }, "get") };
   }
   Object.defineProperty(o, k2, desc);
-} : function(o, m, k, k2) {
+}) : (function(o, m, k, k2) {
   if (k2 === void 0) k2 = k;
   o[k2] = m[k];
-});
-var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+}));
+var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? (function(o, v) {
   Object.defineProperty(o, "default", { enumerable: true, value: v });
-} : function(o, v) {
+}) : function(o, v) {
   o["default"] = v;
 });
-var __importStar = exports && exports.__importStar || /* @__PURE__ */ function() {
+var __importStar = exports && exports.__importStar || /* @__PURE__ */ (function() {
   var ownKeys = /* @__PURE__ */ __name(function(o) {
     ownKeys = Object.getOwnPropertyNames || function(o2) {
       var ar = [];
@@ -50802,7 +52229,7 @@ var __importStar = exports && exports.__importStar || /* @__PURE__ */ function()
     __setModuleDefault(result, mod);
     return result;
   };
-}();
+})();
 var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
   function adopt(value) {
     return value instanceof P ? value : new P(function(resolve) {
@@ -50890,5 +52317,5 @@ mime-types/index.js:
    *)
 
 axios/dist/node/axios.cjs:
-  (*! Axios v1.10.0 Copyright (c) 2025 Matt Zabriskie and contributors *)
+  (*! Axios v1.13.1 Copyright (c) 2025 Matt Zabriskie and contributors *)
 */
