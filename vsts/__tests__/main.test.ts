@@ -90,7 +90,7 @@ To be able to view the detailed Qodana report, you can either:
 To get \`*.log\` files or any other Qodana artifacts, run the task with \`uploadResult\` option set to \`true\`, 
 so that the action will upload the files as the job artifacts:
 \`\`\`yaml
-        - task: QodanaScan@2025.2.1
+        - task: QodanaScan@2025.2.2
           inputs:
             uploadResult: true
 \`\`\`
