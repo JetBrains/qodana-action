@@ -58,7 +58,7 @@ describe('isNeedToUploadCache', () => {
     jest.spyOn(core, 'warning')
     initGithubContext(masterBranch)
     isNeedToUploadCache(false, true)
-    expect(core.warning).toBeCalledWith(ENABLE_USE_CACHE_OPTION_WARNING)
+    expect(core.warning).toHaveBeenCalledWith(ENABLE_USE_CACHE_OPTION_WARNING)
   })
 })
 
