@@ -15,7 +15,7 @@
     "url": "git+https://github.com/JetBrains/qodana-action.git"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.9.2",
     "@typescript-eslint/parser": "^8.32.1",
     "esbuild": "0.25.11",
