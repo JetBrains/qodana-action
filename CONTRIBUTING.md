@@ -134,7 +134,7 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
 
   ```groovy
   plugins {
-      id "org.jetbrains.qodana" version "2025.2.2-SNAPSHOT"
+      id "org.jetbrains.qodana" version "2025.2.3-SNAPSHOT"
   }
   
   qodana {
@@ -145,7 +145,7 @@ Apply Gradle Qodana Plugin with snapshot version in Gradle configuration file an
 
   ```kotlin
   plugins {
-      id("org.jetbrains.qodana") version "2025.2.2-SNAPSHOT"
+      id("org.jetbrains.qodana") version "2025.2.3-SNAPSHOT"
   }
 
   qodana {
@@ -179,7 +179,7 @@ git tag -a vX.X.X -m "vX.X.X" && git push origin vX.X.X
 ```
 
 And [our GitHub Actions job `Release`](https://github.com/JetBrains/qodana-action/actions/workflows/release.yml) will do the rest.
-There's **no need to cherry-pick** any commits to any branch in the repository as it shall be done automatically (e.g., v2025.2.2 release would trigger v2025.2 branch update).
+There's **no need to cherry-pick** any commits to any branch in the repository as it shall be done automatically (e.g., v2025.2.3 release would trigger v2025.2 branch update).
 
 Note that Gradle, GitHub action, CircleCI orb and Azure extension are always released together. 
 The release will be published to:
