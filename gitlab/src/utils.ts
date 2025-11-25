@@ -92,26 +92,32 @@ export async function execAsync(
   args: string[],
   ignoreReturnCode: boolean
 ): Promise<CommandOutput> {
-  const command = `${executable} ${args.join(' ')}`
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Failed to run command: ${command}: ${error.message}`)
-        if (ignoreReturnCode) {
-          resolve({
-            returnCode: error.code || -1,
-            stdout: stdout,
-            stderr: stderr
-          })
-        }
+    const proc = spawn(executable, args)
+    let stdout = ''
+    let stderr = ''
+
+    proc.stdout?.on('data', data => {
+      stdout += data
+    })
+    proc.stderr?.on('data', data => {
+      stderr += data
+    })
+
+    proc.on('close', code => {
+      const returnCode = code || 0
+      if (returnCode !== 0 && !ignoreReturnCode) {
         reject(new Error(stderr))
       } else {
-        resolve({
-          returnCode: 0,
-          stdout: stdout,
-          stderr: stderr
-        })
+        resolve({returnCode, stdout, stderr})
       }
+    })
+
+    proc.on('error', err => {
+      console.error(
+        `Failed to run command: ${executable} ${args.join(' ')}: ${err.message}.\nstdout: ${stdout}\nstderr: ${stderr}`
+      )
+      reject(err)
     })
   })
 }
@@ -293,12 +299,19 @@ function getInitialCacheLocation(): string {
 }
 
 // at this moment any changes inside .qodana dir may affect analysis results
-export async function prepareCaches(cacheDir: string): Promise<void> {
+export async function prepareCaches(
+  cacheDir: string,
+  execute: boolean
+): Promise<void> {
+  if (!execute) {
+    return
+  }
   const initialCacheLocation = getInitialCacheLocation()
   if (initialCacheLocation === cacheDir) {
     return
   }
   try {
+    await fs.promises.mkdir(cacheDir, {recursive: true})
     await fs.promises.access(initialCacheLocation)
     await fs.promises.cp(initialCacheLocation, cacheDir, {recursive: true})
   } catch (e) {
@@ -318,6 +331,7 @@ export async function uploadCache(
   }
   try {
     const initialCacheLocation = getInitialCacheLocation()
+    await fs.promises.mkdir(initialCacheLocation, {recursive: true})
     await fs.promises.rm(initialCacheLocation, {recursive: true})
     await fs.promises.cp(cacheDir, initialCacheLocation, {recursive: true})
   } catch (e) {
@@ -468,7 +482,7 @@ export async function pushQuickFixes(
     await git(['config', 'user.email', COMMIT_EMAIL])
     await git(['add', '.'])
     commitMessage = commitMessage + '\n\n[skip-ci]'
-    let output = await gitOutput(['commit', '-m', `'${commitMessage}'`], true)
+    let output = await gitOutput(['commit', '-m', commitMessage], true)
     if (output.returnCode !== 0) {
       console.warn(`Failed to commit fixes: ${output.stderr}`)
       return

@@ -27,7 +27,10 @@ async function main(): Promise<void> {
     fs.mkdirSync(inputs.resultsDir, {recursive: true})
     fs.mkdirSync(inputs.cacheDir, {recursive: true})
 
-    await Promise.all([prepareCaches(inputs.cacheDir), prepareAgent(inputs)])
+    await Promise.all([
+      prepareCaches(inputs.cacheDir, inputs.useCaches),
+      prepareAgent(inputs)
+    ])
 
     const exitCode = (await qodana()) as QodanaExitCode
 
@@ -41,6 +44,8 @@ async function main(): Promise<void> {
         ''
       )
     }
+    // uploadCache and uploadArtifacts store information inside project dir - don't want to commit them
+    await pushQuickFixes(inputs.pushFixes, inputs.commitMessage)
 
     await Promise.all([
       publishOutput(
@@ -51,7 +56,6 @@ async function main(): Promise<void> {
         inputs.prMode,
         isExecutionSuccessful(exitCode)
       ),
-      pushQuickFixes(inputs.pushFixes, inputs.commitMessage),
       uploadCache(inputs.cacheDir, inputs.useCaches),
       uploadArtifacts(inputs.resultsDir)
     ])

@@ -50411,26 +50411,30 @@ var require_utils5 = __commonJS({
     __name(getQodanaBooleanArg, "getQodanaBooleanArg");
     function execAsync(executable, args, ignoreReturnCode) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const command = `${executable} ${args.join(" ")}`;
         return new Promise((resolve, reject) => {
-          (0, child_process_1.exec)(command, (error, stdout, stderr) => {
-            if (error) {
-              console.error(`Failed to run command: ${command}: ${error.message}`);
-              if (ignoreReturnCode) {
-                resolve({
-                  returnCode: error.code || -1,
-                  stdout,
-                  stderr
-                });
-              }
+          var _a, _b;
+          const proc = (0, child_process_1.spawn)(executable, args);
+          let stdout = "";
+          let stderr = "";
+          (_a = proc.stdout) === null || _a === void 0 ? void 0 : _a.on("data", (data) => {
+            stdout += data;
+          });
+          (_b = proc.stderr) === null || _b === void 0 ? void 0 : _b.on("data", (data) => {
+            stderr += data;
+          });
+          proc.on("close", (code) => {
+            const returnCode = code || 0;
+            if (returnCode !== 0 && !ignoreReturnCode) {
               reject(new Error(stderr));
             } else {
-              resolve({
-                returnCode: 0,
-                stdout,
-                stderr
-              });
+              resolve({ returnCode, stdout, stderr });
             }
+          });
+          proc.on("error", (err) => {
+            console.error(`Failed to run command: ${executable} ${args.join(" ")}: ${err.message}.
+stdout: ${stdout}
+stderr: ${stderr}`);
+            reject(err);
           });
         });
       });
@@ -50607,16 +50611,20 @@ var require_utils5 = __commonJS({
     __name(getPrSha, "getPrSha");
     function getInitialCacheLocation() {
       const cacheDir = getQodanaStringArg("CACHE_DIR", path_1.default.join("qodana", "cache"));
-      return path_1.default.join(process.env["CI_PROJECT_DIR"] || "", cacheDir);
+      return path_1.default.join(process.env["CI_PROJECT_DIR"] || ".", cacheDir);
     }
     __name(getInitialCacheLocation, "getInitialCacheLocation");
-    function prepareCaches(cacheDir) {
+    function prepareCaches(cacheDir, execute) {
       return __awaiter2(this, void 0, void 0, function* () {
+        if (!execute) {
+          return;
+        }
         const initialCacheLocation = getInitialCacheLocation();
         if (initialCacheLocation === cacheDir) {
           return;
         }
         try {
+          yield fs4.promises.mkdir(cacheDir, { recursive: true });
           yield fs4.promises.access(initialCacheLocation);
           yield fs4.promises.cp(initialCacheLocation, cacheDir, { recursive: true });
         } catch (e) {
@@ -50633,6 +50641,7 @@ var require_utils5 = __commonJS({
         }
         try {
           const initialCacheLocation = getInitialCacheLocation();
+          yield fs4.promises.mkdir(initialCacheLocation, { recursive: true });
           yield fs4.promises.rm(initialCacheLocation, { recursive: true });
           yield fs4.promises.cp(cacheDir, initialCacheLocation, { recursive: true });
         } catch (e) {
@@ -50750,7 +50759,7 @@ ${comment_tag_pattern}`;
           yield git(["config", "user.email", output_12.COMMIT_EMAIL]);
           yield git(["add", "."]);
           commitMessage = commitMessage + "\n\n[skip-ci]";
-          let output = yield gitOutput(["commit", "-m", `'${commitMessage}'`], true);
+          let output = yield gitOutput(["commit", "-m", commitMessage], true);
           if (output.returnCode !== 0) {
             console.warn(`Failed to commit fixes: ${output.stderr}`);
             return;
@@ -50893,14 +50902,17 @@ function main() {
       const inputs = (0, utils_1.getInputs)();
       fs3.mkdirSync(inputs.resultsDir, { recursive: true });
       fs3.mkdirSync(inputs.cacheDir, { recursive: true });
-      yield Promise.all([(0, utils_1.prepareCaches)(inputs.cacheDir), (0, utils_1.prepareAgent)(inputs)]);
+      yield Promise.all([
+        (0, utils_1.prepareCaches)(inputs.cacheDir, inputs.useCaches),
+        (0, utils_1.prepareAgent)(inputs)
+      ]);
       const exitCode = yield (0, utils_1.qodana)();
       if (exitCode === qodana_1.QodanaExitCode.UnknownArgument) {
         console.warn("Unknown argument was passed to the action. Please check available arguments in our documentation: https://github.com/JetBrains/qodana-cli#options-1. Note, that docker mode specific arguments not available for Linux because action already executed inside the container. Arguments: ", inputs.args, "");
       }
+      yield (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage);
       yield Promise.all([
         (0, output_1.publishOutput)((0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode)),
-        (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage),
         (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches),
         (0, utils_1.uploadArtifacts)(inputs.resultsDir)
       ]);
