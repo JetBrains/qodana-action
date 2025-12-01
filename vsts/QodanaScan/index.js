@@ -37,14 +37,14 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2025.1.1";
+    version = "2025.2.2";
     checksum = {
-      windows_x86_64: "9b6b30b295b1cc0e60c2be04f4f0054d19a35b79e13c3544c054c1bd052da164",
-      linux_arm64: "656527c02c9a12351949f96064a9599c591de2eec856d218f23ad0ea49445602",
-      darwin_arm64: "c2e365bb218413fcef4279463823d42ebce8472d12ecff0ad4266d5ad26e0cdc",
-      darwin_x86_64: "81cd002d9fcc560596ac35172ccea6958f1645030fde8111c628b98391d16761",
-      windows_arm64: "fb474395342443afa57eb9fa019544a487119b4e418cec1b823bbf238bd9e85f",
-      linux_x86_64: "785dac6b5e1d78f96b20e9ba5600590c1779d5b6daa9d57c003430adb27377e2"
+      windows_x86_64: "38be97d7c2a3e6c2c307fb7d776c22ac5e959a9a3ec55ca10b184154aae33b60",
+      linux_arm64: "59c988f19c5732363cbddf4c414a6cf7ffa75027c44d5e22c78b1075c755f1b1",
+      darwin_arm64: "8a5444d1730b2cd93507f0f0bba6f4c37a77ac83d1d083b2dd9d8da6eac748af",
+      darwin_x86_64: "f313ed0f7c13b8a806da6aca4d389acf5dc7687f27653e1ce675babf2a9d3b72",
+      windows_arm64: "d7934295789b5e3661f7b1585b940ecb78dbfe6b210a8c85ca53cb7757e4189a",
+      linux_x86_64: "c99447abd7f82cf75a5047747e72b7833b8445bb7e446ed824c2de9f48c7f67e"
     };
   }
 });
@@ -9864,13 +9864,23 @@ function extractArg(argShort, argLong, args) {
   return arg;
 }
 function isNativeMode(args) {
-  return args.includes("--ide");
+  if (args.includes("--ide") || args.includes("--within-docker=false")) {
+    return true;
+  }
+  let index = args.findIndex((arg) => arg == "--within-docker");
+  if (index == -1) return false;
+  let nextIndex = index + 1;
+  return args.length > nextIndex && args[nextIndex] == "false";
 }
 function getQodanaPullArgs(args) {
   const pullArgs = ["pull"];
   const linter = extractArg("-l", "--linter", args);
   if (linter) {
     pullArgs.push("-l", linter);
+  }
+  const image = extractArg("--image", "--image", args);
+  if (image) {
+    pullArgs.push("--image", image);
   }
   const project = extractArg("-i", "--project-dir", args);
   if (project) {
@@ -17093,6 +17103,11 @@ var require_GitInterfaces = __commonJS({
 });
 
 // ../common/utils.ts
+var utils_exports = {};
+__export(utils_exports, {
+  parseRawArguments: () => parseRawArguments,
+  parseRules: () => parseRules
+});
 function parseRules(tool) {
   var _a, _b;
   const rules = /* @__PURE__ */ new Map();
@@ -17112,6 +17127,36 @@ function parseRules(tool) {
     });
   });
   return rules;
+}
+function parseRawArguments(rawArgs) {
+  const initialSplit = rawArgs ? rawArgs.split(",").map((arg) => arg.trim()) : [];
+  const result2 = [];
+  let i = 0;
+  while (i < initialSplit.length) {
+    const currentArg = initialSplit[i];
+    if (currentArg === "--property") {
+      result2.push(currentArg);
+      const propertyValues = [];
+      i++;
+      while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
+        propertyValues.push(initialSplit[i]);
+        i++;
+      }
+      result2.push(propertyValues.join(","));
+    } else if (currentArg.startsWith("--property ")) {
+      const fullPropertyArg = [currentArg];
+      i++;
+      while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
+        fullPropertyArg.push(initialSplit[i]);
+        i++;
+      }
+      result2.push(fullPropertyArg.join(","));
+    } else {
+      result2.push(currentArg);
+      i++;
+    }
+  }
+  return result2;
 }
 var init_utils = __esm({
   "../common/utils.ts"() {
@@ -79452,6 +79497,7 @@ var require_utils4 = __commonJS({
     var fs_1 = __importDefault(require("fs"));
     var path_1 = __importDefault(require("path"));
     var GitInterfaces = __importStar2(require_GitInterfaces());
+    var utils_12 = (init_utils(), __toCommonJS(utils_exports));
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var output_12 = (init_output(), __toCommonJS(output_exports));
     var gitApiProvider_1 = require_gitApiProvider();
@@ -79462,7 +79508,7 @@ var require_utils4 = __commonJS({
     function getInputs() {
       const home = path_1.default.join(process.env["AGENT_TEMPDIRECTORY"], "qodana");
       return {
-        args: (tl2.getInput("args", false) || "").split(",").map((arg) => arg.trim()),
+        args: (0, utils_12.parseRawArguments)(tl2.getInput("args", false) || ""),
         resultsDir: tl2.getInput("resultsDir", false) || path_1.default.join(home, "results"),
         cacheDir: tl2.getInput("cacheDir", false) || path_1.default.join(home, "cache"),
         uploadResult: tl2.getBoolInput("uploadResult", false),
@@ -79473,6 +79519,7 @@ var require_utils4 = __commonJS({
         postComment: tl2.getBoolInput("postPrComment", false),
         pushFixes: tl2.getInput("pushFixes", false) || "none",
         commitMessage: tl2.getInput("commitMessage", false) || "\u{1F916} Apply quick-fixes by Qodana \n\n[skip ci]",
+        workingDirectory: tl2.getInput("workingDirectory", false) || "",
         // Not used by the Azure task
         additionalCacheKey: "",
         primaryCacheKey: "",
@@ -79484,25 +79531,25 @@ var require_utils4 = __commonJS({
     }
     function qodana() {
       return __awaiter2(this, arguments, void 0, function* (args = []) {
+        const inputs = getInputs();
         const env = Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" });
         if (args.length === 0) {
-          const inputs = getInputs();
-          args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
-          if (inputs.prMode && tl2.getVariable("Build.Reason") === "PullRequest") {
+          const inputs2 = getInputs();
+          args = (0, qodana_12.getQodanaScanArgs)(inputs2.args, inputs2.resultsDir, inputs2.cacheDir);
+          if (inputs2.prMode && tl2.getVariable("Build.Reason") === "PullRequest") {
             const sha = yield getPrSha();
             if (sha !== "") {
               args.push("--commit", sha);
-              const sourceBranch = process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch;
-              if (sourceBranch) {
-                env.QODANA_BRANCH = sourceBranch;
-              }
+            }
+          }
+          if (tl2.getVariable("Build.Reason") === "PullRequest") {
+            const sourceBranch = process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch;
+            if (sourceBranch) {
+              env.QODANA_BRANCH = sourceBranch;
             }
           }
         }
-        return yield tl2.execAsync(qodana_12.EXECUTABLE, args, {
-          ignoreReturnCode: true,
-          env
-        });
+        return yield tl2.execAsync(qodana_12.EXECUTABLE, args, Object.assign(Object.assign({ ignoreReturnCode: true }, inputs.workingDirectory && { cwd: inputs.workingDirectory }), { env }));
       });
     }
     function prepareAgent(args_1) {
@@ -79573,24 +79620,40 @@ var require_utils4 = __commonJS({
         }
         const { sourceBranch, targetBranch } = getSourceAndTargetBranches();
         if (sourceBranch && targetBranch) {
-          yield git(["fetch", "origin"]);
-          const output = yield gitOutput(["merge-base", "origin/" + sourceBranch, "origin/" + targetBranch], {
-            ignoreReturnCode: true
-          });
-          if (output.exitCode === 0) {
-            return output.stdout.trim();
+          try {
+            yield git(["fetch", "origin"], true);
+            const output = yield gitOutput(["merge-base", "origin/" + sourceBranch, "origin/" + targetBranch], false, {
+              ignoreReturnCode: true
+            });
+            if (output.exitCode === 0) {
+              return output.stdout.trim();
+            }
+          } catch (error) {
+            const message = `Failed to get PR SHA for source branch ${sourceBranch} and target branch ${targetBranch}.
+The analysis would be performed with disabled prMode.
+
+Cause:
+${error.message}
+
+To enable prMode, consider adding "fetchDepth: 0".`;
+            tl2.error(message);
+            return "";
           }
         }
         return "";
       });
     }
-    function git(args_1) {
-      return __awaiter2(this, arguments, void 0, function* (args, options = {}) {
-        return (yield gitOutput(args, options)).exitCode;
+    function git(args_1, withCredentials_1) {
+      return __awaiter2(this, arguments, void 0, function* (args, withCredentials, options = {}) {
+        return (yield gitOutput(args, withCredentials, options)).exitCode;
       });
     }
-    function gitOutput(args_1) {
-      return __awaiter2(this, arguments, void 0, function* (args, options = {}) {
+    function gitOutput(args_1, withCredentials_1) {
+      return __awaiter2(this, arguments, void 0, function* (args, withCredentials, options = {}) {
+        const inputs = getInputs();
+        if (options.cwd === void 0 && inputs.workingDirectory !== "") {
+          options.cwd = inputs.workingDirectory;
+        }
         const result2 = {
           exitCode: 0,
           stdout: "",
@@ -79610,11 +79673,21 @@ var require_utils4 = __commonJS({
         });
         options.outStream = outStream;
         options.errStream = errStream;
+        if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== void 0) {
+          args = [
+            "-c",
+            `http.extraheader="AUTHORIZATION: bearer ${process.env.SYSTEM_ACCESSTOKEN}"`,
+            ...args
+          ];
+        }
         result2.exitCode = yield tl2.execAsync("git", args, options).catch((error) => {
-          tl2.warning(`Failed to run git command with arguments: ${args.join(" ")}`);
+          tl2.warning(`Failed to run git command with arguments: ${args.join(" ")}.
+Error: ${error.message}`);
           throw error;
         });
-        result2.stdout = result2.stdout.replace("[command]/usr/bin/git " + args.join(" "), "").trim();
+        if (result2.stdout.startsWith("[command]")) {
+          result2.stdout = result2.stdout.slice(result2.stdout.indexOf(" ") + 1).replace(args.join(" "), "").trim();
+        }
         return result2;
       });
     }
@@ -79712,30 +79785,32 @@ ${comment_tag_pattern}`;
           }
           currentBranch = currentBranch.replace("refs/heads/", "");
           currentBranch = (0, qodana_12.validateBranchName)(currentBranch);
-          const currentCommit = (yield gitOutput(["rev-parse", "HEAD"])).stdout.trim();
-          yield git(["config", "user.name", output_12.COMMIT_USER]);
-          yield git(["config", "user.email", output_12.COMMIT_EMAIL]);
-          yield git(["add", "."]);
-          let exitCode = yield git(["commit", "-m", commitMessage], {
+          const currentCommit = (yield gitOutput(["rev-parse", "HEAD"], false)).stdout.trim();
+          yield git(["config", "user.name", output_12.COMMIT_USER], false);
+          yield git(["config", "user.email", output_12.COMMIT_EMAIL], false);
+          yield git(["add", "."], false);
+          let exitCode = yield git(["commit", "-m", commitMessage], false, {
             ignoreReturnCode: true
           });
           if (exitCode !== 0) {
             return;
           }
-          exitCode = yield git(["pull", "--rebase", "origin", currentBranch]);
+          exitCode = yield git(["pull", "--rebase", "origin", currentBranch], true);
           if (exitCode !== 0) {
             return;
           }
           if (mode === qodana_12.BRANCH) {
-            const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"])).stdout.trim();
-            yield git(["checkout", currentBranch]);
-            yield git(["cherry-pick", commitToCherryPick]);
+            const commitToCherryPick = (yield gitOutput(["rev-parse", "HEAD"], false)).stdout.trim();
+            yield git(["checkout", currentBranch], false);
+            yield git(["cherry-pick", commitToCherryPick], false);
             yield gitPush(currentBranch);
+            console.log(`Pushed quick-fixes to branch ${currentBranch}`);
           } else if (mode === qodana_12.PULL_REQUEST) {
             const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`;
-            yield git(["checkout", "-b", newBranch]);
+            yield git(["checkout", "-b", newBranch], false);
             yield gitPush(newBranch);
             yield createPr(commitMessage, currentBranch, newBranch);
+            console.log(`Pushed quick-fixes to branch ${newBranch} and created pull request`);
           }
         } catch (error) {
           tl2.warning(`Failed to push quick fixes \u2013 ${error.message}`);
@@ -79744,11 +79819,13 @@ ${comment_tag_pattern}`;
     }
     function gitPush(branch) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const output = yield gitOutput(["push", "origin", branch], {
+        const output = yield gitOutput(["push", "origin", branch], true, {
           ignoreReturnCode: true
         });
         if (output.exitCode !== 0) {
-          tl2.warning(`Failed to push branch ${branch}: ${output.stderr}`);
+          tl2.warning(`Failed to push branch ${branch}.
+Stdout: ${output.stdout}
+Stderr: ${output.stderr}`);
         }
       });
     }

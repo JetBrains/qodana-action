@@ -48,6 +48,7 @@ import * as fs from 'fs'
 import * as os from 'os'
 import {prFixesBody} from './output'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
+import {parseRawArguments} from '../../common/utils'
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
@@ -82,7 +83,7 @@ interface PullRequestPayload {
  */
 export function getInputs(): Inputs {
   const rawArgs = core.getInput('args')
-  const argList = rawArgs ? rawArgs.split(',').map(arg => arg.trim()) : []
+  const argList = parseRawArguments(rawArgs)
   return {
     args: argList,
     resultsDir: core.getInput('results-dir'),
@@ -100,7 +101,9 @@ export function getInputs(): Inputs {
     githubToken: core.getInput('github-token'),
     pushFixes: core.getInput('push-fixes'),
     commitMessage: core.getInput('commit-message'),
-    useNightly: core.getBooleanInput('use-nightly')
+    useNightly: core.getBooleanInput('use-nightly'),
+    // not used by the action
+    workingDirectory: ''
   }
 }
 
@@ -202,6 +205,7 @@ export async function pushQuickFixes(
         await git(['cherry-pick', commitToCherryPick])
       }
       await git(['push', 'origin', currentBranch])
+      core.info(`Pushed quick-fixes to branch ${currentBranch}`)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
       await git(['checkout', '-b', newBranch])
@@ -211,6 +215,9 @@ export async function pushQuickFixes(
         `${c.repo.owner}/${c.repo.repo}`,
         currentBranch,
         newBranch
+      )
+      core.info(
+        `Pushed quick-fixes to branch ${newBranch} and created pull request`
       )
     }
   } catch (error) {

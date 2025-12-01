@@ -14,24 +14,24 @@ import {
   validateBranchName
 } from '../../common/qodana'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
+import {parseRawArguments} from '../../common/utils'
+import {getGitlabApi} from './gitlabApiProvider'
+import {prFixesBody} from './output'
+import {DiscussionSchema} from '@gitbeaker/rest'
 import * as os from 'os'
-import {exec} from 'child_process'
 import * as fs from 'fs'
 import axios from 'axios'
 import * as stream from 'stream'
 import {promisify} from 'util'
 import AdmZip from 'adm-zip'
 import * as tar from 'tar'
-import {DiscussionSchema} from '@gitbeaker/rest'
-import {getGitlabApi} from './gitlabApiProvider'
-import {prFixesBody} from './output'
 import path from 'path'
 import {Readable} from 'stream'
+import {spawn, exec} from 'child_process'
 
 export function getInputs(): Inputs {
   const rawArgs = getQodanaStringArg('ARGS', '')
-  const argList =
-    rawArgs !== '' ? rawArgs.split(',').map(arg => arg.trim()) : []
+  const argList = parseRawArguments(rawArgs)
 
   let pushFixes = getQodanaStringArg('PUSH_FIXES', 'none')
   if (pushFixes === 'merge-request') {
@@ -60,7 +60,8 @@ export function getInputs(): Inputs {
     primaryCacheKey: '',
     cacheDefaultBranchOnly: false,
     githubToken: '',
-    artifactName: ''
+    artifactName: '',
+    workingDirectory: ''
   }
 }
 
@@ -89,22 +90,17 @@ interface CommandOutput {
   stderr: string
 }
 
-interface ExecOptions {
-  streamStdoutLive?: boolean
-  ignoreReturnCode?: boolean
-}
-
 export async function execAsync(
   executable: string,
   args: string[],
-  options: ExecOptions = {}
+  ignoreReturnCode: boolean
 ): Promise<CommandOutput> {
   const command = `${executable} ${args.join(' ')}`
   return new Promise((resolve, reject) => {
-    const proc = exec(command, (error, stdout, stderr) => {
+    exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error(`Failed to run command: ${command}: ${error.message}`)
-        if (options.ignoreReturnCode) {
+        if (ignoreReturnCode) {
           resolve({
             returnCode: error.code || -1,
             stdout: stdout,
@@ -120,22 +116,18 @@ export async function execAsync(
         })
       }
     })
-    if (options?.streamStdoutLive) {
-      proc.stdout?.pipe(process.stdout)
-      proc.stderr?.pipe(process.stderr)
-    }
   })
 }
 
 async function gitOutput(
   args: string[],
-  options: ExecOptions = {}
+  ignoreReturnCode = false
 ): Promise<CommandOutput> {
-  return execAsync('git', args, options)
+  return execAsync('git', args, ignoreReturnCode)
 }
 
-async function git(args: string[], options: ExecOptions = {}): Promise<number> {
-  return (await gitOutput(args, options)).returnCode
+async function git(args: string[], ignoreReturnCode = false): Promise<number> {
+  return (await gitOutput(args, ignoreReturnCode)).returnCode
 }
 
 function isMergeRequest(): boolean {
@@ -215,6 +207,8 @@ export async function qodana(args: string[] = []): Promise<number> {
       if (sha !== '') {
         args.push('--commit', sha)
       }
+    }
+    if (isMergeRequest()) {
       const sourceBranch =
         process.env.QODANA_BRANCH ||
         process.env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
@@ -223,12 +217,22 @@ export async function qodana(args: string[] = []): Promise<number> {
       }
     }
   }
-  return (
-    await execAsync(EXECUTABLE, args, {
-      streamStdoutLive: true,
-      ignoreReturnCode: true
+  return new Promise(resolve => {
+    const proc = spawn(EXECUTABLE, args, {stdio: 'inherit'})
+    proc.on('close', (code, signal) => {
+      if (code == null) {
+        console.error(`Qodana process terminated by signal: ${signal}`)
+        resolve(1)
+      } else {
+        resolve(code)
+      }
     })
-  ).returnCode
+
+    proc.on('error', err => {
+      console.error(err.message)
+      resolve(127)
+    })
+  })
 }
 
 async function getPrSha(): Promise<string> {
@@ -290,10 +294,7 @@ export function uploadCache(cacheDir: string, execute: boolean): void {
   }
 }
 
-export function uploadArtifacts(resultsDir: string, execute: boolean): void {
-  if (!execute) {
-    return
-  }
+export function uploadArtifacts(resultsDir: string): void {
   try {
     const resultDir = getQodanaInputArg('RESULTS_DIR')
     const ciProjectDir = process.env['CI_PROJECT_DIR']
@@ -433,34 +434,36 @@ export async function pushQuickFixes(
     await git(['config', 'user.email', COMMIT_EMAIL])
     await git(['add', '.'])
     commitMessage = commitMessage + '\n\n[skip-ci]'
-    let output = await gitOutput(['commit', '-m', `'${commitMessage}'`], {
-      ignoreReturnCode: true
-    })
+    let output = await gitOutput(['commit', '-m', `'${commitMessage}'`], true)
     if (output.returnCode !== 0) {
       console.warn(`Failed to commit fixes: ${output.stderr}`)
       return
     }
-    output = await gitOutput(['pull', '--rebase', 'origin', currentBranch], {
-      ignoreReturnCode: true
-    })
+    output = await gitOutput(
+      ['pull', '--rebase', 'origin', currentBranch],
+      true
+    )
     if (output.returnCode !== 0) {
       console.warn(`Failed to update branch: ${output.stderr}`)
       return
     }
     if (mode === BRANCH) {
-      if (isMergeRequest()) {
-        const commitToCherryPick = (
-          await gitOutput(['rev-parse', 'HEAD'])
-        ).stdout.trim()
-        await git(['checkout', currentBranch])
-        await git(['cherry-pick', commitToCherryPick])
-      }
+      const commitToCherryPick = (
+        await gitOutput(['rev-parse', 'HEAD'])
+      ).stdout.trim()
+      await git(['checkout', currentBranch])
+      await git(['cherry-pick', commitToCherryPick])
+      await git(['fetch', 'origin', currentBranch])
       await gitPush(currentBranch, false)
+      console.log(`Pushed quick-fixes to branch ${currentBranch}`)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
       await git(['checkout', '-b', newBranch])
       await gitPush(newBranch, true)
       await createPr(commitMessage, newBranch, currentBranch)
+      console.log(
+        `Pushed quick-fixes to branch ${newBranch} and created pull request`
+      )
     }
   } catch (e) {
     console.warn(`Failed to push quick fixes – ${(e as Error).message}`)

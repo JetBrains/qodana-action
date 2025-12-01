@@ -47,3 +47,50 @@ export function parseRules(tool: Tool): Map<string, Rule> {
   })
   return rules
 }
+
+/**
+ * Parses given arguments represented as string with respect to --property
+ * This implementation relies on the fact
+ * that all arguments in qodana cli are passed using some option which starts with '-'
+ * The values in the list for property shouldn't start with '-'
+ * @param rawArgs string with original arguments
+ */
+export function parseRawArguments(rawArgs: string): string[] {
+  const initialSplit = rawArgs ? rawArgs.split(',').map(arg => arg.trim()) : []
+  const result: string[] = []
+  let i = 0
+
+  while (i < initialSplit.length) {
+    const currentArg = initialSplit[i]
+
+    // handle --property,prop.name=val1,val2,...
+    if (currentArg === '--property') {
+      result.push(currentArg)
+      const propertyValues: string[] = []
+
+      i++
+      while (i < initialSplit.length && !initialSplit[i].startsWith('-')) {
+        propertyValues.push(initialSplit[i])
+        i++
+      }
+
+      result.push(propertyValues.join(','))
+      // handle --property prop.name=val1,val2,...
+    } else if (currentArg.startsWith('--property ')) {
+      const fullPropertyArg: string[] = [currentArg]
+
+      i++
+      while (i < initialSplit.length && !initialSplit[i].startsWith('-')) {
+        fullPropertyArg.push(initialSplit[i])
+        i++
+      }
+
+      result.push(fullPropertyArg.join(','))
+    } else {
+      result.push(currentArg)
+      i++
+    }
+  }
+
+  return result
+}

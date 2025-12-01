@@ -21,6 +21,7 @@ import {Writable} from 'node:stream'
 import fs from 'fs'
 import path from 'path'
 import * as GitInterfaces from 'azure-devops-node-api/interfaces/GitInterfaces'
+import {parseRawArguments} from '../../common/utils'
 
 import {
   BRANCH,
@@ -58,7 +59,7 @@ export function getInputs(): Inputs {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const home = path.join(process.env['AGENT_TEMPDIRECTORY']!, 'qodana')
   return {
-    args: (tl.getInput('args', false) || '').split(',').map(arg => arg.trim()),
+    args: parseRawArguments(tl.getInput('args', false) || ''),
     resultsDir: tl.getInput('resultsDir', false) || path.join(home, 'results'),
     cacheDir: tl.getInput('cacheDir', false) || path.join(home, 'cache'),
     uploadResult: tl.getBoolInput('uploadResult', false),
@@ -71,6 +72,7 @@ export function getInputs(): Inputs {
     commitMessage:
       tl.getInput('commitMessage', false) ||
       '🤖 Apply quick-fixes by Qodana \n\n[skip ci]',
+    workingDirectory: tl.getInput('workingDirectory', false) || '',
     // Not used by the Azure task
     additionalCacheKey: '',
     primaryCacheKey: '',
@@ -87,6 +89,7 @@ export function getInputs(): Inputs {
  * @returns The qodana command execution output.
  */
 export async function qodana(args: string[] = []): Promise<number> {
+  const inputs = getInputs()
   const env: Record<string, string> = {
     ...process.env,
     NONINTERACTIVE: '1'
@@ -98,16 +101,19 @@ export async function qodana(args: string[] = []): Promise<number> {
       const sha = await getPrSha()
       if (sha !== '') {
         args.push('--commit', sha)
-        const sourceBranch =
-          process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch
-        if (sourceBranch) {
-          env.QODANA_BRANCH = sourceBranch
-        }
+      }
+    }
+    if (tl.getVariable('Build.Reason') === 'PullRequest') {
+      const sourceBranch =
+        process.env.QODANA_BRANCH || getSourceAndTargetBranches().sourceBranch
+      if (sourceBranch) {
+        env.QODANA_BRANCH = sourceBranch
       }
     }
   }
   return await tl.execAsync(EXECUTABLE, args, {
     ignoreReturnCode: true,
+    ...(inputs.workingDirectory && {cwd: inputs.workingDirectory}),
     env
   })
 }
@@ -211,15 +217,29 @@ async function getPrSha(): Promise<string> {
   const {sourceBranch, targetBranch} = getSourceAndTargetBranches()
 
   if (sourceBranch && targetBranch) {
-    await git(['fetch', 'origin'])
-    const output = await gitOutput(
-      ['merge-base', 'origin/' + sourceBranch, 'origin/' + targetBranch],
-      {
-        ignoreReturnCode: true
+    try {
+      await git(['fetch', 'origin'], true)
+      const output = await gitOutput(
+        ['merge-base', 'origin/' + sourceBranch, 'origin/' + targetBranch],
+        false,
+        {
+          ignoreReturnCode: true
+        }
+      )
+      if (output.exitCode === 0) {
+        return output.stdout.trim()
       }
-    )
-    if (output.exitCode === 0) {
-      return output.stdout.trim()
+    } catch (error) {
+      const message = `Failed to get PR SHA for source branch ${sourceBranch} and target branch ${targetBranch}.
+The analysis would be performed with disabled prMode.
+
+Cause:
+${(error as Error).message}
+
+To enable prMode, consider adding "fetchDepth: 0".`
+
+      tl.error(message)
+      return ''
     }
   }
   return ''
@@ -227,21 +247,28 @@ async function getPrSha(): Promise<string> {
 
 async function git(
   args: string[],
+  withCredentials: boolean,
   options: IExecOptions = {}
 ): Promise<number> {
-  return (await gitOutput(args, options)).exitCode
+  return (await gitOutput(args, withCredentials, options)).exitCode
 }
 
 /**
  * Returns trimmed output of git command omitting the command itself
  * i.e., if gitOutput(['status']) is called the "/usr/bin/git status" will be omitted
+ * @param withCredentials pass oauth token as extra header. Could be needed for fetch, push commands
  * @param args git arguments
  * @param options options for azure-pipelines-task-lib/task exec
  */
 async function gitOutput(
   args: string[],
+  withCredentials: boolean,
   options: IExecOptions = {}
 ): Promise<{exitCode: number; stderr: string; stdout: string}> {
+  const inputs = getInputs()
+  if (options.cwd === undefined && inputs.workingDirectory !== '') {
+    options.cwd = inputs.workingDirectory
+  }
   const result = {
     exitCode: 0,
     stdout: '',
@@ -266,13 +293,28 @@ async function gitOutput(
   options.outStream = outStream
   options.errStream = errStream
 
+  if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== undefined) {
+    args = [
+      '-c',
+      `http.extraheader="AUTHORIZATION: bearer ${process.env.SYSTEM_ACCESSTOKEN}"`,
+      ...args
+    ]
+  }
+
   result.exitCode = await tl.execAsync('git', args, options).catch(error => {
-    tl.warning(`Failed to run git command with arguments: ${args.join(' ')}`)
+    tl.warning(
+      `Failed to run git command with arguments: ${args.join(' ')}.\nError: ${(error as Error).message}`
+    )
     throw error
   })
-  result.stdout = result.stdout
-    .replace('[command]/usr/bin/git ' + args.join(' '), '')
-    .trim()
+  if (result.stdout.startsWith('[command]')) {
+    result.stdout = result.stdout
+      // remove [command]/path/to/executable from output
+      .slice(result.stdout.indexOf(' ') + 1)
+      // remove arguments from output
+      .replace(args.join(' '), '')
+      .trim()
+  }
   return result
 }
 
@@ -422,32 +464,38 @@ export async function pushQuickFixes(
     currentBranch = currentBranch.replace('refs/heads/', '')
     currentBranch = validateBranchName(currentBranch)
 
-    const currentCommit = (await gitOutput(['rev-parse', 'HEAD'])).stdout.trim()
-    await git(['config', 'user.name', COMMIT_USER])
-    await git(['config', 'user.email', COMMIT_EMAIL])
-    await git(['add', '.'])
-    let exitCode = await git(['commit', '-m', commitMessage], {
+    const currentCommit = (
+      await gitOutput(['rev-parse', 'HEAD'], false)
+    ).stdout.trim()
+    await git(['config', 'user.name', COMMIT_USER], false)
+    await git(['config', 'user.email', COMMIT_EMAIL], false)
+    await git(['add', '.'], false)
+    let exitCode = await git(['commit', '-m', commitMessage], false, {
       ignoreReturnCode: true
     })
     if (exitCode !== 0) {
       return
     }
-    exitCode = await git(['pull', '--rebase', 'origin', currentBranch])
+    exitCode = await git(['pull', '--rebase', 'origin', currentBranch], true)
     if (exitCode !== 0) {
       return
     }
     if (mode === BRANCH) {
       const commitToCherryPick = (
-        await gitOutput(['rev-parse', 'HEAD'])
+        await gitOutput(['rev-parse', 'HEAD'], false)
       ).stdout.trim()
-      await git(['checkout', currentBranch])
-      await git(['cherry-pick', commitToCherryPick])
+      await git(['checkout', currentBranch], false)
+      await git(['cherry-pick', commitToCherryPick], false)
       await gitPush(currentBranch)
+      console.log(`Pushed quick-fixes to branch ${currentBranch}`)
     } else if (mode === PULL_REQUEST) {
       const newBranch = `qodana/quick-fixes-${currentCommit.slice(0, 7)}`
-      await git(['checkout', '-b', newBranch])
+      await git(['checkout', '-b', newBranch], false)
       await gitPush(newBranch)
       await createPr(commitMessage, currentBranch, newBranch)
+      console.log(
+        `Pushed quick-fixes to branch ${newBranch} and created pull request`
+      )
     }
   } catch (error) {
     tl.warning(`Failed to push quick fixes – ${(error as Error).message}`)
@@ -455,11 +503,13 @@ export async function pushQuickFixes(
 }
 
 async function gitPush(branch: string): Promise<void> {
-  const output = await gitOutput(['push', 'origin', branch], {
+  const output = await gitOutput(['push', 'origin', branch], true, {
     ignoreReturnCode: true
   })
   if (output.exitCode !== 0) {
-    tl.warning(`Failed to push branch ${branch}: ${output.stderr}`)
+    tl.warning(
+      `Failed to push branch ${branch}.\nStdout: ${output.stdout}\nStderr: ${output.stderr}`
+    )
   }
 }
 

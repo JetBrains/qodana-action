@@ -132,7 +132,16 @@ export function extractArg(
 }
 
 export function isNativeMode(args: string[]): boolean {
-  return args.includes('--ide')
+  if (args.includes('--ide') || args.includes('--within-docker=false')) {
+    return true
+  }
+
+  let index = args.findIndex(arg => arg =='--within-docker')
+
+  if (index == -1) return false
+  let nextIndex = index + 1
+
+  return args.length > nextIndex && args[nextIndex] == 'false';
 }
 
 /**
@@ -146,6 +155,12 @@ export function getQodanaPullArgs(args: string[]): string[] {
   if (linter) {
     pullArgs.push('-l', linter)
   }
+
+  const image = extractArg('--image', '--image', args)
+  if (image) {
+    pullArgs.push('--image', image)
+  }
+
   const project = extractArg('-i', '--project-dir', args)
   if (project) {
     pullArgs.push('-i', project)
@@ -212,6 +227,7 @@ export interface Inputs {
   pushFixes: PushFixesType
   commitMessage: string
   useNightly: boolean
+  workingDirectory: string
 }
 
 /**

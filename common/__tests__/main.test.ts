@@ -18,12 +18,13 @@ import {expect, test} from '@jest/globals'
 import {getCoverageFromSarif, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
   getCoverageStats,
-  getReportURL, parseSarif, ProblemDescriptor
+  getReportURL, parseSarif
 } from '../output'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
 import {outputEmptyFixture, problemDescriptorsDefaultFixture} from './common.test.utils'
+import {parseRawArguments} from '../utils'
 
 test('test passed coverage output using diff', () => {
   const result = getCoverageStats(
@@ -175,3 +176,134 @@ function failedCoverageFixtureDiff(): string {
 # Calculated according to the filters of your coverage tool
 \`\`\``
 }
+
+describe('parseRawArguments', () => {
+  test('empty string returns empty array', () => {
+    expect(parseRawArguments('')).toEqual([])
+  })
+
+  test('simple arguments without property', () => {
+    expect(parseRawArguments('-i,frontend,--print-problems')).toEqual([
+      '-i',
+      'frontend',
+      '--print-problems'
+    ])
+  })
+
+  test('single argument', () => {
+    expect(parseRawArguments('--print-problems')).toEqual(['--print-problems'])
+  })
+
+  test('arguments with whitespace are trimmed', () => {
+    expect(parseRawArguments(' -i, frontend, --print-problems ')).toEqual([
+      '-i',
+      'frontend',
+      '--print-problems'
+    ])
+  })
+
+  test('property with single value', () => {
+    expect(parseRawArguments('--property,idea.log.level=trace')).toEqual([
+      '--property',
+      'idea.log.level=trace'
+    ])
+  })
+
+  test('property with comma-separated values', () => {
+    expect(
+      parseRawArguments('--property,property.name=value1,value2,value3')
+    ).toEqual(['--property', 'property.name=value1,value2,value3'])
+  })
+
+  test('multiple properties', () => {
+    expect(
+      parseRawArguments(
+        '--property,prop1=val1,--property,prop2=val2,val3,--print-problems'
+      )
+    ).toEqual([
+      '--property',
+      'prop1=val1',
+      '--property',
+      'prop2=val2,val3',
+      '--print-problems'
+    ])
+  })
+
+  test('mixed arguments with property in the middle', () => {
+    expect(
+      parseRawArguments(
+        '-i,frontend,--property,idea.log.level=trace,debug,--print-problems'
+      )
+    ).toEqual([
+      '-i',
+      'frontend',
+      '--property',
+      'idea.log.level=trace,debug',
+      '--print-problems'
+    ])
+  })
+
+  test('property at the end with multiple values', () => {
+    expect(
+      parseRawArguments('--print-problems,--property,prop=a,b,c')
+    ).toEqual(['--print-problems', '--property', 'prop=a,b,c'])
+  })
+
+  test('property with values followed by short option', () => {
+    expect(parseRawArguments('--property,prop=x,y,-l,qodana-jvm')).toEqual([
+      '--property',
+      'prop=x,y',
+      '-l',
+      'qodana-jvm'
+    ])
+  })
+
+  test('complex real-world example', () => {
+    expect(
+      parseRawArguments(
+        '-l,qodana-jvm,--property,qodana.format.replace.with.style=spotless,ktfmt,--property,idea.headless.enable.statistics=false,--fail-threshold,10,--print-problems'
+      )
+    ).toEqual([
+      '-l',
+      'qodana-jvm',
+      '--property',
+      'qodana.format.replace.with.style=spotless,ktfmt',
+      '--property',
+      'idea.headless.enable.statistics=false',
+      '--fail-threshold',
+      '10',
+      '--print-problems'
+    ])
+  })
+
+  test('property with space', () => {
+    expect(parseRawArguments('--property idea.log.level=trace')).toEqual([
+      '--property idea.log.level=trace'
+    ])
+  })
+
+  test('arg with space', () => {
+    expect(parseRawArguments('--fail-threshold 10')).toEqual([
+      '--fail-threshold 10'
+    ])
+  })
+
+  test('complex real-world example with space property-value separation', () => {
+    expect(
+      parseRawArguments(
+        `
+-l qodana-jvm,
+--property qodana.format.replace.with.style=spotless,ktfmt,
+--property idea.headless.enable.statistics=false,
+--fail-threshold 10,
+--print-problems`
+      )
+    ).toEqual([
+      '-l qodana-jvm',
+      '--property qodana.format.replace.with.style=spotless,ktfmt',
+      '--property idea.headless.enable.statistics=false',
+      '--fail-threshold 10',
+      '--print-problems'
+    ])
+  })
+})
