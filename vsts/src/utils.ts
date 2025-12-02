@@ -293,6 +293,11 @@ async function gitOutput(
   options.outStream = outStream
   options.errStream = errStream
 
+  console.log(`Running git command: git ${args.join(' ')}`)
+  console.log(
+    `WithCredentials: ${withCredentials}. System access token: ${process.env.SYSTEM_ACCESSTOKEN}`
+  )
+
   if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== undefined) {
     args = [
       '-c',
@@ -303,7 +308,7 @@ async function gitOutput(
 
   result.exitCode = await tl.execAsync('git', args, options).catch(error => {
     tl.warning(
-      `Failed to run git command with arguments: ${args.join(' ')}.\nError: ${(error as Error).message}`
+      `Failed to run git command with arguments: ${args.join(' ')}.\nStderr: ${result.stderr}\nStdout:${result.stdout}`
     )
     throw error
   })

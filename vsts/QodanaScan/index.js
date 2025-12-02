@@ -79673,6 +79673,8 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         });
         options.outStream = outStream;
         options.errStream = errStream;
+        console.log(`Running git command: git ${args.join(" ")}`);
+        console.log(`WithCredentials: ${withCredentials}. System access token: ${process.env.SYSTEM_ACCESSTOKEN}`);
         if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== void 0) {
           args = [
             "-c",
@@ -79682,7 +79684,8 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         }
         result2.exitCode = yield tl2.execAsync("git", args, options).catch((error) => {
           tl2.warning(`Failed to run git command with arguments: ${args.join(" ")}.
-Error: ${error.message}`);
+Stderr: ${result2.stderr}
+Stdout:${result2.stdout}`);
           throw error;
         });
         if (result2.stdout.startsWith("[command]")) {
