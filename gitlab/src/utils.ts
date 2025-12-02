@@ -123,7 +123,17 @@ async function gitOutput(
   args: string[],
   ignoreReturnCode = false
 ): Promise<CommandOutput> {
-  return execAsync('git', args, ignoreReturnCode)
+  const result = await execAsync('git', args, true)
+  if (result.returnCode !== 0 && !ignoreReturnCode) {
+    console.warn(
+      `Git command failed: git ${args.join(' ')}\nExit code: ${result.returnCode}\nStdout: ${result.stdout}\nStderr: ${result.stderr}`
+    )
+  } else if (result.returnCode !== 0) {
+    throw new Error(
+      `git command failed: git ${args.join(' ')} returned ${result.returnCode}\nStdout: ${result.stdout}\nStderr: ${result.stderr}`
+    )
+  }
+  return result
 }
 
 async function git(args: string[], ignoreReturnCode = false): Promise<number> {
@@ -434,17 +444,23 @@ export async function pushQuickFixes(
     await git(['config', 'user.email', COMMIT_EMAIL])
     await git(['add', '.'])
     commitMessage = commitMessage + '\n\n[skip-ci]'
-    let output = await gitOutput(['commit', '-m', `'${commitMessage}'`], true)
+    const output = await gitOutput(['commit', '-m', `'${commitMessage}'`], true)
     if (output.returnCode !== 0) {
       console.warn(`Failed to commit fixes: ${output.stderr}`)
       return
     }
-    output = await gitOutput(
-      ['pull', '--rebase', 'origin', currentBranch],
-      true
-    )
-    if (output.returnCode !== 0) {
-      console.warn(`Failed to update branch: ${output.stderr}`)
+    // Check for any files that may interfere with pull --rebase
+    const statusOutput = await gitOutput(['status', '--porcelain'], true)
+    if (statusOutput.stdout.trim() !== '') {
+      console.log(`Git status before pull --rebase:\n${statusOutput.stdout}`)
+    }
+    const pullReturnCode = await git([
+      'pull',
+      '--rebase',
+      'origin',
+      currentBranch
+    ])
+    if (pullReturnCode !== 0) {
       return
     }
     if (mode === BRANCH) {

@@ -303,7 +303,7 @@ async function gitOutput(
 
   result.exitCode = await tl.execAsync('git', args, options).catch(error => {
     tl.warning(
-      `Failed to run git command with arguments: ${args.join(' ')}.\nError: ${(error as Error).message}`
+      `Git command git ${args.join(' ')} failed: ${(error as Error).message}\nStdout: ${result.stdout}\nStderr: ${result.stderr}`
     )
     throw error
   })
@@ -470,14 +470,24 @@ export async function pushQuickFixes(
     await git(['config', 'user.name', COMMIT_USER], false)
     await git(['config', 'user.email', COMMIT_EMAIL], false)
     await git(['add', '.'], false)
-    let exitCode = await git(['commit', '-m', commitMessage], false, {
+    const exitCode = await git(['commit', '-m', commitMessage], false, {
       ignoreReturnCode: true
     })
     if (exitCode !== 0) {
       return
     }
-    exitCode = await git(['pull', '--rebase', 'origin', currentBranch], true)
-    if (exitCode !== 0) {
+    // Check for any files that may interfere with pull --rebase
+    const statusOutput = await gitOutput(['status', '--porcelain'], false, {
+      ignoreReturnCode: true
+    })
+    if (statusOutput.stdout.trim() !== '') {
+      console.log(`Git status before pull --rebase:\n${statusOutput.stdout}`)
+    }
+    const pullExitCode = await git(
+      ['pull', '--rebase', 'origin', currentBranch],
+      true
+    )
+    if (pullExitCode !== 0) {
       return
     }
     if (mode === BRANCH) {

@@ -192,6 +192,13 @@ export async function pushQuickFixes(
     if (exitCode !== 0) {
       return
     }
+    // Check for any files that may interfere with pull --rebase
+    const statusOutput = await gitOutput(['status', '--porcelain'], {
+      ignoreReturnCode: true
+    })
+    if (statusOutput.stdout.trim() !== '') {
+      core.info(`Git status before pull --rebase:\n${statusOutput.stdout}`)
+    }
     exitCode = await git(['pull', '--rebase', 'origin', currentBranch])
     if (exitCode !== 0) {
       return
@@ -648,7 +655,21 @@ async function gitOutput(
   args: string[],
   options: exec.ExecOptions = {}
 ): Promise<ExecOutput> {
-  return exec.getExecOutput('git', args, options)
+  const originalIgnoreReturnCode = options.ignoreReturnCode
+  const result = await exec.getExecOutput('git', args, {
+    ...options,
+    ignoreReturnCode: true
+  })
+  if (result.exitCode !== 0 && !originalIgnoreReturnCode) {
+    core.warning(
+      `Git command failed: git ${args.join(' ')}\nExit code: ${result.exitCode}\nStdout: ${result.stdout}\nStderr: ${result.stderr}`
+    )
+  } else if (result.exitCode !== 0) {
+    throw new Error(
+      `Git command failed: git ${args.join(' ')} with exit code ${result.exitCode}. Stdout: ${result.stdout}. Stderr: ${result.stderr}`
+    )
+  }
+  return result
 }
 
 async function createPr(
