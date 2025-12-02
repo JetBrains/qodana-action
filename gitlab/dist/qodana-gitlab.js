@@ -51858,7 +51858,18 @@ var require_utils5 = __commonJS({
     __name(execAsync, "execAsync");
     function gitOutput(args_1) {
       return __awaiter2(this, arguments, void 0, function* (args, ignoreReturnCode = false) {
-        return execAsync("git", args, ignoreReturnCode);
+        const result = yield execAsync("git", args, true);
+        if (result.returnCode !== 0 && !ignoreReturnCode) {
+          console.warn(`Git command failed: git ${args.join(" ")}
+Exit code: ${result.returnCode}
+Stdout: ${result.stdout}
+Stderr: ${result.stderr}`);
+        } else if (result.returnCode !== 0) {
+          throw new Error(`git command failed: git ${args.join(" ")} returned ${result.returnCode}
+Stdout: ${result.stdout}
+Stderr: ${result.stderr}`);
+        }
+        return result;
       });
     }
     __name(gitOutput, "gitOutput");
@@ -52134,14 +52145,23 @@ ${comment_tag_pattern}`;
           yield git(["config", "user.email", output_12.COMMIT_EMAIL]);
           yield git(["add", "."]);
           commitMessage = commitMessage + "\n\n[skip-ci]";
-          let output = yield gitOutput(["commit", "-m", `'${commitMessage}'`], true);
+          const output = yield gitOutput(["commit", "-m", `'${commitMessage}'`], true);
           if (output.returnCode !== 0) {
             console.warn(`Failed to commit fixes: ${output.stderr}`);
             return;
           }
-          output = yield gitOutput(["pull", "--rebase", "origin", currentBranch], true);
-          if (output.returnCode !== 0) {
-            console.warn(`Failed to update branch: ${output.stderr}`);
+          const statusOutput = yield gitOutput(["status", "--porcelain"], true);
+          if (statusOutput.stdout.trim() !== "") {
+            console.log(`Git status before pull --rebase:
+${statusOutput.stdout}`);
+          }
+          const pullReturnCode = yield git([
+            "pull",
+            "--rebase",
+            "origin",
+            currentBranch
+          ]);
+          if (pullReturnCode !== 0) {
             return;
           }
           if (mode === qodana_12.BRANCH) {

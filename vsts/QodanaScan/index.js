@@ -79681,8 +79681,9 @@ To enable prMode, consider adding "fetchDepth: 0".`;
           ];
         }
         result2.exitCode = yield tl2.execAsync("git", args, options).catch((error) => {
-          tl2.warning(`Failed to run git command with arguments: ${args.join(" ")}.
-Error: ${error.message}`);
+          tl2.warning(`Git command git ${args.join(" ")} failed: ${error.message}
+Stdout: ${result2.stdout}
+Stderr: ${result2.stderr}`);
           throw error;
         });
         if (result2.stdout.startsWith("[command]")) {
@@ -79789,14 +79790,21 @@ ${comment_tag_pattern}`;
           yield git(["config", "user.name", output_12.COMMIT_USER], false);
           yield git(["config", "user.email", output_12.COMMIT_EMAIL], false);
           yield git(["add", "."], false);
-          let exitCode = yield git(["commit", "-m", commitMessage], false, {
+          const exitCode = yield git(["commit", "-m", commitMessage], false, {
             ignoreReturnCode: true
           });
           if (exitCode !== 0) {
             return;
           }
-          exitCode = yield git(["pull", "--rebase", "origin", currentBranch], true);
-          if (exitCode !== 0) {
+          const statusOutput = yield gitOutput(["status", "--porcelain"], false, {
+            ignoreReturnCode: true
+          });
+          if (statusOutput.stdout.trim() !== "") {
+            console.log(`Git status before pull --rebase:
+${statusOutput.stdout}`);
+          }
+          const pullExitCode = yield git(["pull", "--rebase", "origin", currentBranch], true);
+          if (pullExitCode !== 0) {
             return;
           }
           if (mode === qodana_12.BRANCH) {
