@@ -37,12 +37,12 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
           cache: npm
@@ -64,7 +64,7 @@ jobs:
           fi
         id: diffscan
       # If index.js was different from expected, upload the expected version as an artifact
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: ${{ failure() && steps.diffscan.conclusion == 'failure' }}
         with:
           name: dist
@@ -84,7 +84,7 @@ jobs:
             exit 1
           fi
         id: diffvsts
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: ${{ failure() && steps.diffvsts.conclusion == 'failure' }}
         with:
           name: dist
@@ -107,34 +107,34 @@ jobs:
         include:
           - directory: 'tests/dotnet'
             os: 'ubuntu-latest'
-            arguments: '-l,jetbrains/qodana-cdnet:2025.1-eap'
+            arguments: '-l,jetbrains/qodana-cdnet:2025.2-eap'
             pr: 'false' # TODO: add true when pr-mode is available for dotnet-community
 #          - directory: 'tests/cpp'
-#            arguments: '-l,jetbrains/qodana-clang:2025.1-eap'
+#            arguments: '-l,jetbrains/qodana-clang:2025.2-eap'
 #            os: 'ubuntu-latest'
 #            pr: 'false'
           - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-community:2025.1'
+            arguments: '-l,jetbrains/qodana-jvm-community:2025.2'
             os: 'ubuntu-latest'
             pr: 'true'
           - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-community:2025.1'
+            arguments: '-l,jetbrains/qodana-jvm-community:2025.2'
             os: 'ubuntu-latest'
             pr: 'false'
           - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-android:2025.1'
+            arguments: '-l,jetbrains/qodana-jvm-android:2025.2'
             os: 'ubuntu-latest'
             pr: 'true'
           - directory: 'tests/java'
-            arguments: '-l,jetbrains/qodana-jvm-android:2025.1'
+            arguments: '-l,jetbrains/qodana-jvm-android:2025.2'
             os: 'ubuntu-latest'
             pr: 'false'
           - directory: 'tests/py_error'
-            arguments: '-l,jetbrains/qodana-python-community:2025.1'
+            arguments: '-l,jetbrains/qodana-python-community:2025.2'
             os: 'ubuntu-latest'
             pr: 'true'
           - directory: 'tests/py_error'
-            arguments: '-l,jetbrains/qodana-python-community:2025.1'
+            arguments: '-l,jetbrains/qodana-python-community:2025.2'
             os: 'ubuntu-latest'
             pr: 'false'
           - directory: 'tests/dotnet'
@@ -330,10 +330,10 @@ jobs:
             os: 'macos-latest'
             pr: 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: 'JetBrains/code-analytics-examples'
           fetch-depth: 0
@@ -366,6 +366,14 @@ jobs:
           git commit -m "Add new feature"
         working-directory: '${{ matrix.directory }}'
         shell: bash
+      - uses: actions/setup-go@v6
+        if: ${{ matrix.arguments == '--ide,QDGO'}}
+        with:
+          go-version: '>=1.25.1'
+      - name: Export GOROOT for subsequent steps
+        if: ${{ matrix.arguments == '--ide,QDGO'}}
+        shell: bash
+        run: echo "GOROOT=$(go env GOROOT)" >> $GITHUB_ENV
       - name: Qodana
         uses: ./
         with:
@@ -385,7 +393,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ lint ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -394,7 +402,7 @@ jobs:
             - "vsts/vss-extension.dev.json"
       - name: Set Node.js
         if: steps.filter.outputs.azure-dev == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
           cache: npm
@@ -413,7 +421,7 @@ jobs:
           AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
       - name: Upload vsix
         if: steps.filter.outputs.azure-dev == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: qodana-dev.vsix
           path: vsts/qodana-dev.vsix

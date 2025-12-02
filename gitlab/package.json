@@ -16,23 +16,23 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.15.12",
-    "@typescript-eslint/parser": "^8.32.0",
+    "@types/node": "^24.9.2",
+    "@typescript-eslint/parser": "^8.32.1",
     "esbuild": "0.25.4",
     "eslint": "^8.57.1",
-    "eslint-import-resolver-typescript": "^4.3.4",
-    "eslint-plugin-jest": "^28.11.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-jest": "^29.0.1",
     "jest": "latest",
     "js-yaml": "^4.1.0",
-    "prettier": "3.5.3",
+    "prettier": "3.6.2",
     "ts-jest": "latest",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@gitbeaker/rest": "^42.5.0",
+    "@gitbeaker/rest": "^43.7.0",
     "@types/adm-zip": "^0.5.7",
     "adm-zip": "^0.5.16",
-    "axios": "^1.9.0",
-    "tar": "^7.4.3"
+    "axios": "^1.13.1",
+    "tar": "^7.5.2"
   }
 }
