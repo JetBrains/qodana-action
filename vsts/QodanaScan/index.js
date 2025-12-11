@@ -81361,6 +81361,11 @@ Stderr: ${result2.stderr}`);
         if (result2.stdout.startsWith("[command]")) {
           result2.stdout = result2.stdout.slice(result2.stdout.indexOf(" ") + 1).replace(args.join(" "), "").trim();
         }
+        if (result2.exitCode !== 0) {
+          tl2.warning(`Git command git ${args.join(" ")} failed:
+Stdout: ${result2.stdout}
+Stderr: ${result2.stderr}`);
+        }
         return result2;
       });
     }

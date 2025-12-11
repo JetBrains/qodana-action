@@ -51859,7 +51859,7 @@ var require_utils5 = __commonJS({
     function gitOutput(args_1) {
       return __awaiter2(this, arguments, void 0, function* (args, ignoreReturnCode = false) {
         const result = yield execAsync("git", args, true);
-        if (result.returnCode !== 0 && !ignoreReturnCode) {
+        if (result.returnCode !== 0 && ignoreReturnCode) {
           console.warn(`Git command failed: git ${args.join(" ")}
 Exit code: ${result.returnCode}
 Stdout: ${result.stdout}

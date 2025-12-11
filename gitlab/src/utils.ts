@@ -124,7 +124,7 @@ async function gitOutput(
   ignoreReturnCode = false
 ): Promise<CommandOutput> {
   const result = await execAsync('git', args, true)
-  if (result.returnCode !== 0 && !ignoreReturnCode) {
+  if (result.returnCode !== 0 && ignoreReturnCode) {
     console.warn(
       `Git command failed: git ${args.join(' ')}\nExit code: ${result.returnCode}\nStdout: ${result.stdout}\nStderr: ${result.stderr}`
     )

@@ -121,6 +121,9 @@ async function getPrSha(): Promise<string> {
     if (output.exitCode === 0) {
       return output.stdout.trim()
     } else {
+      core.warning(
+        'Qodana needs git history to extract merge-base. Please specify fetch-depth: 0 in your workflow.'
+      )
       return pr.base.sha
     }
   }
@@ -660,7 +663,7 @@ async function gitOutput(
     ...options,
     ignoreReturnCode: true
   })
-  if (result.exitCode !== 0 && !originalIgnoreReturnCode) {
+  if (result.exitCode !== 0 && originalIgnoreReturnCode) {
     core.warning(
       `Git command failed: git ${args.join(' ')}\nExit code: ${result.exitCode}\nStdout: ${result.stdout}\nStderr: ${result.stderr}`
     )
