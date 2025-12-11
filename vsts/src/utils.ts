@@ -315,6 +315,11 @@ async function gitOutput(
       .replace(args.join(' '), '')
       .trim()
   }
+  if (result.exitCode !== 0) {
+    tl.warning(
+      `Git command git ${args.join(' ')} failed:\nStdout: ${result.stdout}\nStderr: ${result.stderr}`
+    )
+  }
   return result
 }
 
