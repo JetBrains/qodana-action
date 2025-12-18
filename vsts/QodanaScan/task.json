@@ -9,8 +9,8 @@
   "author": "JetBrains",
   "version": {
     "Major": 2025,
-    "Minor": 2,
-    "Patch": 4
+    "Minor": 3,
+    "Patch": 1
   },
   "instanceNameFormat": "Qodana Scan",
   "inputs": [
