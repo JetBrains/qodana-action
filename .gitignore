@@ -105,4 +105,4 @@ vsts/.taskkey
 
 .idea/
 .gradle/
-build/
+build/test
