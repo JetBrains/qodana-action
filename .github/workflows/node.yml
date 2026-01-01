@@ -64,7 +64,7 @@ jobs:
           fi
         id: diffscan
       # If index.js was different from expected, upload the expected version as an artifact
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: ${{ failure() && steps.diffscan.conclusion == 'failure' }}
         with:
           name: dist
@@ -84,7 +84,7 @@ jobs:
             exit 1
           fi
         id: diffvsts
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: ${{ failure() && steps.diffvsts.conclusion == 'failure' }}
         with:
           name: dist
@@ -421,7 +421,7 @@ jobs:
           AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
       - name: Upload vsix
         if: steps.filter.outputs.azure-dev == 'true'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: qodana-dev.vsix
           path: vsts/qodana-dev.vsix
