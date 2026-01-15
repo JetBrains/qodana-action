@@ -59,3 +59,51 @@ jobs:
           tfx extension publish --publisher JetBrains --vsix qodana.vsix -t $AZURE_TOKEN
         env:
           AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
+
+  maven:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract version from tag
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          VERSION=$(echo $TAG_NAME | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 17
+          cache: maven
+
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --reload gpg-agent
+
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'EOF'
+          <settings>
+            <servers>
+              <server>
+                <id>central</id>
+                <username>${env.MAVEN_CENTRAL_USERNAME}</username>
+                <password>${env.MAVEN_CENTRAL_PASSWORD}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Update version and publish
+        run: |
+          cd maven
+          mvn versions:set -DnewVersion=${{ env.VERSION }} -DgenerateBackupPoms=false
+          mvn clean deploy -Prelease -DskipTests -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
