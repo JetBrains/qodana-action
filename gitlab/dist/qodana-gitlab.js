@@ -10302,8 +10302,16 @@ var init_qodana = __esm({
 var utils_exports = {};
 __export(utils_exports, {
   parseRawArguments: () => parseRawArguments,
-  parseRules: () => parseRules
+  parseRules: () => parseRules,
+  resetDeprecationWarning: () => resetDeprecationWarning,
+  setDeprecationWarningCallback: () => setDeprecationWarningCallback
 });
+function setDeprecationWarningCallback(callback) {
+  deprecationWarningCallback = callback;
+}
+function resetDeprecationWarning() {
+  deprecationWarningShown = false;
+}
 function parseRules(tool) {
   const rules = /* @__PURE__ */ new Map();
   tool.driver.rules?.forEach((rule) => {
@@ -10322,7 +10330,47 @@ function parseRules(tool) {
   });
   return rules;
 }
-function parseRawArguments(rawArgs) {
+function looksLikeCommaSeparated(tokens) {
+  return tokens.some((t) => {
+    if (/,\s*-{1,2}\w/.test(t)) {
+      return true;
+    }
+    if (/^-{1,2}\w[^,]*,/.test(t)) {
+      return true;
+    }
+    return false;
+  });
+}
+function parseSpaceSeparated(input) {
+  const tokens = [];
+  let current = "";
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let hasQuotes = false;
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i];
+    if (char === "'" && !inDoubleQuote) {
+      inSingleQuote = !inSingleQuote;
+      hasQuotes = true;
+    } else if (char === '"' && !inSingleQuote) {
+      inDoubleQuote = !inDoubleQuote;
+      hasQuotes = true;
+    } else if (char === " " && !inSingleQuote && !inDoubleQuote) {
+      if (current || hasQuotes) {
+        tokens.push(current);
+        current = "";
+        hasQuotes = false;
+      }
+    } else {
+      current += char;
+    }
+  }
+  if (current || hasQuotes) {
+    tokens.push(current);
+  }
+  return tokens;
+}
+function parseCommaSeparated(rawArgs) {
   const initialSplit = rawArgs ? rawArgs.split(",").map((arg) => arg.trim()) : [];
   const result = [];
   let i = 0;
@@ -10352,10 +10400,69 @@ function parseRawArguments(rawArgs) {
   }
   return result;
 }
+function handlePropertyArgs(args) {
+  const result = [];
+  let i = 0;
+  while (i < args.length) {
+    const currentArg = args[i];
+    if (currentArg === "--property" && i + 1 < args.length) {
+      result.push(currentArg);
+      const propertyParts = [];
+      i++;
+      if (i < args.length) {
+        propertyParts.push(args[i]);
+        i++;
+      }
+      while (i < args.length && !args[i].startsWith("-")) {
+        propertyParts.push(args[i]);
+        i++;
+      }
+      result.push(propertyParts.join(","));
+    } else {
+      result.push(currentArg);
+      i++;
+    }
+  }
+  return result;
+}
+function warnDeprecatedCommaFormat(original, parsed) {
+  if (deprecationWarningShown) {
+    return;
+  }
+  deprecationWarningShown = true;
+  const suggestedStr = parsed.map((arg) => arg.includes(" ") ? `"${arg}"` : arg).join(" ");
+  const message = `Comma-separated args format is deprecated and will be removed in a future version.
+Please switch to space-separated format:
+  Current:   "${original.trim()}"
+  Suggested: "${suggestedStr}"`;
+  deprecationWarningCallback(message);
+}
+function parseRawArguments(rawArgs) {
+  if (!rawArgs || !rawArgs.trim()) {
+    return [];
+  }
+  const spaceParsed = parseSpaceSeparated(rawArgs.trim());
+  if (looksLikeCommaSeparated(spaceParsed)) {
+    const commaParsed = parseCommaSeparated(rawArgs);
+    warnDeprecatedCommaFormat(rawArgs, commaParsed);
+    return commaParsed;
+  }
+  return handlePropertyArgs(spaceParsed);
+}
+var deprecationWarningShown, deprecationWarningCallback;
 var init_utils = __esm({
   "../common/utils.ts"() {
     "use strict";
+    deprecationWarningShown = false;
+    deprecationWarningCallback = /* @__PURE__ */ __name((message) => console.warn(message), "deprecationWarningCallback");
+    __name(setDeprecationWarningCallback, "setDeprecationWarningCallback");
+    __name(resetDeprecationWarning, "resetDeprecationWarning");
     __name(parseRules, "parseRules");
+    __name(looksLikeCommaSeparated, "looksLikeCommaSeparated");
+    __name(parseSpaceSeparated, "parseSpaceSeparated");
+    __name(parseCommaSeparated, "parseCommaSeparated");
+    __name(handlePropertyArgs, "handlePropertyArgs");
+    __name(warnDeprecatedCommaFormat, "warnDeprecatedCommaFormat");
     __name(parseRawArguments, "parseRawArguments");
   }
 });
@@ -47216,15 +47323,25 @@ var require_header = __commonJS({
     }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
-      }
-      __setModuleDefault2(result, mod);
-      return result;
-    };
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = /* @__PURE__ */ __name(function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      }, "ownKeys");
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    })();
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.Header = void 0;
     var node_path_1 = require("node:path");
@@ -48285,15 +48402,25 @@ var require_list = __commonJS({
     }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
-      }
-      __setModuleDefault2(result, mod);
-      return result;
-    };
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = /* @__PURE__ */ __name(function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      }, "ownKeys");
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    })();
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
@@ -48488,15 +48615,25 @@ var require_write_entry = __commonJS({
     }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
-      }
-      __setModuleDefault2(result, mod);
-      return result;
-    };
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = /* @__PURE__ */ __name(function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      }, "ownKeys");
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    })();
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
@@ -49514,15 +49651,25 @@ var require_pack = __commonJS({
     }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
-      }
-      __setModuleDefault2(result, mod);
-      return result;
-    };
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = /* @__PURE__ */ __name(function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      }, "ownKeys");
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    })();
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
@@ -50581,15 +50728,25 @@ var require_unpack = __commonJS({
     }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
-      }
-      __setModuleDefault2(result, mod);
-      return result;
-    };
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = /* @__PURE__ */ __name(function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      }, "ownKeys");
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    })();
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
@@ -50619,6 +50776,7 @@ var require_unpack = __commonJS({
     var HARDLINK = Symbol("hardlink");
     var UNSUPPORTED = Symbol("unsupported");
     var CHECKPATH = Symbol("checkPath");
+    var STRIPABSOLUTEPATH = Symbol("stripAbsolutePath");
     var MKDIR = Symbol("mkdir");
     var ONERROR = Symbol("onError");
     var PENDING = Symbol("pending");
@@ -50749,6 +50907,31 @@ var require_unpack = __commonJS({
           this.emit("end");
         }
       }
+      // return false if we need to skip this file
+      // return true if the field was successfully sanitized
+      [STRIPABSOLUTEPATH](entry, field) {
+        const path2 = entry[field];
+        if (!path2 || this.preservePaths)
+          return true;
+        const parts = path2.split("/");
+        if (parts.includes("..") || /* c8 ignore next */
+        isWindows && /^[a-z]:\.\.$/i.test(parts[0] ?? "")) {
+          this.warn("TAR_ENTRY_ERROR", `${field} contains '..'`, {
+            entry,
+            [field]: path2
+          });
+          return false;
+        }
+        const [root, stripped] = (0, strip_absolute_path_js_1.stripAbsolutePath)(path2);
+        if (root) {
+          entry[field] = String(stripped);
+          this.warn("TAR_ENTRY_INFO", `stripping ${root} from absolute ${field}`, {
+            entry,
+            [field]: path2
+          });
+        }
+        return true;
+      }
       [CHECKPATH](entry) {
         const p = (0, normalize_windows_path_js_1.normalizeWindowsPath)(entry.path);
         const parts = p.split("/");
@@ -50776,23 +50959,8 @@ var require_unpack = __commonJS({
           });
           return false;
         }
-        if (!this.preservePaths) {
-          if (parts.includes("..") || /* c8 ignore next */
-          isWindows && /^[a-z]:\.\.$/i.test(parts[0] ?? "")) {
-            this.warn("TAR_ENTRY_ERROR", `path contains '..'`, {
-              entry,
-              path: p
-            });
-            return false;
-          }
-          const [root, stripped] = (0, strip_absolute_path_js_1.stripAbsolutePath)(p);
-          if (root) {
-            entry.path = String(stripped);
-            this.warn("TAR_ENTRY_INFO", `stripping ${root} from absolute path`, {
-              entry,
-              path: p
-            });
-          }
+        if (!this[STRIPABSOLUTEPATH](entry, "path") || !this[STRIPABSOLUTEPATH](entry, "linkpath")) {
+          return false;
         }
         if (node_path_1.default.isAbsolute(entry.path)) {
           entry.absolute = (0, normalize_windows_path_js_1.normalizeWindowsPath)(node_path_1.default.resolve(entry.path));
@@ -51305,15 +51473,25 @@ var require_extract = __commonJS({
     }) : function(o, v) {
       o["default"] = v;
     });
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
-      }
-      __setModuleDefault2(result, mod);
-      return result;
-    };
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = /* @__PURE__ */ __name(function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      }, "ownKeys");
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    })();
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
@@ -51630,15 +51808,25 @@ var require_commonjs6 = __commonJS({
     var __exportStar = exports2 && exports2.__exportStar || function(m, exports3) {
       for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports3, p)) __createBinding2(exports3, m, p);
     };
-    var __importStar2 = exports2 && exports2.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null) {
-        for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding2(result, mod, k);
-      }
-      __setModuleDefault2(result, mod);
-      return result;
-    };
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = /* @__PURE__ */ __name(function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      }, "ownKeys");
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    })();
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.u = exports2.types = exports2.r = exports2.t = exports2.x = exports2.c = void 0;
     __exportStar(require_create(), exports2);
@@ -51770,6 +51958,9 @@ var require_utils5 = __commonJS({
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var output_12 = (init_output(), __toCommonJS(output_exports));
     var utils_12 = (init_utils(), __toCommonJS(utils_exports));
+    (0, utils_12.setDeprecationWarningCallback)((message) => {
+      console.warn(`WARNING: ${message}`);
+    });
     var gitlabApiProvider_1 = require_gitlabApiProvider();
     var output_2 = require_output();
     var os = __importStar2(require("os"));

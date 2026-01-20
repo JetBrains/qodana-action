@@ -17123,8 +17123,16 @@ var require_GitInterfaces = __commonJS({
 var utils_exports = {};
 __export(utils_exports, {
   parseRawArguments: () => parseRawArguments,
-  parseRules: () => parseRules
+  parseRules: () => parseRules,
+  resetDeprecationWarning: () => resetDeprecationWarning,
+  setDeprecationWarningCallback: () => setDeprecationWarningCallback
 });
+function setDeprecationWarningCallback(callback) {
+  deprecationWarningCallback = callback;
+}
+function resetDeprecationWarning() {
+  deprecationWarningShown = false;
+}
 function parseRules(tool) {
   var _a, _b;
   const rules = /* @__PURE__ */ new Map();
@@ -17145,7 +17153,47 @@ function parseRules(tool) {
   });
   return rules;
 }
-function parseRawArguments(rawArgs) {
+function looksLikeCommaSeparated(tokens) {
+  return tokens.some((t) => {
+    if (/,\s*-{1,2}\w/.test(t)) {
+      return true;
+    }
+    if (/^-{1,2}\w[^,]*,/.test(t)) {
+      return true;
+    }
+    return false;
+  });
+}
+function parseSpaceSeparated(input) {
+  const tokens = [];
+  let current = "";
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let hasQuotes = false;
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i];
+    if (char === "'" && !inDoubleQuote) {
+      inSingleQuote = !inSingleQuote;
+      hasQuotes = true;
+    } else if (char === '"' && !inSingleQuote) {
+      inDoubleQuote = !inDoubleQuote;
+      hasQuotes = true;
+    } else if (char === " " && !inSingleQuote && !inDoubleQuote) {
+      if (current || hasQuotes) {
+        tokens.push(current);
+        current = "";
+        hasQuotes = false;
+      }
+    } else {
+      current += char;
+    }
+  }
+  if (current || hasQuotes) {
+    tokens.push(current);
+  }
+  return tokens;
+}
+function parseCommaSeparated(rawArgs) {
   const initialSplit = rawArgs ? rawArgs.split(",").map((arg) => arg.trim()) : [];
   const result2 = [];
   let i = 0;
@@ -17175,9 +17223,61 @@ function parseRawArguments(rawArgs) {
   }
   return result2;
 }
+function handlePropertyArgs(args) {
+  const result2 = [];
+  let i = 0;
+  while (i < args.length) {
+    const currentArg = args[i];
+    if (currentArg === "--property" && i + 1 < args.length) {
+      result2.push(currentArg);
+      const propertyParts = [];
+      i++;
+      if (i < args.length) {
+        propertyParts.push(args[i]);
+        i++;
+      }
+      while (i < args.length && !args[i].startsWith("-")) {
+        propertyParts.push(args[i]);
+        i++;
+      }
+      result2.push(propertyParts.join(","));
+    } else {
+      result2.push(currentArg);
+      i++;
+    }
+  }
+  return result2;
+}
+function warnDeprecatedCommaFormat(original, parsed) {
+  if (deprecationWarningShown) {
+    return;
+  }
+  deprecationWarningShown = true;
+  const suggestedStr = parsed.map((arg) => arg.includes(" ") ? `"${arg}"` : arg).join(" ");
+  const message = `Comma-separated args format is deprecated and will be removed in a future version.
+Please switch to space-separated format:
+  Current:   "${original.trim()}"
+  Suggested: "${suggestedStr}"`;
+  deprecationWarningCallback(message);
+}
+function parseRawArguments(rawArgs) {
+  if (!rawArgs || !rawArgs.trim()) {
+    return [];
+  }
+  const spaceParsed = parseSpaceSeparated(rawArgs.trim());
+  if (looksLikeCommaSeparated(spaceParsed)) {
+    const commaParsed = parseCommaSeparated(rawArgs);
+    warnDeprecatedCommaFormat(rawArgs, commaParsed);
+    return commaParsed;
+  }
+  return handlePropertyArgs(spaceParsed);
+}
+var deprecationWarningShown, deprecationWarningCallback;
 var init_utils = __esm({
   "../common/utils.ts"() {
     "use strict";
+    deprecationWarningShown = false;
+    deprecationWarningCallback = (message) => console.warn(message);
   }
 });
 
@@ -81170,6 +81270,9 @@ var require_utils4 = __commonJS({
     var path_1 = __importDefault(require("path"));
     var GitInterfaces = __importStar2(require_GitInterfaces());
     var utils_12 = (init_utils(), __toCommonJS(utils_exports));
+    (0, utils_12.setDeprecationWarningCallback)((message) => {
+      tl2.warning(message);
+    });
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var output_12 = (init_output(), __toCommonJS(output_exports));
     var gitApiProvider_1 = require_gitApiProvider();

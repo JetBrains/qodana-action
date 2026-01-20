@@ -48,7 +48,15 @@ import * as fs from 'fs'
 import * as os from 'os'
 import {prFixesBody} from './output'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
-import {parseRawArguments} from '../../common/utils'
+import {
+  parseRawArguments,
+  setDeprecationWarningCallback
+} from '../../common/utils'
+
+// Set up platform-specific deprecation warning callback for GitHub Actions
+setDeprecationWarningCallback((message: string) => {
+  core.warning(message)
+})
 
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'

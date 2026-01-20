@@ -14,7 +14,16 @@ import {
   validateBranchName
 } from '../../common/qodana'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
-import {parseRawArguments} from '../../common/utils'
+import {
+  parseRawArguments,
+  setDeprecationWarningCallback
+} from '../../common/utils'
+
+// Set up platform-specific deprecation warning callback for GitLab CI
+setDeprecationWarningCallback((message: string) => {
+  console.warn(`WARNING: ${message}`)
+})
+
 import {getGitlabApi} from './gitlabApiProvider'
 import {prFixesBody} from './output'
 import {DiscussionSchema} from '@gitbeaker/rest'
