@@ -24,6 +24,8 @@ setDeprecationWarningCallback((message: string) => {
   console.warn(`WARNING: ${message}`)
 })
 
+let cachedInputs: Inputs | null = null
+
 import {getGitlabApi} from './gitlabApiProvider'
 import {prFixesBody} from './output'
 import {DiscussionSchema} from '@gitbeaker/rest'
@@ -39,6 +41,9 @@ import {Readable} from 'stream'
 import {spawn, exec} from 'child_process'
 
 export function getInputs(): Inputs {
+  if (cachedInputs !== null) {
+    return cachedInputs
+  }
   const rawArgs = getQodanaStringArg('ARGS', '')
   const argList = parseRawArguments(rawArgs)
 
@@ -47,7 +52,7 @@ export function getInputs(): Inputs {
     pushFixes = 'pull-request'
   }
 
-  return {
+  cachedInputs = {
     args: argList,
     // user given results and cache dirs are used in uploadCache, prepareCaches and uploadArtifacts
     resultsDir: `${baseDir()}/results`,
@@ -72,6 +77,7 @@ export function getInputs(): Inputs {
     artifactName: '',
     workingDirectory: ''
   }
+  return cachedInputs
 }
 
 function baseDir(): string {

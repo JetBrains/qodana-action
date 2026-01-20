@@ -15,6 +15,7 @@
  */
 
 import type {Tool} from 'sarif'
+import {parse as shellParse} from 'shell-quote'
 
 export interface Rule {
   shortDescription: string
@@ -23,9 +24,6 @@ export interface Rule {
 
 // Callback type for platform-specific deprecation warning
 export type DeprecationWarningCallback = (message: string) => void
-
-// Module-level flag to ensure a warning is shown only once per run
-let deprecationWarningShown = false
 
 // Settable callback for platform-specific warning output
 let deprecationWarningCallback: DeprecationWarningCallback = (message: string) =>
@@ -40,13 +38,6 @@ export function setDeprecationWarningCallback(
   callback: DeprecationWarningCallback
 ): void {
   deprecationWarningCallback = callback
-}
-
-/**
- * Resets the deprecation warning state. Useful for testing.
- */
-export function resetDeprecationWarning(): void {
-  deprecationWarningShown = false
 }
 
 /**
@@ -80,18 +71,30 @@ export function parseRules(tool: Tool): Map<string, Rule> {
  * Checks if the parsed tokens look like they came from comma-separated format.
  * This is used to detect a legacy format and trigger deprecation warning.
  * Patterns detected:
- * - comma followed by a flag: ",-i" or ",--flag" or ", --flag"
+ * - standalone comma (from ", --flag" being split on space)
+ * - token starting with comma followed by flag: ",--flag" or ",-i"
  * - flag followed by comma: "-i," or "--flag,"
+ * - value with trailing comma (from multiline YAML): "value,"
  */
 function looksLikeCommaSeparated(tokens: string[]): boolean {
   return tokens.some(t => {
-    // Pattern 1: comma followed by flag (with optional space): ,--flag or ,-i or , --flag
-    if (/,\s*-{1,2}\w/.test(t)) {
+    // Standalone comma (from ", --flag" split into [",", "--flag"])
+    if (t === ',') {
       return true
     }
-    // Pattern 2: flag followed by comma: --flag, or -i,
+    // Token starts with comma followed by flag: ,--flag or ,-i
+    // Using ^ anchor to avoid false positives like --property=list=-1,-2,-3
+    if (/^,\s*-{1,2}\w/.test(t)) {
+      return true
+    }
+    // Flag followed by comma: --flag, or -i,frontend
     // This catches tokens like "-i,frontend" or "--property,value"
     if (/^-{1,2}\w[^,]*,/.test(t)) {
+      return true
+    }
+    // Value with trailing comma (from YAML multiline): "value," or "file.json,"
+    // Excludes property values with internal commas like "key=a,b,c"
+    if (/^[^-=][^=]*,$/.test(t)) {
       return true
     }
     return false
@@ -99,46 +102,16 @@ function looksLikeCommaSeparated(tokens: string[]): boolean {
 }
 
 /**
- * Shell-style space-separated argument parser with quote support.
- * Handles both single and double quotes for arguments containing spaces.
+ * Parses space-separated arguments with quote support using shell-quote.
  */
 function parseSpaceSeparated(input: string): string[] {
-  const tokens: string[] = []
-  let current = ''
-  let inSingleQuote = false
-  let inDoubleQuote = false
-  let hasQuotes = false // Track if current token had any quotes
-
-  for (let i = 0; i < input.length; i++) {
-    const char = input[i]
-
-    if (char === "'" && !inDoubleQuote) {
-      inSingleQuote = !inSingleQuote
-      hasQuotes = true
-    } else if (char === '"' && !inSingleQuote) {
-      inDoubleQuote = !inDoubleQuote
-      hasQuotes = true
-    } else if (char === ' ' && !inSingleQuote && !inDoubleQuote) {
-      if (current || hasQuotes) {
-        tokens.push(current)
-        current = ''
-        hasQuotes = false
-      }
-    } else {
-      current += char
-    }
-  }
-
-  if (current || hasQuotes) {
-    tokens.push(current)
-  }
-
-  return tokens
+  const parsed = shellParse(input, () => undefined) // disable env expansion
+  return parsed.filter((entry): entry is string => typeof entry === 'string')
 }
 
 /**
  * Parses comma-separated arguments (legacy format).
- * Handles --property especially to preserve comma-separated values.
+ * Handles --property to preserve comma-separated values.
  */
 function parseCommaSeparated(rawArgs: string): string[] {
   const initialSplit = rawArgs ? rawArgs.split(',').map(arg => arg.trim()) : []
@@ -147,6 +120,11 @@ function parseCommaSeparated(rawArgs: string): string[] {
 
   while (i < initialSplit.length) {
     const currentArg = initialSplit[i]
+
+    if (!currentArg) {
+      i++
+      continue
+    }
 
     // handle --property,prop.name=val1,val2,...
     if (currentArg === '--property') {
@@ -160,55 +138,22 @@ function parseCommaSeparated(rawArgs: string): string[] {
       }
 
       result.push(propertyValues.join(','))
-      // handle --property prop.name=val1,val2,...
+      // handle --property prop.name=val1,val2,... (space after --property in segment)
     } else if (currentArg.startsWith('--property ')) {
-      const fullPropertyArg: string[] = [currentArg]
+      result.push('--property')
+      const propertyValue = currentArg.slice('--property '.length)
+      const propertyParts: string[] = [propertyValue]
 
       i++
       while (i < initialSplit.length && !initialSplit[i].startsWith('-')) {
-        fullPropertyArg.push(initialSplit[i])
-        i++
-      }
-
-      result.push(fullPropertyArg.join(','))
-    } else {
-      result.push(currentArg)
-      i++
-    }
-  }
-
-  return result
-}
-
-/**
- * Handles --property arguments in space-separated format.
- * Preserves comma-separated values for --property flags.
- */
-function handlePropertyArgs(args: string[]): string[] {
-  const result: string[] = []
-  let i = 0
-
-  while (i < args.length) {
-    const currentArg = args[i]
-
-    if (currentArg === '--property' && i + 1 < args.length) {
-      result.push(currentArg)
-      const propertyParts: string[] = []
-      i++
-
-      if (i < args.length) {
-        propertyParts.push(args[i])
-        i++
-      }
-
-      while (i < args.length && !args[i].startsWith('-')) {
-        propertyParts.push(args[i])
+        propertyParts.push(initialSplit[i])
         i++
       }
 
       result.push(propertyParts.join(','))
     } else {
-      result.push(currentArg)
+      const parts = currentArg.split(/\s+/).filter(p => p)
+      result.push(...parts)
       i++
     }
   }
@@ -217,17 +162,12 @@ function handlePropertyArgs(args: string[]): string[] {
 }
 
 /**
- * Shows a deprecation warning for comma-separated format (once per run).
+ * Shows deprecation warning for comma-separated format with suggested fix.
  */
 function warnDeprecatedCommaFormat(
   original: string,
   parsed: string[]
 ): void {
-  if (deprecationWarningShown) {
-    return
-  }
-  deprecationWarningShown = true
-
   const suggestedStr = parsed
     .map(arg => (arg.includes(' ') ? `"${arg}"` : arg))
     .join(' ')
@@ -269,5 +209,5 @@ export function parseRawArguments(rawArgs: string): string[] {
     return commaParsed
   }
 
-  return handlePropertyArgs(spaceParsed)
+  return spaceParsed
 }

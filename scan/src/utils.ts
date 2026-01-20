@@ -58,6 +58,8 @@ setDeprecationWarningCallback((message: string) => {
   core.warning(message)
 })
 
+let cachedInputs: Inputs | null = null
+
 export const ANALYSIS_FINISHED_REACTION = '+1'
 export const ANALYSIS_STARTED_REACTION = 'eyes'
 export const ENABLE_USE_CACHE_OPTION_WARNING =
@@ -90,9 +92,12 @@ interface PullRequestPayload {
  * @returns The action inputs.
  */
 export function getInputs(): Inputs {
+  if (cachedInputs !== null) {
+    return cachedInputs
+  }
   const rawArgs = core.getInput('args')
   const argList = parseRawArguments(rawArgs)
-  return {
+  cachedInputs = {
     args: argList,
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
@@ -113,6 +118,7 @@ export function getInputs(): Inputs {
     // not used by the action
     workingDirectory: ''
   }
+  return cachedInputs
 }
 
 async function getPrSha(): Promise<string> {
