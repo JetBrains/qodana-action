@@ -10298,19 +10298,249 @@ var init_qodana = __esm({
   }
 });
 
+// ../node_modules/shell-quote/quote.js
+var require_quote = __commonJS({
+  "../node_modules/shell-quote/quote.js"(exports2, module2) {
+    "use strict";
+    module2.exports = /* @__PURE__ */ __name(function quote(xs) {
+      return xs.map(function(s) {
+        if (s === "") {
+          return "''";
+        }
+        if (s && typeof s === "object") {
+          return s.op.replace(/(.)/g, "\\$1");
+        }
+        if (/["\s\\]/.test(s) && !/'/.test(s)) {
+          return "'" + s.replace(/(['])/g, "\\$1") + "'";
+        }
+        if (/["'\s]/.test(s)) {
+          return '"' + s.replace(/(["\\$`!])/g, "\\$1") + '"';
+        }
+        return String(s).replace(/([A-Za-z]:)?([#!"$&'()*,:;<=>?@[\\\]^`{|}])/g, "$1\\$2");
+      }).join(" ");
+    }, "quote");
+  }
+});
+
+// ../node_modules/shell-quote/parse.js
+var require_parse = __commonJS({
+  "../node_modules/shell-quote/parse.js"(exports2, module2) {
+    "use strict";
+    var CONTROL = "(?:" + [
+      "\\|\\|",
+      "\\&\\&",
+      ";;",
+      "\\|\\&",
+      "\\<\\(",
+      "\\<\\<\\<",
+      ">>",
+      ">\\&",
+      "<\\&",
+      "[&;()|<>]"
+    ].join("|") + ")";
+    var controlRE = new RegExp("^" + CONTROL + "$");
+    var META = "|&;()<> \\t";
+    var SINGLE_QUOTE = '"((\\\\"|[^"])*?)"';
+    var DOUBLE_QUOTE = "'((\\\\'|[^'])*?)'";
+    var hash = /^#$/;
+    var SQ = "'";
+    var DQ = '"';
+    var DS = "$";
+    var TOKEN = "";
+    var mult = 4294967296;
+    for (i = 0; i < 4; i++) {
+      TOKEN += (mult * Math.random()).toString(16);
+    }
+    var i;
+    var startsWithToken = new RegExp("^" + TOKEN);
+    function matchAll(s, r) {
+      var origIndex = r.lastIndex;
+      var matches = [];
+      var matchObj;
+      while (matchObj = r.exec(s)) {
+        matches.push(matchObj);
+        if (r.lastIndex === matchObj.index) {
+          r.lastIndex += 1;
+        }
+      }
+      r.lastIndex = origIndex;
+      return matches;
+    }
+    __name(matchAll, "matchAll");
+    function getVar(env, pre, key) {
+      var r = typeof env === "function" ? env(key) : env[key];
+      if (typeof r === "undefined" && key != "") {
+        r = "";
+      } else if (typeof r === "undefined") {
+        r = "$";
+      }
+      if (typeof r === "object") {
+        return pre + TOKEN + JSON.stringify(r) + TOKEN;
+      }
+      return pre + r;
+    }
+    __name(getVar, "getVar");
+    function parseInternal(string, env, opts) {
+      if (!opts) {
+        opts = {};
+      }
+      var BS = opts.escape || "\\";
+      var BAREWORD = "(\\" + BS + `['"` + META + `]|[^\\s'"` + META + "])+";
+      var chunker = new RegExp([
+        "(" + CONTROL + ")",
+        // control chars
+        "(" + BAREWORD + "|" + SINGLE_QUOTE + "|" + DOUBLE_QUOTE + ")+"
+      ].join("|"), "g");
+      var matches = matchAll(string, chunker);
+      if (matches.length === 0) {
+        return [];
+      }
+      if (!env) {
+        env = {};
+      }
+      var commented = false;
+      return matches.map(function(match) {
+        var s = match[0];
+        if (!s || commented) {
+          return void 0;
+        }
+        if (controlRE.test(s)) {
+          return { op: s };
+        }
+        var quote = false;
+        var esc = false;
+        var out = "";
+        var isGlob = false;
+        var i2;
+        function parseEnvVar() {
+          i2 += 1;
+          var varend;
+          var varname;
+          var char = s.charAt(i2);
+          if (char === "{") {
+            i2 += 1;
+            if (s.charAt(i2) === "}") {
+              throw new Error("Bad substitution: " + s.slice(i2 - 2, i2 + 1));
+            }
+            varend = s.indexOf("}", i2);
+            if (varend < 0) {
+              throw new Error("Bad substitution: " + s.slice(i2));
+            }
+            varname = s.slice(i2, varend);
+            i2 = varend;
+          } else if (/[*@#?$!_-]/.test(char)) {
+            varname = char;
+            i2 += 1;
+          } else {
+            var slicedFromI = s.slice(i2);
+            varend = slicedFromI.match(/[^\w\d_]/);
+            if (!varend) {
+              varname = slicedFromI;
+              i2 = s.length;
+            } else {
+              varname = slicedFromI.slice(0, varend.index);
+              i2 += varend.index - 1;
+            }
+          }
+          return getVar(env, "", varname);
+        }
+        __name(parseEnvVar, "parseEnvVar");
+        for (i2 = 0; i2 < s.length; i2++) {
+          var c = s.charAt(i2);
+          isGlob = isGlob || !quote && (c === "*" || c === "?");
+          if (esc) {
+            out += c;
+            esc = false;
+          } else if (quote) {
+            if (c === quote) {
+              quote = false;
+            } else if (quote == SQ) {
+              out += c;
+            } else {
+              if (c === BS) {
+                i2 += 1;
+                c = s.charAt(i2);
+                if (c === DQ || c === BS || c === DS) {
+                  out += c;
+                } else {
+                  out += BS + c;
+                }
+              } else if (c === DS) {
+                out += parseEnvVar();
+              } else {
+                out += c;
+              }
+            }
+          } else if (c === DQ || c === SQ) {
+            quote = c;
+          } else if (controlRE.test(c)) {
+            return { op: s };
+          } else if (hash.test(c)) {
+            commented = true;
+            var commentObj = { comment: string.slice(match.index + i2 + 1) };
+            if (out.length) {
+              return [out, commentObj];
+            }
+            return [commentObj];
+          } else if (c === BS) {
+            esc = true;
+          } else if (c === DS) {
+            out += parseEnvVar();
+          } else {
+            out += c;
+          }
+        }
+        if (isGlob) {
+          return { op: "glob", pattern: out };
+        }
+        return out;
+      }).reduce(function(prev, arg) {
+        return typeof arg === "undefined" ? prev : prev.concat(arg);
+      }, []);
+    }
+    __name(parseInternal, "parseInternal");
+    module2.exports = /* @__PURE__ */ __name(function parse(s, env, opts) {
+      var mapped = parseInternal(s, env, opts);
+      if (typeof env !== "function") {
+        return mapped;
+      }
+      return mapped.reduce(function(acc, s2) {
+        if (typeof s2 === "object") {
+          return acc.concat(s2);
+        }
+        var xs = s2.split(RegExp("(" + TOKEN + ".*?" + TOKEN + ")", "g"));
+        if (xs.length === 1) {
+          return acc.concat(xs[0]);
+        }
+        return acc.concat(xs.filter(Boolean).map(function(x) {
+          if (startsWithToken.test(x)) {
+            return JSON.parse(x.split(TOKEN)[1]);
+          }
+          return x;
+        }));
+      }, []);
+    }, "parse");
+  }
+});
+
+// ../node_modules/shell-quote/index.js
+var require_shell_quote = __commonJS({
+  "../node_modules/shell-quote/index.js"(exports2) {
+    "use strict";
+    exports2.quote = require_quote();
+    exports2.parse = require_parse();
+  }
+});
+
 // ../common/utils.ts
 var utils_exports = {};
 __export(utils_exports, {
   parseRawArguments: () => parseRawArguments,
   parseRules: () => parseRules,
-  resetDeprecationWarning: () => resetDeprecationWarning,
   setDeprecationWarningCallback: () => setDeprecationWarningCallback
 });
 function setDeprecationWarningCallback(callback) {
   deprecationWarningCallback = callback;
-}
-function resetDeprecationWarning() {
-  deprecationWarningShown = false;
 }
 function parseRules(tool) {
   const rules = /* @__PURE__ */ new Map();
@@ -10332,43 +10562,24 @@ function parseRules(tool) {
 }
 function looksLikeCommaSeparated(tokens) {
   return tokens.some((t) => {
-    if (/,\s*-{1,2}\w/.test(t)) {
+    if (t === ",") {
+      return true;
+    }
+    if (/^,\s*-{1,2}\w/.test(t)) {
       return true;
     }
     if (/^-{1,2}\w[^,]*,/.test(t)) {
+      return true;
+    }
+    if (/^[^-=][^=]*,$/.test(t)) {
       return true;
     }
     return false;
   });
 }
 function parseSpaceSeparated(input) {
-  const tokens = [];
-  let current = "";
-  let inSingleQuote = false;
-  let inDoubleQuote = false;
-  let hasQuotes = false;
-  for (let i = 0; i < input.length; i++) {
-    const char = input[i];
-    if (char === "'" && !inDoubleQuote) {
-      inSingleQuote = !inSingleQuote;
-      hasQuotes = true;
-    } else if (char === '"' && !inSingleQuote) {
-      inDoubleQuote = !inDoubleQuote;
-      hasQuotes = true;
-    } else if (char === " " && !inSingleQuote && !inDoubleQuote) {
-      if (current || hasQuotes) {
-        tokens.push(current);
-        current = "";
-        hasQuotes = false;
-      }
-    } else {
-      current += char;
-    }
-  }
-  if (current || hasQuotes) {
-    tokens.push(current);
-  }
-  return tokens;
+  const parsed = (0, import_shell_quote.parse)(input, () => void 0);
+  return parsed.filter((entry) => typeof entry === "string");
 }
 function parseCommaSeparated(rawArgs) {
   const initialSplit = rawArgs ? rawArgs.split(",").map((arg) => arg.trim()) : [];
@@ -10376,6 +10587,10 @@ function parseCommaSeparated(rawArgs) {
   let i = 0;
   while (i < initialSplit.length) {
     const currentArg = initialSplit[i];
+    if (!currentArg) {
+      i++;
+      continue;
+    }
     if (currentArg === "--property") {
       result.push(currentArg);
       const propertyValues = [];
@@ -10386,50 +10601,24 @@ function parseCommaSeparated(rawArgs) {
       }
       result.push(propertyValues.join(","));
     } else if (currentArg.startsWith("--property ")) {
-      const fullPropertyArg = [currentArg];
+      result.push("--property");
+      const propertyValue = currentArg.slice("--property ".length);
+      const propertyParts = [propertyValue];
       i++;
       while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
-        fullPropertyArg.push(initialSplit[i]);
-        i++;
-      }
-      result.push(fullPropertyArg.join(","));
-    } else {
-      result.push(currentArg);
-      i++;
-    }
-  }
-  return result;
-}
-function handlePropertyArgs(args) {
-  const result = [];
-  let i = 0;
-  while (i < args.length) {
-    const currentArg = args[i];
-    if (currentArg === "--property" && i + 1 < args.length) {
-      result.push(currentArg);
-      const propertyParts = [];
-      i++;
-      if (i < args.length) {
-        propertyParts.push(args[i]);
-        i++;
-      }
-      while (i < args.length && !args[i].startsWith("-")) {
-        propertyParts.push(args[i]);
+        propertyParts.push(initialSplit[i]);
         i++;
       }
       result.push(propertyParts.join(","));
     } else {
-      result.push(currentArg);
+      const parts = currentArg.split(/\s+/).filter((p) => p);
+      result.push(...parts);
       i++;
     }
   }
   return result;
 }
 function warnDeprecatedCommaFormat(original, parsed) {
-  if (deprecationWarningShown) {
-    return;
-  }
-  deprecationWarningShown = true;
   const suggestedStr = parsed.map((arg) => arg.includes(" ") ? `"${arg}"` : arg).join(" ");
   const message = `Comma-separated args format is deprecated and will be removed in a future version.
 Please switch to space-separated format:
@@ -10447,21 +10636,19 @@ function parseRawArguments(rawArgs) {
     warnDeprecatedCommaFormat(rawArgs, commaParsed);
     return commaParsed;
   }
-  return handlePropertyArgs(spaceParsed);
+  return spaceParsed;
 }
-var deprecationWarningShown, deprecationWarningCallback;
+var import_shell_quote, deprecationWarningCallback;
 var init_utils = __esm({
   "../common/utils.ts"() {
     "use strict";
-    deprecationWarningShown = false;
+    import_shell_quote = __toESM(require_shell_quote());
     deprecationWarningCallback = /* @__PURE__ */ __name((message) => console.warn(message), "deprecationWarningCallback");
     __name(setDeprecationWarningCallback, "setDeprecationWarningCallback");
-    __name(resetDeprecationWarning, "resetDeprecationWarning");
     __name(parseRules, "parseRules");
     __name(looksLikeCommaSeparated, "looksLikeCommaSeparated");
     __name(parseSpaceSeparated, "parseSpaceSeparated");
     __name(parseCommaSeparated, "parseCommaSeparated");
-    __name(handlePropertyArgs, "handlePropertyArgs");
     __name(warnDeprecatedCommaFormat, "warnDeprecatedCommaFormat");
     __name(parseRawArguments, "parseRawArguments");
   }
@@ -12912,7 +13099,7 @@ var require_stringify = __commonJS({
 });
 
 // ../node_modules/qs/lib/parse.js
-var require_parse = __commonJS({
+var require_parse2 = __commonJS({
   "../node_modules/qs/lib/parse.js"(exports2, module2) {
     "use strict";
     var utils = require_utils2();
@@ -13167,7 +13354,7 @@ var require_lib4 = __commonJS({
   "../node_modules/qs/lib/index.js"(exports2, module2) {
     "use strict";
     var stringify = require_stringify();
-    var parse = require_parse();
+    var parse = require_parse2();
     var formats = require_formats();
     module2.exports = {
       formats,
@@ -18300,7 +18487,7 @@ var require_scan = __commonJS({
 });
 
 // ../node_modules/picomatch-browser/lib/parse.js
-var require_parse2 = __commonJS({
+var require_parse3 = __commonJS({
   "../node_modules/picomatch-browser/lib/parse.js"(exports2, module2) {
     "use strict";
     var constants = require_constants2();
@@ -19070,7 +19257,7 @@ var require_picomatch = __commonJS({
   "../node_modules/picomatch-browser/lib/picomatch.js"(exports2, module2) {
     "use strict";
     var scan = require_scan();
-    var parse = require_parse2();
+    var parse = require_parse3();
     var utils = require_utils3();
     var constants = require_constants2();
     var isObject = /* @__PURE__ */ __name((val) => val && typeof val === "object" && !Array.isArray(val), "isObject");
@@ -47857,7 +48044,7 @@ var require_warn_method = __commonJS({
 });
 
 // ../node_modules/tar/dist/commonjs/parse.js
-var require_parse3 = __commonJS({
+var require_parse4 = __commonJS({
   "../node_modules/tar/dist/commonjs/parse.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -48430,7 +48617,7 @@ var require_list = __commonJS({
     var node_fs_1 = __importDefault(require("node:fs"));
     var path_1 = require("path");
     var make_command_js_1 = require_make_command();
-    var parse_js_1 = require_parse3();
+    var parse_js_1 = require_parse4();
     var strip_trailing_slashes_js_1 = require_strip_trailing_slashes();
     var onReadEntryFunction = /* @__PURE__ */ __name((opt) => {
       const onReadEntry = opt.onReadEntry;
@@ -50760,7 +50947,7 @@ var require_unpack = __commonJS({
     var get_write_flag_js_1 = require_get_write_flag();
     var mkdir_js_1 = require_mkdir();
     var normalize_windows_path_js_1 = require_normalize_windows_path();
-    var parse_js_1 = require_parse3();
+    var parse_js_1 = require_parse4();
     var strip_absolute_path_js_1 = require_strip_absolute_path();
     var wc = __importStar2(require_winchars());
     var path_reservations_js_1 = require_path_reservations();
@@ -51846,7 +52033,7 @@ var require_commonjs6 = __commonJS({
       return list_js_1.list;
     }, "get") });
     __exportStar(require_pack(), exports2);
-    __exportStar(require_parse3(), exports2);
+    __exportStar(require_parse4(), exports2);
     __exportStar(require_pax(), exports2);
     __exportStar(require_read_entry(), exports2);
     __exportStar(require_replace(), exports2);
@@ -51961,6 +52148,7 @@ var require_utils5 = __commonJS({
     (0, utils_12.setDeprecationWarningCallback)((message) => {
       console.warn(`WARNING: ${message}`);
     });
+    var cachedInputs = null;
     var gitlabApiProvider_1 = require_gitlabApiProvider();
     var output_2 = require_output();
     var os = __importStar2(require("os"));
@@ -51973,13 +52161,16 @@ var require_utils5 = __commonJS({
     var path_1 = __importDefault(require("path"));
     var child_process_1 = require("child_process");
     function getInputs() {
+      if (cachedInputs !== null) {
+        return cachedInputs;
+      }
       const rawArgs = getQodanaStringArg("ARGS", "");
       const argList = (0, utils_12.parseRawArguments)(rawArgs);
       let pushFixes = getQodanaStringArg("PUSH_FIXES", "none");
       if (pushFixes === "merge-request") {
         pushFixes = "pull-request";
       }
-      return {
+      cachedInputs = {
         args: argList,
         // user given results and cache dirs are used in uploadCache, prepareCaches and uploadArtifacts
         resultsDir: `${baseDir()}/results`,
@@ -52001,6 +52192,7 @@ var require_utils5 = __commonJS({
         artifactName: "",
         workingDirectory: ""
       };
+      return cachedInputs;
     }
     __name(getInputs, "getInputs");
     function baseDir() {

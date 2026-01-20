@@ -26,7 +26,6 @@ import * as os from 'os'
 import {outputEmptyFixture, problemDescriptorsDefaultFixture} from './common.test.utils'
 import {
   parseRawArguments,
-  resetDeprecationWarning,
   setDeprecationWarningCallback
 } from '../utils'
 
@@ -182,10 +181,6 @@ function failedCoverageFixtureDiff(): string {
 }
 
 describe('parseRawArguments', () => {
-  beforeEach(() => {
-    resetDeprecationWarning()
-  })
-
   describe('space-separated format (preferred)', () => {
     test('empty string returns empty array', () => {
       expect(parseRawArguments('')).toEqual([])
@@ -439,29 +434,30 @@ describe('parseRawArguments', () => {
       ])
     })
 
+    test('multiline YAML format (args: |)', () => {
+      const multilineInput =
+        '--baseline qodana.sarif.json,\n--fail-threshold 10,\n--linter qodana-jvm'
+      expect(parseRawArguments(multilineInput)).toEqual([
+        '--baseline',
+        'qodana.sarif.json',
+        '--fail-threshold',
+        '10',
+        '--linter',
+        'qodana-jvm'
+      ])
+      expect(warningMessage).toContain('deprecated')
+    })
+
     test('warning includes current and suggested format', () => {
       parseRawArguments('-i,frontend,--print-problems')
       expect(warningMessage).toContain('Current:')
       expect(warningMessage).toContain('Suggested:')
       expect(warningMessage).toContain('-i frontend --print-problems')
     })
-
-    test('warning is shown only once per run', () => {
-      let callCount = 0
-      setDeprecationWarningCallback(() => {
-        callCount++
-      })
-
-      parseRawArguments('-i,frontend')
-      parseRawArguments('-l,qodana-jvm')
-
-      expect(callCount).toBe(1)
-    })
   })
 
   describe('edge cases and mixed scenarios', () => {
     test('commas in property values do not trigger legacy detection', () => {
-      // This looks like it has commas but they are property values, not separators
       let warningMessage: string | null = null
       setDeprecationWarningCallback((msg: string) => {
         warningMessage = msg
@@ -475,14 +471,12 @@ describe('parseRawArguments', () => {
       expect(warningMessage).toBeNull()
     })
 
-    test('newlines are not split (YAML handles this)', () => {
-      // YAML multiline strings with > convert newlines to spaces before reaching parser
-      // So actual newlines in raw input are kept as-is
-      expect(parseRawArguments('--flag\nvalue')).toEqual(['--flag\nvalue'])
+    test('newlines are treated as separators', () => {
+      expect(parseRawArguments('--flag\nvalue')).toEqual(['--flag', 'value'])
     })
 
-    test('tabs are treated as regular characters', () => {
-      expect(parseRawArguments('--flag\tvalue')).toEqual(['--flag\tvalue'])
+    test('tabs are treated as separators', () => {
+      expect(parseRawArguments('--flag\tvalue')).toEqual(['--flag', 'value'])
     })
   })
 })
