@@ -21,7 +21,15 @@ import {Writable} from 'node:stream'
 import fs from 'fs'
 import path from 'path'
 import * as GitInterfaces from 'azure-devops-node-api/interfaces/GitInterfaces'
-import {parseRawArguments} from '../../common/utils'
+import {
+  parseRawArguments,
+  setDeprecationWarningCallback
+} from '../../common/utils'
+
+// Set up platform-specific deprecation warning callback for Azure Pipelines
+setDeprecationWarningCallback((message: string) => {
+  tl.warning(message)
+})
 
 import {
   BRANCH,

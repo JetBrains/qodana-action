@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {expect, test} from '@jest/globals'
+import {expect, test, describe, beforeEach} from '@jest/globals'
 import {getCoverageFromSarif, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
   getCoverageStats,
@@ -24,7 +24,11 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
 import {outputEmptyFixture, problemDescriptorsDefaultFixture} from './common.test.utils'
-import {parseRawArguments} from '../utils'
+import {
+  parseRawArguments,
+  resetDeprecationWarning,
+  setDeprecationWarningCallback
+} from '../utils'
 
 test('test passed coverage output using diff', () => {
   const result = getCoverageStats(
@@ -178,132 +182,307 @@ function failedCoverageFixtureDiff(): string {
 }
 
 describe('parseRawArguments', () => {
-  test('empty string returns empty array', () => {
-    expect(parseRawArguments('')).toEqual([])
+  beforeEach(() => {
+    resetDeprecationWarning()
   })
 
-  test('simple arguments without property', () => {
-    expect(parseRawArguments('-i,frontend,--print-problems')).toEqual([
-      '-i',
-      'frontend',
-      '--print-problems'
-    ])
+  describe('space-separated format (preferred)', () => {
+    test('empty string returns empty array', () => {
+      expect(parseRawArguments('')).toEqual([])
+    })
+
+    test('whitespace only returns empty array', () => {
+      expect(parseRawArguments('   ')).toEqual([])
+    })
+
+    test('single argument', () => {
+      expect(parseRawArguments('--print-problems')).toEqual(['--print-problems'])
+    })
+
+    test('basic flags with values', () => {
+      expect(parseRawArguments('--log-level debug')).toEqual([
+        '--log-level',
+        'debug'
+      ])
+    })
+
+    test('multiple arguments', () => {
+      expect(parseRawArguments('-i frontend --print-problems')).toEqual([
+        '-i',
+        'frontend',
+        '--print-problems'
+      ])
+    })
+
+    test('multiple spaces are collapsed', () => {
+      expect(parseRawArguments('--flag   value')).toEqual(['--flag', 'value'])
+    })
+
+    test('leading and trailing spaces are trimmed', () => {
+      expect(parseRawArguments('  --flag value  ')).toEqual(['--flag', 'value'])
+    })
+
+    test('property with single value', () => {
+      expect(parseRawArguments('--property idea.log.level=trace')).toEqual([
+        '--property',
+        'idea.log.level=trace'
+      ])
+    })
+
+    test('property with comma-separated values (preserved)', () => {
+      expect(
+        parseRawArguments('--property key=val1,val2,val3 --other')
+      ).toEqual(['--property', 'key=val1,val2,val3', '--other'])
+    })
+
+    test('multiple properties', () => {
+      expect(
+        parseRawArguments('--property a=1 --property b=2')
+      ).toEqual(['--property', 'a=1', '--property', 'b=2'])
+    })
+
+    test('complex real-world example', () => {
+      expect(
+        parseRawArguments(
+          '-l qodana-jvm --property qodana.format.replace.with.style=spotless,ktfmt --property idea.headless.enable.statistics=false --fail-threshold 10 --print-problems'
+        )
+      ).toEqual([
+        '-l',
+        'qodana-jvm',
+        '--property',
+        'qodana.format.replace.with.style=spotless,ktfmt',
+        '--property',
+        'idea.headless.enable.statistics=false',
+        '--fail-threshold',
+        '10',
+        '--print-problems'
+      ])
+    })
+
+    test('equals in value', () => {
+      expect(parseRawArguments('--property key=val=ue')).toEqual([
+        '--property',
+        'key=val=ue'
+      ])
+    })
+
+    test('numeric values', () => {
+      expect(parseRawArguments('--threshold 10')).toEqual(['--threshold', '10'])
+    })
+
+    test('path-like values', () => {
+      expect(parseRawArguments('--config ./path/to/file.yaml')).toEqual([
+        '--config',
+        './path/to/file.yaml'
+      ])
+    })
   })
 
-  test('single argument', () => {
-    expect(parseRawArguments('--print-problems')).toEqual(['--print-problems'])
+  describe('quoted arguments', () => {
+    test('double quotes preserve spaces', () => {
+      expect(parseRawArguments('--config "my config.yaml"')).toEqual([
+        '--config',
+        'my config.yaml'
+      ])
+    })
+
+    test('single quotes preserve spaces', () => {
+      expect(parseRawArguments("--config 'my config.yaml'")).toEqual([
+        '--config',
+        'my config.yaml'
+      ])
+    })
+
+    test('quoted value with multiple words', () => {
+      expect(
+        parseRawArguments('--config "path/to/my file.yaml" --verbose')
+      ).toEqual(['--config', 'path/to/my file.yaml', '--verbose'])
+    })
+
+    test('mixed quotes - double containing apostrophe', () => {
+      expect(parseRawArguments('--msg "it\'s working"')).toEqual([
+        '--msg',
+        "it's working"
+      ])
+    })
+
+    test('mixed quotes - single containing double', () => {
+      expect(parseRawArguments("--msg 'say \"hello\"'")).toEqual([
+        '--msg',
+        'say "hello"'
+      ])
+    })
+
+    test('empty quoted string', () => {
+      expect(parseRawArguments('--value ""')).toEqual(['--value', ''])
+    })
+
+    test('quotes in middle of value are stripped', () => {
+      expect(parseRawArguments('--path some"quoted"path')).toEqual([
+        '--path',
+        'somequotedpath'
+      ])
+    })
+
+    test('unclosed quote treats rest as quoted', () => {
+      expect(parseRawArguments('--config "unclosed')).toEqual([
+        '--config',
+        'unclosed'
+      ])
+    })
+
+    test('multiple quoted arguments', () => {
+      expect(
+        parseRawArguments('--first "arg one" --second "arg two"')
+      ).toEqual(['--first', 'arg one', '--second', 'arg two'])
+    })
   })
 
-  test('arguments with whitespace are trimmed', () => {
-    expect(parseRawArguments(' -i, frontend, --print-problems ')).toEqual([
-      '-i',
-      'frontend',
-      '--print-problems'
-    ])
+  describe('comma-separated format (legacy, triggers warning)', () => {
+    let warningMessage: string | null = null
+
+    beforeEach(() => {
+      warningMessage = null
+      setDeprecationWarningCallback((msg: string) => {
+        warningMessage = msg
+      })
+    })
+
+    test('simple arguments', () => {
+      expect(parseRawArguments('-i,frontend,--print-problems')).toEqual([
+        '-i',
+        'frontend',
+        '--print-problems'
+      ])
+      expect(warningMessage).toContain('deprecated')
+    })
+
+    test('arguments with whitespace are trimmed', () => {
+      expect(parseRawArguments(' -i, frontend, --print-problems ')).toEqual([
+        '-i',
+        'frontend',
+        '--print-problems'
+      ])
+    })
+
+    test('property with single value', () => {
+      expect(parseRawArguments('--property,idea.log.level=trace')).toEqual([
+        '--property',
+        'idea.log.level=trace'
+      ])
+    })
+
+    test('property with comma-separated values', () => {
+      expect(
+        parseRawArguments('--property,property.name=value1,value2,value3')
+      ).toEqual(['--property', 'property.name=value1,value2,value3'])
+    })
+
+    test('multiple properties', () => {
+      expect(
+        parseRawArguments(
+          '--property,prop1=val1,--property,prop2=val2,val3,--print-problems'
+        )
+      ).toEqual([
+        '--property',
+        'prop1=val1',
+        '--property',
+        'prop2=val2,val3',
+        '--print-problems'
+      ])
+    })
+
+    test('mixed arguments with property in the middle', () => {
+      expect(
+        parseRawArguments(
+          '-i,frontend,--property,idea.log.level=trace,debug,--print-problems'
+        )
+      ).toEqual([
+        '-i',
+        'frontend',
+        '--property',
+        'idea.log.level=trace,debug',
+        '--print-problems'
+      ])
+    })
+
+    test('property at the end with multiple values', () => {
+      expect(
+        parseRawArguments('--print-problems,--property,prop=a,b,c')
+      ).toEqual(['--print-problems', '--property', 'prop=a,b,c'])
+    })
+
+    test('property with values followed by short option', () => {
+      expect(parseRawArguments('--property,prop=x,y,-l,qodana-jvm')).toEqual([
+        '--property',
+        'prop=x,y',
+        '-l',
+        'qodana-jvm'
+      ])
+    })
+
+    test('complex real-world example', () => {
+      expect(
+        parseRawArguments(
+          '-l,qodana-jvm,--property,qodana.format.replace.with.style=spotless,ktfmt,--property,idea.headless.enable.statistics=false,--fail-threshold,10,--print-problems'
+        )
+      ).toEqual([
+        '-l',
+        'qodana-jvm',
+        '--property',
+        'qodana.format.replace.with.style=spotless,ktfmt',
+        '--property',
+        'idea.headless.enable.statistics=false',
+        '--fail-threshold',
+        '10',
+        '--print-problems'
+      ])
+    })
+
+    test('warning includes current and suggested format', () => {
+      parseRawArguments('-i,frontend,--print-problems')
+      expect(warningMessage).toContain('Current:')
+      expect(warningMessage).toContain('Suggested:')
+      expect(warningMessage).toContain('-i frontend --print-problems')
+    })
+
+    test('warning is shown only once per run', () => {
+      let callCount = 0
+      setDeprecationWarningCallback(() => {
+        callCount++
+      })
+
+      parseRawArguments('-i,frontend')
+      parseRawArguments('-l,qodana-jvm')
+
+      expect(callCount).toBe(1)
+    })
   })
 
-  test('property with single value', () => {
-    expect(parseRawArguments('--property,idea.log.level=trace')).toEqual([
-      '--property',
-      'idea.log.level=trace'
-    ])
-  })
+  describe('edge cases and mixed scenarios', () => {
+    test('commas in property values do not trigger legacy detection', () => {
+      // This looks like it has commas but they are property values, not separators
+      let warningMessage: string | null = null
+      setDeprecationWarningCallback((msg: string) => {
+        warningMessage = msg
+      })
 
-  test('property with comma-separated values', () => {
-    expect(
-      parseRawArguments('--property,property.name=value1,value2,value3')
-    ).toEqual(['--property', 'property.name=value1,value2,value3'])
-  })
+      expect(parseRawArguments('--property key=a,b,c --flag')).toEqual([
+        '--property',
+        'key=a,b,c',
+        '--flag'
+      ])
+      expect(warningMessage).toBeNull()
+    })
 
-  test('multiple properties', () => {
-    expect(
-      parseRawArguments(
-        '--property,prop1=val1,--property,prop2=val2,val3,--print-problems'
-      )
-    ).toEqual([
-      '--property',
-      'prop1=val1',
-      '--property',
-      'prop2=val2,val3',
-      '--print-problems'
-    ])
-  })
+    test('newlines are not split (YAML handles this)', () => {
+      // YAML multiline strings with > convert newlines to spaces before reaching parser
+      // So actual newlines in raw input are kept as-is
+      expect(parseRawArguments('--flag\nvalue')).toEqual(['--flag\nvalue'])
+    })
 
-  test('mixed arguments with property in the middle', () => {
-    expect(
-      parseRawArguments(
-        '-i,frontend,--property,idea.log.level=trace,debug,--print-problems'
-      )
-    ).toEqual([
-      '-i',
-      'frontend',
-      '--property',
-      'idea.log.level=trace,debug',
-      '--print-problems'
-    ])
-  })
-
-  test('property at the end with multiple values', () => {
-    expect(
-      parseRawArguments('--print-problems,--property,prop=a,b,c')
-    ).toEqual(['--print-problems', '--property', 'prop=a,b,c'])
-  })
-
-  test('property with values followed by short option', () => {
-    expect(parseRawArguments('--property,prop=x,y,-l,qodana-jvm')).toEqual([
-      '--property',
-      'prop=x,y',
-      '-l',
-      'qodana-jvm'
-    ])
-  })
-
-  test('complex real-world example', () => {
-    expect(
-      parseRawArguments(
-        '-l,qodana-jvm,--property,qodana.format.replace.with.style=spotless,ktfmt,--property,idea.headless.enable.statistics=false,--fail-threshold,10,--print-problems'
-      )
-    ).toEqual([
-      '-l',
-      'qodana-jvm',
-      '--property',
-      'qodana.format.replace.with.style=spotless,ktfmt',
-      '--property',
-      'idea.headless.enable.statistics=false',
-      '--fail-threshold',
-      '10',
-      '--print-problems'
-    ])
-  })
-
-  test('property with space', () => {
-    expect(parseRawArguments('--property idea.log.level=trace')).toEqual([
-      '--property idea.log.level=trace'
-    ])
-  })
-
-  test('arg with space', () => {
-    expect(parseRawArguments('--fail-threshold 10')).toEqual([
-      '--fail-threshold 10'
-    ])
-  })
-
-  test('complex real-world example with space property-value separation', () => {
-    expect(
-      parseRawArguments(
-        `
--l qodana-jvm,
---property qodana.format.replace.with.style=spotless,ktfmt,
---property idea.headless.enable.statistics=false,
---fail-threshold 10,
---print-problems`
-      )
-    ).toEqual([
-      '-l qodana-jvm',
-      '--property qodana.format.replace.with.style=spotless,ktfmt',
-      '--property idea.headless.enable.statistics=false',
-      '--fail-threshold 10',
-      '--print-problems'
-    ])
+    test('tabs are treated as regular characters', () => {
+      expect(parseRawArguments('--flag\tvalue')).toEqual(['--flag\tvalue'])
+    })
   })
 })
