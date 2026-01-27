@@ -6,7 +6,7 @@ branding:
   icon: "bar-chart-2"
 inputs:
   args:
-    description: 'Additional Qodana CLI arguments. Separate multiple arguments with commas (`,`).'
+    description: 'Additional Qodana CLI arguments, e.g. "--log-level debug --property key=value". Quote arguments containing spaces. Comma-separated format is deprecated.'
     required: false
     default: ""
   results-dir:

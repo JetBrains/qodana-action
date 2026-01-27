@@ -21,7 +21,17 @@ import {Writable} from 'node:stream'
 import fs from 'fs'
 import path from 'path'
 import * as GitInterfaces from 'azure-devops-node-api/interfaces/GitInterfaces'
-import {parseRawArguments} from '../../common/utils'
+import {
+  parseRawArguments,
+  setDeprecationWarningCallback
+} from '../../common/utils'
+
+// Set up platform-specific deprecation warning callback for Azure Pipelines
+setDeprecationWarningCallback((message: string) => {
+  tl.warning(message)
+})
+
+let cachedInputs: Inputs | null = null
 
 import {
   BRANCH,
@@ -56,9 +66,12 @@ export function setFailed(message: string): void {
  * @returns The Azure DevOps Pipeline inputs.
  */
 export function getInputs(): Inputs {
+  if (cachedInputs !== null) {
+    return cachedInputs
+  }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const home = path.join(process.env['AGENT_TEMPDIRECTORY']!, 'qodana')
-  return {
+  cachedInputs = {
     args: parseRawArguments(tl.getInput('args', false) || ''),
     resultsDir: tl.getInput('resultsDir', false) || path.join(home, 'results'),
     cacheDir: tl.getInput('cacheDir', false) || path.join(home, 'cache'),
@@ -81,6 +94,7 @@ export function getInputs(): Inputs {
     cacheDefaultBranchOnly: false,
     githubToken: ''
   }
+  return cachedInputs
 }
 
 /**

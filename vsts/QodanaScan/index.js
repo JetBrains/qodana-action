@@ -17119,12 +17119,246 @@ var require_GitInterfaces = __commonJS({
   }
 });
 
+// ../node_modules/shell-quote/quote.js
+var require_quote = __commonJS({
+  "../node_modules/shell-quote/quote.js"(exports2, module2) {
+    "use strict";
+    module2.exports = function quote(xs) {
+      return xs.map(function(s) {
+        if (s === "") {
+          return "''";
+        }
+        if (s && typeof s === "object") {
+          return s.op.replace(/(.)/g, "\\$1");
+        }
+        if (/["\s\\]/.test(s) && !/'/.test(s)) {
+          return "'" + s.replace(/(['])/g, "\\$1") + "'";
+        }
+        if (/["'\s]/.test(s)) {
+          return '"' + s.replace(/(["\\$`!])/g, "\\$1") + '"';
+        }
+        return String(s).replace(/([A-Za-z]:)?([#!"$&'()*,:;<=>?@[\\\]^`{|}])/g, "$1\\$2");
+      }).join(" ");
+    };
+  }
+});
+
+// ../node_modules/shell-quote/parse.js
+var require_parse2 = __commonJS({
+  "../node_modules/shell-quote/parse.js"(exports2, module2) {
+    "use strict";
+    var CONTROL = "(?:" + [
+      "\\|\\|",
+      "\\&\\&",
+      ";;",
+      "\\|\\&",
+      "\\<\\(",
+      "\\<\\<\\<",
+      ">>",
+      ">\\&",
+      "<\\&",
+      "[&;()|<>]"
+    ].join("|") + ")";
+    var controlRE = new RegExp("^" + CONTROL + "$");
+    var META = "|&;()<> \\t";
+    var SINGLE_QUOTE = '"((\\\\"|[^"])*?)"';
+    var DOUBLE_QUOTE = "'((\\\\'|[^'])*?)'";
+    var hash = /^#$/;
+    var SQ = "'";
+    var DQ = '"';
+    var DS = "$";
+    var TOKEN = "";
+    var mult = 4294967296;
+    for (i = 0; i < 4; i++) {
+      TOKEN += (mult * Math.random()).toString(16);
+    }
+    var i;
+    var startsWithToken = new RegExp("^" + TOKEN);
+    function matchAll(s, r) {
+      var origIndex = r.lastIndex;
+      var matches = [];
+      var matchObj;
+      while (matchObj = r.exec(s)) {
+        matches.push(matchObj);
+        if (r.lastIndex === matchObj.index) {
+          r.lastIndex += 1;
+        }
+      }
+      r.lastIndex = origIndex;
+      return matches;
+    }
+    function getVar(env, pre, key) {
+      var r = typeof env === "function" ? env(key) : env[key];
+      if (typeof r === "undefined" && key != "") {
+        r = "";
+      } else if (typeof r === "undefined") {
+        r = "$";
+      }
+      if (typeof r === "object") {
+        return pre + TOKEN + JSON.stringify(r) + TOKEN;
+      }
+      return pre + r;
+    }
+    function parseInternal(string, env, opts) {
+      if (!opts) {
+        opts = {};
+      }
+      var BS = opts.escape || "\\";
+      var BAREWORD = "(\\" + BS + `['"` + META + `]|[^\\s'"` + META + "])+";
+      var chunker = new RegExp([
+        "(" + CONTROL + ")",
+        // control chars
+        "(" + BAREWORD + "|" + SINGLE_QUOTE + "|" + DOUBLE_QUOTE + ")+"
+      ].join("|"), "g");
+      var matches = matchAll(string, chunker);
+      if (matches.length === 0) {
+        return [];
+      }
+      if (!env) {
+        env = {};
+      }
+      var commented = false;
+      return matches.map(function(match) {
+        var s = match[0];
+        if (!s || commented) {
+          return void 0;
+        }
+        if (controlRE.test(s)) {
+          return { op: s };
+        }
+        var quote = false;
+        var esc = false;
+        var out = "";
+        var isGlob = false;
+        var i2;
+        function parseEnvVar() {
+          i2 += 1;
+          var varend;
+          var varname;
+          var char = s.charAt(i2);
+          if (char === "{") {
+            i2 += 1;
+            if (s.charAt(i2) === "}") {
+              throw new Error("Bad substitution: " + s.slice(i2 - 2, i2 + 1));
+            }
+            varend = s.indexOf("}", i2);
+            if (varend < 0) {
+              throw new Error("Bad substitution: " + s.slice(i2));
+            }
+            varname = s.slice(i2, varend);
+            i2 = varend;
+          } else if (/[*@#?$!_-]/.test(char)) {
+            varname = char;
+            i2 += 1;
+          } else {
+            var slicedFromI = s.slice(i2);
+            varend = slicedFromI.match(/[^\w\d_]/);
+            if (!varend) {
+              varname = slicedFromI;
+              i2 = s.length;
+            } else {
+              varname = slicedFromI.slice(0, varend.index);
+              i2 += varend.index - 1;
+            }
+          }
+          return getVar(env, "", varname);
+        }
+        for (i2 = 0; i2 < s.length; i2++) {
+          var c = s.charAt(i2);
+          isGlob = isGlob || !quote && (c === "*" || c === "?");
+          if (esc) {
+            out += c;
+            esc = false;
+          } else if (quote) {
+            if (c === quote) {
+              quote = false;
+            } else if (quote == SQ) {
+              out += c;
+            } else {
+              if (c === BS) {
+                i2 += 1;
+                c = s.charAt(i2);
+                if (c === DQ || c === BS || c === DS) {
+                  out += c;
+                } else {
+                  out += BS + c;
+                }
+              } else if (c === DS) {
+                out += parseEnvVar();
+              } else {
+                out += c;
+              }
+            }
+          } else if (c === DQ || c === SQ) {
+            quote = c;
+          } else if (controlRE.test(c)) {
+            return { op: s };
+          } else if (hash.test(c)) {
+            commented = true;
+            var commentObj = { comment: string.slice(match.index + i2 + 1) };
+            if (out.length) {
+              return [out, commentObj];
+            }
+            return [commentObj];
+          } else if (c === BS) {
+            esc = true;
+          } else if (c === DS) {
+            out += parseEnvVar();
+          } else {
+            out += c;
+          }
+        }
+        if (isGlob) {
+          return { op: "glob", pattern: out };
+        }
+        return out;
+      }).reduce(function(prev, arg) {
+        return typeof arg === "undefined" ? prev : prev.concat(arg);
+      }, []);
+    }
+    module2.exports = function parse(s, env, opts) {
+      var mapped = parseInternal(s, env, opts);
+      if (typeof env !== "function") {
+        return mapped;
+      }
+      return mapped.reduce(function(acc, s2) {
+        if (typeof s2 === "object") {
+          return acc.concat(s2);
+        }
+        var xs = s2.split(RegExp("(" + TOKEN + ".*?" + TOKEN + ")", "g"));
+        if (xs.length === 1) {
+          return acc.concat(xs[0]);
+        }
+        return acc.concat(xs.filter(Boolean).map(function(x) {
+          if (startsWithToken.test(x)) {
+            return JSON.parse(x.split(TOKEN)[1]);
+          }
+          return x;
+        }));
+      }, []);
+    };
+  }
+});
+
+// ../node_modules/shell-quote/index.js
+var require_shell_quote = __commonJS({
+  "../node_modules/shell-quote/index.js"(exports2) {
+    "use strict";
+    exports2.quote = require_quote();
+    exports2.parse = require_parse2();
+  }
+});
+
 // ../common/utils.ts
 var utils_exports = {};
 __export(utils_exports, {
   parseRawArguments: () => parseRawArguments,
-  parseRules: () => parseRules
+  parseRules: () => parseRules,
+  setDeprecationWarningCallback: () => setDeprecationWarningCallback
 });
+function setDeprecationWarningCallback(callback) {
+  deprecationWarningCallback = callback;
+}
 function parseRules(tool) {
   var _a, _b;
   const rules = /* @__PURE__ */ new Map();
@@ -17145,12 +17379,37 @@ function parseRules(tool) {
   });
   return rules;
 }
-function parseRawArguments(rawArgs) {
+function looksLikeCommaSeparated(tokens) {
+  return tokens.some((t) => {
+    if (t === ",") {
+      return true;
+    }
+    if (/^,\s*-{1,2}\w/.test(t)) {
+      return true;
+    }
+    if (/^-{1,2}\w[^,]*,/.test(t)) {
+      return true;
+    }
+    if (/^[^-=][^=]*,$/.test(t)) {
+      return true;
+    }
+    return false;
+  });
+}
+function parseSpaceSeparated(input) {
+  const parsed = (0, import_shell_quote.parse)(input, () => void 0);
+  return parsed.filter((entry) => typeof entry === "string");
+}
+function parseCommaSeparated(rawArgs) {
   const initialSplit = rawArgs ? rawArgs.split(",").map((arg) => arg.trim()) : [];
   const result2 = [];
   let i = 0;
   while (i < initialSplit.length) {
     const currentArg = initialSplit[i];
+    if (!currentArg) {
+      i++;
+      continue;
+    }
     if (currentArg === "--property") {
       result2.push(currentArg);
       const propertyValues = [];
@@ -17161,23 +17420,49 @@ function parseRawArguments(rawArgs) {
       }
       result2.push(propertyValues.join(","));
     } else if (currentArg.startsWith("--property ")) {
-      const fullPropertyArg = [currentArg];
+      result2.push("--property");
+      const propertyValue = currentArg.slice("--property ".length);
+      const propertyParts = [propertyValue];
       i++;
       while (i < initialSplit.length && !initialSplit[i].startsWith("-")) {
-        fullPropertyArg.push(initialSplit[i]);
+        propertyParts.push(initialSplit[i]);
         i++;
       }
-      result2.push(fullPropertyArg.join(","));
+      result2.push(propertyParts.join(","));
     } else {
-      result2.push(currentArg);
+      const parts = currentArg.split(/\s+/).filter((p) => p);
+      result2.push(...parts);
       i++;
     }
   }
   return result2;
 }
+function warnDeprecatedCommaFormat(original, parsed) {
+  const suggestedStr = parsed.map((arg) => arg.includes(" ") ? `"${arg}"` : arg).join(" ");
+  const message = `Comma-separated args format is deprecated and will be removed in a future version.
+Please switch to space-separated format:
+  Current:   "${original.trim()}"
+  Suggested: "${suggestedStr}"`;
+  deprecationWarningCallback(message);
+}
+function parseRawArguments(rawArgs) {
+  if (!rawArgs || !rawArgs.trim()) {
+    return [];
+  }
+  const spaceParsed = parseSpaceSeparated(rawArgs.trim());
+  if (looksLikeCommaSeparated(spaceParsed)) {
+    const commaParsed = parseCommaSeparated(rawArgs);
+    warnDeprecatedCommaFormat(rawArgs, commaParsed);
+    return commaParsed;
+  }
+  return spaceParsed;
+}
+var import_shell_quote, deprecationWarningCallback;
 var init_utils = __esm({
   "../common/utils.ts"() {
     "use strict";
+    import_shell_quote = __toESM(require_shell_quote());
+    deprecationWarningCallback = (message) => console.warn(message);
   }
 });
 
@@ -81170,6 +81455,10 @@ var require_utils4 = __commonJS({
     var path_1 = __importDefault(require("path"));
     var GitInterfaces = __importStar2(require_GitInterfaces());
     var utils_12 = (init_utils(), __toCommonJS(utils_exports));
+    (0, utils_12.setDeprecationWarningCallback)((message) => {
+      tl2.warning(message);
+    });
+    var cachedInputs = null;
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var output_12 = (init_output(), __toCommonJS(output_exports));
     var gitApiProvider_1 = require_gitApiProvider();
@@ -81178,8 +81467,11 @@ var require_utils4 = __commonJS({
       tl2.setResult(tl2.TaskResult.Failed, message);
     }
     function getInputs() {
+      if (cachedInputs !== null) {
+        return cachedInputs;
+      }
       const home = path_1.default.join(process.env["AGENT_TEMPDIRECTORY"], "qodana");
-      return {
+      cachedInputs = {
         args: (0, utils_12.parseRawArguments)(tl2.getInput("args", false) || ""),
         resultsDir: tl2.getInput("resultsDir", false) || path_1.default.join(home, "results"),
         cacheDir: tl2.getInput("cacheDir", false) || path_1.default.join(home, "cache"),
@@ -81200,6 +81492,7 @@ var require_utils4 = __commonJS({
         cacheDefaultBranchOnly: false,
         githubToken: ""
       };
+      return cachedInputs;
     }
     function qodana() {
       return __awaiter2(this, arguments, void 0, function* (args = []) {

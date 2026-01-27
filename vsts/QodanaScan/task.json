@@ -20,7 +20,7 @@
       "label": "Qodana CLI arguments",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "[Qodana CLI `scan` arguments](https://github.com/jetbrains/qodana-cli#scan)"
+      "helpMarkDown": "[Qodana CLI `scan` arguments](https://github.com/jetbrains/qodana-cli#scan), e.g. `--log-level debug --property key=value`. Quote arguments containing spaces. Comma-separated format is deprecated."
     },
     {
       "name": "resultsDir",
