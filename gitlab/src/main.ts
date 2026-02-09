@@ -4,7 +4,7 @@ import {
   prepareAgent,
   prepareCaches,
   pushQuickFixes,
-  qodana,
+  qodanaScan,
   uploadArtifacts,
   uploadCache
 } from './utils'
@@ -29,7 +29,7 @@ async function main(): Promise<void> {
     prepareCaches(inputs.cacheDir)
     await prepareAgent(inputs, inputs.useNightly)
 
-    const exitCode = (await qodana()) as QodanaExitCode
+    const exitCode = (await qodanaScan()) as QodanaExitCode
 
     await Promise.all([
       publishOutput(

@@ -5,12 +5,15 @@ import {
   getProcessPlatformName,
   getQodanaPullArgs,
   getQodanaScanArgs,
+  getQodanaSha256,
+  getQodanaSha256MismatchMessage,
   getQodanaUrl,
   Inputs,
   isNativeMode,
   NONE,
   PULL_REQUEST,
   PushFixesType,
+  sha256sum,
   validateBranchName
 } from '../../common/qodana'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
@@ -18,6 +21,20 @@ import {
   parseRawArguments,
   setDeprecationWarningCallback
 } from '../../common/utils'
+import {getGitlabApi} from './gitlabApiProvider'
+import {prFixesBody} from './output'
+import {DiscussionSchema} from '@gitbeaker/rest'
+import * as os from 'os'
+import * as fs from 'fs'
+import axios from 'axios'
+import * as stream from 'stream'
+import {Readable} from 'stream'
+import {promisify} from 'util'
+import AdmZip from 'adm-zip'
+import * as tar from 'tar'
+import path from 'path'
+import {exec, spawn} from 'child_process'
+import {debuglog, inspect} from 'node:util'
 
 // Set up platform-specific deprecation warning callback for GitLab CI
 setDeprecationWarningCallback((message: string) => {
@@ -26,27 +43,21 @@ setDeprecationWarningCallback((message: string) => {
 
 let cachedInputs: Inputs | null = null
 
-import {getGitlabApi} from './gitlabApiProvider'
-import {prFixesBody} from './output'
-import {DiscussionSchema} from '@gitbeaker/rest'
-import * as os from 'os'
-import * as fs from 'fs'
-import axios from 'axios'
-import * as stream from 'stream'
-import {promisify} from 'util'
-import AdmZip from 'adm-zip'
-import * as tar from 'tar'
-import path from 'path'
-import {Readable} from 'stream'
-import {spawn, exec} from 'child_process'
+const debug = debuglog('qodana:gitlab')
 
 export function getInputs(): Inputs {
   if (cachedInputs !== null) {
     return cachedInputs
   }
   const rawArgs = getQodanaStringArg('ARGS', '')
+  debug(`Raw args: ${rawArgs}`)
   const argList = parseRawArguments(rawArgs)
-
+  if (
+    process.env.QODANA_GITLAB_CONTAINER === 'true' &&
+    !argList.includes('within-docker')
+  ) {
+    argList.push('--within-docker', 'false')
+  }
   let pushFixes = getQodanaStringArg('PUSH_FIXES', 'none')
   if (pushFixes === 'merge-request') {
     pushFixes = 'pull-request'
@@ -65,7 +76,7 @@ export function getInputs(): Inputs {
       '🤖 Apply quick-fixes by Qodana'
     ),
     useNightly: getQodanaBooleanArg('USE_NIGHTLY', false),
-    postComment: getQodanaBooleanArg('PUBLISH_COMMENT', true),
+    postComment: getQodanaBooleanArg('POST_MR_COMMENT', true),
     useCaches: getQodanaBooleanArg('USE_CACHES', true),
     // not used by GitLab
     uploadSarif: false,
@@ -77,6 +88,7 @@ export function getInputs(): Inputs {
     artifactName: '',
     workingDirectory: ''
   }
+  debug(`Got inputs: ${JSON.stringify(cachedInputs)}`)
   return cachedInputs
 }
 
@@ -90,13 +102,8 @@ function getQodanaStringArg(name: string, def: string): string {
 }
 
 function getQodanaBooleanArg(name: string, def: boolean): boolean {
-  return def
-    ? process.env[`QODANA_${name}`] !== 'false'
-    : process.env[`QODANA_${name}`] === 'true'
-}
-
-function getQodanaInputArg(name: string): string | undefined {
-  return process.env[`INPUT_${name}`]
+  const value = process.env[`QODANA_${name}`]?.toLowerCase()
+  return def ? value !== 'false' : value === 'true'
 }
 
 interface CommandOutput {
@@ -110,26 +117,50 @@ export async function execAsync(
   args: string[],
   ignoreReturnCode: boolean
 ): Promise<CommandOutput> {
-  const command = `${executable} ${args.join(' ')}`
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Failed to run command: ${command}: ${error.message}`)
-        if (ignoreReturnCode) {
-          resolve({
-            returnCode: error.code || -1,
-            stdout: stdout,
-            stderr: stderr
-          })
+    let stdout = ''
+    let stderr = ''
+    const proc = spawn(executable, args)
+    proc.stdout.on('data', (data: Buffer) => {
+      stdout += data.toString()
+    })
+    proc.stderr.on('data', (data: Buffer) => {
+      stderr += data.toString()
+    })
+    proc.on('close', code => {
+      if (code !== 0) {
+        const token = process.env.QODANA_GITLAB_TOKEN || ''
+        let commandStr = `${executable} ${args.join(' ')}`
+        if (token !== '') {
+          commandStr = commandStr.replace(token, '***')
         }
-        reject(new Error(stderr))
-      } else {
-        resolve({
-          returnCode: 0,
-          stdout: stdout,
-          stderr: stderr
-        })
+        console.warn(`Failed to run command: ${commandStr}: exit code ${code}`)
+        if (ignoreReturnCode) {
+          return resolve({returnCode: code ?? -1, stdout, stderr})
+        }
+        return reject(
+          new Error(
+            `Failed to run command: ${commandStr}: exit code ${code}\nStdout: ${stdout}\nStderr: ${stderr}`
+          )
+        )
       }
+      resolve({returnCode: 0, stdout, stderr})
+    })
+    proc.on('error', err => {
+      const token = process.env.QODANA_GITLAB_TOKEN || ''
+      let commandStr = `${executable} ${args.join(' ')}`
+      if (token !== '') {
+        commandStr = commandStr.replace(token, '***')
+      }
+      console.warn(`Failed to run command: ${commandStr}: ${err.message}`)
+      if (ignoreReturnCode) {
+        return resolve({returnCode: -1, stdout, stderr})
+      }
+      return reject(
+        new Error(
+          `Failed to run command: ${commandStr}: ${err.message}\nStdout: ${stdout}\nStderr: ${stderr}`
+        )
+      )
     })
   })
 }
@@ -139,6 +170,7 @@ async function gitOutput(
   ignoreReturnCode = false
 ): Promise<CommandOutput> {
   const result = await execAsync('git', args, true)
+  debug(`Git command with args ${args.join(' ')} output: ${inspect(result)})}`)
   if (result.returnCode !== 0 && ignoreReturnCode) {
     console.warn(
       `Git command failed: git ${args.join(' ')}\nExit code: ${result.returnCode}\nStdout: ${result.stdout}\nStderr: ${result.stderr}`
@@ -160,7 +192,7 @@ function isMergeRequest(): boolean {
 }
 
 async function downloadTool(url: string): Promise<string> {
-  const tempPath = `${os.tmpdir()}/archive`
+  const tempPath = `${os.tmpdir()}/qodana-cli-${Date.now()}`
   const writer = fs.createWriteStream(tempPath)
   const response = await axios({
     url,
@@ -189,6 +221,15 @@ export async function installCli(useNightly: boolean): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
   const temp = await downloadTool(getQodanaUrl(arch, platform, useNightly))
+  if (!useNightly) {
+    const expectedChecksum = getQodanaSha256(arch, platform)
+    const actualChecksum = sha256sum(temp)
+    if (actualChecksum !== expectedChecksum) {
+      throw new Error(
+        getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
+      )
+    }
+  }
   const extractRoot = `${os.tmpdir()}/qodana-cli`
   fs.mkdirSync(extractRoot, {recursive: true})
   if (process.platform === 'win32') {
@@ -200,6 +241,7 @@ export async function installCli(useNightly: boolean): Promise<void> {
       f: temp
     })
   }
+  fs.rmSync(temp, {force: true})
   const separator = process.platform === 'win32' ? ';' : ':'
   process.env.PATH = process.env.PATH + separator + extractRoot
 }
@@ -209,38 +251,25 @@ export async function prepareAgent(
   useNightly: boolean
 ): Promise<void> {
   if (!(await isCliInstalled())) {
+    debug('CLI is not installed, installing...')
     await installCli(useNightly)
+  } else {
+    debug('CLI is already installed, skipping installation')
   }
+
   if (!isNativeMode(inputs.args)) {
-    const pull = await qodana(getQodanaPullArgs(inputs.args))
+    const pull = await qodanaExec(getQodanaPullArgs(inputs.args))
     if (pull !== 0) {
       throw new Error("Unable to run 'qodana pull' to download linter")
     }
   }
 }
 
-export async function qodana(args: string[] = []): Promise<number> {
+export async function qodanaExec(args: string[]): Promise<number> {
+  debug(`Executing Qodana with arguments: ${inspect(args)}`)
   process.env = {
     ...process.env,
     NONINTERACTIVE: '1'
-  }
-  if (args.length === 0) {
-    const inputs = getInputs()
-    args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
-    if (inputs.prMode && isMergeRequest()) {
-      const sha = await getPrSha()
-      if (sha !== '') {
-        args.push('--commit', sha)
-      }
-    }
-    if (isMergeRequest()) {
-      const sourceBranch =
-        process.env.QODANA_BRANCH ||
-        process.env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
-      if (sourceBranch) {
-        process.env.QODANA_BRANCH = sourceBranch
-      }
-    }
   }
   return new Promise(resolve => {
     const proc = spawn(EXECUTABLE, args, {stdio: 'inherit'})
@@ -260,6 +289,30 @@ export async function qodana(args: string[] = []): Promise<number> {
   })
 }
 
+export async function qodanaScan(): Promise<number> {
+  const inputs = getInputs()
+  const args = getQodanaScanArgs(
+    inputs.args,
+    inputs.resultsDir,
+    inputs.cacheDir
+  )
+  if (inputs.prMode && isMergeRequest()) {
+    const sha = await getPrSha()
+    if (sha !== '') {
+      args.push('--commit', sha)
+    }
+  }
+  if (isMergeRequest()) {
+    const sourceBranch =
+      process.env.QODANA_BRANCH ||
+      process.env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    if (sourceBranch) {
+      process.env.QODANA_BRANCH = sourceBranch
+    }
+  }
+  return qodanaExec(args)
+}
+
 async function getPrSha(): Promise<string> {
   try {
     if (process.env.QODANA_PR_SHA) {
@@ -274,7 +327,7 @@ async function getPrSha(): Promise<string> {
         )
         return ''
       }
-      await gitOutput(['fetch', 'origin'])
+      await git(['fetch', 'origin'])
       const output = await gitOutput([
         'merge-base',
         'origin/' + targetBranch,
@@ -292,8 +345,8 @@ async function getPrSha(): Promise<string> {
 }
 
 function getInitialCacheLocation(): string {
-  return (
-    getQodanaInputArg('CACHE_DIR') ||
+  return getQodanaStringArg(
+    'CACHE_DIR',
     `${process.env['CI_PROJECT_DIR']}/.qodana/cache`
   )
 }
@@ -301,9 +354,12 @@ function getInitialCacheLocation(): string {
 // at this moment any changes inside .qodana dir may affect analysis results
 export function prepareCaches(cacheDir: string): void {
   const initialCacheLocation = getInitialCacheLocation()
+  debug(`Initial cache location: ${initialCacheLocation}`)
   if (fs.existsSync(initialCacheLocation)) {
+    debug(`Copying cache from ${initialCacheLocation} to ${cacheDir}`)
     fs.cpSync(initialCacheLocation, cacheDir, {recursive: true})
-    fs.rmSync(initialCacheLocation, {recursive: true})
+  } else {
+    debug(`No cache at location: ${initialCacheLocation}`)
   }
 }
 
@@ -313,7 +369,10 @@ export function uploadCache(cacheDir: string, execute: boolean): void {
   }
   try {
     const initialCacheLocation = getInitialCacheLocation()
-    fs.cpSync(cacheDir, initialCacheLocation, {recursive: true})
+    debug(
+      `Deleting initial cache at ${initialCacheLocation} and saving cache from ${cacheDir}`
+    )
+    fs.cpSync(cacheDir, initialCacheLocation, {recursive: true, force: true})
   } catch (e) {
     console.error(`Failed to upload cache: ${(e as Error).message}`)
   }
@@ -321,16 +380,14 @@ export function uploadCache(cacheDir: string, execute: boolean): void {
 
 export function uploadArtifacts(resultsDir: string): void {
   try {
-    const resultDir = getQodanaInputArg('RESULTS_DIR')
+    const resultDir = getQodanaStringArg('RESULTS_DIR', '.qodana/results')
     const ciProjectDir = process.env['CI_PROJECT_DIR']
     if (!ciProjectDir) {
       console.warn('CI_PROJECT_DIR is not defined, skipping artifacts upload')
       return
     }
-    const resultsArtifactPath = path.join(
-      process.env['CI_PROJECT_DIR']!,
-      resultDir ? resultDir : '.qodana/results'
-    )
+    const resultsArtifactPath = path.join(ciProjectDir, resultDir)
+    debug(`Copying artifacts from ${resultsDir} to ${resultsArtifactPath}`)
     fs.cpSync(resultsDir, resultsArtifactPath, {recursive: true})
   } catch (e) {
     console.error(`Failed to upload artifacts: ${(e as Error).message}`)
@@ -459,15 +516,14 @@ export async function pushQuickFixes(
     await git(['config', 'user.email', COMMIT_EMAIL])
     await git(['add', '.'])
     commitMessage = commitMessage + '\n\n[skip-ci]'
-    const output = await gitOutput(['commit', '-m', `'${commitMessage}'`], true)
+    const output = await gitOutput(['commit', '-m', commitMessage], true)
     if (output.returnCode !== 0) {
-      console.warn(`Failed to commit fixes: ${output.stderr}`)
       return
     }
     // Check for any files that may interfere with pull --rebase
     const statusOutput = await gitOutput(['status', '--porcelain'], true)
     if (statusOutput.stdout.trim() !== '') {
-      console.log(`Git status before pull --rebase:\n${statusOutput.stdout}`)
+      console.warn(`Git status before pull --rebase:\n${statusOutput.stdout}`)
     }
     const pullReturnCode = await git([
       'pull',
@@ -502,16 +558,26 @@ export async function pushQuickFixes(
 }
 
 async function gitPush(branch: string, force: boolean): Promise<void> {
-  const gitRepo = (
+  const remoteUrl = (
     await gitOutput(['config', '--get', 'remote.origin.url'])
-  ).stdout
-    .trim()
-    .replace('git@', '')
-  const url = `https://${COMMIT_USER}:${process.env.QODANA_GITLAB_TOKEN}@${gitRepo.split('@')[1]}`
-  if (force) {
-    await git(['push', '--force', '-o', 'ci.skip', url, branch])
+  ).stdout.trim()
+  const token = process.env.QODANA_GITLAB_TOKEN || ''
+  let pushUrl: string
+  if (remoteUrl.startsWith('git@')) {
+    // SSH format: git@gitlab.com:user/repo.git -> gitlab.com/user/repo.git
+    const hostAndPath = remoteUrl.replace('git@', '').replace(':', '/')
+    pushUrl = `https://${COMMIT_USER}:${token}@${hostAndPath}`
   } else {
-    await git(['push', '-o', 'ci.skip', url, branch])
+    // HTTPS format: replace or inject credentials
+    const url = new URL(remoteUrl)
+    url.username = COMMIT_USER
+    url.password = token
+    pushUrl = url.toString()
+  }
+  if (force) {
+    await git(['push', '--force', '-o', 'ci.skip', pushUrl, branch])
+  } else {
+    await git(['push', '-o', 'ci.skip', pushUrl, branch])
   }
 }
 
