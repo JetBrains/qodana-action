@@ -10847,7 +10847,7 @@ var require_shams = __commonJS({
         return true;
       }
       var obj = {};
-      var sym = Symbol("test");
+      var sym = /* @__PURE__ */ Symbol("test");
       var symObj = Object(sym);
       if (typeof sym === "string") {
         return false;
@@ -10906,7 +10906,7 @@ var require_has_symbols = __commonJS({
       if (typeof origSymbol("foo") !== "symbol") {
         return false;
       }
-      if (typeof Symbol("bar") !== "symbol") {
+      if (typeof /* @__PURE__ */ Symbol("bar") !== "symbol") {
         return false;
       }
       return hasSymbolSham();
@@ -19055,6 +19055,31 @@ var require_ClientApiBases = __commonJS({
         };
         let deserializedResult = serm.ContractSerializer.deserialize(data, serializationData.responseTypeMetadata, false, serializationData.responseIsCollection);
         return deserializedResult;
+      }
+      extractRateLimitHeaders(headers, target) {
+        if (!headers || !target) {
+          return;
+        }
+        const rateLimit = {};
+        if (headers["x-ratelimit-resource"]) {
+          rateLimit.resource = headers["x-ratelimit-resource"];
+        }
+        if (headers["x-ratelimit-delay"]) {
+          rateLimit.delay = parseFloat(headers["x-ratelimit-delay"]);
+        }
+        if (headers["x-ratelimit-limit"]) {
+          rateLimit.limit = parseInt(headers["x-ratelimit-limit"], 10);
+        }
+        if (headers["x-ratelimit-remaining"]) {
+          rateLimit.remaining = parseInt(headers["x-ratelimit-remaining"], 10);
+        }
+        if (headers["x-ratelimit-reset"]) {
+          rateLimit.reset = parseInt(headers["x-ratelimit-reset"], 10);
+        }
+        if (headers["retry-after"]) {
+          rateLimit.retryAfter = parseInt(headers["retry-after"], 10);
+        }
+        target.rateLimit = rateLimit;
       }
     };
     exports2.ClientApiBase = ClientApiBase;
