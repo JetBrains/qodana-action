@@ -1,0 +1,68 @@
+name: 'maven'
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'maven/**'
+      - 'plugin/src/main/kotlin/org/jetbrains/qodana/Qodana.kt'
+      - 'plugin/src/main/kotlin/org/jetbrains/qodana/Checksums.kt'
+      - 'plugin/src/main/kotlin/org/jetbrains/qodana/Version.kt'
+  push:
+    branches:
+      - main
+      - 'releases/*'
+    paths:
+      - 'maven/**'
+      - 'plugin/src/main/kotlin/org/jetbrains/qodana/Qodana.kt'
+      - 'plugin/src/main/kotlin/org/jetbrains/qodana/Checksums.kt'
+      - 'plugin/src/main/kotlin/org/jetbrains/qodana/Version.kt'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  maven-test:
+    name: maven-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+    steps:
+      - name: Fetch sources
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 17
+          cache: maven
+
+      - name: Build and install plugin
+        run: |
+          cd maven
+          mvn clean install -DskipTests
+
+      - name: Run unit tests
+        run: |
+          cd maven
+          mvn test
+
+      - name: Run integration tests
+        run: |
+          cd maven
+          mvn failsafe:integration-test failsafe:verify
+
+      - name: Collect test results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: maven-test-results-${{ runner.os }}
+          path: |
+            maven/target/surefire-reports
+            maven/target/failsafe-reports
