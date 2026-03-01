@@ -19,7 +19,7 @@
     "@actions/artifact": "^2.3.2",
     "@actions/cache": "^4.1.0",
     "@actions/core": "^1.11.1",
-    "@actions/exec": "^1.1.0",
+    "@actions/exec": "^3.0.0",
     "@actions/github": "^6.0.1",
     "@actions/tool-cache": "^2.0.2",
     "@octokit/plugin-paginate-rest": "latest",
