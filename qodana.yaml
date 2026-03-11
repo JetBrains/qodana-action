@@ -1,0 +1,51 @@
+#-------------------------------------------------------------------------------#
+#               Qodana analysis is configured by qodana.yaml file               #
+#             https://www.jetbrains.com/help/qodana/qodana-yaml.html            #
+#-------------------------------------------------------------------------------#
+version: "1.0"
+
+#Specify inspection profile for code analysis
+profile:
+  name: empty
+
+#bootstrap: cat /etc/hosts
+
+#  cd /opt/idea/plugins/ && ls -l && mkdir ../backup && mv java ../backup/ && mv java-ide-customization ../backup/ && mv json ../backup/ && mv qodana ../backup && mv vcs-git ../backup && mv maven ../backup && rm -rf * &&  mv ../backup/* ./ && rm -rf ../backup && cd /data/project
+includeAbsent: false
+disableSanityInspections: false
+runPromoInspections: true
+#Enable inspections
+include:
+#  - name: IncorrectFormatting
+#  - name: InfiniteLoopStatement
+#  - name: ReplacePrintlnWithLogging
+#  - name: WhenWithOnlyElse
+  - name: Stupid
+  - name: All
+    paths:
+      - module2
+      - module3
+exclude:
+  - name: All
+    paths:
+      - results
+      - report
+      - cache
+      - target
+#Disable inspections
+#exclude:
+#  - name: <SomeDisabledInspectionId>
+#    paths:
+#      - <path/where/not/run/inspection>
+
+projectJDK: "21" #(Applied in CI/CD pipeline)
+#Execute shell command before Qodana execution (Applied in CI/CD pipeline)
+#bootstrap: sh ./prepare-qodana.sh
+
+#Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
+#plugins:
+#  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)
+
+#Specify Qodana linter for analysis (Applied in CI/CD pipeline)
+#linter: registry.jetbrains.team/p/sa/containers/qodana-jvm:2025.1-nightly
+ide: QDJVM
