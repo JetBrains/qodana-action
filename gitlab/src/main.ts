@@ -27,7 +27,7 @@ async function main(): Promise<void> {
     fs.mkdirSync(inputs.resultsDir, {recursive: true})
     fs.mkdirSync(inputs.cacheDir, {recursive: true})
     prepareCaches(inputs.cacheDir)
-    await prepareAgent(inputs, inputs.useNightly)
+    await prepareAgent(inputs.useNightly)
 
     const exitCode = (await qodanaScan()) as QodanaExitCode
 
@@ -43,7 +43,12 @@ async function main(): Promise<void> {
       pushQuickFixes(inputs.pushFixes, inputs.commitMessage)
     ])
 
-    uploadCache(inputs.cacheDir, inputs.useCaches)
+    uploadCache(
+      inputs.cacheDir,
+      inputs.useCaches &&
+        (exitCode === QodanaExitCode.Success ||
+          exitCode === QodanaExitCode.FailThreshold)
+    )
     uploadArtifacts(inputs.resultsDir)
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)
