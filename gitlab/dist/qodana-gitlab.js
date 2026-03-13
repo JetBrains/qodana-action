@@ -28265,10 +28265,7 @@ var require_gitlabApiProvider = __commonJS({
     var gitlabApi = null;
     function initApi() {
       const token = (0, utils_12.getEnvVariable)("QODANA_GITLAB_TOKEN");
-      let host = process.env["CI_SERVER_HOST"] || "https://gitlab.com";
-      if (!host.startsWith("https://")) {
-        host = `https://${host}`;
-      }
+      const host = process.env["CI_SERVER_URL"] || "https://gitlab.com";
       const gitlab = new rest_1.Gitlab({
         token,
         host
@@ -28370,7 +28367,7 @@ so that the job will upload the files as the job artifacts:
           const problemsDescriptions = (_a = problems.problemDescriptions) !== null && _a !== void 0 ? _a : [];
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : output_12.QODANA_CHECK_NAME;
           problems.summary = (0, output_12.getSummary)(toolName, projectDir, sourceDir, problemsDescriptions, coverageInfo, licensesInfo.packages, licensesInfo.licenses, reportUrl, isPrMode, exports2.DEPENDENCY_CHARS_LIMIT, exports2.VIEW_REPORT_OPTIONS);
-          if (postComment) {
+          if (isPrMode && postComment) {
             yield (0, utils_12.postResultsToPRComments)(toolName, sourceDir, problems.summary, problemsDescriptions.length != 0, postComment);
           }
         } catch (e) {
@@ -49322,19 +49319,13 @@ Stderr: ${result.stderr}`);
       });
     }
     __name(installCli, "installCli");
-    function prepareAgent(inputs, useNightly) {
+    function prepareAgent(useNightly) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!(yield isCliInstalled())) {
           debug("CLI is not installed, installing...");
           yield installCli(useNightly);
         } else {
           debug("CLI is already installed, skipping installation");
-        }
-        if (!(0, qodana_12.isNativeMode)(inputs.args)) {
-          const pull = yield qodanaExec((0, qodana_12.getQodanaPullArgs)(inputs.args));
-          if (pull !== 0) {
-            throw new Error("Unable to run 'qodana pull' to download linter");
-          }
         }
       });
     }
@@ -49586,23 +49577,22 @@ ${statusOutput.stdout}`);
     __name(pushQuickFixes, "pushQuickFixes");
     function gitPush(branch, force) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const remoteUrl = (yield gitOutput(["config", "--get", "remote.origin.url"])).stdout.trim();
+        const serverUrl = process.env.CI_SERVER_URL;
+        const projectPath = process.env.CI_PROJECT_PATH;
+        if (!serverUrl || !projectPath) {
+          throw new Error("Missing GitLab CI predefined variables: CI_SERVER_URL and CI_PROJECT_PATH");
+        }
         const token = process.env.QODANA_GITLAB_TOKEN || "";
-        let pushUrl;
-        if (remoteUrl.startsWith("git@")) {
-          const hostAndPath = remoteUrl.replace("git@", "").replace(":", "/");
-          pushUrl = `https://${output_12.COMMIT_USER}:${token}@${hostAndPath}`;
-        } else {
-          const url = new URL(remoteUrl);
-          url.username = output_12.COMMIT_USER;
-          url.password = token;
-          pushUrl = url.toString();
-        }
+        const url = new URL(`${serverUrl}/${projectPath}.git`);
+        url.username = output_12.COMMIT_USER;
+        url.password = token;
+        const pushUrl = url.toString();
+        const pushArgs = ["push"];
         if (force) {
-          yield git(["push", "--force", "-o", "ci.skip", pushUrl, branch]);
-        } else {
-          yield git(["push", "-o", "ci.skip", pushUrl, branch]);
+          pushArgs.push("--force");
         }
+        pushArgs.push("-o", "ci.skip", pushUrl, branch);
+        yield git(pushArgs);
       });
     }
     __name(gitPush, "gitPush");
@@ -49708,13 +49698,13 @@ function main() {
       fs3.mkdirSync(inputs.resultsDir, { recursive: true });
       fs3.mkdirSync(inputs.cacheDir, { recursive: true });
       (0, utils_1.prepareCaches)(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs, inputs.useNightly);
+      yield (0, utils_1.prepareAgent)(inputs.useNightly);
       const exitCode = yield (0, utils_1.qodanaScan)();
       yield Promise.all([
         (0, output_1.publishOutput)((0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode)),
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage)
       ]);
-      (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches);
+      (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches && (exitCode === qodana_1.QodanaExitCode.Success || exitCode === qodana_1.QodanaExitCode.FailThreshold));
       (0, utils_1.uploadArtifacts)(inputs.resultsDir);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`);

@@ -5,13 +5,10 @@ let gitlabApi: InstanceType<typeof Gitlab> | null = null
 
 function initApi(): InstanceType<typeof Gitlab> {
   const token = getEnvVariable('QODANA_GITLAB_TOKEN')
-  let host = process.env['CI_SERVER_HOST'] || 'https://gitlab.com'
-  if (!host.startsWith('https://')) {
-    host = `https://${host}`
-  }
+  const host = process.env['CI_SERVER_URL'] || 'https://gitlab.com'
   const gitlab = new Gitlab({
-    token: token,
-    host: host
+    token,
+    host
   })
   gitlabApi = gitlab
   return gitlab

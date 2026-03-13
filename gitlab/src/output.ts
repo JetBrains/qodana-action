@@ -73,7 +73,7 @@ export async function publishOutput(
       DEPENDENCY_CHARS_LIMIT,
       VIEW_REPORT_OPTIONS
     )
-    if (postComment) {
+    if (isPrMode && postComment) {
       await postResultsToPRComments(
         toolName,
         sourceDir,

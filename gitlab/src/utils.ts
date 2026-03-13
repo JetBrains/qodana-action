@@ -3,13 +3,11 @@ import {
   EXECUTABLE,
   getProcessArchName,
   getProcessPlatformName,
-  getQodanaPullArgs,
   getQodanaScanArgs,
   getQodanaSha256,
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
   Inputs,
-  isNativeMode,
   NONE,
   PULL_REQUEST,
   PushFixesType,
@@ -43,6 +41,7 @@ setDeprecationWarningCallback((message: string) => {
 
 let cachedInputs: Inputs | null = null
 
+// specify NODE_DEBUG=qodana:gitlab env variable to see debug messages
 const debug = debuglog('qodana:gitlab')
 
 export function getInputs(): Inputs {
@@ -246,22 +245,12 @@ export async function installCli(useNightly: boolean): Promise<void> {
   process.env.PATH = process.env.PATH + separator + extractRoot
 }
 
-export async function prepareAgent(
-  inputs: Inputs,
-  useNightly: boolean
-): Promise<void> {
+export async function prepareAgent(useNightly: boolean): Promise<void> {
   if (!(await isCliInstalled())) {
     debug('CLI is not installed, installing...')
     await installCli(useNightly)
   } else {
     debug('CLI is already installed, skipping installation')
-  }
-
-  if (!isNativeMode(inputs.args)) {
-    const pull = await qodanaExec(getQodanaPullArgs(inputs.args))
-    if (pull !== 0) {
-      throw new Error("Unable to run 'qodana pull' to download linter")
-    }
   }
 }
 
@@ -558,27 +547,31 @@ export async function pushQuickFixes(
 }
 
 async function gitPush(branch: string, force: boolean): Promise<void> {
-  const remoteUrl = (
-    await gitOutput(['config', '--get', 'remote.origin.url'])
-  ).stdout.trim()
+  const serverUrl = process.env.CI_SERVER_URL
+  const projectPath = process.env.CI_PROJECT_PATH
+
+  if (!serverUrl || !projectPath) {
+    throw new Error(
+      'Missing GitLab CI predefined variables: CI_SERVER_URL and CI_PROJECT_PATH'
+    )
+  }
+
   const token = process.env.QODANA_GITLAB_TOKEN || ''
-  let pushUrl: string
-  if (remoteUrl.startsWith('git@')) {
-    // SSH format: git@gitlab.com:user/repo.git -> gitlab.com/user/repo.git
-    const hostAndPath = remoteUrl.replace('git@', '').replace(':', '/')
-    pushUrl = `https://${COMMIT_USER}:${token}@${hostAndPath}`
-  } else {
-    // HTTPS format: replace or inject credentials
-    const url = new URL(remoteUrl)
-    url.username = COMMIT_USER
-    url.password = token
-    pushUrl = url.toString()
-  }
+
+  const url = new URL(`${serverUrl}/${projectPath}.git`)
+
+  url.username = COMMIT_USER
+  url.password = token
+
+  const pushUrl = url.toString()
+
+  const pushArgs = ['push']
   if (force) {
-    await git(['push', '--force', '-o', 'ci.skip', pushUrl, branch])
-  } else {
-    await git(['push', '-o', 'ci.skip', pushUrl, branch])
+    pushArgs.push('--force')
   }
+  pushArgs.push('-o', 'ci.skip', pushUrl, branch)
+
+  await git(pushArgs)
 }
 
 async function createPr(
