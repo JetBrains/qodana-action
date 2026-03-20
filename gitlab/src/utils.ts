@@ -7,6 +7,7 @@ import {
   getQodanaSha256,
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
+  getLatestNightlyTag,
   Inputs,
   NONE,
   PULL_REQUEST,
@@ -219,7 +220,8 @@ export async function isCliInstalled(): Promise<boolean> {
 export async function installCli(useNightly: boolean): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
-  const temp = await downloadTool(getQodanaUrl(arch, platform, useNightly))
+  const nightlyTag = useNightly ? await getLatestNightlyTag() : ''
+  const temp = await downloadTool(getQodanaUrl(arch, platform, nightlyTag))
   if (!useNightly) {
     const expectedChecksum = getQodanaSha256(arch, platform)
     const actualChecksum = sha256sum(temp)

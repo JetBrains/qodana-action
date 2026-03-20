@@ -48,6 +48,17 @@ class Installer {
 
         fun getLatestVersion(): String = LATEST_VERSION
 
+        fun getLatestNightlyTag(): String {
+            return try {
+                val url = URL("https://api.github.com/repos/JetBrains/qodana-cli/releases")
+                val json = url.readText()
+                val tagPattern = """"tag_name"\s*:\s*"(v[^"]*-nightly)"""".toRegex()
+                tagPattern.find(json)?.groupValues?.get(1) ?: "nightly"
+            } catch (_: Exception) {
+                "nightly"
+            }
+        }
+
         fun getArchName(): String {
             val arch = System.getProperty("os.arch").lowercase()
             return when {
@@ -80,7 +91,7 @@ class Installer {
         version: String = getLatestVersion(),
     ): String {
         val downloadURL = getQodanaUrl(version = version)
-        val useNightly = version == "nightly"
+        val useNightly = version.endsWith("-nightly")
 
         if (path.exists()) {
             try {

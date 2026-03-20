@@ -44,6 +44,7 @@ import {
   getQodanaSha256,
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
+  getLatestNightlyTag,
   Inputs,
   isNativeMode,
   NONE,
@@ -143,7 +144,8 @@ export async function prepareAgent(
 ): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
-  const temp = await tool.downloadTool(getQodanaUrl(arch, platform, useNightly))
+  const nightlyTag = useNightly ? await getLatestNightlyTag() : ''
+  const temp = await tool.downloadTool(getQodanaUrl(arch, platform, nightlyTag))
   if (!useNightly) {
     const expectedChecksum = getQodanaSha256(arch, platform)
     const actualChecksum = sha256sum(temp)

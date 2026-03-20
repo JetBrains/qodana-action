@@ -10059,6 +10059,7 @@ __export(qodana_exports, {
   compressFolder: () => compressFolder,
   extractArg: () => extractArg,
   getCoverageFromSarif: () => getCoverageFromSarif,
+  getLatestNightlyTag: () => getLatestNightlyTag,
   getProcessArchName: () => getProcessArchName,
   getProcessPlatformName: () => getProcessPlatformName,
   getQodanaPullArgs: () => getQodanaPullArgs,
@@ -10095,7 +10096,24 @@ function getProcessArchName() {
 function getProcessPlatformName() {
   return process.platform === "win32" ? "windows" : process.platform;
 }
-function getQodanaUrl(arch, platform, nightly = false) {
+async function getLatestNightlyTag() {
+  try {
+    const response = await fetch(
+      "https://api.github.com/repos/JetBrains/qodana-cli/releases"
+    );
+    if (!response.ok) {
+      return "nightly";
+    }
+    const releases = await response.json();
+    const nightlyRelease = releases.find(
+      (r) => r.tag_name.endsWith("-nightly")
+    );
+    return nightlyRelease?.tag_name ?? "nightly";
+  } catch {
+    return "nightly";
+  }
+}
+function getQodanaUrl(arch, platform, nightlyTag = "") {
   if (!SUPPORTED_PLATFORMS.includes(platform)) {
     throw new Error(`Unsupported platform: ${platform}`);
   }
@@ -10103,7 +10121,7 @@ function getQodanaUrl(arch, platform, nightly = false) {
     throw new Error(`Unsupported architecture: ${arch}`);
   }
   const archive = platform === "windows" ? "zip" : "tar.gz";
-  const cli_version = nightly ? "nightly" : `v${version}`;
+  const cli_version = nightlyTag || `v${version}`;
   return `https://github.com/JetBrains/qodana-cli/releases/download/${cli_version}/qodana_${platform}_${arch}.${archive}`;
 }
 function isExecutionSuccessful(exitCode) {
@@ -10274,6 +10292,7 @@ var init_qodana = __esm({
     __name(getQodanaSha256, "getQodanaSha256");
     __name(getProcessArchName, "getProcessArchName");
     __name(getProcessPlatformName, "getProcessPlatformName");
+    __name(getLatestNightlyTag, "getLatestNightlyTag");
     __name(getQodanaUrl, "getQodanaUrl");
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
@@ -49294,7 +49313,8 @@ Stderr: ${result.stderr}`);
       return __awaiter2(this, void 0, void 0, function* () {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const temp = yield downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, useNightly));
+        const nightlyTag = useNightly ? yield (0, qodana_12.getLatestNightlyTag)() : "";
+        const temp = yield downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, nightlyTag));
         if (!useNightly) {
           const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
           const actualChecksum = (0, qodana_12.sha256sum)(temp);

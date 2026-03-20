@@ -77,12 +77,37 @@ export function getProcessPlatformName(): string {
 }
 
 /**
+ * Finds the latest nightly release tag (e.g. "2026.1-nightly") from GitHub.
+ * Falls back to "nightly" if the API call fails or no matching release is found.
+ */
+export async function getLatestNightlyTag(): Promise<string> {
+  try {
+    const response = await fetch(
+      'https://api.github.com/repos/JetBrains/qodana-cli/releases'
+    )
+    if (!response.ok) {
+      return 'nightly'
+    }
+    const releases = (await response.json()) as Array<{
+      tag_name: string
+      prerelease: boolean
+    }>
+    const nightlyRelease = releases.find((r) =>
+      r.tag_name.endsWith('-nightly')
+    )
+    return nightlyRelease?.tag_name ?? 'nightly'
+  } catch {
+    return 'nightly'
+  }
+}
+
+/**
  * Gets Qodana CLI download URL from the GitHub Releases API.
  */
 export function getQodanaUrl(
   arch: string,
   platform: string,
-  nightly = false
+  nightlyTag = ''
 ): string {
   if (!SUPPORTED_PLATFORMS.includes(platform)) {
     throw new Error(`Unsupported platform: ${platform}`)
@@ -91,7 +116,7 @@ export function getQodanaUrl(
     throw new Error(`Unsupported architecture: ${arch}`)
   }
   const archive = platform === 'windows' ? 'zip' : 'tar.gz'
-  const cli_version = nightly ? 'nightly' : `v${version}`
+  const cli_version = nightlyTag || `v${version}`
   return `https://github.com/JetBrains/qodana-cli/releases/download/${cli_version}/qodana_${platform}_${arch}.${archive}`
 }
 
