@@ -79,7 +79,7 @@ open class QodanaScanTask : Exec() {
     override fun exec() {
         setArgs(getArguments())
 
-        executable = (if (useNightly.get()) "nightly" else Installer.getLatestVersion()).let {
+        executable = (if (useNightly.get()) Installer.getLatestNightlyTag() else Installer.getLatestVersion()).let {
             Installer().setup(
                 qodanaPath.get(),
                 version = it
