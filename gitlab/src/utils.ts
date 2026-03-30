@@ -53,7 +53,7 @@ export function getInputs(): Inputs {
   debug(`Raw args: ${rawArgs}`)
   const argList = parseRawArguments(rawArgs)
   if (
-    process.env.QODANA_GITLAB_CONTAINER === 'true' &&
+    process.env.QODANA_DOCKER === '' &&
     !argList.includes('within-docker')
   ) {
     argList.push('--within-docker', 'false')
