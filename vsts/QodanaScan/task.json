@@ -125,6 +125,9 @@
     },
     "Node20_1": {
       "target": "index.js"
+    },
+    "Node24": {
+      "target": "index.js"
     }
   },
   "minimumAgentVersion": "2.144.0"
