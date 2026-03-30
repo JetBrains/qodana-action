@@ -49155,13 +49155,15 @@ var require_utils5 = __commonJS({
     var cachedInputs = null;
     var debug = (0, node_util_1.debuglog)("qodana:gitlab");
     function getInputs() {
+      var _a;
       if (cachedInputs !== null) {
         return cachedInputs;
       }
       const rawArgs = getQodanaStringArg("ARGS", "");
       debug(`Raw args: ${rawArgs}`);
       const argList = (0, utils_12.parseRawArguments)(rawArgs);
-      if (process.env.QODANA_DOCKER === "" && !argList.includes("within-docker")) {
+      const qodanaDockerEnv = (_a = process.env.QODANA_DOCKER) !== null && _a !== void 0 ? _a : "";
+      if (qodanaDockerEnv === "" && !argList.includes("within-docker")) {
         argList.push("--within-docker", "false");
       }
       let pushFixes = getQodanaStringArg("PUSH_FIXES", "none");
