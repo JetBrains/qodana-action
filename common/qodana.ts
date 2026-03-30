@@ -170,6 +170,15 @@ export function isNativeMode(args: string[]): boolean {
 }
 
 /**
+ * Returns the cache key suffix based on whether native mode is enabled.
+ * Used to prevent incompatible native/non-native caches from clashing.
+ * @param args CLI arguments to check for native mode indicators.
+ */
+export function getNativeModeSuffix(args: string[]): string {
+  return `-native-${isNativeMode(args)}`
+}
+
+/**
  * Builds the `qodana pull` command arguments.
  * @returns The `qodana scan` command arguments.
  * @param args additional CLI arguments.

@@ -52,10 +52,7 @@ export function getInputs(): Inputs {
   const rawArgs = getQodanaStringArg('ARGS', '')
   debug(`Raw args: ${rawArgs}`)
   const argList = parseRawArguments(rawArgs)
-  if (
-    process.env.QODANA_DOCKER === '' &&
-    !argList.includes('within-docker')
-  ) {
+  if (process.env.QODANA_DOCKER === '' && !argList.includes('within-docker')) {
     argList.push('--within-docker', 'false')
   }
   let pushFixes = getQodanaStringArg('PUSH_FIXES', 'none')

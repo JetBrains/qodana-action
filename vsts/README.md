@@ -39,15 +39,20 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  nativeMode: 'true'  # set to 'false' for Docker mode
+
 steps:
   - task: Cache@2  # Not required, but Qodana will open projects with cache faster.
     inputs:
-      key: '"$(Build.Repository.Name)" | "$(Build.SourceBranchName)" | "$(Build.SourceVersion)"'
+      key: 'native-$(nativeMode) | "$(Build.Repository.Name)" | "$(Build.SourceBranchName)" | "$(Build.SourceVersion)"'
       path: '$(Agent.TempDirectory)/qodana/cache'
       restoreKeys: |
-        "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
-        "$(Build.Repository.Name)"
+        native-$(nativeMode) | "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
+        native-$(nativeMode) | "$(Build.Repository.Name)"
   - task: QodanaScan@2025
+    inputs:
+      args: '--within-docker=$(nativeMode)'
 ```
 
 Triggering this job depends on [what type of repository you are using in Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/build/triggers?view=azure-devops#classic-build-pipelines-and-yaml-pipelines).

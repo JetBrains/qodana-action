@@ -62,6 +62,71 @@ describe('isNeedToUploadCache', () => {
   })
 })
 
+describe('getInputs cache key native mode suffix', () => {
+  beforeEach(() => {
+    jest.resetModules()
+  })
+
+  function setupCoreMock(
+    args: string,
+    primaryKey: string,
+    additionalKey: string
+  ): void {
+    jest.doMock('@actions/core', () => ({
+      getInput: (name: string) => {
+        switch (name) {
+          case 'args':
+            return args
+          case 'primary-cache-key':
+            return primaryKey
+          case 'additional-cache-key':
+            return additionalKey
+          default:
+            return ''
+        }
+      },
+      getBooleanInput: () => false,
+      warning: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      addPath: jest.fn(),
+      setFailed: jest.fn()
+    }))
+  }
+
+  it('appends -native-false when args have no native flags', () => {
+    setupCoreMock(
+      '',
+      'qodana-2025.3-refs/heads/main-abc',
+      'qodana-2025.3-refs/heads/main'
+    )
+    const {getInputs} = require('../src/utils')
+    const inputs = getInputs()
+    expect(inputs.primaryCacheKey).toBe(
+      'qodana-2025.3-refs/heads/main-abc-native-false'
+    )
+    expect(inputs.additionalCacheKey).toBe(
+      'qodana-2025.3-refs/heads/main-native-false'
+    )
+  })
+
+  it('appends -native-true when args contain --ide', () => {
+    setupCoreMock('--ide', 'my-key', 'my-restore-key')
+    const {getInputs} = require('../src/utils')
+    const inputs = getInputs()
+    expect(inputs.primaryCacheKey).toBe('my-key-native-true')
+    expect(inputs.additionalCacheKey).toBe('my-restore-key-native-true')
+  })
+
+  it('appends -native-true when args contain --within-docker=false', () => {
+    setupCoreMock('--within-docker=false', 'key', 'restore-key')
+    const {getInputs} = require('../src/utils')
+    const inputs = getInputs()
+    expect(inputs.primaryCacheKey).toBe('key-native-true')
+    expect(inputs.additionalCacheKey).toBe('restore-key-native-true')
+  })
+})
+
 export function initGithubContext(currentBranch: string): void {
   Object.defineProperty(github, 'context', {
     value: {

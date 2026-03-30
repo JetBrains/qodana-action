@@ -10060,6 +10060,7 @@ __export(qodana_exports, {
   extractArg: () => extractArg,
   getCoverageFromSarif: () => getCoverageFromSarif,
   getLatestNightlyTag: () => getLatestNightlyTag,
+  getNativeModeSuffix: () => getNativeModeSuffix,
   getProcessArchName: () => getProcessArchName,
   getProcessPlatformName: () => getProcessPlatformName,
   getQodanaPullArgs: () => getQodanaPullArgs,
@@ -10145,6 +10146,9 @@ function isNativeMode(args) {
   if (index == -1) return false;
   let nextIndex = index + 1;
   return args.length > nextIndex && args[nextIndex] == "false";
+}
+function getNativeModeSuffix(args) {
+  return `-native-${isNativeMode(args)}`;
 }
 function getQodanaPullArgs(args) {
   const pullArgs = ["pull"];
@@ -10302,6 +10306,7 @@ var init_qodana = __esm({
     __name(isExecutionSuccessful, "isExecutionSuccessful");
     __name(extractArg, "extractArg");
     __name(isNativeMode, "isNativeMode");
+    __name(getNativeModeSuffix, "getNativeModeSuffix");
     __name(getQodanaPullArgs, "getQodanaPullArgs");
     __name(getQodanaScanArgs, "getQodanaScanArgs");
     NONE = "none";
@@ -49156,7 +49161,7 @@ var require_utils5 = __commonJS({
       const rawArgs = getQodanaStringArg("ARGS", "");
       debug(`Raw args: ${rawArgs}`);
       const argList = (0, utils_12.parseRawArguments)(rawArgs);
-      if (process.env.QODANA_GITLAB_CONTAINER === "true" && !argList.includes("within-docker")) {
+      if (process.env.QODANA_DOCKER === "" && !argList.includes("within-docker")) {
         argList.push("--within-docker", "false");
       }
       let pushFixes = getQodanaStringArg("PUSH_FIXES", "none");
