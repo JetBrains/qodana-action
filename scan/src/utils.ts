@@ -131,19 +131,48 @@ async function getPrSha(): Promise<string> {
   if (process.env.QODANA_PR_SHA) {
     return process.env.QODANA_PR_SHA
   }
-  if (pr) {
-    const output = await gitOutput(['merge-base', pr.base.sha, pr.head.sha], {
-      ignoreReturnCode: true
-    })
-    if (output.exitCode === 0) {
-      return output.stdout.trim()
-    } else {
-      core.warning(
-        'Qodana needs git history to extract merge-base. Please specify fetch-depth: 0 in your workflow.'
-      )
-      return pr.base.sha
+  if (!pr) {
+    return ''
+  }
+
+  // Step 1: Fetch up-to-date branches and compute merge-base
+  // This avoids the stale pr.base.sha issue:
+  // https://github.com/orgs/community/discussions/59677
+  const targetBranch = pr.base.ref
+  const sourceBranch = pr.head.ref
+  const fetchResult = await gitOutput(
+    ['fetch', 'origin', targetBranch, sourceBranch],
+    {ignoreReturnCode: true}
+  )
+  if (fetchResult.exitCode === 0) {
+    const mergeBase = await gitOutput(
+      ['merge-base', `origin/${targetBranch}`, `origin/${sourceBranch}`],
+      {ignoreReturnCode: true}
+    )
+    if (mergeBase.exitCode === 0) {
+      return mergeBase.stdout.trim()
     }
   }
+
+  // Step 2: Fall back to webhook payload SHAs
+  core.warning(
+    'Unable to compute merge-base using git. ' +
+      'Please specify fetch-depth: 0 in your checkout step. ' +
+      'Falling back to the GitHub webhook payload.'
+  )
+  const webhookMergeBase = await gitOutput(
+    ['merge-base', pr.base.sha, pr.head.sha],
+    {ignoreReturnCode: true}
+  )
+  if (webhookMergeBase.exitCode === 0) {
+    return webhookMergeBase.stdout.trim()
+  }
+
+  // Step 3: Nothing worked — disable PR mode
+  core.warning(
+    'Unable to determine the base commit for PR analysis. ' +
+      'The analysis will run without PR mode.'
+  )
   return ''
 }
 
