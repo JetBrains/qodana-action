@@ -23,6 +23,12 @@ Clone the repository anywhere:
 git clone git@github.com:JetBrains/qodana-action.git
 ```
 
+We recommend setting a minimum release age for npm packages globally to protect against supply chain attacks (see [axios incident](https://socket.dev/blog/axios-npm-package-compromised)):
+
+```sh
+echo "min-release-age=7" >> ~/.npmrc
+```
+
 Install all dependencies:
 
 ```sh
