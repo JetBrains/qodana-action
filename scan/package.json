@@ -21,7 +21,7 @@
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.0",
     "@actions/github": "^6.0.1",
-    "@actions/tool-cache": "^2.0.2",
+    "@actions/tool-cache": "^4.0.0",
     "@octokit/plugin-paginate-rest": "latest",
     "@octokit/rest": "latest",
     "@octokit/types": "latest",
