@@ -21,6 +21,7 @@ import * as fs from 'fs'
 import path from 'path'
 import JSZip from 'jszip'
 import {promisify} from 'util'
+import * as util from 'node:util'
 
 const readdir = promisify(fs.readdir)
 const stat = promisify(fs.stat)
@@ -77,28 +78,41 @@ export function getProcessPlatformName(): string {
 }
 
 /**
- * Finds the latest nightly release tag (e.g. "2026.1-nightly") from GitHub.
- * Falls back to "nightly" if the API call fails or no matching release is found.
+ * Finds the latest nightly release tag (e.g. "v2026.1-nightly") from GitHub.
+ * Throws an error if the API call fails or no matching release is found to save QA time
  */
-export async function getLatestNightlyTag(): Promise<string> {
-  try {
-    const response = await fetch(
-      'https://api.github.com/repos/JetBrains/qodana-cli/releases'
+async function getLatestNightlyTag(): Promise<string> {
+  const response = await fetch(
+    'https://api.github.com/repos/JetBrains/qodana-cli/releases'
+  )
+  if (!response.ok) {
+    throw Error(
+      `Could not resolve latest qodana-cli release: ${util.inspect(response)}`
     )
-    if (!response.ok) {
-      return 'nightly'
-    }
-    const releases = (await response.json()) as Array<{
-      tag_name: string
-      prerelease: boolean
-    }>
-    const nightlyRelease = releases.find((r) =>
-      r.tag_name.endsWith('-nightly')
-    )
-    return nightlyRelease?.tag_name ?? 'nightly'
-  } catch {
-    return 'nightly'
   }
+  const releases = (await response.json()) as Array<{
+    tag_name: string
+    prerelease: boolean
+  }>
+  const nightlyRelease = releases.find(r => r.tag_name.endsWith('-nightly'))
+  if (nightlyRelease?.tag_name) {
+    return nightlyRelease.tag_name
+  } else {
+    throw Error("No nightly release found")
+  }
+}
+
+/**
+ * Returns the nightly release tag based on nightlyVersion:
+ * - "" → empty string (use stable version)
+ * - "latest" → fetches the latest nightly tag from GitHub
+ * - "2026.2" → "v2026.2-nightly"
+ */
+export async function getNightlyTag(nightlyVersion: string): Promise<string> {
+  if (!nightlyVersion) return ''
+  let version = nightlyVersion === 'latest' ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`
+  console.warn(`Using nightly version: ${version}`)
+  return version
 }
 
 /**
@@ -260,7 +274,7 @@ export interface Inputs {
   githubToken: string
   pushFixes: PushFixesType
   commitMessage: string
-  useNightly: boolean
+  nightlyVersion: string
   workingDirectory: string
 }
 

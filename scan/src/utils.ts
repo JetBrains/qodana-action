@@ -34,7 +34,7 @@ import {
   getQodanaSha256,
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
-  getLatestNightlyTag,
+  getNightlyTag,
   Inputs,
   getNativeModeSuffix,
   isNativeMode,
@@ -117,7 +117,7 @@ export function getInputs(): Inputs {
     githubToken: core.getInput('github-token'),
     pushFixes: core.getInput('push-fixes'),
     commitMessage: core.getInput('commit-message'),
-    useNightly: core.getBooleanInput('use-nightly'),
+    nightlyVersion: core.getInput('nightly-version'),
     // not used by the action
     workingDirectory: ''
   }
@@ -283,13 +283,13 @@ export async function pushQuickFixes(
 
 export async function prepareAgent(
   args: string[],
-  useNightly = false
+  nightlyVersion = ''
 ): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
-  const nightlyTag = useNightly ? await getLatestNightlyTag() : ''
+  const nightlyTag = await getNightlyTag(nightlyVersion)
   const temp = await tc.downloadTool(getQodanaUrl(arch, platform, nightlyTag))
-  if (!useNightly) {
+  if (!nightlyVersion) {
     const expectedChecksum = getQodanaSha256(arch, platform)
     const actualChecksum = sha256sum(temp)
     if (expectedChecksum !== actualChecksum) {
@@ -305,7 +305,11 @@ export async function prepareAgent(
     extractRoot = await tc.extractTar(temp)
   }
   core.addPath(
-    await tc.cacheDir(extractRoot, EXECUTABLE, useNightly ? 'nightly' : VERSION)
+    await tc.cacheDir(
+      extractRoot,
+      EXECUTABLE,
+      nightlyVersion ? `nightly-${nightlyVersion}` : VERSION
+    )
   )
   if (!isNativeMode(args)) {
     const exitCode = await qodana(getInputs(), getQodanaPullArgs(args))

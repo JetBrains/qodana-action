@@ -27,7 +27,7 @@ async function main(): Promise<void> {
     fs.mkdirSync(inputs.resultsDir, {recursive: true})
     fs.mkdirSync(inputs.cacheDir, {recursive: true})
     prepareCaches(inputs.cacheDir)
-    await prepareAgent(inputs.useNightly)
+    await prepareAgent(inputs.nightlyVersion)
 
     const exitCode = (await qodanaScan()) as QodanaExitCode
 

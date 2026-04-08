@@ -209,7 +209,7 @@ export function inputsDefaultFixture(): Inputs {
     githubToken: '',
     pushFixes: 'none',
     commitMessage: '',
-    useNightly: false,
+    nightlyVersion: '',
     workingDirectory: ''
   }
 }

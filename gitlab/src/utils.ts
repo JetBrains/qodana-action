@@ -7,7 +7,7 @@ import {
   getQodanaSha256,
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
-  getLatestNightlyTag,
+  getNightlyTag,
   Inputs,
   NONE,
   PULL_REQUEST,
@@ -73,7 +73,7 @@ export function getInputs(): Inputs {
       'COMMIT_MESSAGE',
       '🤖 Apply quick-fixes by Qodana'
     ),
-    useNightly: getQodanaBooleanArg('USE_NIGHTLY', false),
+    nightlyVersion: getQodanaStringArg('NIGHTLY_VERSION', ''),
     postComment: getQodanaBooleanArg('POST_MR_COMMENT', true),
     useCaches: getQodanaBooleanArg('USE_CACHES', true),
     // not used by GitLab
@@ -215,12 +215,12 @@ export async function isCliInstalled(): Promise<boolean> {
   })
 }
 
-export async function installCli(useNightly: boolean): Promise<void> {
+export async function installCli(nightlyVersion: string): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
-  const nightlyTag = useNightly ? await getLatestNightlyTag() : ''
+  const nightlyTag = await getNightlyTag(nightlyVersion)
   const temp = await downloadTool(getQodanaUrl(arch, platform, nightlyTag))
-  if (!useNightly) {
+  if (!nightlyVersion) {
     const expectedChecksum = getQodanaSha256(arch, platform)
     const actualChecksum = sha256sum(temp)
     if (actualChecksum !== expectedChecksum) {
@@ -245,10 +245,10 @@ export async function installCli(useNightly: boolean): Promise<void> {
   process.env.PATH = process.env.PATH + separator + extractRoot
 }
 
-export async function prepareAgent(useNightly: boolean): Promise<void> {
+export async function prepareAgent(nightlyVersion: string): Promise<void> {
   if (!(await isCliInstalled())) {
     debug('CLI is not installed, installing...')
-    await installCli(useNightly)
+    await installCli(nightlyVersion)
   } else {
     debug('CLI is already installed, skipping installation')
   }
