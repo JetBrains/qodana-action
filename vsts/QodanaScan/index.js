@@ -274,13 +274,13 @@ var require_inherits_browser = __commonJS({
 var require_inherits = __commonJS({
   "../node_modules/inherits/inherits.js"(exports2, module2) {
     try {
-      util = require("util");
-      if (typeof util.inherits !== "function") throw "";
-      module2.exports = util.inherits;
+      util2 = require("util");
+      if (typeof util2.inherits !== "function") throw "";
+      module2.exports = util2.inherits;
     } catch (e) {
       module2.exports = require_inherits_browser();
     }
-    var util;
+    var util2;
   }
 });
 
@@ -294,7 +294,7 @@ var require_BufferList = __commonJS({
       }
     }
     var Buffer2 = require_safe_buffer().Buffer;
-    var util = require("util");
+    var util2 = require("util");
     function copyBuffer(src, target, offset) {
       src.copy(target, offset);
     }
@@ -353,9 +353,9 @@ var require_BufferList = __commonJS({
       };
       return BufferList;
     })();
-    if (util && util.inspect && util.inspect.custom) {
-      module2.exports.prototype[util.inspect.custom] = function() {
-        var obj = util.inspect({ length: this.length });
+    if (util2 && util2.inspect && util2.inspect.custom) {
+      module2.exports.prototype[util2.inspect.custom] = function() {
+        var obj = util2.inspect({ length: this.length });
         return this.constructor.name + " " + obj;
       };
     }
@@ -455,8 +455,8 @@ var require_stream_writable = __commonJS({
     var asyncWrite = !process.browser && ["v0.10", "v0.9."].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : pna.nextTick;
     var Duplex;
     Writable.WritableState = WritableState;
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
     var internalUtil = {
       deprecate: require_node()
     };
@@ -471,7 +471,7 @@ var require_stream_writable = __commonJS({
       return Buffer2.isBuffer(obj) || obj instanceof OurUint8Array;
     }
     var destroyImpl = require_destroy();
-    util.inherits(Writable, Stream);
+    util2.inherits(Writable, Stream);
     function nop() {
     }
     function WritableState(options, stream) {
@@ -891,11 +891,11 @@ var require_stream_duplex = __commonJS({
       return keys3;
     };
     module2.exports = Duplex;
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
     var Readable = require_stream_readable();
     var Writable = require_stream_writable();
-    util.inherits(Duplex, Readable);
+    util2.inherits(Duplex, Readable);
     {
       keys2 = objectKeys(Writable.prototype);
       for (v = 0; v < keys2.length; v++) {
@@ -1216,8 +1216,8 @@ var require_stream_readable = __commonJS({
     function _isUint8Array(obj) {
       return Buffer2.isBuffer(obj) || obj instanceof OurUint8Array;
     }
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
     var debugUtil = require("util");
     var debug = void 0;
     if (debugUtil && debugUtil.debuglog) {
@@ -1229,7 +1229,7 @@ var require_stream_readable = __commonJS({
     var BufferList = require_BufferList();
     var destroyImpl = require_destroy();
     var StringDecoder;
-    util.inherits(Readable, Stream);
+    util2.inherits(Readable, Stream);
     var kProxyEvents = ["error", "close", "destroy", "pause", "resume"];
     function prependListener(emitter, event, fn) {
       if (typeof emitter.prependListener === "function") return emitter.prependListener(event, fn);
@@ -1885,9 +1885,9 @@ var require_stream_transform = __commonJS({
     "use strict";
     module2.exports = Transform;
     var Duplex = require_stream_duplex();
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
-    util.inherits(Transform, Duplex);
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
+    util2.inherits(Transform, Duplex);
     function afterTransform(er, data) {
       var ts = this._transformState;
       ts.transforming = false;
@@ -1985,9 +1985,9 @@ var require_stream_passthrough = __commonJS({
     "use strict";
     module2.exports = PassThrough;
     var Transform = require_stream_transform();
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
-    util.inherits(PassThrough, Transform);
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
+    util2.inherits(PassThrough, Transform);
     function PassThrough(options) {
       if (!(this instanceof PassThrough)) return new PassThrough(options);
       Transform.call(this, options);
@@ -9803,8 +9803,8 @@ __export(qodana_exports, {
   compressFolder: () => compressFolder,
   extractArg: () => extractArg,
   getCoverageFromSarif: () => getCoverageFromSarif,
-  getLatestNightlyTag: () => getLatestNightlyTag,
   getNativeModeSuffix: () => getNativeModeSuffix,
+  getNightlyTag: () => getNightlyTag,
   getProcessArchName: () => getProcessArchName,
   getProcessPlatformName: () => getProcessPlatformName,
   getQodanaPullArgs: () => getQodanaPullArgs,
@@ -9842,21 +9842,27 @@ function getProcessPlatformName() {
   return process.platform === "win32" ? "windows" : process.platform;
 }
 async function getLatestNightlyTag() {
-  try {
-    const response = await fetch(
-      "https://api.github.com/repos/JetBrains/qodana-cli/releases"
+  const response = await fetch(
+    "https://api.github.com/repos/JetBrains/qodana-cli/releases"
+  );
+  if (!response.ok) {
+    throw Error(
+      `Could not resolve latest qodana-cli release: ${util.inspect(response)}`
     );
-    if (!response.ok) {
-      return "nightly";
-    }
-    const releases = await response.json();
-    const nightlyRelease = releases.find(
-      (r) => r.tag_name.endsWith("-nightly")
-    );
-    return (nightlyRelease == null ? void 0 : nightlyRelease.tag_name) ?? "nightly";
-  } catch {
-    return "nightly";
   }
+  const releases = await response.json();
+  const nightlyRelease = releases.find((r) => r.tag_name.endsWith("-nightly"));
+  if (nightlyRelease == null ? void 0 : nightlyRelease.tag_name) {
+    return nightlyRelease.tag_name;
+  } else {
+    throw Error("No nightly release found");
+  }
+}
+async function getNightlyTag(nightlyVersion) {
+  if (!nightlyVersion) return "";
+  let version2 = nightlyVersion === "latest" ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`;
+  console.warn(`Using nightly version: ${version2}`);
+  return version2;
 }
 function getQodanaUrl(arch, platform, nightlyTag = "") {
   if (!SUPPORTED_PLATFORMS.includes(platform)) {
@@ -10013,7 +10019,7 @@ async function compressFolder(srcDir, destFile) {
     zip.generateNodeStream({ streamFiles: true, compression: "DEFLATE" }).pipe(fs.createWriteStream(destFile)).on("error", (err) => reject2(err)).on("finish", () => resolve());
   });
 }
-var import_crypto, fs, import_path, import_jszip, import_util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
+var import_crypto, fs, import_path, import_jszip, import_util, util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
@@ -10023,6 +10029,7 @@ var init_qodana = __esm({
     import_path = __toESM(require("path"));
     import_jszip = __toESM(require_lib3());
     import_util = require("util");
+    util = __toESM(require("node:util"));
     readdir2 = (0, import_util.promisify)(fs.readdir);
     stat2 = (0, import_util.promisify)(fs.stat);
     mkdir2 = (0, import_util.promisify)(fs.mkdir);
@@ -10186,7 +10193,7 @@ var require_object_inspect = __commonJS({
       } else if (indexOf(seen, obj) >= 0) {
         return "[Circular]";
       }
-      function inspect(value, from, noIndent) {
+      function inspect2(value, from, noIndent) {
         if (from) {
           seen = $arrSlice.call(seen);
           seen.push(from);
@@ -10204,7 +10211,7 @@ var require_object_inspect = __commonJS({
       }
       if (typeof obj === "function" && !isRegExp(obj)) {
         var name = nameOf(obj);
-        var keys2 = arrObjKeys(obj, inspect);
+        var keys2 = arrObjKeys(obj, inspect2);
         return "[Function" + (name ? ": " + name : " (anonymous)") + "]" + (keys2.length > 0 ? " { " + $join.call(keys2, ", ") + " }" : "");
       }
       if (isSymbol(obj)) {
@@ -10228,16 +10235,16 @@ var require_object_inspect = __commonJS({
         if (obj.length === 0) {
           return "[]";
         }
-        var xs = arrObjKeys(obj, inspect);
+        var xs = arrObjKeys(obj, inspect2);
         if (indent && !singleLineValues(xs)) {
           return "[" + indentedJoin(xs, indent) + "]";
         }
         return "[ " + $join.call(xs, ", ") + " ]";
       }
       if (isError(obj)) {
-        var parts = arrObjKeys(obj, inspect);
+        var parts = arrObjKeys(obj, inspect2);
         if (!("cause" in Error.prototype) && "cause" in obj && !isEnumerable.call(obj, "cause")) {
-          return "{ [" + String(obj) + "] " + $join.call($concat.call("[cause]: " + inspect(obj.cause), parts), ", ") + " }";
+          return "{ [" + String(obj) + "] " + $join.call($concat.call("[cause]: " + inspect2(obj.cause), parts), ", ") + " }";
         }
         if (parts.length === 0) {
           return "[" + String(obj) + "]";
@@ -10255,7 +10262,7 @@ var require_object_inspect = __commonJS({
         var mapParts = [];
         if (mapForEach) {
           mapForEach.call(obj, function(value, key) {
-            mapParts.push(inspect(key, obj, true) + " => " + inspect(value, obj));
+            mapParts.push(inspect2(key, obj, true) + " => " + inspect2(value, obj));
           });
         }
         return collectionOf("Map", mapSize.call(obj), mapParts, indent);
@@ -10264,7 +10271,7 @@ var require_object_inspect = __commonJS({
         var setParts = [];
         if (setForEach) {
           setForEach.call(obj, function(value) {
-            setParts.push(inspect(value, obj));
+            setParts.push(inspect2(value, obj));
           });
         }
         return collectionOf("Set", setSize.call(obj), setParts, indent);
@@ -10279,16 +10286,16 @@ var require_object_inspect = __commonJS({
         return weakCollectionOf("WeakRef");
       }
       if (isNumber(obj)) {
-        return markBoxed(inspect(Number(obj)));
+        return markBoxed(inspect2(Number(obj)));
       }
       if (isBigInt(obj)) {
-        return markBoxed(inspect(bigIntValueOf.call(obj)));
+        return markBoxed(inspect2(bigIntValueOf.call(obj)));
       }
       if (isBoolean2(obj)) {
         return markBoxed(booleanValueOf.call(obj));
       }
       if (isString(obj)) {
-        return markBoxed(inspect(String(obj)));
+        return markBoxed(inspect2(String(obj)));
       }
       if (typeof window !== "undefined" && obj === window) {
         return "{ [object Window] }";
@@ -10297,7 +10304,7 @@ var require_object_inspect = __commonJS({
         return "{ [object globalThis] }";
       }
       if (!isDate(obj) && !isRegExp(obj)) {
-        var ys = arrObjKeys(obj, inspect);
+        var ys = arrObjKeys(obj, inspect2);
         var isPlainObject = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
         var protoTag = obj instanceof Object ? "" : "null prototype";
         var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr(obj), 8, -1) : protoTag ? "Object" : "";
@@ -10551,13 +10558,13 @@ var require_object_inspect = __commonJS({
       var lineJoiner = "\n" + indent.prev + indent.base;
       return lineJoiner + $join.call(xs, "," + lineJoiner) + "\n" + indent.prev;
     }
-    function arrObjKeys(obj, inspect) {
+    function arrObjKeys(obj, inspect2) {
       var isArr = isArray(obj);
       var xs = [];
       if (isArr) {
         xs.length = obj.length;
         for (var i = 0; i < obj.length; i++) {
-          xs[i] = has3(obj, i) ? inspect(obj[i], obj) : "";
+          xs[i] = has3(obj, i) ? inspect2(obj[i], obj) : "";
         }
       }
       var syms = typeof gOPS === "function" ? gOPS(obj) : [];
@@ -10578,15 +10585,15 @@ var require_object_inspect = __commonJS({
         if (hasShammedSymbols && symMap["$" + key] instanceof Symbol) {
           continue;
         } else if ($test.call(/[^\w$]/, key)) {
-          xs.push(inspect(key, obj) + ": " + inspect(obj[key], obj));
+          xs.push(inspect2(key, obj) + ": " + inspect2(obj[key], obj));
         } else {
-          xs.push(key + ": " + inspect(obj[key], obj));
+          xs.push(key + ": " + inspect2(obj[key], obj));
         }
       }
       if (typeof gOPS === "function") {
         for (var j = 0; j < syms.length; j++) {
           if (isEnumerable.call(obj, syms[j])) {
-            xs.push("[" + inspect(syms[j]) + "]: " + inspect(obj[syms[j]], obj));
+            xs.push("[" + inspect2(syms[j]) + "]: " + inspect2(obj[syms[j]], obj));
           }
         }
       }
@@ -10599,7 +10606,7 @@ var require_object_inspect = __commonJS({
 var require_side_channel_list = __commonJS({
   "../node_modules/side-channel-list/index.js"(exports2, module2) {
     "use strict";
-    var inspect = require_object_inspect();
+    var inspect2 = require_object_inspect();
     var $TypeError = require_type();
     var listGetNode = function(list, key, isDelete) {
       var prev = list;
@@ -10653,7 +10660,7 @@ var require_side_channel_list = __commonJS({
       var channel = {
         assert: function(key) {
           if (!channel.has(key)) {
-            throw new $TypeError("Side channel does not contain " + inspect(key));
+            throw new $TypeError("Side channel does not contain " + inspect2(key));
           }
         },
         "delete": function(key) {
@@ -11513,7 +11520,7 @@ var require_side_channel_map = __commonJS({
     "use strict";
     var GetIntrinsic = require_get_intrinsic();
     var callBound = require_call_bound();
-    var inspect = require_object_inspect();
+    var inspect2 = require_object_inspect();
     var $TypeError = require_type();
     var $Map = GetIntrinsic("%Map%", true);
     var $mapGet = callBound("Map.prototype.get", true);
@@ -11527,7 +11534,7 @@ var require_side_channel_map = __commonJS({
       var channel = {
         assert: function(key) {
           if (!channel.has(key)) {
-            throw new $TypeError("Side channel does not contain " + inspect(key));
+            throw new $TypeError("Side channel does not contain " + inspect2(key));
           }
         },
         "delete": function(key) {
@@ -11569,7 +11576,7 @@ var require_side_channel_weakmap = __commonJS({
     "use strict";
     var GetIntrinsic = require_get_intrinsic();
     var callBound = require_call_bound();
-    var inspect = require_object_inspect();
+    var inspect2 = require_object_inspect();
     var getSideChannelMap = require_side_channel_map();
     var $TypeError = require_type();
     var $WeakMap = GetIntrinsic("%WeakMap%", true);
@@ -11585,7 +11592,7 @@ var require_side_channel_weakmap = __commonJS({
         var channel = {
           assert: function(key) {
             if (!channel.has(key)) {
-              throw new $TypeError("Side channel does not contain " + inspect(key));
+              throw new $TypeError("Side channel does not contain " + inspect2(key));
             }
           },
           "delete": function(key) {
@@ -11641,7 +11648,7 @@ var require_side_channel = __commonJS({
   "../node_modules/side-channel/index.js"(exports2, module2) {
     "use strict";
     var $TypeError = require_type();
-    var inspect = require_object_inspect();
+    var inspect2 = require_object_inspect();
     var getSideChannelList = require_side_channel_list();
     var getSideChannelMap = require_side_channel_map();
     var getSideChannelWeakMap = require_side_channel_weakmap();
@@ -11651,7 +11658,7 @@ var require_side_channel = __commonJS({
       var channel = {
         assert: function(key) {
           if (!channel.has(key)) {
-            throw new $TypeError("Side channel does not contain " + inspect(key));
+            throw new $TypeError("Side channel does not contain " + inspect2(key));
           }
         },
         "delete": function(key) {
@@ -12571,7 +12578,7 @@ var require_tunnel = __commonJS({
     var https = require("https");
     var events = require("events");
     var assert = require("assert");
-    var util = require("util");
+    var util2 = require("util");
     exports2.httpOverHttp = httpOverHttp;
     exports2.httpsOverHttp = httpsOverHttp;
     exports2.httpOverHttps = httpOverHttps;
@@ -12621,7 +12628,7 @@ var require_tunnel = __commonJS({
         self2.removeSocket(socket);
       });
     }
-    util.inherits(TunnelingAgent, events.EventEmitter);
+    util2.inherits(TunnelingAgent, events.EventEmitter);
     TunnelingAgent.prototype.addRequest = function addRequest(req, host, port, localAddress) {
       var self2 = this;
       var options = mergeOptions({ request: req }, self2.options, toOptions(host, port, localAddress));
@@ -12830,7 +12837,7 @@ var require_HttpClient = __commonJS({
     var url = require("url");
     var http = require("http");
     var https = require("https");
-    var util = require_Util();
+    var util2 = require_Util();
     var fs3;
     var tunnel;
     var HttpCodes;
@@ -12876,7 +12883,7 @@ var require_HttpClient = __commonJS({
       readBody() {
         return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
           const chunks = [];
-          const encodingCharset = util.obtainContentCharset(this);
+          const encodingCharset = util2.obtainContentCharset(this);
           const contentEncoding = this.message.headers["content-encoding"] || "";
           const isGzippedEncoded = new RegExp("(gzip$)|(gzip, *deflate)").test(contentEncoding);
           this.message.on("data", function(data) {
@@ -12886,7 +12893,7 @@ var require_HttpClient = __commonJS({
             return __awaiter2(this, void 0, void 0, function* () {
               const buffer = Buffer.concat(chunks);
               if (isGzippedEncoded) {
-                const gunzippedBody = yield util.decompressGzippedContent(buffer, encodingCharset);
+                const gunzippedBody = yield util2.decompressGzippedContent(buffer, encodingCharset);
                 resolve(gunzippedBody);
               } else {
                 resolve(buffer.toString(encodingCharset));
@@ -12926,7 +12933,7 @@ var require_HttpClient = __commonJS({
         if (no_proxy) {
           this._httpProxyBypassHosts = [];
           no_proxy.split(",").forEach((bypass) => {
-            this._httpProxyBypassHosts.push(util.buildProxyBypassRegexFromEnv(bypass));
+            this._httpProxyBypassHosts.push(util2.buildProxyBypassRegexFromEnv(bypass));
           });
         }
         this.requestOptions = requestOptions;
@@ -18346,7 +18353,7 @@ var require_HttpClient2 = __commonJS({
     var url = require("url");
     var http = require("http");
     var https = require("https");
-    var util = require_Util2();
+    var util2 = require_Util2();
     var fs3;
     var tunnel;
     var HttpCodes;
@@ -18392,7 +18399,7 @@ var require_HttpClient2 = __commonJS({
       readBody() {
         return new Promise((resolve, reject2) => __awaiter2(this, void 0, void 0, function* () {
           const chunks = [];
-          const encodingCharset = util.obtainContentCharset(this);
+          const encodingCharset = util2.obtainContentCharset(this);
           const contentEncoding = this.message.headers["content-encoding"] || "";
           const isGzippedEncoded = new RegExp("(gzip$)|(gzip, *deflate)").test(contentEncoding);
           this.message.on("data", function(data) {
@@ -18402,7 +18409,7 @@ var require_HttpClient2 = __commonJS({
             return __awaiter2(this, void 0, void 0, function* () {
               const buffer = Buffer.concat(chunks);
               if (isGzippedEncoded) {
-                const gunzippedBody = yield util.decompressGzippedContent(buffer, encodingCharset);
+                const gunzippedBody = yield util2.decompressGzippedContent(buffer, encodingCharset);
                 resolve(gunzippedBody);
               } else {
                 resolve(buffer.toString(encodingCharset));
@@ -18445,7 +18452,7 @@ var require_HttpClient2 = __commonJS({
         if (no_proxy) {
           this._httpProxyBypassHosts = [];
           no_proxy.split(",").forEach((bypass) => {
-            this._httpProxyBypassHosts.push(util.buildProxyBypassRegexFromEnv(bypass));
+            this._httpProxyBypassHosts.push(util2.buildProxyBypassRegexFromEnv(bypass));
           });
         }
         this.requestOptions = requestOptions;
@@ -18847,7 +18854,7 @@ var require_RestClient = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.RestClient = void 0;
     var httpm = require_HttpClient2();
-    var util = require_Util2();
+    var util2 = require_Util2();
     var RestClient = class _RestClient {
       /**
        * Creates an instance of the RestClient
@@ -18871,7 +18878,7 @@ var require_RestClient = __commonJS({
        */
       options(requestUrl, options) {
         return __awaiter2(this, void 0, void 0, function* () {
-          let url = util.getUrl(requestUrl, this._baseUrl);
+          let url = util2.getUrl(requestUrl, this._baseUrl);
           let res = yield this.client.options(url, this._headersFromOptions(options));
           return this.processResponse(res, options);
         });
@@ -18884,7 +18891,7 @@ var require_RestClient = __commonJS({
        */
       get(resource, options) {
         return __awaiter2(this, void 0, void 0, function* () {
-          let url = util.getUrl(resource, this._baseUrl, (options || {}).queryParameters);
+          let url = util2.getUrl(resource, this._baseUrl, (options || {}).queryParameters);
           let res = yield this.client.get(url, this._headersFromOptions(options));
           return this.processResponse(res, options);
         });
@@ -18897,7 +18904,7 @@ var require_RestClient = __commonJS({
        */
       del(resource, options) {
         return __awaiter2(this, void 0, void 0, function* () {
-          let url = util.getUrl(resource, this._baseUrl, (options || {}).queryParameters);
+          let url = util2.getUrl(resource, this._baseUrl, (options || {}).queryParameters);
           let res = yield this.client.del(url, this._headersFromOptions(options));
           return this.processResponse(res, options);
         });
@@ -18911,7 +18918,7 @@ var require_RestClient = __commonJS({
        */
       create(resource, resources, options) {
         return __awaiter2(this, void 0, void 0, function* () {
-          let url = util.getUrl(resource, this._baseUrl);
+          let url = util2.getUrl(resource, this._baseUrl);
           let headers = this._headersFromOptions(options, true);
           let data = JSON.stringify(resources, null, 2);
           let res = yield this.client.post(url, data, headers);
@@ -18927,7 +18934,7 @@ var require_RestClient = __commonJS({
        */
       update(resource, resources, options) {
         return __awaiter2(this, void 0, void 0, function* () {
-          let url = util.getUrl(resource, this._baseUrl);
+          let url = util2.getUrl(resource, this._baseUrl);
           let headers = this._headersFromOptions(options, true);
           let data = JSON.stringify(resources, null, 2);
           let res = yield this.client.patch(url, data, headers);
@@ -18943,7 +18950,7 @@ var require_RestClient = __commonJS({
        */
       replace(resource, resources, options) {
         return __awaiter2(this, void 0, void 0, function* () {
-          let url = util.getUrl(resource, this._baseUrl);
+          let url = util2.getUrl(resource, this._baseUrl);
           let headers = this._headersFromOptions(options, true);
           let data = JSON.stringify(resources, null, 2);
           let res = yield this.client.put(url, data, headers);
@@ -18952,7 +18959,7 @@ var require_RestClient = __commonJS({
       }
       uploadStream(verb, requestUrl, stream, options) {
         return __awaiter2(this, void 0, void 0, function* () {
-          let url = util.getUrl(requestUrl, this._baseUrl);
+          let url = util2.getUrl(requestUrl, this._baseUrl);
           let headers = this._headersFromOptions(options, true);
           let res = yield this.client.sendStream(verb, url, stream, headers);
           return this.processResponse(res, options);
@@ -81525,7 +81532,7 @@ var require_utils4 = __commonJS({
         uploadResult: tl2.getBoolInput("uploadResult", false),
         uploadSarif: tl2.getBoolInput("uploadSarif", false),
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
-        useNightly: tl2.getBoolInput("useNightly", false),
+        nightlyVersion: tl2.getInput("nightlyVersion", false) || "",
         prMode: tl2.getBoolInput("prMode", false),
         postComment: tl2.getBoolInput("postPrComment", false),
         pushFixes: tl2.getInput("pushFixes", false) || "none",
@@ -81565,12 +81572,12 @@ var require_utils4 = __commonJS({
       });
     }
     function prepareAgent(args_1) {
-      return __awaiter2(this, arguments, void 0, function* (args, useNightly = false) {
+      return __awaiter2(this, arguments, void 0, function* (args, nightlyVersion = "") {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const nightlyTag = useNightly ? yield (0, qodana_12.getLatestNightlyTag)() : "";
+        const nightlyTag = yield (0, qodana_12.getNightlyTag)(nightlyVersion);
         const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, nightlyTag));
-        if (!useNightly) {
+        if (!nightlyVersion) {
           const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
           const actualChecksum = (0, qodana_12.sha256sum)(temp);
           if (expectedChecksum !== actualChecksum) {
@@ -81960,7 +81967,7 @@ function main() {
       const inputs = (0, utils_1.getInputs)();
       tl.mkdirP(inputs.resultsDir);
       tl.mkdirP(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs.args, inputs.useNightly);
+      yield (0, utils_1.prepareAgent)(inputs.args, inputs.nightlyVersion);
       const exitCode = yield (0, utils_1.qodana)();
       yield Promise.all([
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage),

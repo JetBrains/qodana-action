@@ -293,13 +293,13 @@ var require_inherits_browser = __commonJS({
 var require_inherits = __commonJS({
   "../node_modules/inherits/inherits.js"(exports2, module2) {
     try {
-      util = require("util");
-      if (typeof util.inherits !== "function") throw "";
-      module2.exports = util.inherits;
+      util2 = require("util");
+      if (typeof util2.inherits !== "function") throw "";
+      module2.exports = util2.inherits;
     } catch (e) {
       module2.exports = require_inherits_browser();
     }
-    var util;
+    var util2;
   }
 });
 
@@ -314,7 +314,7 @@ var require_BufferList = __commonJS({
     }
     __name(_classCallCheck, "_classCallCheck");
     var Buffer2 = require_safe_buffer().Buffer;
-    var util = require("util");
+    var util2 = require("util");
     function copyBuffer(src, target, offset) {
       src.copy(target, offset);
     }
@@ -375,9 +375,9 @@ var require_BufferList = __commonJS({
       }, "concat");
       return BufferList;
     })();
-    if (util && util.inspect && util.inspect.custom) {
-      module2.exports.prototype[util.inspect.custom] = function() {
-        var obj = util.inspect({ length: this.length });
+    if (util2 && util2.inspect && util2.inspect.custom) {
+      module2.exports.prototype[util2.inspect.custom] = function() {
+        var obj = util2.inspect({ length: this.length });
         return this.constructor.name + " " + obj;
       };
     }
@@ -481,8 +481,8 @@ var require_stream_writable = __commonJS({
     var asyncWrite = !process.browser && ["v0.10", "v0.9."].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : pna.nextTick;
     var Duplex;
     Writable.WritableState = WritableState;
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
     var internalUtil = {
       deprecate: require_node()
     };
@@ -499,7 +499,7 @@ var require_stream_writable = __commonJS({
     }
     __name(_isUint8Array, "_isUint8Array");
     var destroyImpl = require_destroy();
-    util.inherits(Writable, Stream);
+    util2.inherits(Writable, Stream);
     function nop() {
     }
     __name(nop, "nop");
@@ -939,11 +939,11 @@ var require_stream_duplex = __commonJS({
       return keys2;
     };
     module2.exports = Duplex;
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
     var Readable = require_stream_readable();
     var Writable = require_stream_writable();
-    util.inherits(Duplex, Readable);
+    util2.inherits(Duplex, Readable);
     {
       keys = objectKeys(Writable.prototype);
       for (v = 0; v < keys.length; v++) {
@@ -1284,8 +1284,8 @@ var require_stream_readable = __commonJS({
       return Buffer2.isBuffer(obj) || obj instanceof OurUint8Array;
     }
     __name(_isUint8Array, "_isUint8Array");
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
     var debugUtil = require("util");
     var debug = void 0;
     if (debugUtil && debugUtil.debuglog) {
@@ -1297,7 +1297,7 @@ var require_stream_readable = __commonJS({
     var BufferList = require_BufferList();
     var destroyImpl = require_destroy();
     var StringDecoder;
-    util.inherits(Readable, Stream);
+    util2.inherits(Readable, Stream);
     var kProxyEvents = ["error", "close", "destroy", "pause", "resume"];
     function prependListener(emitter, event, fn) {
       if (typeof emitter.prependListener === "function") return emitter.prependListener(event, fn);
@@ -1987,9 +1987,9 @@ var require_stream_transform = __commonJS({
     "use strict";
     module2.exports = Transform;
     var Duplex = require_stream_duplex();
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
-    util.inherits(Transform, Duplex);
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
+    util2.inherits(Transform, Duplex);
     function afterTransform(er, data) {
       var ts = this._transformState;
       ts.transforming = false;
@@ -2091,9 +2091,9 @@ var require_stream_passthrough = __commonJS({
     "use strict";
     module2.exports = PassThrough;
     var Transform = require_stream_transform();
-    var util = Object.create(require_util());
-    util.inherits = require_inherits();
-    util.inherits(PassThrough, Transform);
+    var util2 = Object.create(require_util());
+    util2.inherits = require_inherits();
+    util2.inherits(PassThrough, Transform);
     function PassThrough(options) {
       if (!(this instanceof PassThrough)) return new PassThrough(options);
       Transform.call(this, options);
@@ -10059,8 +10059,8 @@ __export(qodana_exports, {
   compressFolder: () => compressFolder,
   extractArg: () => extractArg,
   getCoverageFromSarif: () => getCoverageFromSarif,
-  getLatestNightlyTag: () => getLatestNightlyTag,
   getNativeModeSuffix: () => getNativeModeSuffix,
+  getNightlyTag: () => getNightlyTag,
   getProcessArchName: () => getProcessArchName,
   getProcessPlatformName: () => getProcessPlatformName,
   getQodanaPullArgs: () => getQodanaPullArgs,
@@ -10098,21 +10098,27 @@ function getProcessPlatformName() {
   return process.platform === "win32" ? "windows" : process.platform;
 }
 async function getLatestNightlyTag() {
-  try {
-    const response = await fetch(
-      "https://api.github.com/repos/JetBrains/qodana-cli/releases"
+  const response = await fetch(
+    "https://api.github.com/repos/JetBrains/qodana-cli/releases"
+  );
+  if (!response.ok) {
+    throw Error(
+      `Could not resolve latest qodana-cli release: ${util.inspect(response)}`
     );
-    if (!response.ok) {
-      return "nightly";
-    }
-    const releases = await response.json();
-    const nightlyRelease = releases.find(
-      (r) => r.tag_name.endsWith("-nightly")
-    );
-    return nightlyRelease?.tag_name ?? "nightly";
-  } catch {
-    return "nightly";
   }
+  const releases = await response.json();
+  const nightlyRelease = releases.find((r) => r.tag_name.endsWith("-nightly"));
+  if (nightlyRelease?.tag_name) {
+    return nightlyRelease.tag_name;
+  } else {
+    throw Error("No nightly release found");
+  }
+}
+async function getNightlyTag(nightlyVersion) {
+  if (!nightlyVersion) return "";
+  let version2 = nightlyVersion === "latest" ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`;
+  console.warn(`Using nightly version: ${version2}`);
+  return version2;
 }
 function getQodanaUrl(arch, platform, nightlyTag = "") {
   if (!SUPPORTED_PLATFORMS.includes(platform)) {
@@ -10268,7 +10274,7 @@ async function compressFolder(srcDir, destFile) {
     zip.generateNodeStream({ streamFiles: true, compression: "DEFLATE" }).pipe(fs.createWriteStream(destFile)).on("error", (err) => reject(err)).on("finish", () => resolve());
   });
 }
-var import_crypto, fs, import_path, import_jszip, import_util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
+var import_crypto, fs, import_path, import_jszip, import_util, util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
@@ -10278,6 +10284,7 @@ var init_qodana = __esm({
     import_path = __toESM(require("path"));
     import_jszip = __toESM(require_lib3());
     import_util = require("util");
+    util = __toESM(require("node:util"));
     readdir2 = (0, import_util.promisify)(fs.readdir);
     stat2 = (0, import_util.promisify)(fs.stat);
     mkdir2 = (0, import_util.promisify)(fs.mkdir);
@@ -10297,6 +10304,7 @@ var init_qodana = __esm({
     __name(getProcessArchName, "getProcessArchName");
     __name(getProcessPlatformName, "getProcessPlatformName");
     __name(getLatestNightlyTag, "getLatestNightlyTag");
+    __name(getNightlyTag, "getNightlyTag");
     __name(getQodanaUrl, "getQodanaUrl");
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
@@ -11087,7 +11095,7 @@ var require_object_inspect = __commonJS({
       } else if (indexOf(seen, obj) >= 0) {
         return "[Circular]";
       }
-      function inspect(value, from, noIndent) {
+      function inspect2(value, from, noIndent) {
         if (from) {
           seen = $arrSlice.call(seen);
           seen.push(from);
@@ -11103,10 +11111,10 @@ var require_object_inspect = __commonJS({
         }
         return inspect_(value, opts, depth + 1, seen);
       }
-      __name(inspect, "inspect");
+      __name(inspect2, "inspect");
       if (typeof obj === "function" && !isRegExp(obj)) {
         var name = nameOf(obj);
-        var keys = arrObjKeys(obj, inspect);
+        var keys = arrObjKeys(obj, inspect2);
         return "[Function" + (name ? ": " + name : " (anonymous)") + "]" + (keys.length > 0 ? " { " + $join.call(keys, ", ") + " }" : "");
       }
       if (isSymbol(obj)) {
@@ -11130,16 +11138,16 @@ var require_object_inspect = __commonJS({
         if (obj.length === 0) {
           return "[]";
         }
-        var xs = arrObjKeys(obj, inspect);
+        var xs = arrObjKeys(obj, inspect2);
         if (indent && !singleLineValues(xs)) {
           return "[" + indentedJoin(xs, indent) + "]";
         }
         return "[ " + $join.call(xs, ", ") + " ]";
       }
       if (isError(obj)) {
-        var parts = arrObjKeys(obj, inspect);
+        var parts = arrObjKeys(obj, inspect2);
         if (!("cause" in Error.prototype) && "cause" in obj && !isEnumerable.call(obj, "cause")) {
-          return "{ [" + String(obj) + "] " + $join.call($concat.call("[cause]: " + inspect(obj.cause), parts), ", ") + " }";
+          return "{ [" + String(obj) + "] " + $join.call($concat.call("[cause]: " + inspect2(obj.cause), parts), ", ") + " }";
         }
         if (parts.length === 0) {
           return "[" + String(obj) + "]";
@@ -11157,7 +11165,7 @@ var require_object_inspect = __commonJS({
         var mapParts = [];
         if (mapForEach) {
           mapForEach.call(obj, function(value, key) {
-            mapParts.push(inspect(key, obj, true) + " => " + inspect(value, obj));
+            mapParts.push(inspect2(key, obj, true) + " => " + inspect2(value, obj));
           });
         }
         return collectionOf("Map", mapSize.call(obj), mapParts, indent);
@@ -11166,7 +11174,7 @@ var require_object_inspect = __commonJS({
         var setParts = [];
         if (setForEach) {
           setForEach.call(obj, function(value) {
-            setParts.push(inspect(value, obj));
+            setParts.push(inspect2(value, obj));
           });
         }
         return collectionOf("Set", setSize.call(obj), setParts, indent);
@@ -11181,16 +11189,16 @@ var require_object_inspect = __commonJS({
         return weakCollectionOf("WeakRef");
       }
       if (isNumber(obj)) {
-        return markBoxed(inspect(Number(obj)));
+        return markBoxed(inspect2(Number(obj)));
       }
       if (isBigInt(obj)) {
-        return markBoxed(inspect(bigIntValueOf.call(obj)));
+        return markBoxed(inspect2(bigIntValueOf.call(obj)));
       }
       if (isBoolean(obj)) {
         return markBoxed(booleanValueOf.call(obj));
       }
       if (isString(obj)) {
-        return markBoxed(inspect(String(obj)));
+        return markBoxed(inspect2(String(obj)));
       }
       if (typeof window !== "undefined" && obj === window) {
         return "{ [object Window] }";
@@ -11199,7 +11207,7 @@ var require_object_inspect = __commonJS({
         return "{ [object globalThis] }";
       }
       if (!isDate(obj) && !isRegExp(obj)) {
-        var ys = arrObjKeys(obj, inspect);
+        var ys = arrObjKeys(obj, inspect2);
         var isPlainObject = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
         var protoTag = obj instanceof Object ? "" : "null prototype";
         var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr(obj), 8, -1) : protoTag ? "Object" : "";
@@ -11483,13 +11491,13 @@ var require_object_inspect = __commonJS({
       return lineJoiner + $join.call(xs, "," + lineJoiner) + "\n" + indent.prev;
     }
     __name(indentedJoin, "indentedJoin");
-    function arrObjKeys(obj, inspect) {
+    function arrObjKeys(obj, inspect2) {
       var isArr = isArray(obj);
       var xs = [];
       if (isArr) {
         xs.length = obj.length;
         for (var i = 0; i < obj.length; i++) {
-          xs[i] = has(obj, i) ? inspect(obj[i], obj) : "";
+          xs[i] = has(obj, i) ? inspect2(obj[i], obj) : "";
         }
       }
       var syms = typeof gOPS === "function" ? gOPS(obj) : [];
@@ -11510,15 +11518,15 @@ var require_object_inspect = __commonJS({
         if (hasShammedSymbols && symMap["$" + key] instanceof Symbol) {
           continue;
         } else if ($test.call(/[^\w$]/, key)) {
-          xs.push(inspect(key, obj) + ": " + inspect(obj[key], obj));
+          xs.push(inspect2(key, obj) + ": " + inspect2(obj[key], obj));
         } else {
-          xs.push(key + ": " + inspect(obj[key], obj));
+          xs.push(key + ": " + inspect2(obj[key], obj));
         }
       }
       if (typeof gOPS === "function") {
         for (var j = 0; j < syms.length; j++) {
           if (isEnumerable.call(obj, syms[j])) {
-            xs.push("[" + inspect(syms[j]) + "]: " + inspect(obj[syms[j]], obj));
+            xs.push("[" + inspect2(syms[j]) + "]: " + inspect2(obj[syms[j]], obj));
           }
         }
       }
@@ -11532,7 +11540,7 @@ var require_object_inspect = __commonJS({
 var require_side_channel_list = __commonJS({
   "../node_modules/side-channel-list/index.js"(exports2, module2) {
     "use strict";
-    var inspect = require_object_inspect();
+    var inspect2 = require_object_inspect();
     var $TypeError = require_type();
     var listGetNode = /* @__PURE__ */ __name(function(list, key, isDelete) {
       var prev = list;
@@ -11586,7 +11594,7 @@ var require_side_channel_list = __commonJS({
       var channel = {
         assert: /* @__PURE__ */ __name(function(key) {
           if (!channel.has(key)) {
-            throw new $TypeError("Side channel does not contain " + inspect(key));
+            throw new $TypeError("Side channel does not contain " + inspect2(key));
           }
         }, "assert"),
         "delete": /* @__PURE__ */ __name(function(key) {
@@ -12446,7 +12454,7 @@ var require_side_channel_map = __commonJS({
     "use strict";
     var GetIntrinsic = require_get_intrinsic();
     var callBound = require_call_bound();
-    var inspect = require_object_inspect();
+    var inspect2 = require_object_inspect();
     var $TypeError = require_type();
     var $Map = GetIntrinsic("%Map%", true);
     var $mapGet = callBound("Map.prototype.get", true);
@@ -12460,7 +12468,7 @@ var require_side_channel_map = __commonJS({
       var channel = {
         assert: /* @__PURE__ */ __name(function(key) {
           if (!channel.has(key)) {
-            throw new $TypeError("Side channel does not contain " + inspect(key));
+            throw new $TypeError("Side channel does not contain " + inspect2(key));
           }
         }, "assert"),
         "delete": /* @__PURE__ */ __name(function(key) {
@@ -12502,7 +12510,7 @@ var require_side_channel_weakmap = __commonJS({
     "use strict";
     var GetIntrinsic = require_get_intrinsic();
     var callBound = require_call_bound();
-    var inspect = require_object_inspect();
+    var inspect2 = require_object_inspect();
     var getSideChannelMap = require_side_channel_map();
     var $TypeError = require_type();
     var $WeakMap = GetIntrinsic("%WeakMap%", true);
@@ -12518,7 +12526,7 @@ var require_side_channel_weakmap = __commonJS({
         var channel = {
           assert: /* @__PURE__ */ __name(function(key) {
             if (!channel.has(key)) {
-              throw new $TypeError("Side channel does not contain " + inspect(key));
+              throw new $TypeError("Side channel does not contain " + inspect2(key));
             }
           }, "assert"),
           "delete": /* @__PURE__ */ __name(function(key) {
@@ -12574,7 +12582,7 @@ var require_side_channel = __commonJS({
   "../node_modules/side-channel/index.js"(exports2, module2) {
     "use strict";
     var $TypeError = require_type();
-    var inspect = require_object_inspect();
+    var inspect2 = require_object_inspect();
     var getSideChannelList = require_side_channel_list();
     var getSideChannelMap = require_side_channel_map();
     var getSideChannelWeakMap = require_side_channel_weakmap();
@@ -12584,7 +12592,7 @@ var require_side_channel = __commonJS({
       var channel = {
         assert: /* @__PURE__ */ __name(function(key) {
           if (!channel.has(key)) {
-            throw new $TypeError("Side channel does not contain " + inspect(key));
+            throw new $TypeError("Side channel does not contain " + inspect2(key));
           }
         }, "assert"),
         "delete": /* @__PURE__ */ __name(function(key) {
@@ -28421,7 +28429,7 @@ Best,
 var require_delayed_stream = __commonJS({
   "../node_modules/delayed-stream/lib/delayed_stream.js"(exports2, module2) {
     var Stream = require("stream").Stream;
-    var util = require("util");
+    var util2 = require("util");
     module2.exports = DelayedStream;
     function DelayedStream() {
       this.source = null;
@@ -28433,7 +28441,7 @@ var require_delayed_stream = __commonJS({
       this._bufferedEvents = [];
     }
     __name(DelayedStream, "DelayedStream");
-    util.inherits(DelayedStream, Stream);
+    util2.inherits(DelayedStream, Stream);
     DelayedStream.create = function(source, options) {
       var delayedStream = new this();
       options = options || {};
@@ -28512,7 +28520,7 @@ var require_delayed_stream = __commonJS({
 // ../node_modules/combined-stream/lib/combined_stream.js
 var require_combined_stream = __commonJS({
   "../node_modules/combined-stream/lib/combined_stream.js"(exports2, module2) {
-    var util = require("util");
+    var util2 = require("util");
     var Stream = require("stream").Stream;
     var DelayedStream = require_delayed_stream();
     module2.exports = CombinedStream;
@@ -28529,7 +28537,7 @@ var require_combined_stream = __commonJS({
       this._pendingNext = false;
     }
     __name(CombinedStream, "CombinedStream");
-    util.inherits(CombinedStream, Stream);
+    util2.inherits(CombinedStream, Stream);
     CombinedStream.create = function(options) {
       var combinedStream = new this();
       options = options || {};
@@ -37589,7 +37597,7 @@ var require_form_data = __commonJS({
   "../node_modules/axios/node_modules/form-data/lib/form_data.js"(exports2, module2) {
     "use strict";
     var CombinedStream = require_combined_stream();
-    var util = require("util");
+    var util2 = require("util");
     var path2 = require("path");
     var http = require("http");
     var https = require("https");
@@ -37616,7 +37624,7 @@ var require_form_data = __commonJS({
       }
     }
     __name(FormData2, "FormData");
-    util.inherits(FormData2, CombinedStream);
+    util2.inherits(FormData2, CombinedStream);
     FormData2.LINE_BREAK = "\r\n";
     FormData2.DEFAULT_CONTENT_TYPE = "application/octet-stream";
     FormData2.prototype.append = function(field, value, options) {
@@ -38582,14 +38590,14 @@ var require_supports_color = __commonJS({
 var require_node2 = __commonJS({
   "../node_modules/debug/src/node.js"(exports2, module2) {
     var tty = require("tty");
-    var util = require("util");
+    var util2 = require("util");
     exports2.init = init;
     exports2.log = log;
     exports2.formatArgs = formatArgs;
     exports2.save = save;
     exports2.load = load;
     exports2.useColors = useColors;
-    exports2.destroy = util.deprecate(
+    exports2.destroy = util2.deprecate(
       () => {
       },
       "Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."
@@ -38723,7 +38731,7 @@ var require_node2 = __commonJS({
     }
     __name(getDate, "getDate");
     function log(...args) {
-      return process.stderr.write(util.formatWithOptions(exports2.inspectOpts, ...args) + "\n");
+      return process.stderr.write(util2.formatWithOptions(exports2.inspectOpts, ...args) + "\n");
     }
     __name(log, "log");
     function save(namespaces) {
@@ -38750,11 +38758,11 @@ var require_node2 = __commonJS({
     var { formatters } = module2.exports;
     formatters.o = function(v) {
       this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
+      return util2.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
     };
     formatters.O = function(v) {
       this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts);
+      return util2.inspect(v, this.inspectOpts);
     };
   }
 });
@@ -39318,7 +39326,7 @@ var require_axios = __commonJS({
     var http = require("http");
     var https = require("https");
     var http2 = require("http2");
-    var util = require("util");
+    var util2 = require("util");
     var followRedirects = require_follow_redirects();
     var zlib = require("zlib");
     var stream = require("stream");
@@ -39334,7 +39342,7 @@ var require_axios = __commonJS({
     var http__default = /* @__PURE__ */ _interopDefaultLegacy(http);
     var https__default = /* @__PURE__ */ _interopDefaultLegacy(https);
     var http2__default = /* @__PURE__ */ _interopDefaultLegacy(http2);
-    var util__default = /* @__PURE__ */ _interopDefaultLegacy(util);
+    var util__default = /* @__PURE__ */ _interopDefaultLegacy(util2);
     var followRedirects__default = /* @__PURE__ */ _interopDefaultLegacy(followRedirects);
     var zlib__default = /* @__PURE__ */ _interopDefaultLegacy(zlib);
     var stream__default = /* @__PURE__ */ _interopDefaultLegacy(stream);
@@ -49179,7 +49187,7 @@ var require_utils5 = __commonJS({
         prMode: getQodanaBooleanArg("MR_MODE", true),
         pushFixes,
         commitMessage: getQodanaStringArg("COMMIT_MESSAGE", "\u{1F916} Apply quick-fixes by Qodana"),
-        useNightly: getQodanaBooleanArg("USE_NIGHTLY", false),
+        nightlyVersion: getQodanaStringArg("NIGHTLY_VERSION", ""),
         postComment: getQodanaBooleanArg("POST_MR_COMMENT", true),
         useCaches: getQodanaBooleanArg("USE_CACHES", true),
         // not used by GitLab
@@ -49316,13 +49324,13 @@ Stderr: ${result.stderr}`);
       });
     }
     __name(isCliInstalled, "isCliInstalled");
-    function installCli(useNightly) {
+    function installCli(nightlyVersion) {
       return __awaiter2(this, void 0, void 0, function* () {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const nightlyTag = useNightly ? yield (0, qodana_12.getLatestNightlyTag)() : "";
+        const nightlyTag = yield (0, qodana_12.getNightlyTag)(nightlyVersion);
         const temp = yield downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, nightlyTag));
-        if (!useNightly) {
+        if (!nightlyVersion) {
           const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
           const actualChecksum = (0, qodana_12.sha256sum)(temp);
           if (actualChecksum !== expectedChecksum) {
@@ -49346,11 +49354,11 @@ Stderr: ${result.stderr}`);
       });
     }
     __name(installCli, "installCli");
-    function prepareAgent(useNightly) {
+    function prepareAgent(nightlyVersion) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!(yield isCliInstalled())) {
           debug("CLI is not installed, installing...");
-          yield installCli(useNightly);
+          yield installCli(nightlyVersion);
         } else {
           debug("CLI is already installed, skipping installation");
         }
@@ -49725,7 +49733,7 @@ function main() {
       fs3.mkdirSync(inputs.resultsDir, { recursive: true });
       fs3.mkdirSync(inputs.cacheDir, { recursive: true });
       (0, utils_1.prepareCaches)(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs.useNightly);
+      yield (0, utils_1.prepareAgent)(inputs.nightlyVersion);
       const exitCode = yield (0, utils_1.qodanaScan)();
       yield Promise.all([
         (0, output_1.publishOutput)((0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode)),

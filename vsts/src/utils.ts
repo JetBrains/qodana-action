@@ -44,7 +44,7 @@ import {
   getQodanaSha256,
   getQodanaSha256MismatchMessage,
   getQodanaUrl,
-  getLatestNightlyTag,
+  getNightlyTag,
   Inputs,
   isNativeMode,
   NONE,
@@ -79,7 +79,7 @@ export function getInputs(): Inputs {
     uploadResult: tl.getBoolInput('uploadResult', false),
     uploadSarif: tl.getBoolInput('uploadSarif', false),
     artifactName: tl.getInput('artifactName', false) || 'qodana-report',
-    useNightly: tl.getBoolInput('useNightly', false),
+    nightlyVersion: tl.getInput('nightlyVersion', false) || '',
     prMode: tl.getBoolInput('prMode', false),
     postComment: tl.getBoolInput('postPrComment', false),
     pushFixes: tl.getInput('pushFixes', false) || 'none',
@@ -136,17 +136,17 @@ export async function qodana(args: string[] = []): Promise<number> {
 /**
  * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
  * @param args qodana arguments
- * @param useNightly whether to use a nightly version of Qodana CLI
+ * @param nightlyVersion nightly version to use (e.g. '2026.2'), empty for stable
  */
 export async function prepareAgent(
   args: string[],
-  useNightly = false
+  nightlyVersion = ''
 ): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
-  const nightlyTag = useNightly ? await getLatestNightlyTag() : ''
+  const nightlyTag = await getNightlyTag(nightlyVersion)
   const temp = await tool.downloadTool(getQodanaUrl(arch, platform, nightlyTag))
-  if (!useNightly) {
+  if (!nightlyVersion) {
     const expectedChecksum = getQodanaSha256(arch, platform)
     const actualChecksum = sha256sum(temp)
     if (expectedChecksum !== actualChecksum) {

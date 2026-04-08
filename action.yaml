@@ -65,10 +65,10 @@ inputs:
     description: 'Commit message for the commit with quick-fixes. Not used if `push-fixes` is set to `none`'
     required: false
     default: "🤖 Apply quick-fixes by Qodana"
-  use-nightly:
-    description: 'Use unstable Qodana CLI nightly'
+  nightly-version:
+    description: 'Qodana CLI nightly version to use (e.g. 2026.2 or latest). Downloads CLI from tag v{version}-nightly.'
     required: false
-    default: "false"
+    default: ""
     deprecationMessage: 'This option is for development purposes only. Do not use it in production.'
 runs:
   using: 'node24'
