@@ -81735,7 +81735,7 @@ var require_utils4 = __commonJS({
         uploadResult: tl2.getBoolInput("uploadResult", false),
         uploadSarif: tl2.getBoolInput("uploadSarif", false),
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
-        useNightly: tl2.getBoolInput("useNightly", false),
+        nightlyVersion: tl2.getInput("nightlyVersion", false) || "",
         prMode: tl2.getBoolInput("prMode", false),
         postComment: tl2.getBoolInput("postPrComment", false),
         pushFixes: tl2.getInput("pushFixes", false) || "none",
@@ -81775,11 +81775,12 @@ var require_utils4 = __commonJS({
       });
     }
     function prepareAgent(args_1) {
-      return __awaiter2(this, arguments, void 0, function* (args, useNightly = false) {
+      return __awaiter2(this, arguments, void 0, function* (args, nightlyVersion = "") {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, useNightly));
-        if (!useNightly) {
+        const nightlyTag = yield (0, qodana_12.getNightlyTag)(nightlyVersion);
+        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, nightlyTag));
+        if (!nightlyVersion) {
           const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
           const actualChecksum = (0, qodana_12.sha256sum)(temp);
           if (expectedChecksum !== actualChecksum) {
@@ -82169,7 +82170,7 @@ function main() {
       const inputs = (0, utils_1.getInputs)();
       tl.mkdirP(inputs.resultsDir);
       tl.mkdirP(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs.args, inputs.useNightly);
+      yield (0, utils_1.prepareAgent)(inputs.args, inputs.nightlyVersion);
       const exitCode = yield (0, utils_1.qodana)();
       yield Promise.all([
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage),
