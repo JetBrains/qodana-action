@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 JetBrains s.r.o.
+ * Copyright 2021-2026 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,16 +97,16 @@ describe('getInputs cache key native mode suffix', () => {
   it('appends -native-false when args have no native flags', () => {
     setupCoreMock(
       '',
-      'qodana-2025.3-refs/heads/main-abc',
-      'qodana-2025.3-refs/heads/main'
+      'qodana-2026.1-refs/heads/main-abc',
+      'qodana-2026.1-refs/heads/main'
     )
     const {getInputs} = require('../src/utils')
     const inputs = getInputs()
     expect(inputs.primaryCacheKey).toBe(
-      'qodana-2025.3-refs/heads/main-abc-native-false'
+      'qodana-2026.1-refs/heads/main-abc-native-false'
     )
     expect(inputs.additionalCacheKey).toBe(
-      'qodana-2025.3-refs/heads/main-native-false'
+      'qodana-2026.1-refs/heads/main-native-false'
     )
   })
 

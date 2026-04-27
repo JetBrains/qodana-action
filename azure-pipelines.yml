@@ -11,7 +11,7 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-  - task: QodanaScan@2025
+  - task: QodanaScan@2026
     displayName: 'Run Qodana Scan'
     env:
       QODANA_BRANCH: azure-main

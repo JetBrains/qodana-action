@@ -34,13 +34,13 @@ parameters:
       Optional.
   primary-cache-key:
     type: string
-    default: qodana-2025.3-<< pipeline.git.branch >>-<< pipeline.git.revision >>
+    default: qodana-2026.1-<< pipeline.git.branch >>-<< pipeline.git.revision >>
     description: >
       Allows customizing the primary cache hash.
       Optional.
   additional-cache-key:
     type: string
-    default: qodana-2025.3-<< pipeline.git.branch >>
+    default: qodana-2026.1-<< pipeline.git.branch >>
     description: >
       Allows customizing the additional cache hash.
       Optional.
@@ -53,12 +53,12 @@ steps:
       name: Qodana Scan
       command: |
         set -e
-        QODANA_SHA_256=6490b32ad41a0e0c58c849b6141b235245204c0d2747b50d852c5761a0f091a5
-        CLI_DIRECTORY=/tmp/cache/qodana-cli/2025.3.2
+        QODANA_SHA_256=80c13b93b3f3392a5f69b88a581d1302d897d854a472d933fd17a449a70bc60e
+        CLI_DIRECTORY=/tmp/cache/qodana-cli/2026.1.0
         mkdir -p $CLI_DIRECTORY
         if [[ ! -x "$CLI_DIRECTORY/qodana" ]]; then
           curl -fsSL https://jb.gg/qodana-cli/install | bash -s -- \
-          v2025.3.2 $CLI_DIRECTORY \
+          v2026.1.0 $CLI_DIRECTORY \
           1> /dev/null
         fi
         echo "$QODANA_SHA_256 $CLI_DIRECTORY/qodana" | sha256sum -c

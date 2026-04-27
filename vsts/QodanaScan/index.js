@@ -37,14 +37,14 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2025.3.2";
+    version = "2026.1.0";
     checksum = {
-      windows_x86_64: "f536d158ca4d3a7af17f9bebe3210a22e0fb664910ac31e91813898dbafd7dea",
-      linux_arm64: "ce5dc17205a3f7537d38552453585c628929bccc645f5bba3961953a59680aa9",
-      darwin_arm64: "8f7d2a8d374146e87f70a450292882a34989643da0521e22a3e6104c752b3c82",
-      darwin_x86_64: "e24806fc15b3fd2415c98243d55db6023b425fdf06ab8ff145cd04fbc96330a3",
-      windows_arm64: "6fe4e2add0880ef910d248f2896df1d6421661dd25f6e6813fa2f8c1a3180db7",
-      linux_x86_64: "f27e2d2cb134eda913945e9e1aa95f3c43a5843b002b0cb9f04219c911b79399"
+      windows_x86_64: "c1cc5e885071ac4a15aa8e1d6e292ad6cf77990dceafa15debb1c203145a37e8",
+      linux_arm64: "dc9b3e5e4a6013f27e90d9413f5ed75a09220a05cd338e4b33f53b020b3a2ebc",
+      darwin_arm64: "f2dc679d5b94ecf3cca1181da6d2f1a3ebd62e8d8b5f395188a2d2bd5a293a2a",
+      darwin_x86_64: "3a5667566531d2b9868e0a30175ad0471e49dc5ad24999fd7b3ddc9f39aa8412",
+      windows_arm64: "5961b11af07edd853952f819c2fdc8f12b09a732f784e39d5c273589a87c79d3",
+      linux_x86_64: "b6dd245734c3b0854a448036344527fb2d05b343b36498a0e554c4e0399892e2"
     };
   }
 });
@@ -11713,12 +11713,27 @@ var require_utils2 = __commonJS({
   "../node_modules/qs/lib/utils.js"(exports2, module2) {
     "use strict";
     var formats = require_formats();
+    var getSideChannel = require_side_channel();
     var has3 = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
+    var overflowChannel = getSideChannel();
+    var markOverflow = function markOverflow2(obj, maxIndex) {
+      overflowChannel.set(obj, maxIndex);
+      return obj;
+    };
+    var isOverflow = function isOverflow2(obj) {
+      return overflowChannel.has(obj);
+    };
+    var getMaxIndex = function getMaxIndex2(obj) {
+      return overflowChannel.get(obj);
+    };
+    var setMaxIndex = function setMaxIndex2(obj, maxIndex) {
+      overflowChannel.set(obj, maxIndex);
+    };
     var hexTable = (function() {
       var array = [];
       for (var i = 0; i < 256; ++i) {
-        array.push("%" + ((i < 16 ? "0" : "") + i.toString(16)).toUpperCase());
+        array[array.length] = "%" + ((i < 16 ? "0" : "") + i.toString(16)).toUpperCase();
       }
       return array;
     })();
@@ -11730,7 +11745,7 @@ var require_utils2 = __commonJS({
           var compacted = [];
           for (var j = 0; j < obj.length; ++j) {
             if (typeof obj[j] !== "undefined") {
-              compacted.push(obj[j]);
+              compacted[compacted.length] = obj[j];
             }
           }
           item.obj[item.prop] = compacted;
@@ -11752,9 +11767,19 @@ var require_utils2 = __commonJS({
       }
       if (typeof source !== "object" && typeof source !== "function") {
         if (isArray(target)) {
-          target.push(source);
+          var nextIndex = target.length;
+          if (options && typeof options.arrayLimit === "number" && nextIndex > options.arrayLimit) {
+            return markOverflow(arrayToObject(target.concat(source), options), nextIndex);
+          }
+          target[nextIndex] = source;
         } else if (target && typeof target === "object") {
-          if (options && (options.plainObjects || options.allowPrototypes) || !has3.call(Object.prototype, source)) {
+          if (isOverflow(target)) {
+            var newIndex = getMaxIndex(target) + 1;
+            target[newIndex] = source;
+            setMaxIndex(target, newIndex);
+          } else if (options && options.strictMerge) {
+            return [target, source];
+          } else if (options && (options.plainObjects || options.allowPrototypes) || !has3.call(Object.prototype, source)) {
             target[source] = true;
           }
         } else {
@@ -11763,7 +11788,20 @@ var require_utils2 = __commonJS({
         return target;
       }
       if (!target || typeof target !== "object") {
-        return [target].concat(source);
+        if (isOverflow(source)) {
+          var sourceKeys = Object.keys(source);
+          var result2 = options && options.plainObjects ? { __proto__: null, 0: target } : { 0: target };
+          for (var m = 0; m < sourceKeys.length; m++) {
+            var oldKey = parseInt(sourceKeys[m], 10);
+            result2[oldKey + 1] = source[sourceKeys[m]];
+          }
+          return markOverflow(result2, getMaxIndex(source) + 1);
+        }
+        var combined = [target].concat(source);
+        if (options && typeof options.arrayLimit === "number" && combined.length > options.arrayLimit) {
+          return markOverflow(arrayToObject(combined, options), combined.length - 1);
+        }
+        return combined;
       }
       var mergeTarget = target;
       if (isArray(target) && !isArray(source)) {
@@ -11776,7 +11814,7 @@ var require_utils2 = __commonJS({
             if (targetItem && typeof targetItem === "object" && item && typeof item === "object") {
               target[i] = merge2(targetItem, item, options);
             } else {
-              target.push(item);
+              target[target.length] = item;
             }
           } else {
             target[i] = item;
@@ -11790,6 +11828,15 @@ var require_utils2 = __commonJS({
           acc[key] = merge2(acc[key], value, options);
         } else {
           acc[key] = value;
+        }
+        if (isOverflow(source) && !isOverflow(acc)) {
+          markOverflow(acc, getMaxIndex(source));
+        }
+        if (isOverflow(acc)) {
+          var keyNum = parseInt(key, 10);
+          if (String(keyNum) === key && keyNum >= 0 && keyNum > getMaxIndex(acc)) {
+            setMaxIndex(acc, keyNum);
+          }
         }
         return acc;
       }, mergeTarget);
@@ -11868,8 +11915,8 @@ var require_utils2 = __commonJS({
           var key = keys2[j];
           var val = obj[key];
           if (typeof val === "object" && val !== null && refs.indexOf(val) === -1) {
-            queue.push({ obj, prop: key });
-            refs.push(val);
+            queue[queue.length] = { obj, prop: key };
+            refs[refs.length] = val;
           }
         }
       }
@@ -11885,14 +11932,24 @@ var require_utils2 = __commonJS({
       }
       return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
     };
-    var combine = function combine2(a, b) {
-      return [].concat(a, b);
+    var combine = function combine2(a, b, arrayLimit, plainObjects) {
+      if (isOverflow(a)) {
+        var newIndex = getMaxIndex(a) + 1;
+        a[newIndex] = b;
+        setMaxIndex(a, newIndex);
+        return a;
+      }
+      var result2 = [].concat(a, b);
+      if (result2.length > arrayLimit) {
+        return markOverflow(arrayToObject(result2, { plainObjects }), result2.length - 1);
+      }
+      return result2;
     };
     var maybeMap = function maybeMap2(val, fn) {
       if (isArray(val)) {
         var mapped = [];
         for (var i = 0; i < val.length; i += 1) {
-          mapped.push(fn(val[i]));
+          mapped[mapped.length] = fn(val[i]);
         }
         return mapped;
       }
@@ -11906,7 +11963,9 @@ var require_utils2 = __commonJS({
       decode,
       encode,
       isBuffer,
+      isOverflow,
       isRegExp,
+      markOverflow,
       maybeMap,
       merge
     };
@@ -12223,6 +12282,7 @@ var require_parse = __commonJS({
       parseArrays: true,
       plainObjects: false,
       strictDepth: false,
+      strictMerge: true,
       strictNullHandling: false,
       throwOnLimitExceeded: false
     };
@@ -12284,16 +12344,18 @@ var require_parse = __commonJS({
           val = options.strictNullHandling ? null : "";
         } else {
           key = options.decoder(part.slice(0, pos), defaults.decoder, charset, "key");
-          val = utils.maybeMap(
-            parseArrayValue(
-              part.slice(pos + 1),
-              options,
-              isArray(obj[key]) ? obj[key].length : 0
-            ),
-            function(encodedVal) {
-              return options.decoder(encodedVal, defaults.decoder, charset, "value");
-            }
-          );
+          if (key !== null) {
+            val = utils.maybeMap(
+              parseArrayValue(
+                part.slice(pos + 1),
+                options,
+                isArray(obj[key]) ? obj[key].length : 0
+              ),
+              function(encodedVal) {
+                return options.decoder(encodedVal, defaults.decoder, charset, "value");
+              }
+            );
+          }
         }
         if (val && options.interpretNumericEntities && charset === "iso-8859-1") {
           val = interpretNumericEntities(String(val));
@@ -12301,11 +12363,24 @@ var require_parse = __commonJS({
         if (part.indexOf("[]=") > -1) {
           val = isArray(val) ? [val] : val;
         }
-        var existing = has3.call(obj, key);
-        if (existing && options.duplicates === "combine") {
-          obj[key] = utils.combine(obj[key], val);
-        } else if (!existing || options.duplicates === "last") {
-          obj[key] = val;
+        if (options.comma && isArray(val) && val.length > options.arrayLimit) {
+          if (options.throwOnLimitExceeded) {
+            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+          }
+          val = utils.combine([], val, options.arrayLimit, options.plainObjects);
+        }
+        if (key !== null) {
+          var existing = has3.call(obj, key);
+          if (existing && (options.duplicates === "combine" || part.indexOf("[]=") > -1)) {
+            obj[key] = utils.combine(
+              obj[key],
+              val,
+              options.arrayLimit,
+              options.plainObjects
+            );
+          } else if (!existing || options.duplicates === "last") {
+            obj[key] = val;
+          }
         }
       }
       return obj;
@@ -12321,17 +12396,32 @@ var require_parse = __commonJS({
         var obj;
         var root2 = chain2[i];
         if (root2 === "[]" && options.parseArrays) {
-          obj = options.allowEmptyArrays && (leaf === "" || options.strictNullHandling && leaf === null) ? [] : utils.combine([], leaf);
+          if (utils.isOverflow(leaf)) {
+            obj = leaf;
+          } else {
+            obj = options.allowEmptyArrays && (leaf === "" || options.strictNullHandling && leaf === null) ? [] : utils.combine(
+              [],
+              leaf,
+              options.arrayLimit,
+              options.plainObjects
+            );
+          }
         } else {
           obj = options.plainObjects ? { __proto__: null } : {};
           var cleanRoot = root2.charAt(0) === "[" && root2.charAt(root2.length - 1) === "]" ? root2.slice(1, -1) : root2;
           var decodedRoot = options.decodeDotInKeys ? cleanRoot.replace(/%2E/g, ".") : cleanRoot;
           var index = parseInt(decodedRoot, 10);
+          var isValidArrayIndex = !isNaN(index) && root2 !== decodedRoot && String(index) === decodedRoot && index >= 0 && options.parseArrays;
           if (!options.parseArrays && decodedRoot === "") {
             obj = { 0: leaf };
-          } else if (!isNaN(index) && root2 !== decodedRoot && String(index) === decodedRoot && index >= 0 && (options.parseArrays && index <= options.arrayLimit)) {
+          } else if (isValidArrayIndex && index < options.arrayLimit) {
             obj = [];
             obj[index] = leaf;
+          } else if (isValidArrayIndex && options.throwOnLimitExceeded) {
+            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+          } else if (isValidArrayIndex) {
+            obj[index] = leaf;
+            utils.markOverflow(obj, index);
           } else if (decodedRoot !== "__proto__") {
             obj[decodedRoot] = leaf;
           }
@@ -12340,14 +12430,19 @@ var require_parse = __commonJS({
       }
       return leaf;
     };
-    var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
-      if (!givenKey) {
-        return;
-      }
+    var splitKeyIntoSegments = function splitKeyIntoSegments2(givenKey, options) {
       var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, "[$1]") : givenKey;
+      if (options.depth <= 0) {
+        if (!options.plainObjects && has3.call(Object.prototype, key)) {
+          if (!options.allowPrototypes) {
+            return;
+          }
+        }
+        return [key];
+      }
       var brackets = /(\[[^[\]]*])/;
       var child = /(\[[^[\]]*])/g;
-      var segment = options.depth > 0 && brackets.exec(key);
+      var segment = brackets.exec(key);
       var parent = segment ? key.slice(0, segment.index) : key;
       var keys2 = [];
       if (parent) {
@@ -12356,23 +12451,34 @@ var require_parse = __commonJS({
             return;
           }
         }
-        keys2.push(parent);
+        keys2[keys2.length] = parent;
       }
       var i = 0;
-      while (options.depth > 0 && (segment = child.exec(key)) !== null && i < options.depth) {
+      while ((segment = child.exec(key)) !== null && i < options.depth) {
         i += 1;
-        if (!options.plainObjects && has3.call(Object.prototype, segment[1].slice(1, -1))) {
+        var segmentContent = segment[1].slice(1, -1);
+        if (!options.plainObjects && has3.call(Object.prototype, segmentContent)) {
           if (!options.allowPrototypes) {
             return;
           }
         }
-        keys2.push(segment[1]);
+        keys2[keys2.length] = segment[1];
       }
       if (segment) {
         if (options.strictDepth === true) {
           throw new RangeError("Input depth exceeded depth option of " + options.depth + " and strictDepth is true");
         }
-        keys2.push("[" + key.slice(segment.index) + "]");
+        keys2[keys2.length] = "[" + key.slice(segment.index) + "]";
+      }
+      return keys2;
+    };
+    var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
+      if (!givenKey) {
+        return;
+      }
+      var keys2 = splitKeyIntoSegments(givenKey, options);
+      if (!keys2) {
+        return;
       }
       return parseObject(keys2, val, options, valuesParsed);
     };
@@ -12422,6 +12528,7 @@ var require_parse = __commonJS({
         parseArrays: opts.parseArrays !== false,
         plainObjects: typeof opts.plainObjects === "boolean" ? opts.plainObjects : defaults.plainObjects,
         strictDepth: typeof opts.strictDepth === "boolean" ? !!opts.strictDepth : defaults.strictDepth,
+        strictMerge: typeof opts.strictMerge === "boolean" ? !!opts.strictMerge : defaults.strictMerge,
         strictNullHandling: typeof opts.strictNullHandling === "boolean" ? opts.strictNullHandling : defaults.strictNullHandling,
         throwOnLimitExceeded: typeof opts.throwOnLimitExceeded === "boolean" ? opts.throwOnLimitExceeded : false
       };
@@ -14462,6 +14569,78 @@ var require_v4 = __commonJS({
   }
 });
 
+// ../node_modules/azure-pipelines-tool-lib/package.json
+var require_package = __commonJS({
+  "../node_modules/azure-pipelines-tool-lib/package.json"(exports2, module2) {
+    module2.exports = {
+      name: "azure-pipelines-tool-lib",
+      version: "2.0.12",
+      description: "Azure Pipelines Tool Installer Lib for CI/CD Tasks",
+      main: "tool.js",
+      scripts: {
+        build: "node make.js build",
+        test: "nyc --reporter=cobertura --reporter=html node make.js test",
+        sample: "node make.js sample",
+        units: "node make.js units"
+      },
+      repository: {
+        type: "git",
+        url: "git+https://github.com/microsoft/azure-pipelines-tool-lib.git"
+      },
+      keywords: [
+        "VSTS"
+      ],
+      author: "Microsoft",
+      license: "MIT",
+      bugs: {
+        url: "https://github.com/microsoft/azure-pipelines-tool-lib/issues"
+      },
+      homepage: "https://github.com/microsoft/azure-pipelines-tool-lib#readme",
+      dependencies: {
+        "@types/semver": "^5.3.0",
+        "@types/uuid": "^3.4.5",
+        "azure-pipelines-task-lib": "^5.2.7",
+        semver: "^5.7.0",
+        "semver-compare": "^1.0.0",
+        "typed-rest-client": "^1.8.6",
+        uuid: "^3.3.2"
+      },
+      devDependencies: {
+        "@types/mocha": "^5.2.7",
+        "@types/node": "^16.11.39",
+        "@types/shelljs": "^0.8.4",
+        "@types/xml2js": "^0.4.5",
+        mocha: "^6.2.3",
+        nock: "13.0.4",
+        shelljs: "^0.8.5",
+        typescript: "^4.0.5",
+        xml2js: "^0.4.23",
+        nyc: "^17.0.0"
+      }
+    };
+  }
+});
+
+// ../node_modules/azure-pipelines-tool-lib/lib.json
+var require_lib5 = __commonJS({
+  "../node_modules/azure-pipelines-tool-lib/lib.json"(exports2, module2) {
+    module2.exports = {
+      messages: {
+        TOOL_LIB_CachingTool: "Caching tool: %s %s %s",
+        "_TOOL_LIB_CachingTool.comment": "This informational log message indicates that a tool, that was just downloaded, is being copied into the cache directory. %s %s %s represent the tool name, version information, and processor architecture.",
+        TOOL_LIB_Downloading: "Downloading: %s",
+        "_TOOL_LIB_Downloading.comment": "This information log message indicates that a file is being downloaded. %s represents the URL being downloaded.",
+        TOOL_LIB_ExtractingArchive: "Extracting archive",
+        "_TOOL_LIB_ExtractingArchive.comment": "This informational log message indicates that an archive file is being extracted. For example, a .zip file, .7z file, or .tar.gz file.",
+        TOOL_LIB_FoundInCache: "Found tool in cache: %s %s %s",
+        "_TOOL_LIB_FoundInCache.comment": "This informational log message indicates that the request tool is already cached, and does not need to be downloaded again. %s %s %s represent the tool name, version information, and processor architecture.",
+        TOOL_LIB_PrependPath: "Prepending PATH environment variable with directory: %s",
+        "_TOOL_LIB_PrependPath.comment": "This informational log message indicates that a directory is being prepended to the front of the PATH environment variable. The directories specified by the PATH environment variable are used to resolve the location of command line tools."
+      }
+    };
+  }
+});
+
 // ../node_modules/azure-pipelines-tool-lib/tool.js
 var require_tool = __commonJS({
   "../node_modules/azure-pipelines-tool-lib/tool.js"(exports2) {
@@ -14501,10 +14680,13 @@ var require_tool = __commonJS({
     var process2 = require("process");
     var fs3 = require("fs");
     var semver = require_semver();
+    var util2 = require("util");
     var tl2 = require("azure-pipelines-task-lib/task");
     var cmp = require_semver_compare();
     var uuidV4 = require_v4();
-    var pkg = require(path2.join(__dirname, "package.json"));
+    var pkg = require_package();
+    var libJson = require_lib5();
+    var englishMessages = libJson.messages || {};
     var userAgent = "vsts-task-installer/" + pkg.version;
     var requestOptions = {
       // ignoreSslError: true,
@@ -14514,7 +14696,28 @@ var require_tool = __commonJS({
       allowRetries: true,
       maxRetries: 2
     };
-    tl2.setResourcePath(path2.join(__dirname, "lib.json"));
+    var localizationEnabled = false;
+    try {
+      const libJsonPath = path2.join(__dirname, "lib.json");
+      if (tl2.exist(libJsonPath)) {
+        tl2.setResourcePath(libJsonPath);
+        localizationEnabled = true;
+      } else {
+        tl2.debug("lib.json not found at expected path - using English fallback messages");
+      }
+    } catch (err) {
+      tl2.debug("Could not set resource path for lib.json: " + err + " - using English fallback messages");
+    }
+    function loc(key, ...params) {
+      if (!localizationEnabled) {
+        let template2 = englishMessages[key] || key;
+        if (params.length > 0) {
+          return util2.format(template2, ...params);
+        }
+        return template2;
+      }
+      return tl2.loc(key, ...params);
+    }
     function debug(message) {
       tl2.debug(message);
     }
@@ -14526,7 +14729,7 @@ var require_tool = __commonJS({
       } else if (!tl2.exist(toolPath) || !tl2.stats(toolPath).isDirectory()) {
         throw new Error("Directory does not exist: " + toolPath);
       }
-      console.log(tl2.loc("TOOL_LIB_PrependPath", toolPath));
+      console.log(loc("TOOL_LIB_PrependPath", toolPath));
       let newPath = toolPath + path2.delimiter + process2.env["PATH"];
       tl2.debug("new Path: " + newPath);
       process2.env["PATH"] = newPath;
@@ -14589,7 +14792,7 @@ var require_tool = __commonJS({
         let cachePath = path2.join(cacheRoot, toolName, versionSpec, arch);
         tl2.debug("checking cache: " + cachePath);
         if (tl2.exist(cachePath) && tl2.exist(`${cachePath}.complete`)) {
-          console.log(tl2.loc("TOOL_LIB_FoundInCache", toolName, versionSpec, arch));
+          console.log(loc("TOOL_LIB_FoundInCache", toolName, versionSpec, arch));
           toolPath = cachePath;
         } else {
           tl2.debug("not found");
@@ -14631,7 +14834,7 @@ var require_tool = __commonJS({
               destPath = path2.join(_getAgentTemp(), fileName);
             }
             tl2.mkdirP(path2.dirname(destPath));
-            console.log(tl2.loc("TOOL_LIB_Downloading", url.replace(/sig=[^&]*/, "sig=-REDACTED-")));
+            console.log(loc("TOOL_LIB_Downloading", url.replace(/sig=[^&]*/, "sig=-REDACTED-")));
             tl2.debug("destination " + destPath);
             if (fs3.existsSync(destPath)) {
               throw new Error("Destination file path already exists");
@@ -14751,7 +14954,7 @@ var require_tool = __commonJS({
       return __awaiter2(this, void 0, void 0, function* () {
         version2 = semver.clean(version2);
         arch = arch || os.arch();
-        console.log(tl2.loc("TOOL_LIB_CachingTool", tool, version2, arch));
+        console.log(loc("TOOL_LIB_CachingTool", tool, version2, arch));
         tl2.debug("source dir: " + sourceDir);
         if (!tl2.stats(sourceDir).isDirectory()) {
           throw new Error("sourceDir is not a directory");
@@ -14770,7 +14973,7 @@ var require_tool = __commonJS({
       return __awaiter2(this, void 0, void 0, function* () {
         version2 = semver.clean(version2);
         arch = arch || os.arch();
-        console.log(tl2.loc("TOOL_LIB_CachingTool", tool, version2, arch));
+        console.log(loc("TOOL_LIB_CachingTool", tool, version2, arch));
         tl2.debug("source file:" + sourceFile);
         if (!tl2.stats(sourceFile).isFile()) {
           throw new Error("sourceFile is not a file");
@@ -14792,7 +14995,7 @@ var require_tool = __commonJS({
         if (!file) {
           throw new Error("parameter 'file' is required");
         }
-        console.log(tl2.loc("TOOL_LIB_ExtractingArchive"));
+        console.log(loc("TOOL_LIB_ExtractingArchive"));
         dest = _createExtractFolder(dest);
         let originalCwd = process2.cwd();
         try {
@@ -14829,7 +15032,7 @@ var require_tool = __commonJS({
     exports2.extract7z = extract7z;
     function extractTar(file, destination) {
       return __awaiter2(this, void 0, void 0, function* () {
-        console.log(tl2.loc("TOOL_LIB_ExtractingArchive"));
+        console.log(loc("TOOL_LIB_ExtractingArchive"));
         let dest = _createExtractFolder(destination);
         let tr = tl2.tool("tar");
         tr.arg(["xC", dest, "-f", file]);
@@ -14843,7 +15046,7 @@ var require_tool = __commonJS({
         if (!file) {
           throw new Error("parameter 'file' is required");
         }
-        console.log(tl2.loc("TOOL_LIB_ExtractingArchive"));
+        console.log(loc("TOOL_LIB_ExtractingArchive"));
         let dest = _createExtractFolder(destination);
         if (process2.platform == "win32") {
           let escapedFile = file.replace(/'/g, "''").replace(/"|\n|\r/g, "");
@@ -81532,7 +81735,7 @@ var require_utils4 = __commonJS({
         uploadResult: tl2.getBoolInput("uploadResult", false),
         uploadSarif: tl2.getBoolInput("uploadSarif", false),
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
-        nightlyVersion: tl2.getInput("nightlyVersion", false) || "",
+        useNightly: tl2.getBoolInput("useNightly", false),
         prMode: tl2.getBoolInput("prMode", false),
         postComment: tl2.getBoolInput("postPrComment", false),
         pushFixes: tl2.getInput("pushFixes", false) || "none",
@@ -81572,12 +81775,11 @@ var require_utils4 = __commonJS({
       });
     }
     function prepareAgent(args_1) {
-      return __awaiter2(this, arguments, void 0, function* (args, nightlyVersion = "") {
+      return __awaiter2(this, arguments, void 0, function* (args, useNightly = false) {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const nightlyTag = yield (0, qodana_12.getNightlyTag)(nightlyVersion);
-        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, nightlyTag));
-        if (!nightlyVersion) {
+        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, useNightly));
+        if (!useNightly) {
           const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
           const actualChecksum = (0, qodana_12.sha256sum)(temp);
           if (expectedChecksum !== actualChecksum) {
@@ -81967,7 +82169,7 @@ function main() {
       const inputs = (0, utils_1.getInputs)();
       tl.mkdirP(inputs.resultsDir);
       tl.mkdirP(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs.args, inputs.nightlyVersion);
+      yield (0, utils_1.prepareAgent)(inputs.args, inputs.useNightly);
       const exitCode = yield (0, utils_1.qodana)();
       yield Promise.all([
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage),
