@@ -50,7 +50,7 @@ steps:
       restoreKeys: |
         native-$(nativeMode) | "$(Build.Repository.Name)" | "$(Build.SourceBranchName)"
         native-$(nativeMode) | "$(Build.Repository.Name)"
-  - task: QodanaScan@2025
+  - task: QodanaScan@2026
     inputs:
       args: '--within-docker=$(nativeMode)'
 ```
@@ -85,7 +85,7 @@ steps:
   - checkout: self
     fetchDepth: 0
     persistCredentials: true
-  - task: QodanaScan@2025
+  - task: QodanaScan@2026
     env:
       QODANA_TOKEN: $(QODANA_TOKEN)
     inputs:
@@ -106,7 +106,7 @@ To send the results to Qodana Cloud, all you need to do is to specify the `QODAN
    add `QODANA_TOKEN` variable to the `env` section of the `QodanaScan` task:
 
 ```yaml
-  - task: QodanaScan@2025
+  - task: QodanaScan@2026
     env:
       QODANA_TOKEN: $(QODANA_TOKEN)
 ```
