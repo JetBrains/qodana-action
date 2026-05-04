@@ -22,6 +22,12 @@ import type {Log, Result} from 'sarif'
 import {getWorkflowRunUrl, publishGitHubCheck} from './utils'
 import {getProblemPlural} from '../../common/output'
 import {parseRules, Rule} from '../../common/utils'
+import {
+  getLocationWithoutPrefix,
+  getPrefixesToRemove,
+  OriginalUriBaseIds,
+  PrefixesToRemove
+} from './sarifPaths'
 
 function getQodanaHelpString(): string {
   return `This result was published with [Qodana GitHub Action](${getWorkflowRunUrl()})`
@@ -117,11 +123,17 @@ export interface Annotation {
  * Converts a SARIF result to a GitHub Check Annotation.
  * @param result The SARIF log to convert.
  * @param rules The map of SARIF rule IDs to their descriptions.
+ * @param originalUriBaseIds The run's `originalUriBaseIds` (if any) used to
+ *   resolve relative URIs.
+ * @param prefixes Prefixes discovered for the run; stripped from resolved URIs
+ *   to produce workspace-relative annotation paths.
  * @returns GitHub Check annotations are created for each result.
  */
 function parseResult(
   result: Result,
-  rules: Map<string, Rule>
+  rules: Map<string, Rule>,
+  originalUriBaseIds: OriginalUriBaseIds,
+  prefixes: PrefixesToRemove
 ): Annotation | null {
   if (
     !result.locations ||
@@ -130,12 +142,19 @@ function parseResult(
   ) {
     return null
   }
-  const location = result.locations[0].physicalLocation
+  const sarifLocation = result.locations[0]
+  const location = sarifLocation.physicalLocation!
+  const resolvedPath = getLocationWithoutPrefix(
+    sarifLocation,
+    originalUriBaseIds,
+    prefixes
+  )
+  if (resolvedPath === null) return null
   const region = location.region
   return {
     message: result.message.markdown ?? result.message.text!,
     title: rules.get(result.ruleId!)?.shortDescription,
-    path: location.artifactLocation!.uri!,
+    path: resolvedPath,
     start_line: region?.startLine || 0,
     end_line: region?.endLine || region?.startLine || 1,
     start_column:
@@ -158,14 +177,26 @@ function parseResult(
 /**
  * Converts a SARIF from the given path to a GitHub Check Output.
  * @param path The SARIF path to convert.
+ * @param projectRoot Workspace root used to resolve report paths against the
+ *   on-disk project tree. Defaults to `GITHUB_WORKSPACE` (set by the GitHub
+ *   Actions runner) and falls back to the current working directory.
  * @returns GitHub Check Outputs with annotations are created for each result.
  */
-export function parseSarif(path: string): Output {
+export function parseSarif(
+  path: string,
+  projectRoot: string = process.env.GITHUB_WORKSPACE ?? process.cwd()
+): Output {
   const sarif: Log = JSON.parse(
     fs.readFileSync(path, {encoding: 'utf8'})
   ) as Log
   const run = sarif.runs[0]
   const rules = parseRules(run.tool)
+  const originalUriBaseIds = run.originalUriBaseIds ?? {}
+  const prefixes = getPrefixesToRemove(
+    run.results ?? [],
+    originalUriBaseIds,
+    projectRoot
+  )
   let title = 'No new problems found by '
   let annotations: Annotation[] = []
   if (run.results?.length) {
@@ -175,7 +206,7 @@ export function parseSarif(path: string): Output {
           result.baselineState !== 'unchanged' &&
           result.baselineState !== 'absent'
       )
-      .map(result => parseResult(result, rules))
+      .map(result => parseResult(result, rules, originalUriBaseIds, prefixes))
       .filter((a): a is Annotation => a !== null && a !== undefined)
     title = `${annotations.length} ${getProblemPlural(
       annotations.length

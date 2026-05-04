@@ -28404,10 +28404,7 @@ var require_gitlabApiProvider = __commonJS({
     var gitlabApi = null;
     function initApi() {
       const token = (0, utils_12.getEnvVariable)("QODANA_GITLAB_TOKEN");
-      let host = process.env["CI_SERVER_HOST"] || "https://gitlab.com";
-      if (!host.startsWith("https://")) {
-        host = `https://${host}`;
-      }
+      const host = process.env["CI_SERVER_URL"] || "https://gitlab.com";
       const gitlab = new rest_1.Gitlab({
         token,
         host
@@ -28509,7 +28506,7 @@ so that the job will upload the files as the job artifacts:
           const problemsDescriptions = (_a = problems.problemDescriptions) !== null && _a !== void 0 ? _a : [];
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : output_12.QODANA_CHECK_NAME;
           problems.summary = (0, output_12.getSummary)(toolName, projectDir, sourceDir, problemsDescriptions, coverageInfo, licensesInfo.packages, licensesInfo.licenses, reportUrl, isPrMode, exports2.DEPENDENCY_CHARS_LIMIT, exports2.VIEW_REPORT_OPTIONS);
-          if (postComment) {
+          if (isPrMode && postComment) {
             yield (0, utils_12.postResultsToPRComments)(toolName, sourceDir, problems.summary, problemsDescriptions.length != 0, postComment);
           }
         } catch (e) {
@@ -49074,7 +49071,8 @@ var require_utils5 = __commonJS({
     exports2.isCliInstalled = isCliInstalled;
     exports2.installCli = installCli;
     exports2.prepareAgent = prepareAgent;
-    exports2.qodana = qodana;
+    exports2.qodanaExec = qodanaExec;
+    exports2.qodanaScan = qodanaScan;
     exports2.prepareCaches = prepareCaches;
     exports2.uploadCache = uploadCache;
     exports2.uploadArtifacts = uploadArtifacts;
@@ -49097,24 +49095,39 @@ var require_utils5 = __commonJS({
     var tar = __importStar2(require_index_min());
     var path_1 = __importDefault(require("path"));
     var child_process_1 = require("child_process");
+    var node_util_1 = require("node:util");
+    (0, utils_12.setDeprecationWarningCallback)((message) => {
+      console.warn(`WARNING: ${message}`);
+    });
+    var cachedInputs = null;
+    var debug = (0, node_util_1.debuglog)("qodana:gitlab");
     function getInputs() {
+      var _a;
+      if (cachedInputs !== null) {
+        return cachedInputs;
+      }
       const rawArgs = getQodanaStringArg("ARGS", "");
+      debug(`Raw args: ${rawArgs}`);
       const argList = (0, utils_12.parseRawArguments)(rawArgs);
+      const qodanaDockerEnv = (_a = process.env.QODANA_DOCKER) !== null && _a !== void 0 ? _a : "";
+      if (qodanaDockerEnv === "" && !argList.includes("within-docker")) {
+        argList.push("--within-docker", "false");
+      }
       let pushFixes = getQodanaStringArg("PUSH_FIXES", "none");
       if (pushFixes === "merge-request") {
         pushFixes = "pull-request";
       }
-      return {
+      cachedInputs = {
         args: argList,
         // user given results and cache dirs are used in uploadCache, prepareCaches and uploadArtifacts
-        resultsDir: process.env.QODANA_RESULTS_DIR || `${baseDir()}/results`,
-        cacheDir: process.env.QODANA_CACHE_DIR || `${baseDir()}/cache`,
+        resultsDir: `${baseDir()}/results`,
+        cacheDir: `${baseDir()}/cache`,
         uploadResult: getQodanaBooleanArg("UPLOAD_RESULT", false),
         prMode: getQodanaBooleanArg("MR_MODE", true),
         pushFixes,
         commitMessage: getQodanaStringArg("COMMIT_MESSAGE", "\u{1F916} Apply quick-fixes by Qodana"),
-        useNightly: getQodanaBooleanArg("USE_NIGHTLY", false),
-        postComment: getQodanaBooleanArg("PUBLISH_COMMENT", true),
+        nightlyVersion: getQodanaStringArg("NIGHTLY_VERSION", ""),
+        postComment: getQodanaBooleanArg("POST_MR_COMMENT", true),
         useCaches: getQodanaBooleanArg("USE_CACHES", true),
         // not used by GitLab
         uploadSarif: false,
@@ -49126,6 +49139,8 @@ var require_utils5 = __commonJS({
         artifactName: "",
         workingDirectory: ""
       };
+      debug(`Got inputs: ${JSON.stringify(cachedInputs)}`);
+      return cachedInputs;
     }
     __name(getInputs, "getInputs");
     function baseDir() {
@@ -49138,35 +49153,53 @@ var require_utils5 = __commonJS({
     }
     __name(getQodanaStringArg, "getQodanaStringArg");
     function getQodanaBooleanArg(name, def) {
-      return def ? process.env[`QODANA_${name}`] !== "false" : process.env[`QODANA_${name}`] === "true";
+      var _a;
+      const value = (_a = process.env[`QODANA_${name}`]) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+      return def ? value !== "false" : value === "true";
     }
     __name(getQodanaBooleanArg, "getQodanaBooleanArg");
-    function getQodanaInputArg(name) {
-      return process.env[`INPUT_${name}`];
-    }
-    __name(getQodanaInputArg, "getQodanaInputArg");
     function execAsync(executable, args, ignoreReturnCode) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const command = `${executable} ${args.join(" ")}`;
         return new Promise((resolve, reject) => {
-          (0, child_process_1.exec)(command, (error, stdout, stderr) => {
-            if (error) {
-              console.error(`Failed to run command: ${command}: ${error.message}`);
-              if (ignoreReturnCode) {
-                resolve({
-                  returnCode: error.code || -1,
-                  stdout,
-                  stderr
-                });
+          let stdout = "";
+          let stderr = "";
+          const proc = (0, child_process_1.spawn)(executable, args);
+          proc.stdout.on("data", (data) => {
+            stdout += data.toString();
+          });
+          proc.stderr.on("data", (data) => {
+            stderr += data.toString();
+          });
+          proc.on("close", (code) => {
+            if (code !== 0) {
+              const token = process.env.QODANA_GITLAB_TOKEN || "";
+              let commandStr = `${executable} ${args.join(" ")}`;
+              if (token !== "") {
+                commandStr = commandStr.replace(token, "***");
               }
-              reject(new Error(stderr));
-            } else {
-              resolve({
-                returnCode: 0,
-                stdout,
-                stderr
-              });
+              console.warn(`Failed to run command: ${commandStr}: exit code ${code}`);
+              if (ignoreReturnCode) {
+                return resolve({ returnCode: code !== null && code !== void 0 ? code : -1, stdout, stderr });
+              }
+              return reject(new Error(`Failed to run command: ${commandStr}: exit code ${code}
+Stdout: ${stdout}
+Stderr: ${stderr}`));
             }
+            resolve({ returnCode: 0, stdout, stderr });
+          });
+          proc.on("error", (err) => {
+            const token = process.env.QODANA_GITLAB_TOKEN || "";
+            let commandStr = `${executable} ${args.join(" ")}`;
+            if (token !== "") {
+              commandStr = commandStr.replace(token, "***");
+            }
+            console.warn(`Failed to run command: ${commandStr}: ${err.message}`);
+            if (ignoreReturnCode) {
+              return resolve({ returnCode: -1, stdout, stderr });
+            }
+            return reject(new Error(`Failed to run command: ${commandStr}: ${err.message}
+Stdout: ${stdout}
+Stderr: ${stderr}`));
           });
         });
       });
@@ -49175,6 +49208,7 @@ var require_utils5 = __commonJS({
     function gitOutput(args_1) {
       return __awaiter2(this, arguments, void 0, function* (args, ignoreReturnCode = false) {
         const result = yield execAsync("git", args, true);
+        debug(`Git command with args ${args.join(" ")} output: ${(0, node_util_1.inspect)(result)})}`);
         if (result.returnCode !== 0 && ignoreReturnCode) {
           console.warn(`Git command failed: git ${args.join(" ")}
 Exit code: ${result.returnCode}
@@ -49201,7 +49235,7 @@ Stderr: ${result.stderr}`);
     __name(isMergeRequest, "isMergeRequest");
     function downloadTool(url) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const tempPath = `${os.tmpdir()}/archive`;
+        const tempPath = `${os.tmpdir()}/qodana-cli-${Date.now()}`;
         const writer = fs4.createWriteStream(tempPath);
         const response = yield (0, axios_1.default)({
           url,
@@ -49229,11 +49263,19 @@ Stderr: ${result.stderr}`);
       });
     }
     __name(isCliInstalled, "isCliInstalled");
-    function installCli(useNightly) {
+    function installCli(nightlyVersion) {
       return __awaiter2(this, void 0, void 0, function* () {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const temp = yield downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, useNightly));
+        const nightlyTag = yield (0, qodana_12.getNightlyTag)(nightlyVersion);
+        const temp = yield downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, nightlyTag));
+        if (!nightlyVersion) {
+          const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
+          const actualChecksum = (0, qodana_12.sha256sum)(temp);
+          if (actualChecksum !== expectedChecksum) {
+            throw new Error((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
+          }
+        }
         const extractRoot = `${os.tmpdir()}/qodana-cli`;
         fs4.mkdirSync(extractRoot, { recursive: true });
         if (process.platform === "win32") {
@@ -49245,44 +49287,27 @@ Stderr: ${result.stderr}`);
             f: temp
           });
         }
+        fs4.rmSync(temp, { force: true });
         const separator = process.platform === "win32" ? ";" : ":";
         process.env.PATH = process.env.PATH + separator + extractRoot;
       });
     }
     __name(installCli, "installCli");
-    function prepareAgent(inputs, useNightly) {
+    function prepareAgent(nightlyVersion) {
       return __awaiter2(this, void 0, void 0, function* () {
         if (!(yield isCliInstalled())) {
-          yield installCli(useNightly);
-        }
-        if (!(0, qodana_12.isNativeMode)(inputs.args)) {
-          const pull = yield qodana((0, qodana_12.getQodanaPullArgs)(inputs.args));
-          if (pull !== 0) {
-            throw new Error("Unable to run 'qodana pull' to download linter");
-          }
+          debug("CLI is not installed, installing...");
+          yield installCli(nightlyVersion);
+        } else {
+          debug("CLI is already installed, skipping installation");
         }
       });
     }
     __name(prepareAgent, "prepareAgent");
-    function qodana() {
-      return __awaiter2(this, arguments, void 0, function* (args = []) {
+    function qodanaExec(args) {
+      return __awaiter2(this, void 0, void 0, function* () {
+        debug(`Executing Qodana with arguments: ${(0, node_util_1.inspect)(args)}`);
         process.env = Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" });
-        if (args.length === 0) {
-          const inputs = getInputs();
-          args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
-          if (inputs.prMode && isMergeRequest()) {
-            const sha = yield getPrSha();
-            if (sha !== "") {
-              args.push("--commit", sha);
-            }
-          }
-          if (isMergeRequest()) {
-            const sourceBranch = process.env.QODANA_BRANCH || process.env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME;
-            if (sourceBranch) {
-              process.env.QODANA_BRANCH = sourceBranch;
-            }
-          }
-        }
         return new Promise((resolve) => {
           const proc = (0, child_process_1.spawn)(qodana_12.EXECUTABLE, args, { stdio: "inherit" });
           proc.on("close", (code, signal) => {
@@ -49300,7 +49325,27 @@ Stderr: ${result.stderr}`);
         });
       });
     }
-    __name(qodana, "qodana");
+    __name(qodanaExec, "qodanaExec");
+    function qodanaScan() {
+      return __awaiter2(this, void 0, void 0, function* () {
+        const inputs = getInputs();
+        const args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
+        if (inputs.prMode && isMergeRequest()) {
+          const sha = yield getPrSha();
+          if (sha !== "") {
+            args.push("--commit", sha);
+          }
+        }
+        if (isMergeRequest()) {
+          const sourceBranch = process.env.QODANA_BRANCH || process.env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME;
+          if (sourceBranch) {
+            process.env.QODANA_BRANCH = sourceBranch;
+          }
+        }
+        return qodanaExec(args);
+      });
+    }
+    __name(qodanaScan, "qodanaScan");
     function getPrSha() {
       return __awaiter2(this, void 0, void 0, function* () {
         try {
@@ -49314,7 +49359,7 @@ Stderr: ${result.stderr}`);
               console.warn(`Source or target branch is not defined, falling back to regular scan`);
               return "";
             }
-            yield gitOutput(["fetch", "origin"]);
+            yield git(["fetch", "origin"]);
             const output = yield gitOutput([
               "merge-base",
               "origin/" + targetBranch,
@@ -49331,14 +49376,17 @@ Stderr: ${result.stderr}`);
     }
     __name(getPrSha, "getPrSha");
     function getInitialCacheLocation() {
-      return getQodanaInputArg("CACHE_DIR") || `${process.env["CI_PROJECT_DIR"]}/.qodana/cache`;
+      return getQodanaStringArg("CACHE_DIR", `${process.env["CI_PROJECT_DIR"]}/.qodana/cache`);
     }
     __name(getInitialCacheLocation, "getInitialCacheLocation");
     function prepareCaches(cacheDir) {
       const initialCacheLocation = getInitialCacheLocation();
+      debug(`Initial cache location: ${initialCacheLocation}`);
       if (fs4.existsSync(initialCacheLocation)) {
+        debug(`Copying cache from ${initialCacheLocation} to ${cacheDir}`);
         fs4.cpSync(initialCacheLocation, cacheDir, { recursive: true });
-        fs4.rmSync(initialCacheLocation, { recursive: true });
+      } else {
+        debug(`No cache at location: ${initialCacheLocation}`);
       }
     }
     __name(prepareCaches, "prepareCaches");
@@ -49348,7 +49396,8 @@ Stderr: ${result.stderr}`);
       }
       try {
         const initialCacheLocation = getInitialCacheLocation();
-        fs4.cpSync(cacheDir, initialCacheLocation, { recursive: true });
+        debug(`Deleting initial cache at ${initialCacheLocation} and saving cache from ${cacheDir}`);
+        fs4.cpSync(cacheDir, initialCacheLocation, { recursive: true, force: true });
       } catch (e) {
         console.error(`Failed to upload cache: ${e.message}`);
       }
@@ -49356,13 +49405,14 @@ Stderr: ${result.stderr}`);
     __name(uploadCache, "uploadCache");
     function uploadArtifacts(resultsDir) {
       try {
-        const resultDir = getQodanaInputArg("RESULTS_DIR");
+        const resultDir = getQodanaStringArg("RESULTS_DIR", ".qodana/results");
         const ciProjectDir = process.env["CI_PROJECT_DIR"];
         if (!ciProjectDir) {
           console.warn("CI_PROJECT_DIR is not defined, skipping artifacts upload");
           return;
         }
-        const resultsArtifactPath = path_1.default.join(process.env["CI_PROJECT_DIR"], resultDir ? resultDir : ".qodana/results");
+        const resultsArtifactPath = path_1.default.join(ciProjectDir, resultDir);
+        debug(`Copying artifacts from ${resultsDir} to ${resultsArtifactPath}`);
         fs4.cpSync(resultsDir, resultsArtifactPath, { recursive: true });
       } catch (e) {
         console.error(`Failed to upload artifacts: ${e.message}`);
@@ -49461,14 +49511,13 @@ ${comment_tag_pattern}`;
           yield git(["config", "user.email", output_12.COMMIT_EMAIL]);
           yield git(["add", "."]);
           commitMessage = commitMessage + "\n\n[skip-ci]";
-          const output = yield gitOutput(["commit", "-m", `'${commitMessage}'`], true);
+          const output = yield gitOutput(["commit", "-m", commitMessage], true);
           if (output.returnCode !== 0) {
-            console.warn(`Failed to commit fixes: ${output.stderr}`);
             return;
           }
           const statusOutput = yield gitOutput(["status", "--porcelain"], true);
           if (statusOutput.stdout.trim() !== "") {
-            console.log(`Git status before pull --rebase:
+            console.warn(`Git status before pull --rebase:
 ${statusOutput.stdout}`);
           }
           const pullReturnCode = yield git([
@@ -49502,13 +49551,22 @@ ${statusOutput.stdout}`);
     __name(pushQuickFixes, "pushQuickFixes");
     function gitPush(branch, force) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const gitRepo = (yield gitOutput(["config", "--get", "remote.origin.url"])).stdout.trim().replace("git@", "");
-        const url = `https://${output_12.COMMIT_USER}:${process.env.QODANA_GITLAB_TOKEN}@${gitRepo.split("@")[1]}`;
-        if (force) {
-          yield git(["push", "--force", "-o", "ci.skip", url, branch]);
-        } else {
-          yield git(["push", "-o", "ci.skip", url, branch]);
+        const serverUrl = process.env.CI_SERVER_URL;
+        const projectPath = process.env.CI_PROJECT_PATH;
+        if (!serverUrl || !projectPath) {
+          throw new Error("Missing GitLab CI predefined variables: CI_SERVER_URL and CI_PROJECT_PATH");
         }
+        const token = process.env.QODANA_GITLAB_TOKEN || "";
+        const url = new URL(`${serverUrl}/${projectPath}.git`);
+        url.username = output_12.COMMIT_USER;
+        url.password = token;
+        const pushUrl = url.toString();
+        const pushArgs = ["push"];
+        if (force) {
+          pushArgs.push("--force");
+        }
+        pushArgs.push("-o", "ci.skip", pushUrl, branch);
+        yield git(pushArgs);
       });
     }
     __name(gitPush, "gitPush");
@@ -49614,13 +49672,13 @@ function main() {
       fs3.mkdirSync(inputs.resultsDir, { recursive: true });
       fs3.mkdirSync(inputs.cacheDir, { recursive: true });
       (0, utils_1.prepareCaches)(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs, inputs.useNightly);
-      const exitCode = yield (0, utils_1.qodana)();
+      yield (0, utils_1.prepareAgent)(inputs.nightlyVersion);
+      const exitCode = yield (0, utils_1.qodanaScan)();
       yield Promise.all([
         (0, output_1.publishOutput)((0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode)),
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage)
       ]);
-      (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches);
+      (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches && (exitCode === qodana_1.QodanaExitCode.Success || exitCode === qodana_1.QodanaExitCode.FailThreshold));
       (0, utils_1.uploadArtifacts)(inputs.resultsDir);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`);
