@@ -67,6 +67,15 @@ export async function publishAnnotations(
   if (!execute) {
     return
   }
+  if (problems.annotations.length > 0) {
+    const first = problems.annotations[0].path
+    const last = problems.annotations[problems.annotations.length - 1].path
+    core.debug(
+      `Publishing ${problems.annotations.length} annotation(s) (first='${first}', last='${last}')`
+    )
+  } else {
+    core.debug('Publishing 0 annotations')
+  }
   try {
     if (problems.annotations.length >= MAX_ANNOTATIONS) {
       for (let i = 0; i < problems.annotations.length; i += MAX_ANNOTATIONS) {
@@ -149,7 +158,21 @@ function parseResult(
     originalUriBaseIds,
     prefixes
   )
-  if (resolvedPath === null) return null
+  const originalUri = location.artifactLocation?.uri
+  const originalUriBaseId = location.artifactLocation?.uriBaseId
+  if (resolvedPath === null) {
+    core.debug(
+      `SARIF location skipped: uri='${originalUri ?? '<missing>'}' uriBaseId='${
+        originalUriBaseId ?? '<none>'
+      }' (could not resolve)`
+    )
+    return null
+  }
+  core.debug(
+    `SARIF location: uri='${originalUri}' uriBaseId='${
+      originalUriBaseId ?? '<none>'
+    }' -> '${resolvedPath}'`
+  )
   const region = location.region
   return {
     message: result.message.markdown ?? result.message.text!,
@@ -196,6 +219,9 @@ export function parseSarif(
     run.results ?? [],
     originalUriBaseIds,
     projectRoot
+  )
+  core.debug(
+    `SARIF prefixes: projectRoot='${projectRoot}' absolutePrefix='${prefixes.absolutePrefix}' relativePrefix='${prefixes.relativePrefix}'`
   )
   let title = 'No new problems found by '
   let annotations: Annotation[] = []
