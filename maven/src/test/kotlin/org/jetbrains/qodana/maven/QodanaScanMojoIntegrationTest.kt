@@ -96,8 +96,8 @@ class QodanaScanMojoIntegrationTest {
             assumeTrue(isLinux, "Docker tests only run on Linux in GitHub Actions")
         }
 
-        // Create a Python file with issues (extra blank lines)
-        File(projectDir, "main.py").writeText("print('Hello, world!')\n\n\n\n\n\nprint()")
+        // Create a Python file with issues (syntax error)
+        File(projectDir, "main.py").writeText("def broken_function(\n    print(\"syntax error\")")
         File(projectDir, "qodana.yaml").writeText("linter: jetbrains/qodana-python-community")
 
         val result = runMaven(
