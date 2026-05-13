@@ -344,6 +344,12 @@ function getInitialCacheLocation(): string {
 export function prepareCaches(cacheDir: string): void {
   const initialCacheLocation = getInitialCacheLocation()
   debug(`Initial cache location: ${initialCacheLocation}`)
+  if (path.resolve(initialCacheLocation) == path.resolve(cacheDir)) {
+    debug(
+      `Initial cache location matches cacheDir (${cacheDir}); skipping copy`
+    )
+    return
+  }
   if (fs.existsSync(initialCacheLocation)) {
     debug(`Copying cache from ${initialCacheLocation} to ${cacheDir}`)
     fs.cpSync(initialCacheLocation, cacheDir, {recursive: true})
@@ -358,6 +364,12 @@ export function uploadCache(cacheDir: string, execute: boolean): void {
   }
   try {
     const initialCacheLocation = getInitialCacheLocation()
+    if (path.resolve(initialCacheLocation) == path.resolve(cacheDir)) {
+      debug(
+        `Initial cache location matches cacheDir (${cacheDir}); skipping upload`
+      )
+      return
+    }
     debug(
       `Deleting initial cache at ${initialCacheLocation} and saving cache from ${cacheDir}`
     )
