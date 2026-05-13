@@ -49382,6 +49382,10 @@ Stderr: ${result.stderr}`);
     function prepareCaches(cacheDir) {
       const initialCacheLocation = getInitialCacheLocation();
       debug(`Initial cache location: ${initialCacheLocation}`);
+      if (path_1.default.resolve(initialCacheLocation) == path_1.default.resolve(cacheDir)) {
+        debug(`Initial cache location matches cacheDir (${cacheDir}); skipping copy`);
+        return;
+      }
       if (fs4.existsSync(initialCacheLocation)) {
         debug(`Copying cache from ${initialCacheLocation} to ${cacheDir}`);
         fs4.cpSync(initialCacheLocation, cacheDir, { recursive: true });
@@ -49396,6 +49400,10 @@ Stderr: ${result.stderr}`);
       }
       try {
         const initialCacheLocation = getInitialCacheLocation();
+        if (path_1.default.resolve(initialCacheLocation) == path_1.default.resolve(cacheDir)) {
+          debug(`Initial cache location matches cacheDir (${cacheDir}); skipping upload`);
+          return;
+        }
         debug(`Deleting initial cache at ${initialCacheLocation} and saving cache from ${cacheDir}`);
         fs4.cpSync(cacheDir, initialCacheLocation, { recursive: true, force: true });
       } catch (e) {
