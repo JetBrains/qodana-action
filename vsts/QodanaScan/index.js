@@ -37,14 +37,14 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var version, checksum;
 var init_cli = __esm({
   "../common/cli.json"() {
-    version = "2026.1.0";
+    version = "2026.1.1";
     checksum = {
-      windows_x86_64: "c1cc5e885071ac4a15aa8e1d6e292ad6cf77990dceafa15debb1c203145a37e8",
-      linux_arm64: "dc9b3e5e4a6013f27e90d9413f5ed75a09220a05cd338e4b33f53b020b3a2ebc",
-      darwin_arm64: "f2dc679d5b94ecf3cca1181da6d2f1a3ebd62e8d8b5f395188a2d2bd5a293a2a",
-      darwin_x86_64: "3a5667566531d2b9868e0a30175ad0471e49dc5ad24999fd7b3ddc9f39aa8412",
-      windows_arm64: "5961b11af07edd853952f819c2fdc8f12b09a732f784e39d5c273589a87c79d3",
-      linux_x86_64: "b6dd245734c3b0854a448036344527fb2d05b343b36498a0e554c4e0399892e2"
+      windows_x86_64: "291b80d90578258251d7aa4a52c34f08e46822d347cedeecdf69be230c99a36f",
+      linux_arm64: "9c167a1c7faab62f129c4190cda6c8be595c590287fb3f9dc2d2277a789a9541",
+      darwin_arm64: "d9aa18f08327fd1af8104eb855d3da12f2e1e9888ee9fc519b72253243b1c59d",
+      darwin_x86_64: "6d5d2665c406b5fff5152361647c220b6b386348146a4ad467849797b09ab7f5",
+      windows_arm64: "fb8ca0dcd70d8723e2082e46ecd22c9c8f5edbde7be4242b671f2f88665ae8cb",
+      linux_x86_64: "bd95cbfa99065c2f3b1070284ec2ed4878c180240142ba764e8f5911a52d2b84"
     };
   }
 });
@@ -81735,7 +81735,7 @@ var require_utils4 = __commonJS({
         uploadResult: tl2.getBoolInput("uploadResult", false),
         uploadSarif: tl2.getBoolInput("uploadSarif", false),
         artifactName: tl2.getInput("artifactName", false) || "qodana-report",
-        useNightly: tl2.getBoolInput("useNightly", false),
+        nightlyVersion: tl2.getInput("nightlyVersion", false) || "",
         prMode: tl2.getBoolInput("prMode", false),
         postComment: tl2.getBoolInput("postPrComment", false),
         pushFixes: tl2.getInput("pushFixes", false) || "none",
@@ -81775,11 +81775,12 @@ var require_utils4 = __commonJS({
       });
     }
     function prepareAgent(args_1) {
-      return __awaiter2(this, arguments, void 0, function* (args, useNightly = false) {
+      return __awaiter2(this, arguments, void 0, function* (args, nightlyVersion = "") {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
-        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, useNightly));
-        if (!useNightly) {
+        const nightlyTag = yield (0, qodana_12.getNightlyTag)(nightlyVersion);
+        const temp = yield tool.downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, nightlyTag));
+        if (!nightlyVersion) {
           const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
           const actualChecksum = (0, qodana_12.sha256sum)(temp);
           if (expectedChecksum !== actualChecksum) {
@@ -82169,7 +82170,7 @@ function main() {
       const inputs = (0, utils_1.getInputs)();
       tl.mkdirP(inputs.resultsDir);
       tl.mkdirP(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs.args, inputs.useNightly);
+      yield (0, utils_1.prepareAgent)(inputs.args, inputs.nightlyVersion);
       const exitCode = yield (0, utils_1.qodana)();
       yield Promise.all([
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage),
