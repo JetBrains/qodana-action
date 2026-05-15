@@ -38,7 +38,8 @@ jobs:
           fetch-depth: 0
       - run: |
           ./changelog.sh > changelog.md
-          gh release create ${GITHUB_REF##*/} -F changelog.md
+          TAG_NAME=${GITHUB_REF##*/}
+          gh release create $TAG_NAME --title "$TAG_NAME" -F changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   azure:
