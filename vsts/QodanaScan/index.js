@@ -9803,7 +9803,7 @@ __export(qodana_exports, {
   compressFolder: () => compressFolder,
   extractArg: () => extractArg,
   getCoverageFromSarif: () => getCoverageFromSarif,
-  getNativeModeSuffix: () => getNativeModeSuffix,
+  getNativeModePrefix: () => getNativeModePrefix,
   getNightlyTag: () => getNightlyTag,
   getProcessArchName: () => getProcessArchName,
   getProcessPlatformName: () => getProcessPlatformName,
@@ -9897,8 +9897,8 @@ function isNativeMode(args) {
   let nextIndex = index + 1;
   return args.length > nextIndex && args[nextIndex] == "false";
 }
-function getNativeModeSuffix(args) {
-  return `-native-${isNativeMode(args)}`;
+function getNativeModePrefix(args) {
+  return `native-${isNativeMode(args)}-`;
 }
 function getQodanaPullArgs(args) {
   const pullArgs = ["pull"];

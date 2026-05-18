@@ -184,12 +184,14 @@ export function isNativeMode(args: string[]): boolean {
 }
 
 /**
- * Returns the cache key suffix based on whether native mode is enabled.
- * Used to prevent incompatible native/non-native caches from clashing.
+ * Returns the cache key prefix based on whether native mode is enabled.
+ * Used to prevent incompatible native/non-native caches from clashing while
+ * preserving the prefix relationship between primary and restore keys so
+ * GitHub Actions cache `restoreKeys` fallback can still match.
  * @param args CLI arguments to check for native mode indicators.
  */
-export function getNativeModeSuffix(args: string[]): string {
-  return `-native-${isNativeMode(args)}`
+export function getNativeModePrefix(args: string[]): string {
+  return `native-${isNativeMode(args)}-`
 }
 
 /**
