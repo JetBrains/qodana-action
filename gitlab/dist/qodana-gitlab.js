@@ -10059,7 +10059,7 @@ __export(qodana_exports, {
   compressFolder: () => compressFolder,
   extractArg: () => extractArg,
   getCoverageFromSarif: () => getCoverageFromSarif,
-  getNativeModeSuffix: () => getNativeModeSuffix,
+  getNativeModePrefix: () => getNativeModePrefix,
   getNightlyTag: () => getNightlyTag,
   getProcessArchName: () => getProcessArchName,
   getProcessPlatformName: () => getProcessPlatformName,
@@ -10153,8 +10153,8 @@ function isNativeMode(args) {
   let nextIndex = index + 1;
   return args.length > nextIndex && args[nextIndex] == "false";
 }
-function getNativeModeSuffix(args) {
-  return `-native-${isNativeMode(args)}`;
+function getNativeModePrefix(args) {
+  return `native-${isNativeMode(args)}-`;
 }
 function getQodanaPullArgs(args) {
   const pullArgs = ["pull"];
@@ -10314,7 +10314,7 @@ var init_qodana = __esm({
     __name(isExecutionSuccessful, "isExecutionSuccessful");
     __name(extractArg, "extractArg");
     __name(isNativeMode, "isNativeMode");
-    __name(getNativeModeSuffix, "getNativeModeSuffix");
+    __name(getNativeModePrefix, "getNativeModePrefix");
     __name(getQodanaPullArgs, "getQodanaPullArgs");
     __name(getQodanaScanArgs, "getQodanaScanArgs");
     NONE = "none";

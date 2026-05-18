@@ -36,7 +36,7 @@ import {
   getQodanaUrl,
   getNightlyTag,
   Inputs,
-  getNativeModeSuffix,
+  getNativeModePrefix,
   isNativeMode,
   NONE,
   PULL_REQUEST,
@@ -99,13 +99,13 @@ export function getInputs(): Inputs {
   }
   const rawArgs = core.getInput('args')
   const argList = parseRawArguments(rawArgs)
-  const nativeSuffix = getNativeModeSuffix(argList)
+  const nativePrefix = getNativeModePrefix(argList)
   cachedInputs = {
     args: argList,
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
-    primaryCacheKey: core.getInput('primary-cache-key') + nativeSuffix,
-    additionalCacheKey: core.getInput('additional-cache-key') + nativeSuffix,
+    primaryCacheKey: nativePrefix + core.getInput('primary-cache-key'),
+    additionalCacheKey: nativePrefix + core.getInput('additional-cache-key'),
     cacheDefaultBranchOnly: core.getBooleanInput('cache-default-branch-only'),
     uploadResult: core.getBooleanInput('upload-result'),
     uploadSarif: false, // not used by the action

@@ -62,7 +62,7 @@ describe('isNeedToUploadCache', () => {
   })
 })
 
-describe('getInputs cache key native mode suffix', () => {
+describe('getInputs cache key native mode prefix', () => {
   beforeEach(() => {
     jest.resetModules()
   })
@@ -94,36 +94,44 @@ describe('getInputs cache key native mode suffix', () => {
     }))
   }
 
-  it('appends -native-false when args have no native flags', () => {
-    setupCoreMock(
-      '',
-      'qodana-2026.1-refs/heads/main-abc',
-      'qodana-2026.1-refs/heads/main'
-    )
+  // Matches the defaults defined in action.yaml for primary-cache-key and
+  // additional-cache-key after GitHub expression interpolation.
+  const PRIMARY_KEY = 'qodana-2026.1-refs/heads/main-abc'
+  const ADDITIONAL_KEY = 'qodana-2026.1-refs/heads/main'
+
+  it('prepends native-false- when args have no native flags', () => {
+    setupCoreMock('', PRIMARY_KEY, ADDITIONAL_KEY)
     const {getInputs} = require('../src/utils')
     const inputs = getInputs()
-    expect(inputs.primaryCacheKey).toBe(
-      'qodana-2026.1-refs/heads/main-abc-native-false'
-    )
-    expect(inputs.additionalCacheKey).toBe(
-      'qodana-2026.1-refs/heads/main-native-false'
+    expect(inputs.primaryCacheKey).toBe(`native-false-${PRIMARY_KEY}`)
+    expect(inputs.additionalCacheKey).toBe(`native-false-${ADDITIONAL_KEY}`)
+    // additionalCacheKey must be a prefix of primaryCacheKey so that
+    // GitHub Actions restoreKeys fallback can match.
+    expect(inputs.primaryCacheKey.startsWith(inputs.additionalCacheKey)).toBe(
+      true
     )
   })
 
-  it('appends -native-true when args contain --ide', () => {
-    setupCoreMock('--ide', 'my-key', 'my-restore-key')
+  it('prepends native-true- when args contain --ide', () => {
+    setupCoreMock('--ide', PRIMARY_KEY, ADDITIONAL_KEY)
     const {getInputs} = require('../src/utils')
     const inputs = getInputs()
-    expect(inputs.primaryCacheKey).toBe('my-key-native-true')
-    expect(inputs.additionalCacheKey).toBe('my-restore-key-native-true')
+    expect(inputs.primaryCacheKey).toBe(`native-true-${PRIMARY_KEY}`)
+    expect(inputs.additionalCacheKey).toBe(`native-true-${ADDITIONAL_KEY}`)
+    expect(inputs.primaryCacheKey.startsWith(inputs.additionalCacheKey)).toBe(
+      true
+    )
   })
 
-  it('appends -native-true when args contain --within-docker=false', () => {
-    setupCoreMock('--within-docker=false', 'key', 'restore-key')
+  it('prepends native-true- when args contain --within-docker=false', () => {
+    setupCoreMock('--within-docker=false', PRIMARY_KEY, ADDITIONAL_KEY)
     const {getInputs} = require('../src/utils')
     const inputs = getInputs()
-    expect(inputs.primaryCacheKey).toBe('key-native-true')
-    expect(inputs.additionalCacheKey).toBe('restore-key-native-true')
+    expect(inputs.primaryCacheKey).toBe(`native-true-${PRIMARY_KEY}`)
+    expect(inputs.additionalCacheKey).toBe(`native-true-${ADDITIONAL_KEY}`)
+    expect(inputs.primaryCacheKey.startsWith(inputs.additionalCacheKey)).toBe(
+      true
+    )
   })
 })
 
