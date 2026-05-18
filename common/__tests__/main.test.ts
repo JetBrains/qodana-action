@@ -15,7 +15,7 @@
  */
 
 import {expect, test, describe, beforeEach} from '@jest/globals'
-import {getCoverageFromSarif, getNativeModeSuffix, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
+import {getCoverageFromSarif, getNativeModePrefix, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
   getCoverageStats,
   getReportURL, parseSarif
@@ -180,21 +180,21 @@ function failedCoverageFixtureDiff(): string {
 \`\`\``
 }
 
-describe('getNativeModeSuffix', () => {
-  test('returns -native-false for empty args', () => {
-    expect(getNativeModeSuffix([])).toBe('-native-false')
+describe('getNativeModePrefix', () => {
+  test('returns native-false- for empty args', () => {
+    expect(getNativeModePrefix([])).toBe('native-false-')
   })
 
-  test('returns -native-true when --ide is present', () => {
-    expect(getNativeModeSuffix(['--ide'])).toBe('-native-true')
+  test('returns native-true- when --ide is present', () => {
+    expect(getNativeModePrefix(['--ide'])).toBe('native-true-')
   })
 
-  test('returns -native-true when --within-docker=false is present', () => {
-    expect(getNativeModeSuffix(['--within-docker=false'])).toBe('-native-true')
+  test('returns native-true- when --within-docker=false is present', () => {
+    expect(getNativeModePrefix(['--within-docker=false'])).toBe('native-true-')
   })
 
-  test('returns -native-true when --within-docker false is present', () => {
-    expect(getNativeModeSuffix(['--within-docker', 'false'])).toBe('-native-true')
+  test('returns native-true- when --within-docker false is present', () => {
+    expect(getNativeModePrefix(['--within-docker', 'false'])).toBe('native-true-')
   })
 })
 
