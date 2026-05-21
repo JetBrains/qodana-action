@@ -106,3 +106,6 @@ vsts/.taskkey
 .idea/
 .gradle/
 build/
+
+# Husky-generated runtime
+.husky/_/
