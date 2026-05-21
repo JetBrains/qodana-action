@@ -12,7 +12,8 @@
     "build": "tsc -b common scan vsts gitlab --force",
     "test": "npm run test --workspaces",
     "package": "npm run -w scan package && npm run -w vsts package && npm run -w gitlab package",
-    "all": "npm run lint && npm run build && npm run test && npm run package"
+    "all": "npm run lint && npm run build && npm run test && npm run package",
+    "prepare": "husky"
   },
   "contributors": [
     {
@@ -40,6 +41,7 @@
     "eslint": "^8.57.1",
     "eslint-plugin-jest": "^29.15.1",
     "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
     "prettier": "3.8.1",
     "prettier-eslint": "^16.4.2",
     "ts-node": "^10.9.2",
