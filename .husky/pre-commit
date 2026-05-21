@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+
+# Detect what's staged so we only run the relevant steps.
+staged="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+# 1. Build first. `npm run lint` is type-aware (@typescript-eslint) and cross-workspace
+#    imports need .d.ts output from `tsc -b`. Without a fresh build, lint can give
+#    false errors
+echo "$staged" | grep -qE '^(common|scan|vsts|gitlab)/.*\.ts$' && npm run build
+
+# 2. Lint only workspaces whose .ts files changed. Each workspace's lint script
+#    runs prettier --write + eslint --fix over its own **/*.ts
+echo "$staged" | grep -qE '^common/.*\.ts$' && npm run -w common lint
+echo "$staged" | grep -qE '^scan/.*\.ts$'   && npm run -w scan   lint
+echo "$staged" | grep -qE '^vsts/.*\.ts$'   && npm run -w vsts   lint
+echo "$staged" | grep -qE '^gitlab/.*\.ts$' && npm run -w gitlab lint
+
+# 3. Repackage bundles whose sources changed.
+echo "$staged" | grep -qE '^scan/src/'             && npm run -w scan   package
+echo "$staged" | grep -qE '^vsts/src/'             && npm run -w vsts   package
+echo "$staged" | grep -qE '^(common|gitlab)/src/'  && npm run -w gitlab package
+
+# 4. Restage exactly what we may have touched:
+#    - the dist/ directories that esbuild just wrote
+#    - any files that were already staged (so prettier --write fixes land in the commit)
+git add scan/dist/ vsts/QodanaScan/ gitlab/dist/
+[ -n "$staged" ] && echo "$staged" | xargs git add --
