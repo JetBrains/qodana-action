@@ -105,7 +105,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         directory: [
-          'tests/dotnet', 'tests/duplicates', 'tests/go', 'tests/java', 'tests/js', 'tests/py_error' # 'tests/cpp',
+          'tests/dotnet', 'tests/duplicates', 'tests/go', 'tests/js', 'tests/py_error' # 'tests/cpp', 'tests/java'
         ]
         arguments: ['']
         pr: [ 'true', 'false' ]
@@ -119,11 +119,11 @@ jobs:
 #            os: 'ubuntu-latest'
 #            pr: 'false'
           - directory: 'tests/java'
-            arguments: '-l jetbrains/qodana-jvm-community:2026.1'
+            arguments: '-l registry.jetbrains.team/p/sa/containers/qodana-jvm-community:2026.1-nightly'
             os: 'ubuntu-latest'
             pr: 'true'
           - directory: 'tests/java'
-            arguments: '-l jetbrains/qodana-jvm-community:2026.1'
+            arguments: '-l registry.jetbrains.team/p/sa/containers/qodana-jvm-community:2026.1-nightly'
             os: 'ubuntu-latest'
             pr: 'false'
           - directory: 'tests/java'
@@ -334,6 +334,38 @@ jobs:
             arguments: '--ide QDJVMC'
             os: 'macos-latest'
             pr: 'true'
+          - directory: 'tests/java'
+            arguments: '--image registry.jetbrains.team/p/sa/containers/qodana-jvm:2026.1-nightly'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/java'
+            arguments: '--image registry.jetbrains.team/p/sa/containers/qodana-jvm:2026.1-nightly'
+            os: 'ubuntu-latest'
+            pr: 'false'
+          - directory: 'tests/java'
+            arguments: '--image registry.jetbrains.team/p/sa/containers/qodana-jvm:2026.1-nightly --within-docker false'
+            os: 'ubuntu-latest'
+            pr: 'true'
+          - directory: 'tests/java'
+            arguments: '--image registry.jetbrains.team/p/sa/containers/qodana-jvm:2026.1-nightly --within-docker false'
+            os: 'ubuntu-latest'
+            pr: 'false'
+          - directory: 'tests/java'
+            arguments: '--image registry.jetbrains.team/p/sa/containers/qodana-jvm:2026.1-nightly --within-docker false'
+            os: 'windows-latest'
+            pr: 'true'
+          - directory: 'tests/java'
+            arguments: '--image registry.jetbrains.team/p/sa/containers/qodana-jvm:2026.1-nightly --within-docker false'
+            os: 'windows-latest'
+            pr: 'false'
+          - directory: 'tests/java'
+            arguments: '--image registry.jetbrains.team/p/sa/containers/qodana-jvm:2026.1-nightly --within-docker false'
+            os: 'macos-latest'
+            pr: 'true'
+          - directory: 'tests/java'
+            arguments: '--image registry.jetbrains.team/p/sa/containers/qodana-jvm:2026.1-nightly --within-docker false'
+            os: 'macos-latest'
+            pr: 'false'
     steps:
       - uses: actions/checkout@v6
         with:
@@ -379,6 +411,13 @@ jobs:
         if: ${{ matrix.arguments == '--ide QDGO'}}
         shell: bash
         run: echo "GOROOT=$(go env GOROOT)" >> $GITHUB_ENV
+      - name: Login to JetBrains Registry
+        if: ${{ matrix.directory == 'tests/java' && !contains(matrix.arguments, '--ide') }}
+        uses: docker/login-action@v3
+        with:
+          registry: registry.jetbrains.team
+          username: ${{ secrets.DOCKER_NAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Qodana
         uses: ./
         with:
