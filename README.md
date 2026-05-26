@@ -47,6 +47,7 @@ jobs:
       contents: write
       pull-requests: write
       checks: write
+      actions: read
     steps:
       - uses: actions/checkout@v3
         with:
@@ -89,7 +90,7 @@ to
 2. Set `push-fixes` property to
     - `pull-request`: create a new branch with fixes and create a pull request to the original branch
     - or `branch`: push fixes to the original branch. Also, set `pr-mode` to `false`: currently, this mode is not supported for applying fixes.
-3. Set the correct permissions for the job (`contents: write`, `pull-requests: write`, `checks: write`)
+3. Set the correct permissions for the job (`contents: write`, `pull-requests: write`, `checks: write`, `actions: read`)
     - If you use `pull-request` value for `push-fixes` property: [**allow GitHub Actions to create and approve pull requests**](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests)
 
 Example configuration:
@@ -130,6 +131,7 @@ jobs:
       contents: write
       pull-requests: write
       checks: write
+      actions: read
     steps:
       - uses: actions/checkout@v3
         with:
@@ -197,6 +199,8 @@ Instead of `main`, you can specify your branch here.
 8. Select **Require status checks to pass before merging**.
 9. Search for the `Qodana` status check, then check it.
 10. Click **Create**.
+
+> **Note:** The Qodana summary is posted on the workflow job's own check-run (named after the job's YAML key, or the job's `name:` override) rather than as a separate `Qodana for <Linter>` check. Set an explicit `jobs.<id>.name:` in your workflow if you want a stable status-check name to require in branch protection.
 
 <anchor name="quality-gate-and-baseline"></anchor>
 
