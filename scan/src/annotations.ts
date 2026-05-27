@@ -78,7 +78,7 @@ export async function publishAnnotations(
     core.info(`Not able to publish annotations with Checks API – ${
       (error as Error).message
     }, 
-    using limited (10 problems per level) output instead. Check job permissions (checks: write, pull-requests: write, actions: read needed)`)
+    using limited (10 problems per level) output instead. Check job permissions (checks: write, pull-requests: write needed)`)
     for (const p of problems.annotations) {
       const properties = toAnnotationProperties(p)
       switch (p.annotation_level) {

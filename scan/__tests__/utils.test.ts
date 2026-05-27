@@ -144,81 +144,47 @@ export function initGithubContext(currentBranch: string): void {
   })
 }
 
-describe('publishGitHubCheck — job check-run resolution', () => {
-  const ENV_KEYS = [
-    'GITHUB_ACTIONS',
-    'GITHUB_RUN_ID',
-    'GITHUB_JOB',
-    'RUNNER_NAME'
-  ] as const
-  const savedEnv: Record<string, string | undefined> = {}
-
+describe('publishGitHubCheck — job check-run via _job-check-run-id input', () => {
   beforeEach(() => {
     jest.resetModules()
-    for (const k of ENV_KEYS) savedEnv[k] = process.env[k]
   })
-
-  afterEach(() => {
-    for (const k of ENV_KEYS) {
-      if (savedEnv[k] === undefined) delete process.env[k]
-      else process.env[k] = savedEnv[k]
-    }
-  })
-
-  type Job = {
-    id: number
-    name: string
-    runner_name: string | null
-    status: string
-  }
 
   function makeOctokit(
-    jobs: Job[],
     overrides: {
-      paginateImpl?: (
-        endpoint: unknown,
-        params: unknown
-      ) => Promise<Job[]> | Job[]
-      listJobsImpl?: () => Promise<{data: {jobs: Job[]}}>
       update?: jest.Mock
       listForRefImpl?: () => Promise<unknown>
       createImpl?: () => Promise<unknown>
     } = {}
   ): {
-    paginate: jest.Mock
-    listJobs: jest.Mock
     update: jest.Mock
     listForRef: jest.Mock
     create: jest.Mock
     client: unknown
   } {
-    const listJobs = jest.fn(
-      overrides.listJobsImpl ?? (async () => ({data: {jobs}}))
-    )
-    const paginate = jest.fn(
-      overrides.paginateImpl ?? (async () => jobs)
-    ) as jest.Mock
     const update = overrides.update ?? jest.fn(async () => ({}))
     const listForRef = jest.fn(
       overrides.listForRefImpl ?? (async () => ({data: {check_runs: []}}))
     )
     const create = jest.fn(overrides.createImpl ?? (async () => ({})))
     const client = {
-      paginate,
       rest: {
-        actions: {listJobsForWorkflowRun: listJobs},
         checks: {update, listForRef, create}
       }
     }
-    return {paginate, listJobs, update, listForRef, create, client}
+    return {update, listForRef, create, client}
   }
 
   function setupMocks(
     octokitClient: unknown,
+    inputValue: string,
     coreWarning: jest.Mock = jest.fn()
   ): jest.Mock {
     jest.doMock('@actions/core', () => ({
-      getInput: (name: string) => (name === 'github-token' ? 'tkn' : ''),
+      getInput: (name: string) => {
+        if (name === 'github-token') return 'tkn'
+        if (name === '_job-check-run-id') return inputValue
+        return ''
+      },
       getBooleanInput: () => false,
       getMultilineInput: () => [],
       warning: coreWarning,
@@ -249,43 +215,13 @@ describe('publishGitHubCheck — job check-run resolution', () => {
     annotations: []
   }
 
-  function setActionsEnv(
-    overrides: Partial<Record<(typeof ENV_KEYS)[number], string>> = {}
-  ): void {
-    process.env.GITHUB_ACTIONS = 'true'
-    process.env.GITHUB_RUN_ID = '99'
-    process.env.GITHUB_JOB = 'qodana'
-    process.env.RUNNER_NAME = 'GitHub-Hosted-1'
-    for (const [k, v] of Object.entries(overrides)) {
-      process.env[k] = v
-    }
-  }
-
-  test('exact GITHUB_JOB match: PATCH job check-run with no status/conclusion', async () => {
-    setActionsEnv()
-    const {paginate, update, listForRef, create, client} = makeOctokit([
-      {
-        id: 12345,
-        name: 'qodana',
-        runner_name: 'GitHub-Hosted-1',
-        status: 'in_progress'
-      }
-    ])
-    setupMocks(client)
+  test('input present: PATCH job check-run with no status/conclusion', async () => {
+    const {update, listForRef, create, client} = makeOctokit()
+    setupMocks(client, '12345')
 
     const {publishGitHubCheck} = require('../src/utils')
     await publishGitHubCheck(false, 'Qodana for JVM', output)
 
-    expect(paginate).toHaveBeenCalledTimes(1)
-    const paginateParams = paginate.mock.calls[0][1] as Record<string, unknown>
-    expect(paginateParams).toMatchObject({
-      owner: 'o',
-      repo: 'r',
-      run_id: 99,
-      filter: 'latest',
-      per_page: 100
-    })
-    expect(paginateParams).not.toHaveProperty('attempt_number')
     expect(update).toHaveBeenCalledTimes(1)
     const payload = update.mock.calls[0][0] as Record<string, unknown>
     expect(payload).toMatchObject({owner: 'o', repo: 'r', check_run_id: 12345})
@@ -296,160 +232,16 @@ describe('publishGitHubCheck — job check-run resolution', () => {
     expect(create).not.toHaveBeenCalled()
   })
 
-  test('paginate is invoked with an unwrap callback that extracts response.data.jobs', async () => {
-    setActionsEnv()
-    const {paginate, client} = makeOctokit([
-      {id: 1, name: 'qodana', runner_name: 'r', status: 'in_progress'}
-    ])
-    setupMocks(client)
+  test('empty input (running outside Actions or on GHES): legacy fallback', async () => {
+    const {update, listForRef, create, client} = makeOctokit()
+    setupMocks(client, '')
 
     const {publishGitHubCheck} = require('../src/utils')
     await publishGitHubCheck(false, 'Qodana for JVM', output)
 
-    const unwrap = paginate.mock.calls[0][2] as (resp: {
-      data: {jobs: unknown}
-    }) => unknown
-    expect(typeof unwrap).toBe('function')
-    // The response shape is {total_count, jobs}, not a flat array; the unwrap
-    // must return the jobs array so client.paginate can flatten across pages.
-    expect(unwrap({data: {jobs: [{id: 42}]}})).toEqual([{id: 42}])
-  })
-
-  test('paginated jobs: candidate on page 2 is still found', async () => {
-    setActionsEnv()
-    const pageJobs: Job[] = [
-      ...Array.from({length: 100}, (_, i) => ({
-        id: i + 1,
-        name: `other-job-${i}`,
-        runner_name: `R${i}`,
-        status: 'completed'
-      })),
-      {
-        id: 999,
-        name: 'qodana',
-        runner_name: 'GitHub-Hosted-1',
-        status: 'in_progress'
-      }
-    ]
-    const {paginate, update, client} = makeOctokit([], {
-      paginateImpl: async () => pageJobs
-    })
-    setupMocks(client)
-
-    const {publishGitHubCheck} = require('../src/utils')
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
-
-    expect(paginate).toHaveBeenCalledTimes(1)
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({check_run_id: 999})
-    )
-  })
-
-  test('matrix prefix match with in_progress tie-break', async () => {
-    setActionsEnv()
-    const {update, client} = makeOctokit([
-      {
-        id: 100,
-        name: 'qodana (ubuntu-latest)',
-        runner_name: 'A',
-        status: 'completed'
-      },
-      {
-        id: 200,
-        name: 'qodana (macos-latest)',
-        runner_name: 'B',
-        status: 'in_progress'
-      },
-      {
-        id: 300,
-        name: 'qodana (windows-latest)',
-        runner_name: 'C',
-        status: 'completed'
-      }
-    ])
-    setupMocks(client)
-
-    const {publishGitHubCheck} = require('../src/utils')
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
-
-    expect(update).toHaveBeenCalledTimes(1)
-    expect(update.mock.calls[0][0]).toMatchObject({check_run_id: 200})
-  })
-
-  test('matrix with multiple in_progress: RUNNER_NAME disambiguates', async () => {
-    // All three matrix children are concurrently in_progress (real-world case
-    // when matrix children start at the same time). Only RUNNER_NAME uniquely
-    // identifies the current process's leg.
-    setActionsEnv({RUNNER_NAME: 'GitHub-Actions-2'})
-    const {update, client} = makeOctokit([
-      {
-        id: 111,
-        name: 'qodana (ubuntu)',
-        runner_name: 'GitHub-Actions-1',
-        status: 'in_progress'
-      },
-      {
-        id: 222,
-        name: 'qodana (macos)',
-        runner_name: 'GitHub-Actions-2',
-        status: 'in_progress'
-      },
-      {
-        id: 333,
-        name: 'qodana (windows)',
-        runner_name: 'GitHub-Actions-3',
-        status: 'in_progress'
-      }
-    ])
-    setupMocks(client)
-
-    const {publishGitHubCheck} = require('../src/utils')
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
-
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({check_run_id: 222})
-    )
-  })
-
-  test('name: override → RUNNER_NAME fallback', async () => {
-    setActionsEnv({RUNNER_NAME: 'GitHub-Actions-7'})
-    const {update, client} = makeOctokit([
-      {
-        id: 1,
-        name: 'Some Display Name',
-        runner_name: 'GitHub-Actions-7',
-        status: 'in_progress'
-      },
-      {
-        id: 2,
-        name: 'Other Job',
-        runner_name: 'GitHub-Actions-3',
-        status: 'completed'
-      }
-    ])
-    setupMocks(client)
-
-    const {publishGitHubCheck} = require('../src/utils')
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
-
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({check_run_id: 1})
-    )
-  })
-
-  test('GITHUB_ACTIONS unset → legacy fallback (listForRef + create)', async () => {
-    delete process.env.GITHUB_ACTIONS
-    const {paginate, listForRef, create, update, client} = makeOctokit([])
-    setupMocks(client)
-
-    const {publishGitHubCheck} = require('../src/utils')
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
-
-    expect(paginate).not.toHaveBeenCalled()
+    expect(update).not.toHaveBeenCalled()
     expect(listForRef).toHaveBeenCalledTimes(1)
     expect(create).toHaveBeenCalledTimes(1)
-    expect(update).not.toHaveBeenCalled()
-    // Verify create payload preserves legacy behavior
     expect(create.mock.calls[0][0]).toMatchObject({
       owner: 'o',
       repo: 'r',
@@ -459,106 +251,45 @@ describe('publishGitHubCheck — job check-run resolution', () => {
     })
   })
 
-  test('missing GITHUB_RUN_ID → legacy fallback, no paginate call', async () => {
-    setActionsEnv()
-    delete process.env.GITHUB_RUN_ID
-    const {paginate, create, client} = makeOctokit([])
-    setupMocks(client)
+  test('non-numeric input: legacy fallback (no PATCH attempt)', async () => {
+    const {update, create, client} = makeOctokit()
+    setupMocks(client, 'not-a-number')
 
     const {publishGitHubCheck} = require('../src/utils')
     await publishGitHubCheck(false, 'Qodana for JVM', output)
 
-    expect(paginate).not.toHaveBeenCalled()
+    expect(update).not.toHaveBeenCalled()
     expect(create).toHaveBeenCalledTimes(1)
   })
 
-  test('paginate rejects → warning + legacy fallback', async () => {
-    setActionsEnv()
-    const warn = jest.fn()
-    const {paginate, create, client} = makeOctokit([], {
-      paginateImpl: async () => {
-        throw new Error('boom')
-      }
-    })
-    setupMocks(client, warn)
+  test('zero / negative input: legacy fallback (no PATCH attempt)', async () => {
+    for (const bad of ['0', '-1']) {
+      jest.resetModules()
+      const {update, create, client} = makeOctokit()
+      setupMocks(client, bad)
 
-    const {publishGitHubCheck} = require('../src/utils')
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
+      const {publishGitHubCheck} = require('../src/utils')
+      await publishGitHubCheck(false, 'Qodana for JVM', output)
 
-    expect(paginate).toHaveBeenCalledTimes(1)
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('boom'))
-    expect(create).toHaveBeenCalledTimes(1)
+      expect(update).not.toHaveBeenCalled()
+      expect(create).toHaveBeenCalledTimes(1)
+    }
   })
 
-  test('no matching job → warning + legacy fallback (cached)', async () => {
-    setActionsEnv()
+  test('PATCH fails: warn and fall back to legacy', async () => {
     const warn = jest.fn()
-    const {paginate, create, client} = makeOctokit([
-      {id: 1, name: 'unrelated', runner_name: 'X', status: 'completed'}
-    ])
-    setupMocks(client, warn)
+    const update = jest.fn().mockRejectedValueOnce(new Error('403 denied'))
+    const {listForRef, create, client} = makeOctokit({update})
+    setupMocks(client, '777', warn)
 
     const {publishGitHubCheck} = require('../src/utils')
     await publishGitHubCheck(false, 'Qodana for JVM', output)
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
 
-    expect(paginate).toHaveBeenCalledTimes(1) // cached after first failure
-    expect(warn).toHaveBeenCalledTimes(1)
-    expect(create).toHaveBeenCalledTimes(2)
-  })
-
-  test('caching: second publishGitHubCheck call uses cached job id', async () => {
-    setActionsEnv()
-    const {paginate, update, client} = makeOctokit([
-      {
-        id: 7,
-        name: 'qodana',
-        runner_name: 'GitHub-Hosted-1',
-        status: 'in_progress'
-      }
-    ])
-    setupMocks(client)
-
-    const {publishGitHubCheck} = require('../src/utils')
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
-
-    expect(paginate).toHaveBeenCalledTimes(1)
-    expect(update).toHaveBeenCalledTimes(2)
-    expect(update.mock.calls[0][0]).toMatchObject({check_run_id: 7})
-    expect(update.mock.calls[1][0]).toMatchObject({check_run_id: 7})
-  })
-
-  test('PATCH failure → invalidates cache, falls back to legacy on this and subsequent calls', async () => {
-    setActionsEnv()
-    const warn = jest.fn()
-    const update = jest
-      .fn()
-      .mockRejectedValueOnce(new Error('403 update denied'))
-    const {paginate, listForRef, create, client} = makeOctokit(
-      [
-        {
-          id: 9,
-          name: 'qodana',
-          runner_name: 'GitHub-Hosted-1',
-          status: 'in_progress'
-        }
-      ],
-      {update}
-    )
-    setupMocks(client, warn)
-
-    const {publishGitHubCheck} = require('../src/utils')
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
-    await publishGitHubCheck(false, 'Qodana for JVM', output)
-
-    expect(paginate).toHaveBeenCalledTimes(1)
-    expect(update).toHaveBeenCalledTimes(1) // only the first call attempts PATCH
+    expect(update).toHaveBeenCalledTimes(1)
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('failed to update workflow job check-run')
     )
-    // Both calls fell through to the legacy path
-    expect(listForRef).toHaveBeenCalledTimes(2)
-    expect(create).toHaveBeenCalledTimes(2)
+    expect(listForRef).toHaveBeenCalledTimes(1)
+    expect(create).toHaveBeenCalledTimes(1)
   })
 })

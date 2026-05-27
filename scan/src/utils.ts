@@ -615,100 +615,18 @@ export async function putReaction(
   }
 }
 
-// Cached once per process. publishAnnotations chunks >=50 annotations into
-// multiple publishGitHubCheck calls; we must not re-list jobs each chunk.
-// undefined = not resolved yet; null = resolved as "fall back to legacy".
-let cachedJobCheckRunId: number | null | undefined = undefined
-
 /**
- * Resolve the check-run ID of the currently running GitHub Actions job.
- * The job's `id` returned by listJobsForWorkflowRun IS its check-run ID;
- * PATCHing it keeps the result inside the workflow's own check-suite.
- * Memoized for the process. Returns null on any failure — callers fall back.
+ * Read the current job's check-run ID from the auto-populated internal input,
+ * which defaults to `${{ job.check_run_id }}` in action.yaml. Returns null if
+ * the input is empty (running outside GitHub Actions, or on GitHub Enterprise
+ * Server where the expression isn't available), so callers can fall back to
+ * the legacy `checks.create` path.
  */
-async function resolveJobCheckRunId(
-  client: InstanceType<typeof GitHub>
-): Promise<number | null> {
-  if (cachedJobCheckRunId !== undefined) return cachedJobCheckRunId
-
-  const fail = (msg?: string): null => {
-    if (msg) core.warning(msg)
-    cachedJobCheckRunId = null
-    return null
-  }
-
-  if (process.env.GITHUB_ACTIONS !== 'true') return fail()
-  const runIdStr = process.env.GITHUB_RUN_ID
-  if (!runIdStr) return fail()
-  const run_id = Number(runIdStr)
-  if (!Number.isFinite(run_id)) return fail()
-
-  const jobKey = process.env.GITHUB_JOB
-  const runnerName = process.env.RUNNER_NAME
-
-  try {
-    // Paginate to handle large matrix workflows that exceed 100 jobs.
-    // Explicit unwrap is required because the response is {total_count, jobs},
-    // not a flat array — Octokit can't auto-detect the list field.
-    const allJobs = await client.paginate(
-      client.rest.actions.listJobsForWorkflowRun,
-      {
-        ...github.context.repo,
-        run_id,
-        filter: 'latest',
-        per_page: 100
-      },
-      response => response.data.jobs
-    )
-
-    // Among same-named matches, RUNNER_NAME is the most discriminating signal
-    // (unique per matrix leg). Apply it as a sub-filter before the in_progress
-    // tie-break to avoid PATCHing the wrong matrix child when several are
-    // concurrently in_progress.
-    const narrow = (matches: typeof allJobs): typeof allJobs => {
-      if (matches.length <= 1 || !runnerName) return matches
-      const byRunner = matches.filter(j => j.runner_name === runnerName)
-      return byRunner.length ? byRunner : matches
-    }
-    const tieBreak = (matches: typeof allJobs): (typeof allJobs)[number] => {
-      const narrowed = narrow(matches)
-      return narrowed.find(j => j.status === 'in_progress') ?? narrowed[0]
-    }
-
-    let candidate: (typeof allJobs)[number] | undefined
-    if (jobKey) {
-      const exact = allJobs.filter(j => j.name === jobKey)
-      if (exact.length) {
-        candidate = tieBreak(exact)
-      } else {
-        const prefix = `${jobKey} (`
-        const matrix = allJobs.filter(j => j.name.startsWith(prefix))
-        if (matrix.length) candidate = tieBreak(matrix)
-      }
-    }
-    if (!candidate && runnerName) {
-      const byRunner = allJobs.filter(j => j.runner_name === runnerName)
-      if (byRunner.length) candidate = tieBreak(byRunner)
-    }
-
-    if (!candidate) {
-      return fail(
-        `Qodana: could not match the running workflow job in the ${allJobs.length} ` +
-          `jobs returned by listJobsForWorkflowRun ` +
-          `(GITHUB_JOB=${jobKey}, RUNNER_NAME=${runnerName}). ` +
-          `Falling back to legacy check-run creation.`
-      )
-    }
-
-    cachedJobCheckRunId = candidate.id
-    return cachedJobCheckRunId
-  } catch (error) {
-    return fail(
-      `Qodana: actions.listJobsForWorkflowRun failed – ${
-        (error as Error).message
-      }. Falling back to legacy check-run creation. Verify 'actions: read' permission.`
-    )
-  }
+function readJobCheckRunId(): number | null {
+  const raw = core.getInput('_job-check-run-id')
+  if (!raw) return null
+  const id = Number(raw)
+  return Number.isFinite(id) && id > 0 ? id : null
 }
 
 /**
@@ -744,16 +662,15 @@ export async function publishGitHubCheck(
 ): Promise<void> {
   const client = github.getOctokit(getInputs().githubToken)
 
-  const jobCheckRunId = await resolveJobCheckRunId(client)
+  const jobCheckRunId = readJobCheckRunId()
   if (jobCheckRunId !== null) {
     try {
       await updateJobCheck(client, jobCheckRunId, output)
       return
     } catch (error) {
-      // PATCH can still fail (fork PR + restricted token, wrong app identity,
-      // 404 on a stale ID). Invalidate cache so subsequent chunks skip the
-      // PATCH path directly, and fall through to the legacy path.
-      cachedJobCheckRunId = null
+      // PATCH can fail in fork-PR contexts with a restricted token, on a
+      // stale ID, or with mismatched app identity. Fall through to the
+      // legacy create/update-by-name path so the user still gets a check-run.
       core.warning(
         `Qodana: failed to update workflow job check-run – ${
           (error as Error).message

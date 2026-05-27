@@ -47,7 +47,6 @@ jobs:
       contents: write
       pull-requests: write
       checks: write
-      actions: read
     steps:
       - uses: actions/checkout@v3
         with:
@@ -90,7 +89,7 @@ to
 2. Set `push-fixes` property to
     - `pull-request`: create a new branch with fixes and create a pull request to the original branch
     - or `branch`: push fixes to the original branch. Also, set `pr-mode` to `false`: currently, this mode is not supported for applying fixes.
-3. Set the correct permissions for the job (`contents: write`, `pull-requests: write`, `checks: write`, `actions: read`)
+3. Set the correct permissions for the job (`contents: write`, `pull-requests: write`, `checks: write`)
     - If you use `pull-request` value for `push-fixes` property: [**allow GitHub Actions to create and approve pull requests**](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests)
 
 Example configuration:
@@ -131,7 +130,6 @@ jobs:
       contents: write
       pull-requests: write
       checks: write
-      actions: read
     steps:
       - uses: actions/checkout@v3
         with:
