@@ -296,6 +296,25 @@ describe('publishGitHubCheck — job check-run resolution', () => {
     expect(create).not.toHaveBeenCalled()
   })
 
+  test('paginate is invoked with an unwrap callback that extracts response.data.jobs', async () => {
+    setActionsEnv()
+    const {paginate, client} = makeOctokit([
+      {id: 1, name: 'qodana', runner_name: 'r', status: 'in_progress'}
+    ])
+    setupMocks(client)
+
+    const {publishGitHubCheck} = require('../src/utils')
+    await publishGitHubCheck(false, 'Qodana for JVM', output)
+
+    const unwrap = paginate.mock.calls[0][2] as (resp: {
+      data: {jobs: unknown}
+    }) => unknown
+    expect(typeof unwrap).toBe('function')
+    // The response shape is {total_count, jobs}, not a flat array; the unwrap
+    // must return the jobs array so client.paginate can flatten across pages.
+    expect(unwrap({data: {jobs: [{id: 42}]}})).toEqual([{id: 42}])
+  })
+
   test('paginated jobs: candidate on page 2 is still found', async () => {
     setActionsEnv()
     const pageJobs: Job[] = [
