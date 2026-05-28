@@ -615,13 +615,8 @@ export async function putReaction(
   }
 }
 
-/**
- * Read the current job's check-run ID from the auto-populated internal input,
- * which defaults to `${{ job.check_run_id }}` in action.yaml. Returns null if
- * the input is empty (running outside GitHub Actions, or on GitHub Enterprise
- * Server where the expression isn't available), so callers can fall back to
- * the legacy `checks.create` path.
- */
+/** Read the job's check-run ID (auto-populated from `${{ job.check_run_id }}`).
+ *  Returns null outside Actions or on GHES where the expression isn't available. */
 function readJobCheckRunId(): number | null {
   const raw = core.getInput('_job-check-run-id')
   if (!raw) return null
@@ -629,11 +624,7 @@ function readJobCheckRunId(): number | null {
   return Number.isFinite(id) && id > 0 ? id : null
 }
 
-/**
- * PATCH the workflow job's existing check-run with Qodana output.
- * Does NOT pass status/conclusion — GitHub Actions owns those for job
- * check-runs and overwrites any value we set when the step exits.
- */
+/** PATCH the job's check-run. No status/conclusion — Actions owns those. */
 async function updateJobCheck(
   client: InstanceType<typeof GitHub>,
   check_run_id: number,
@@ -647,13 +638,10 @@ async function updateJobCheck(
 }
 
 /**
- * Publish GitHub Checks output to GitHub Checks.
- * Preferred path: PATCH the workflow job's own check-run so the result is
- * grouped under the workflow that actually ran Qodana. Falls back to the
- * legacy listForRef + create/update path on any failure.
- * @param failedByThreshold flag if the Qodana failThreshold was reached.
- * @param name The name of the Check.
- * @param output The output to publish.
+ * Publish Qodana results. Preferred: PATCH the workflow job's own check-run
+ * so the result stays grouped under its workflow's check-suite. Falls back
+ * to legacy listForRef + create/update on PATCH failure (fork PR with
+ * restricted token, stale ID, or running on GHES where the input is empty).
  */
 export async function publishGitHubCheck(
   failedByThreshold: boolean,
@@ -668,9 +656,6 @@ export async function publishGitHubCheck(
       await updateJobCheck(client, jobCheckRunId, output)
       return
     } catch (error) {
-      // PATCH can fail in fork-PR contexts with a restricted token, on a
-      // stale ID, or with mismatched app identity. Fall through to the
-      // legacy create/update-by-name path so the user still gets a check-run.
       core.warning(
         `Qodana: failed to update workflow job check-run – ${
           (error as Error).message
