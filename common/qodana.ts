@@ -183,6 +183,10 @@ export function isNativeMode(args: string[]): boolean {
   return args.length > nextIndex && args[nextIndex] == 'false';
 }
 
+export function isPullSkipped(args: string[]): boolean {
+  return args.includes('--skip-pull')
+}
+
 /**
  * Returns the cache key prefix based on whether native mode is enabled.
  * Used to prevent incompatible native/non-native caches from clashing while
