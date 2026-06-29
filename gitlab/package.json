@@ -32,7 +32,7 @@
     "@gitbeaker/rest": "^43.8.0",
     "@types/adm-zip": "^0.5.7",
     "adm-zip": "^0.5.17",
-    "axios": "^1.14.0",
+    "axios": "1.15.2",
     "tar": "^7.5.13"
   }
 }
