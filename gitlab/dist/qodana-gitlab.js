@@ -49912,9 +49912,9 @@ var fs3 = __importStar(require("fs"));
 var utils_1 = require_utils5();
 var qodana_1 = (init_qodana(), __toCommonJS(qodana_exports));
 var output_1 = require_output();
-function setFailed(message) {
+function setFailed(message, exitCode) {
   console.error(message);
-  throw new Error(message);
+  process.exit(exitCode);
 }
 __name(setFailed, "setFailed");
 function main() {
@@ -49933,12 +49933,12 @@ function main() {
       (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches && (exitCode === qodana_1.QodanaExitCode.Success || exitCode === qodana_1.QodanaExitCode.FailThreshold));
       (0, utils_1.uploadArtifacts)(inputs.resultsDir);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
-        setFailed(`qodana scan failed with exit code ${exitCode}`);
+        setFailed(`qodana scan failed with exit code ${exitCode}`, exitCode);
       } else if (exitCode === qodana_1.QodanaExitCode.FailThreshold) {
-        setFailed(qodana_1.FAIL_THRESHOLD_OUTPUT);
+        setFailed(qodana_1.FAIL_THRESHOLD_OUTPUT, exitCode);
       }
     } catch (error) {
-      setFailed(error.message);
+      setFailed(error.message, 1);
     }
   });
 }
