@@ -616,28 +616,62 @@ export async function putReaction(
   }
 }
 
+/** Read the job's check-run ID (auto-populated from `${{ job.check_run_id }}`).
+ *  Returns null outside Actions or on GHES where the expression isn't available. */
+function readJobCheckRunId(): number | null {
+  const raw = core.getInput('_job-check-run-id')
+  if (!raw) return null
+  const id = Number(raw)
+  return Number.isFinite(id) && id > 0 ? id : null
+}
+
+/** PATCH the job's check-run. No status/conclusion — Actions owns those. */
+async function updateJobCheck(
+  client: InstanceType<typeof GitHub>,
+  check_run_id: number,
+  output: Output
+): Promise<void> {
+  await client.rest.checks.update({
+    ...github.context.repo,
+    check_run_id,
+    output
+  })
+}
+
 /**
- * Publish GitHub Checks output to GitHub Checks.
- * @param failedByThreshold flag if the Qodana failThreshold was reached.
- * @param name The name of the Check.
- * @param output The output to publish.
+ * Publish Qodana results. Preferred: PATCH the workflow job's own check-run
+ * so the result stays grouped under its workflow's check-suite. Falls back
+ * to legacy listForRef + create/update on PATCH failure (fork PR with
+ * restricted token, stale ID, or running on GHES where the input is empty).
  */
 export async function publishGitHubCheck(
   failedByThreshold: boolean,
   name: string,
   output: Output
 ): Promise<void> {
+  const client = github.getOctokit(getInputs().githubToken)
+
+  const jobCheckRunId = readJobCheckRunId()
+  if (jobCheckRunId !== null) {
+    try {
+      await updateJobCheck(client, jobCheckRunId, output)
+      return
+    } catch (error) {
+      core.warning(
+        `Qodana: failed to update workflow job check-run – ${
+          (error as Error).message
+        }. Falling back to legacy check-run creation.`
+      )
+    }
+  }
+
   const conclusion = getGitHubCheckConclusion(
     output.annotations,
     failedByThreshold
   )
   const c = github.context
   const pr = c.payload.pull_request as PullRequestPayload | undefined
-  let sha = c.sha
-  if (pr) {
-    sha = pr.head.sha
-  }
-  const client = github.getOctokit(getInputs().githubToken)
+  const sha = pr ? pr.head.sha : c.sha
   const result = await client.rest.checks.listForRef({
     ...github.context.repo,
     ref: sha

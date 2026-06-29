@@ -198,6 +198,8 @@ Instead of `main`, you can specify your branch here.
 9. Search for the `Qodana` status check, then check it.
 10. Click **Create**.
 
+> **Note:** The Qodana summary is posted on the workflow job's own check-run (named after the job's YAML key, or the job's `name:` override) rather than as a separate `Qodana for <Linter>` check. Set an explicit `jobs.<id>.name:` in your workflow if you want a stable status-check name to require in branch protection.
+
 <anchor name="quality-gate-and-baseline"></anchor>
 
 ### Quality gate and baseline
