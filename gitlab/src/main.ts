@@ -16,9 +16,9 @@ import {
 } from '../../common/qodana'
 import {publishOutput} from './output'
 
-function setFailed(message: string): void {
+function setFailed(message: string, exitCode: number): void {
   console.error(message)
-  throw new Error(message)
+  process.exit(exitCode)
 }
 
 async function main(): Promise<void> {
@@ -51,12 +51,12 @@ async function main(): Promise<void> {
     )
     uploadArtifacts(inputs.resultsDir)
     if (!isExecutionSuccessful(exitCode)) {
-      setFailed(`qodana scan failed with exit code ${exitCode}`)
+      setFailed(`qodana scan failed with exit code ${exitCode}`, exitCode)
     } else if (exitCode === QodanaExitCode.FailThreshold) {
-      setFailed(FAIL_THRESHOLD_OUTPUT)
+      setFailed(FAIL_THRESHOLD_OUTPUT, exitCode)
     }
   } catch (error) {
-    setFailed((error as Error).message)
+    setFailed((error as Error).message, 1)
   }
 }
 

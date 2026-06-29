@@ -42,8 +42,10 @@ import {publishOutput} from './output'
 // throw an uncaught exception.  Instead of failing this action, just warn.
 process.on('uncaughtException', e => core.warning(e.message))
 
-function setFailed(message: string): void {
-  core.setFailed(message)
+function setFailed(message: string, exitCode: number): void {
+  // exact mimic of core.setFailed(message) with exit code replacement
+  process.exitCode = exitCode
+  core.error(message)
 }
 
 /**
@@ -105,12 +107,12 @@ async function main(): Promise<void> {
       )
     ])
     if (!isExecutionSuccessful(exitCode)) {
-      setFailed(`qodana scan failed with exit code ${exitCode}`)
+      setFailed(`qodana scan failed with exit code ${exitCode}`, exitCode)
     } else if (exitCode === QodanaExitCode.FailThreshold) {
-      setFailed(FAIL_THRESHOLD_OUTPUT)
+      setFailed(FAIL_THRESHOLD_OUTPUT, exitCode)
     }
   } catch (error) {
-    setFailed((error as Error).message)
+    setFailed((error as Error).message, 1)
   }
 }
 
