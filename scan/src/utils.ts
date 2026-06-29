@@ -43,7 +43,8 @@ import {
   PushFixesType,
   sha256sum,
   validateBranchName,
-  VERSION
+  VERSION,
+  isPullSkipped
 } from '../../common/qodana'
 import path from 'path'
 import * as fs from 'fs'
@@ -311,7 +312,7 @@ export async function prepareAgent(
       nightlyVersion ? `nightly-${nightlyVersion}` : VERSION
     )
   )
-  if (!isNativeMode(args)) {
+  if (!isNativeMode(args) && !isPullSkipped(args)) {
     const exitCode = await qodana(getInputs(), getQodanaPullArgs(args))
     if (exitCode !== 0) {
       core.setFailed(`qodana pull failed with exit code ${exitCode}`)

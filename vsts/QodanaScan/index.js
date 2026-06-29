@@ -9814,6 +9814,7 @@ __export(qodana_exports, {
   getQodanaUrl: () => getQodanaUrl,
   isExecutionSuccessful: () => isExecutionSuccessful,
   isNativeMode: () => isNativeMode,
+  isPullSkipped: () => isPullSkipped,
   sha256sum: () => sha256sum,
   validateBranchName: () => validateBranchName
 });
@@ -9896,6 +9897,9 @@ function isNativeMode(args) {
   if (index == -1) return false;
   let nextIndex = index + 1;
   return args.length > nextIndex && args[nextIndex] == "false";
+}
+function isPullSkipped(args) {
+  return args.includes("--skip-pull");
 }
 function getNativeModePrefix(args) {
   return `native-${isNativeMode(args)}-`;
@@ -81794,7 +81798,7 @@ var require_utils4 = __commonJS({
           extractRoot = yield tool.extractTar(temp);
         }
         tool.prependPath(yield tool.cacheDir(extractRoot, qodana_12.EXECUTABLE, qodana_12.VERSION));
-        if (!(0, qodana_12.isNativeMode)(args)) {
+        if (!(0, qodana_12.isNativeMode)(args) && !(0, qodana_12.isPullSkipped)(args)) {
           const pull = yield qodana((0, qodana_12.getQodanaPullArgs)(args));
           if (pull !== 0) {
             setFailed("Unable to run 'qodana pull'");

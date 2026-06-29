@@ -52,7 +52,8 @@ import {
   PushFixesType,
   sha256sum,
   validateBranchName,
-  VERSION
+  VERSION,
+  isPullSkipped
 } from '../../common/qodana'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 import {getGitApi} from './gitApiProvider'
@@ -162,7 +163,7 @@ export async function prepareAgent(
     extractRoot = await tool.extractTar(temp)
   }
   tool.prependPath(await tool.cacheDir(extractRoot, EXECUTABLE, VERSION))
-  if (!isNativeMode(args)) {
+  if (!isNativeMode(args) && !isPullSkipped(args)) {
     const pull = await qodana(getQodanaPullArgs(args))
     if (pull !== 0) {
       setFailed("Unable to run 'qodana pull'")

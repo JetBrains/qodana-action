@@ -10070,6 +10070,7 @@ __export(qodana_exports, {
   getQodanaUrl: () => getQodanaUrl,
   isExecutionSuccessful: () => isExecutionSuccessful,
   isNativeMode: () => isNativeMode,
+  isPullSkipped: () => isPullSkipped,
   sha256sum: () => sha256sum,
   validateBranchName: () => validateBranchName
 });
@@ -10152,6 +10153,9 @@ function isNativeMode(args) {
   if (index == -1) return false;
   let nextIndex = index + 1;
   return args.length > nextIndex && args[nextIndex] == "false";
+}
+function isPullSkipped(args) {
+  return args.includes("--skip-pull");
 }
 function getNativeModePrefix(args) {
   return `native-${isNativeMode(args)}-`;
@@ -10314,6 +10318,7 @@ var init_qodana = __esm({
     __name(isExecutionSuccessful, "isExecutionSuccessful");
     __name(extractArg, "extractArg");
     __name(isNativeMode, "isNativeMode");
+    __name(isPullSkipped, "isPullSkipped");
     __name(getNativeModePrefix, "getNativeModePrefix");
     __name(getQodanaPullArgs, "getQodanaPullArgs");
     __name(getQodanaScanArgs, "getQodanaScanArgs");
