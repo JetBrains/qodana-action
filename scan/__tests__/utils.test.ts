@@ -143,3 +143,153 @@ export function initGithubContext(currentBranch: string): void {
     }
   })
 }
+
+describe('publishGitHubCheck — job check-run via _job-check-run-id input', () => {
+  beforeEach(() => {
+    jest.resetModules()
+  })
+
+  function makeOctokit(
+    overrides: {
+      update?: jest.Mock
+      listForRefImpl?: () => Promise<unknown>
+      createImpl?: () => Promise<unknown>
+    } = {}
+  ): {
+    update: jest.Mock
+    listForRef: jest.Mock
+    create: jest.Mock
+    client: unknown
+  } {
+    const update = overrides.update ?? jest.fn(async () => ({}))
+    const listForRef = jest.fn(
+      overrides.listForRefImpl ?? (async () => ({data: {check_runs: []}}))
+    )
+    const create = jest.fn(overrides.createImpl ?? (async () => ({})))
+    const client = {
+      rest: {
+        checks: {update, listForRef, create}
+      }
+    }
+    return {update, listForRef, create, client}
+  }
+
+  function setupMocks(
+    octokitClient: unknown,
+    inputValue: string,
+    coreWarning: jest.Mock = jest.fn()
+  ): jest.Mock {
+    jest.doMock('@actions/core', () => ({
+      getInput: (name: string) => {
+        if (name === 'github-token') return 'tkn'
+        if (name === '_job-check-run-id') return inputValue
+        return ''
+      },
+      getBooleanInput: () => false,
+      getMultilineInput: () => [],
+      warning: coreWarning,
+      debug: jest.fn(),
+      info: jest.fn(),
+      error: jest.fn(),
+      notice: jest.fn(),
+      addPath: jest.fn(),
+      setFailed: jest.fn(),
+      setOutput: jest.fn(),
+      summary: {addRaw: () => ({write: jest.fn()})}
+    }))
+    jest.doMock('@actions/github', () => ({
+      context: {
+        repo: {owner: 'o', repo: 'r'},
+        payload: {pull_request: {head: {sha: 'head-sha'}}},
+        sha: 'ctx-sha'
+      },
+      getOctokit: () => octokitClient
+    }))
+    return coreWarning
+  }
+
+  const output = {
+    title: 'Qodana for JVM',
+    summary: 'sum',
+    text: 'txt',
+    annotations: []
+  }
+
+  test('input present: PATCH job check-run with no status/conclusion', async () => {
+    const {update, listForRef, create, client} = makeOctokit()
+    setupMocks(client, '12345')
+
+    const {publishGitHubCheck} = require('../src/utils')
+    await publishGitHubCheck(false, 'Qodana for JVM', output)
+
+    expect(update).toHaveBeenCalledTimes(1)
+    const payload = update.mock.calls[0][0] as Record<string, unknown>
+    expect(payload).toMatchObject({owner: 'o', repo: 'r', check_run_id: 12345})
+    expect(payload).not.toHaveProperty('status')
+    expect(payload).not.toHaveProperty('conclusion')
+    expect(payload.output).toEqual(output)
+    expect(listForRef).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
+  })
+
+  test('empty input (running outside Actions or on GHES): legacy fallback', async () => {
+    const {update, listForRef, create, client} = makeOctokit()
+    setupMocks(client, '')
+
+    const {publishGitHubCheck} = require('../src/utils')
+    await publishGitHubCheck(false, 'Qodana for JVM', output)
+
+    expect(update).not.toHaveBeenCalled()
+    expect(listForRef).toHaveBeenCalledTimes(1)
+    expect(create).toHaveBeenCalledTimes(1)
+    expect(create.mock.calls[0][0]).toMatchObject({
+      owner: 'o',
+      repo: 'r',
+      head_sha: 'head-sha',
+      name: 'Qodana for JVM',
+      status: 'completed'
+    })
+  })
+
+  test('non-numeric input: legacy fallback (no PATCH attempt)', async () => {
+    const {update, create, client} = makeOctokit()
+    setupMocks(client, 'not-a-number')
+
+    const {publishGitHubCheck} = require('../src/utils')
+    await publishGitHubCheck(false, 'Qodana for JVM', output)
+
+    expect(update).not.toHaveBeenCalled()
+    expect(create).toHaveBeenCalledTimes(1)
+  })
+
+  test('zero / negative input: legacy fallback (no PATCH attempt)', async () => {
+    for (const bad of ['0', '-1']) {
+      jest.resetModules()
+      const {update, create, client} = makeOctokit()
+      setupMocks(client, bad)
+
+      const {publishGitHubCheck} = require('../src/utils')
+      await publishGitHubCheck(false, 'Qodana for JVM', output)
+
+      expect(update).not.toHaveBeenCalled()
+      expect(create).toHaveBeenCalledTimes(1)
+    }
+  })
+
+  test('PATCH fails: warn and fall back to legacy', async () => {
+    const warn = jest.fn()
+    const update = jest.fn().mockRejectedValueOnce(new Error('403 denied'))
+    const {listForRef, create, client} = makeOctokit({update})
+    setupMocks(client, '777', warn)
+
+    const {publishGitHubCheck} = require('../src/utils')
+    await publishGitHubCheck(false, 'Qodana for JVM', output)
+
+    expect(update).toHaveBeenCalledTimes(1)
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('failed to update workflow job check-run')
+    )
+    expect(listForRef).toHaveBeenCalledTimes(1)
+    expect(create).toHaveBeenCalledTimes(1)
+  })
+})

@@ -70,6 +70,11 @@ inputs:
     required: false
     default: ""
     deprecationMessage: 'This option is for development purposes only. Do not use it in production.'
+  _job-check-run-id:
+    description: 'Internal. Auto-populated from the job context to identify the workflow job check-run. Do not set.'
+    required: false
+    default: ${{ job.check_run_id }}
+    deprecationMessage: 'This input is internal — do not set it manually. It is auto-populated from the job context.'
 runs:
   using: 'node24'
   main: 'scan/dist/index.js'
