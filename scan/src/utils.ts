@@ -564,8 +564,9 @@ export async function updateComment(
 }
 
 /**
- * Updates the reaction of a pull request review comment to the given 'newReaction'.
- * Removes the previous reaction if 'oldReaction' is non-empty.
+ * Updates the reaction on the pull request to the given 'newReaction'.
+ * Removes the action's own 'oldReaction' reactions if 'oldReaction' is non-empty,
+ * leaving reactions added by other users untouched.
  *
  * @param newReaction The new reaction to be added.
  * @param oldReaction The old reaction to be removed (if non-empty).
@@ -584,35 +585,50 @@ export async function putReaction(
   const client = github.getOctokit(getInputs().githubToken)
   const issue_number = pr.number
 
-  if (oldReaction !== '') {
-    try {
-      const {data: reactions} = await client.rest.reactions.listForIssue({
-        ...github.context.repo,
-        issue_number
-      })
-      const previousReaction = reactions.find(r => r.content === oldReaction)
-      if (previousReaction) {
-        await client.rest.reactions.deleteForIssue({
-          ...github.context.repo,
-          issue_number,
-          reaction_id: previousReaction.id
-        })
-      }
-    } catch (error) {
-      core.debug(
-        `Failed to delete the initial reaction – ${(error as Error).message}`
-      )
-    }
-  }
-
+  // Create the new reaction first so its author identifies us: the token may be
+  // the default GITHUB_TOKEN (github-actions[bot]) or a custom PAT/App user.
+  let ownLogin: string | undefined
   try {
-    await client.rest.reactions.createForIssue({
+    const {data: created} = await client.rest.reactions.createForIssue({
       ...github.context.repo,
       issue_number,
       content: newReaction
     })
+    ownLogin = created.user?.login
   } catch (error) {
     core.debug(`Failed to set reaction – ${(error as Error).message}`)
+  }
+
+  if (oldReaction !== '' && ownLogin) {
+    try {
+      const reactions = await client.paginate(
+        client.rest.reactions.listForIssue,
+        {
+          ...github.context.repo,
+          issue_number,
+          per_page: 100
+        }
+      )
+      for (const previousReaction of reactions.filter(
+        r => r.content === oldReaction && r.user?.login === ownLogin
+      )) {
+        try {
+          await client.rest.reactions.deleteForIssue({
+            ...github.context.repo,
+            issue_number,
+            reaction_id: previousReaction.id
+          })
+        } catch (error) {
+          core.debug(
+            `Failed to delete reaction ${previousReaction.id} – ${(error as Error).message}`
+          )
+        }
+      }
+    } catch (error) {
+      core.warning(
+        `Failed to list the initial reactions – ${(error as Error).message}`
+      )
+    }
   }
 }
 
