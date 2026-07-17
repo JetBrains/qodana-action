@@ -15,9 +15,13 @@
  */
 
 import {expect} from '@jest/globals'
-import {isNeedToUploadCache} from '../src/utils'
+import {isNeedToUploadCache, putReaction} from '../src/utils'
 import * as github from '@actions/github'
-import {ENABLE_USE_CACHE_OPTION_WARNING} from '../src/utils'
+import {
+  ANALYSIS_FINISHED_REACTION,
+  ANALYSIS_STARTED_REACTION,
+  ENABLE_USE_CACHE_OPTION_WARNING
+} from '../src/utils'
 
 const masterBranch = 'master'
 describe('isNeedToUploadCache', () => {
@@ -143,3 +147,133 @@ export function initGithubContext(currentBranch: string): void {
     }
   })
 }
+
+describe('putReaction', () => {
+  function initPrContext(pr?: {number: number}): void {
+    Object.defineProperty(github, 'context', {
+      value: {
+        repo: {owner: 'JetBrains', repo: 'qodana-action'},
+        payload: pr ? {pull_request: pr} : {}
+      },
+      configurable: true
+    })
+  }
+
+  const OWN_LOGIN = 'github-actions[bot]'
+
+  function mockOctokit(
+    reactions: {id: number; content: string; user: {login: string} | null}[],
+    ownLogin: string | null = OWN_LOGIN
+  ): {
+    paginate: jest.Mock
+    deleteForIssue: jest.Mock
+    createForIssue: jest.Mock
+    listForIssue: jest.Mock
+  } {
+    const listForIssue = jest.fn()
+    const deleteForIssue = jest.fn().mockResolvedValue({})
+    const createForIssue = jest
+      .fn()
+      .mockResolvedValue({data: {user: ownLogin ? {login: ownLogin} : null}})
+    const paginate = jest.fn().mockResolvedValue(reactions)
+    const client = {
+      paginate,
+      rest: {reactions: {listForIssue, deleteForIssue, createForIssue}}
+    }
+    jest.spyOn(github, 'getOctokit').mockReturnValue(client as never)
+    return {paginate, deleteForIssue, createForIssue, listForIssue}
+  }
+
+  const booleanInputs = [
+    'cache-default-branch-only',
+    'upload-result',
+    'use-caches',
+    'use-annotations',
+    'pr-mode',
+    'post-pr-comment'
+  ]
+
+  beforeEach(() => {
+    for (const name of booleanInputs) {
+      process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] = 'false'
+    }
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+    for (const name of booleanInputs) {
+      delete process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`]
+    }
+  })
+
+  it("deletes only its own old reactions and leaves other users' alone", async () => {
+    initPrContext({number: 123})
+    const {paginate, deleteForIssue, createForIssue, listForIssue} =
+      mockOctokit([
+        {id: 1, content: 'eyes', user: {login: OWN_LOGIN}},
+        {id: 2, content: 'eyes', user: {login: OWN_LOGIN}},
+        {id: 3, content: 'eyes', user: {login: 'human'}}, // must survive
+        {id: 4, content: '+1', user: {login: OWN_LOGIN}} // wrong content
+      ])
+    deleteForIssue.mockRejectedValueOnce(new Error('403 forbidden'))
+
+    await putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION)
+
+    // new reaction created first (its author identifies us)
+    expect(createForIssue).toHaveBeenCalledWith(
+      expect.objectContaining({content: ANALYSIS_FINISHED_REACTION})
+    )
+    // paginates rather than using the unpaginated listForIssue directly
+    expect(paginate).toHaveBeenCalledWith(
+      listForIssue,
+      expect.objectContaining({issue_number: 123, per_page: 100})
+    )
+    // both of our eyes attempted (first fails, second still tried); human & +1 untouched
+    expect(deleteForIssue).toHaveBeenCalledTimes(2)
+    expect(deleteForIssue).toHaveBeenCalledWith(
+      expect.objectContaining({reaction_id: 1})
+    )
+    expect(deleteForIssue).toHaveBeenCalledWith(
+      expect.objectContaining({reaction_id: 2})
+    )
+    expect(deleteForIssue).not.toHaveBeenCalledWith(
+      expect.objectContaining({reaction_id: 3})
+    )
+  })
+
+  it('does not delete when the created reaction has no identifiable author', async () => {
+    initPrContext({number: 123})
+    const {paginate, deleteForIssue, createForIssue} = mockOctokit(
+      [{id: 1, content: 'eyes', user: {login: OWN_LOGIN}}],
+      null
+    )
+
+    await putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION)
+
+    expect(createForIssue).toHaveBeenCalled()
+    expect(paginate).not.toHaveBeenCalled()
+    expect(deleteForIssue).not.toHaveBeenCalled()
+  })
+
+  it('skips listing/deleting when oldReaction is empty', async () => {
+    initPrContext({number: 123})
+    const {paginate, deleteForIssue, createForIssue} = mockOctokit([])
+
+    await putReaction(ANALYSIS_STARTED_REACTION, '')
+
+    expect(paginate).not.toHaveBeenCalled()
+    expect(deleteForIssue).not.toHaveBeenCalled()
+    expect(createForIssue).toHaveBeenCalledWith(
+      expect.objectContaining({content: ANALYSIS_STARTED_REACTION})
+    )
+  })
+
+  it('returns early and touches no API when not a pull request', async () => {
+    initPrContext(undefined)
+    const getOctokit = jest.spyOn(github, 'getOctokit')
+
+    await putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION)
+
+    expect(getOctokit).not.toHaveBeenCalled()
+  })
+})
