@@ -34,7 +34,7 @@ jobs:
           - macos-latest
     steps:
       - name: Fetch sources
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -60,7 +60,7 @@ jobs:
 
       - name: Collect test results
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: maven-test-results-${{ runner.os }}
           path: |
