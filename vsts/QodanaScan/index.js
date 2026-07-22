@@ -17588,10 +17588,16 @@ var require_shell_quote = __commonJS({
 // ../common/utils.ts
 var utils_exports = {};
 __export(utils_exports, {
+  MERGE_COMMIT_PARENTS_ARGS: () => MERGE_COMMIT_PARENTS_ARGS,
+  MERGE_COMMIT_PR_WARNING: () => MERGE_COMMIT_PR_WARNING,
+  isMergeCommit: () => isMergeCommit,
   parseRawArguments: () => parseRawArguments,
   parseRules: () => parseRules,
   setDeprecationWarningCallback: () => setDeprecationWarningCallback
 });
+function isMergeCommit(parents) {
+  return parents.trim().split(/\s+/).filter(Boolean).length >= 2;
+}
 function setDeprecationWarningCallback(callback) {
   deprecationWarningCallback = callback;
 }
@@ -17693,11 +17699,18 @@ function parseRawArguments(rawArgs) {
   }
   return spaceParsed;
 }
-var import_shell_quote, deprecationWarningCallback;
+var import_shell_quote, MERGE_COMMIT_PR_WARNING, MERGE_COMMIT_PARENTS_ARGS, deprecationWarningCallback;
 var init_utils = __esm({
   "../common/utils.ts"() {
     "use strict";
     import_shell_quote = __toESM(require_shell_quote());
+    MERGE_COMMIT_PR_WARNING = "Detected a merge-commit checkout (HEAD has multiple parents) while running in pull request mode. The scan may report problems from files not changed by the pull request, because the diff includes target-branch changes merged into the checkout. Check out the pull request source-branch head before scanning.";
+    MERGE_COMMIT_PARENTS_ARGS = [
+      "show",
+      "--no-patch",
+      "--format=%P",
+      "HEAD"
+    ];
     deprecationWarningCallback = (message) => console.warn(message);
   }
 });
@@ -81763,6 +81776,7 @@ var require_utils4 = __commonJS({
           const inputs2 = getInputs();
           args = (0, qodana_12.getQodanaScanArgs)(inputs2.args, inputs2.resultsDir, inputs2.cacheDir);
           if (inputs2.prMode && tl2.getVariable("Build.Reason") === "PullRequest") {
+            yield warnIfMergeCommitCheckout();
             const sha = yield getPrSha();
             if (sha !== "") {
               args.push("--commit", sha);
@@ -81839,6 +81853,20 @@ var require_utils4 = __commonJS({
       const sourceBranch = (_a = tl2.getVariable("System.PullRequest.SourceBranch")) === null || _a === void 0 ? void 0 : _a.replace("refs/heads/", "");
       const targetBranch = (_b = tl2.getVariable("System.PullRequest.TargetBranch")) === null || _b === void 0 ? void 0 : _b.replace("refs/heads/", "");
       return { sourceBranch, targetBranch };
+    }
+    function warnIfMergeCommitCheckout() {
+      return __awaiter2(this, void 0, void 0, function* () {
+        try {
+          const { stdout } = yield gitOutput(utils_12.MERGE_COMMIT_PARENTS_ARGS, false, {
+            ignoreReturnCode: true
+          });
+          if ((0, utils_12.isMergeCommit)(stdout)) {
+            tl2.warning(`${utils_12.MERGE_COMMIT_PR_WARNING} Add a "git checkout $(System.PullRequest.SourceCommitId)" step (with "fetchDepth: 0") before the scan.`);
+          }
+        } catch (error) {
+          tl2.debug(`Failed to check whether HEAD is a merge commit: ${error.message}`);
+        }
+      });
     }
     function getPrSha() {
       return __awaiter2(this, void 0, void 0, function* () {

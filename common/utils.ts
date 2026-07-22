@@ -22,6 +22,29 @@ export interface Rule {
   fullDescription: string
 }
 
+/**
+ * Base warning shown when PR mode runs on a merge-commit checkout.
+ */
+export const MERGE_COMMIT_PR_WARNING =
+  'Detected a merge-commit checkout (HEAD has multiple parents) while running in pull request mode. ' +
+  'The scan may report problems from files not changed by the pull request, because the diff includes ' +
+  'target-branch changes merged into the checkout. Check out the pull request source-branch head before scanning.'
+
+/** Git args that print HEAD's parent hashes (space-separated), for merge-commit detection. */
+export const MERGE_COMMIT_PARENTS_ARGS = [
+  'show',
+  '--no-patch',
+  '--format=%P',
+  'HEAD'
+]
+
+/**
+ * Detects a merge-commit checkout (a pre-merged checkout of the source into the target branch)
+ */
+export function isMergeCommit(parents: string): boolean {
+  return parents.trim().split(/\s+/).filter(Boolean).length >= 2
+}
+
 // Callback type for platform-specific deprecation warning
 export type DeprecationWarningCallback = (message: string) => void
 
