@@ -17,6 +17,9 @@ import {
 } from '../../common/qodana'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 import {
+  isMergeCommit,
+  MERGE_COMMIT_PARENTS_ARGS,
+  MERGE_COMMIT_PR_WARNING,
   parseRawArguments,
   setDeprecationWarningCallback
 } from '../../common/utils'
@@ -286,6 +289,7 @@ export async function qodanaScan(): Promise<number> {
     inputs.cacheDir
   )
   if (inputs.prMode && isMergeRequest()) {
+    await warnIfMergeCommitCheckout()
     const sha = await getPrSha()
     if (sha !== '') {
       args.push('--commit', sha)
@@ -300,6 +304,23 @@ export async function qodanaScan(): Promise<number> {
     }
   }
   return qodanaExec(args)
+}
+
+async function warnIfMergeCommitCheckout(): Promise<void> {
+  try {
+    const {stdout} = await gitOutput(MERGE_COMMIT_PARENTS_ARGS, true)
+    if (isMergeCommit(stdout)) {
+      console.warn(
+        `${MERGE_COMMIT_PR_WARNING} ` +
+          'Use a standard merge request pipeline (merged-results pipelines check out a pre-merged commit), ' +
+          'or check out the source-branch head before scanning.'
+      )
+    }
+  } catch (e) {
+    debug(
+      `Failed to check whether HEAD is a merge commit: ${(e as Error).message}`
+    )
+  }
 }
 
 async function getPrSha(): Promise<string> {

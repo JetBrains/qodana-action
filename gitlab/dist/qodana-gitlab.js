@@ -10572,10 +10572,16 @@ var require_shell_quote = __commonJS({
 // ../common/utils.ts
 var utils_exports = {};
 __export(utils_exports, {
+  MERGE_COMMIT_PARENTS_ARGS: () => MERGE_COMMIT_PARENTS_ARGS,
+  MERGE_COMMIT_PR_WARNING: () => MERGE_COMMIT_PR_WARNING,
+  isMergeCommit: () => isMergeCommit,
   parseRawArguments: () => parseRawArguments,
   parseRules: () => parseRules,
   setDeprecationWarningCallback: () => setDeprecationWarningCallback
 });
+function isMergeCommit(parents) {
+  return parents.trim().split(/\s+/).filter(Boolean).length >= 2;
+}
 function setDeprecationWarningCallback(callback) {
   deprecationWarningCallback = callback;
 }
@@ -10675,11 +10681,19 @@ function parseRawArguments(rawArgs) {
   }
   return spaceParsed;
 }
-var import_shell_quote, deprecationWarningCallback;
+var import_shell_quote, MERGE_COMMIT_PR_WARNING, MERGE_COMMIT_PARENTS_ARGS, deprecationWarningCallback;
 var init_utils = __esm({
   "../common/utils.ts"() {
     "use strict";
     import_shell_quote = __toESM(require_shell_quote());
+    MERGE_COMMIT_PR_WARNING = "Detected a merge-commit checkout (HEAD has multiple parents) while running in pull request mode. The scan may report problems from files not changed by the pull request, because the diff includes target-branch changes merged into the checkout. Check out the pull request source-branch head before scanning.";
+    MERGE_COMMIT_PARENTS_ARGS = [
+      "show",
+      "--no-patch",
+      "--format=%P",
+      "HEAD"
+    ];
+    __name(isMergeCommit, "isMergeCommit");
     deprecationWarningCallback = /* @__PURE__ */ __name((message) => console.warn(message), "deprecationWarningCallback");
     __name(setDeprecationWarningCallback, "setDeprecationWarningCallback");
     __name(parseRules, "parseRules");
@@ -49580,6 +49594,7 @@ Stderr: ${result.stderr}`);
         const inputs = getInputs();
         const args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
         if (inputs.prMode && isMergeRequest()) {
+          yield warnIfMergeCommitCheckout();
           const sha = yield getPrSha();
           if (sha !== "") {
             args.push("--commit", sha);
@@ -49595,6 +49610,19 @@ Stderr: ${result.stderr}`);
       });
     }
     __name(qodanaScan, "qodanaScan");
+    function warnIfMergeCommitCheckout() {
+      return __awaiter2(this, void 0, void 0, function* () {
+        try {
+          const { stdout } = yield gitOutput(utils_12.MERGE_COMMIT_PARENTS_ARGS, true);
+          if ((0, utils_12.isMergeCommit)(stdout)) {
+            console.warn(`${utils_12.MERGE_COMMIT_PR_WARNING} Use a standard merge request pipeline (merged-results pipelines check out a pre-merged commit), or check out the source-branch head before scanning.`);
+          }
+        } catch (e) {
+          debug(`Failed to check whether HEAD is a merge commit: ${e.message}`);
+        }
+      });
+    }
+    __name(warnIfMergeCommitCheckout, "warnIfMergeCommitCheckout");
     function getPrSha() {
       return __awaiter2(this, void 0, void 0, function* () {
         try {

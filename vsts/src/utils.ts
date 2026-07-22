@@ -22,6 +22,9 @@ import fs from 'fs'
 import path from 'path'
 import * as GitInterfaces from 'azure-devops-node-api/interfaces/GitInterfaces'
 import {
+  isMergeCommit,
+  MERGE_COMMIT_PARENTS_ARGS,
+  MERGE_COMMIT_PR_WARNING,
   parseRawArguments,
   setDeprecationWarningCallback
 } from '../../common/utils'
@@ -114,6 +117,7 @@ export async function qodana(args: string[] = []): Promise<number> {
     const inputs = getInputs()
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
     if (inputs.prMode && tl.getVariable('Build.Reason') === 'PullRequest') {
+      await warnIfMergeCommitCheckout()
       const sha = await getPrSha()
       if (sha !== '') {
         args.push('--commit', sha)
@@ -225,6 +229,24 @@ function getSourceAndTargetBranches(): {
     .getVariable('System.PullRequest.TargetBranch')
     ?.replace('refs/heads/', '')
   return {sourceBranch, targetBranch}
+}
+
+async function warnIfMergeCommitCheckout(): Promise<void> {
+  try {
+    const {stdout} = await gitOutput(MERGE_COMMIT_PARENTS_ARGS, false, {
+      ignoreReturnCode: true
+    })
+    if (isMergeCommit(stdout)) {
+      tl.warning(
+        `${MERGE_COMMIT_PR_WARNING} ` +
+          'Add a "git checkout $(System.PullRequest.SourceCommitId)" step (with "fetchDepth: 0") before the scan.'
+      )
+    }
+  } catch (error) {
+    tl.debug(
+      `Failed to check whether HEAD is a merge commit: ${(error as Error).message}`
+    )
+  }
 }
 
 async function getPrSha(): Promise<string> {
