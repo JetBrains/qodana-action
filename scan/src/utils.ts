@@ -52,6 +52,9 @@ import * as os from 'os'
 import {prFixesBody} from './output'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 import {
+  isMergeCommit,
+  MERGE_COMMIT_PARENTS_ARGS,
+  MERGE_COMMIT_PR_WARNING,
   parseRawArguments,
   setDeprecationWarningCallback
 } from '../../common/utils'
@@ -177,6 +180,18 @@ async function getPrSha(): Promise<string> {
   return ''
 }
 
+async function warnIfMergeCommitCheckout(): Promise<void> {
+  const {stdout} = await gitOutput(MERGE_COMMIT_PARENTS_ARGS, {
+    ignoreReturnCode: true
+  })
+  if (isMergeCommit(stdout)) {
+    core.warning(
+      `${MERGE_COMMIT_PR_WARNING} ` +
+        'Set `ref: ${{ github.event.pull_request.head.sha }}` and `fetch-depth: 0` in your checkout step.'
+    )
+  }
+}
+
 function getHeadSha(): string {
   const c = github.context
   const pr = c.payload.pull_request as PullRequestPayload | undefined
@@ -196,6 +211,7 @@ export async function qodana(
   if (args.length === 0) {
     args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
     if (inputs.prMode) {
+      await warnIfMergeCommitCheckout()
       const sha = await getPrSha()
       if (sha !== '') {
         args.push('--commit', sha)

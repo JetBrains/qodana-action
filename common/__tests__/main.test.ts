@@ -15,7 +15,7 @@
  */
 
 import {expect, test, describe, beforeEach} from '@jest/globals'
-import {getCoverageFromSarif, getNativeModePrefix, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
+import {getCoverageFromSarif, getNativeModePrefix, getSanityProblemsCount, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
   getCoverageStats,
   getReportURL, parseSarif
@@ -25,6 +25,8 @@ import * as path from 'path'
 import * as os from 'os'
 import {outputEmptyFixture, problemDescriptorsDefaultFixture} from './common.test.utils'
 import {
+  isMergeCommit,
+  MERGE_COMMIT_PARENTS_ARGS,
   parseRawArguments,
   setDeprecationWarningCallback
 } from '../utils'
@@ -86,6 +88,18 @@ test('test sarif with no problems to output annotations', () => {
     "This is a test help string"
   )
   expect(result.problemDescriptions).toEqual(output)
+})
+
+test('test sanity problems count from sarif with sanity results', () => {
+  expect(getSanityProblemsCount('__tests__/data/sanity.sarif.json')).toEqual(1)
+})
+
+test('test sanity problems count from sarif without sanity results', () => {
+  expect(getSanityProblemsCount('__tests__/data/some.sarif.json')).toEqual(0)
+})
+
+test('test sanity problems count from missing sarif file', () => {
+  expect(getSanityProblemsCount('__tests__/data/does.not.exist.json')).toEqual(0)
 })
 
 describe('getReportURL', () => {
@@ -195,6 +209,41 @@ describe('getNativeModePrefix', () => {
 
   test('returns native-true- when --within-docker false is present', () => {
     expect(getNativeModePrefix(['--within-docker', 'false'])).toBe('native-true-')
+  })
+})
+
+describe('isMergeCommit', () => {
+  test('false for a commit with a single parent', () => {
+    expect(isMergeCommit('parent1')).toBe(false)
+  })
+
+  test('true for a commit with two parents (merge commit)', () => {
+    expect(isMergeCommit('targetHead sourceHead')).toBe(true)
+  })
+
+  test('true for a commit with more than two parents (octopus merge)', () => {
+    expect(isMergeCommit('p1 p2 p3')).toBe(true)
+  })
+
+  test('false for a root commit with no parents', () => {
+    expect(isMergeCommit('')).toBe(false)
+  })
+
+  test('false for whitespace-only output', () => {
+    expect(isMergeCommit('   ')).toBe(false)
+  })
+
+  test('tolerates surrounding whitespace and newlines', () => {
+    expect(isMergeCommit('  p1 p2 \n')).toBe(true)
+  })
+
+  test('git args print HEAD parent hashes', () => {
+    expect(MERGE_COMMIT_PARENTS_ARGS).toEqual([
+      'show',
+      '--no-patch',
+      '--format=%P',
+      'HEAD'
+    ])
   })
 })
 

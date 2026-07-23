@@ -10068,6 +10068,7 @@ __export(qodana_exports, {
   getQodanaSha256: () => getQodanaSha256,
   getQodanaSha256MismatchMessage: () => getQodanaSha256MismatchMessage,
   getQodanaUrl: () => getQodanaUrl,
+  getSanityProblemsCount: () => getSanityProblemsCount,
   isExecutionSuccessful: () => isExecutionSuccessful,
   isNativeMode: () => isNativeMode,
   isPullSkipped: () => isPullSkipped,
@@ -10227,6 +10228,15 @@ function getCoverageFromSarif(sarifPath) {
   }
   throw new Error(`SARIF file not found: ${sarifPath}`);
 }
+function getSanityProblemsCount(sarifPath) {
+  if (fs.existsSync(sarifPath)) {
+    const sarifContents = JSON.parse(
+      fs.readFileSync(sarifPath, { encoding: "utf8" })
+    );
+    return sarifContents.runs?.[0]?.properties?.["qodana.sanity.results"]?.length ?? 0;
+  }
+  return 0;
+}
 function sha256sum(file) {
   const hash = (0, import_crypto.createHash)("sha256");
   hash.update(fs.readFileSync(file));
@@ -10326,6 +10336,7 @@ var init_qodana = __esm({
     BRANCH = "branch";
     PULL_REQUEST = "pull-request";
     __name(getCoverageFromSarif, "getCoverageFromSarif");
+    __name(getSanityProblemsCount, "getSanityProblemsCount");
     __name(sha256sum, "sha256sum");
     __name(getQodanaSha256MismatchMessage, "getQodanaSha256MismatchMessage");
     __name(validateBranchName, "validateBranchName");
@@ -10572,10 +10583,16 @@ var require_shell_quote = __commonJS({
 // ../common/utils.ts
 var utils_exports = {};
 __export(utils_exports, {
+  MERGE_COMMIT_PARENTS_ARGS: () => MERGE_COMMIT_PARENTS_ARGS,
+  MERGE_COMMIT_PR_WARNING: () => MERGE_COMMIT_PR_WARNING,
+  isMergeCommit: () => isMergeCommit,
   parseRawArguments: () => parseRawArguments,
   parseRules: () => parseRules,
   setDeprecationWarningCallback: () => setDeprecationWarningCallback
 });
+function isMergeCommit(parents) {
+  return parents.trim().split(/\s+/).filter(Boolean).length >= 2;
+}
 function setDeprecationWarningCallback(callback) {
   deprecationWarningCallback = callback;
 }
@@ -10675,11 +10692,19 @@ function parseRawArguments(rawArgs) {
   }
   return spaceParsed;
 }
-var import_shell_quote, deprecationWarningCallback;
+var import_shell_quote, MERGE_COMMIT_PR_WARNING, MERGE_COMMIT_PARENTS_ARGS, deprecationWarningCallback;
 var init_utils = __esm({
   "../common/utils.ts"() {
     "use strict";
     import_shell_quote = __toESM(require_shell_quote());
+    MERGE_COMMIT_PR_WARNING = "Detected a merge-commit checkout (HEAD has multiple parents) while running in pull request mode. The scan may report problems from files not changed by the pull request, because the diff includes target-branch changes merged into the checkout. Check out the pull request source-branch head before scanning.";
+    MERGE_COMMIT_PARENTS_ARGS = [
+      "show",
+      "--no-patch",
+      "--format=%P",
+      "HEAD"
+    ];
+    __name(isMergeCommit, "isMergeCommit");
     deprecationWarningCallback = /* @__PURE__ */ __name((message) => console.warn(message), "deprecationWarningCallback");
     __name(setDeprecationWarningCallback, "setDeprecationWarningCallback");
     __name(parseRules, "parseRules");
@@ -10706,6 +10731,7 @@ __export(output_exports, {
   getLicenseInfo: () => getLicenseInfo,
   getProblemPlural: () => getProblemPlural,
   getReportURL: () => getReportURL,
+  getSanityProblemPlural: () => getSanityProblemPlural,
   getSummary: () => getSummary,
   parseResult: () => parseResult,
   parseSarif: () => parseSarif
@@ -10848,7 +10874,7 @@ function getRowsByLevel(annotations, level) {
   );
   return Array.from(problems.entries()).sort((a, b) => b[1] - a[1]).map(([title, count]) => `| \`${title}\` | ${level} | ${count} |`).join("\n");
 }
-function getSummary(toolName, projectDir, sourceDir, problemsDescriptors, coverageInfo, packages, licensesInfo, reportUrl, prMode, dependencyCharsLimit, reportViewOptionsHelp) {
+function getSummary(toolName, projectDir, sourceDir, problemsDescriptors, coverageInfo, packages, licensesInfo, reportUrl, prMode, dependencyCharsLimit, reportViewOptionsHelp, sanityProblemsCount = 0) {
   const contactBlock = wrapToToggleBlock("Contact Qodana team", SUMMARY_MISC);
   let licensesBlock = "";
   if (licensesInfo !== "" && licensesInfo.length < dependencyCharsLimit) {
@@ -10861,6 +10887,7 @@ function getSummary(toolName, projectDir, sourceDir, problemsDescriptors, covera
   if (prMode) {
     prModeBlock = SUMMARY_PR_MODE;
   }
+  const sanityBlock = getSanityWarning(sanityProblemsCount, reportUrl);
   if (reportUrl !== "") {
     const firstToolName = toolName.split(" ")[0];
     toolName = toolName.replace(
@@ -10891,6 +10918,7 @@ function getSummary(toolName, projectDir, sourceDir, problemsDescriptors, covera
     `**${problemsDescriptors.length} ${getProblemPlural(
       problemsDescriptors.length
     )}** were found`,
+    ...sanityBlock !== "" ? [sanityBlock] : [],
     "",
     SUMMARY_TABLE_HEADER,
     SUMMARY_TABLE_SEP,
@@ -10918,6 +10946,16 @@ function getSummary(toolName, projectDir, sourceDir, problemsDescriptors, covera
 }
 function getProblemPlural(count) {
   return `new problem${count !== 1 ? "s" : ""}`;
+}
+function getSanityProblemPlural(count) {
+  return `sanity problem${count !== 1 ? "s" : ""}`;
+}
+function getSanityWarning(count, reportUrl) {
+  if (count === 0) {
+    return "";
+  }
+  const link = reportUrl !== "" ? `[report](${reportUrl})` : "report";
+  return `\u26A0\uFE0F We also discovered **${count} ${getSanityProblemPlural(count)}** during the analysis. They may indicate that the project is misconfigured. For more info, open the ${link}.`;
 }
 function getDepencencyPlural(count) {
   return `dependenc${count !== 1 ? "ies" : "y"}`;
@@ -10957,6 +10995,8 @@ var init_output = __esm({
     __name(getRowsByLevel, "getRowsByLevel");
     __name(getSummary, "getSummary");
     __name(getProblemPlural, "getProblemPlural");
+    __name(getSanityProblemPlural, "getSanityProblemPlural");
+    __name(getSanityWarning, "getSanityWarning");
     __name(getDepencencyPlural, "getDepencencyPlural");
     __name(getCommentTag, "getCommentTag");
   }
@@ -28506,11 +28546,12 @@ so that the job will upload the files as the job artifacts:
         try {
           const problems = (0, output_12.parseSarif)(`${resultsDir}/${qodana_12.QODANA_SARIF_NAME}`, getQodanaHelpString());
           const reportUrl = (0, output_12.getReportURL)(resultsDir);
+          const sanityProblemsCount = (0, qodana_12.getSanityProblemsCount)(`${resultsDir}/${qodana_12.QODANA_SARIF_NAME}`);
           const coverageInfo = (0, output_12.getCoverageStats)((0, qodana_12.getCoverageFromSarif)(`${resultsDir}/${qodana_12.QODANA_SHORT_SARIF_NAME}`), true);
           const licensesInfo = (0, output_12.getLicenseInfo)(resultsDir);
           const problemsDescriptions = (_a = problems.problemDescriptions) !== null && _a !== void 0 ? _a : [];
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : output_12.QODANA_CHECK_NAME;
-          problems.summary = (0, output_12.getSummary)(toolName, projectDir, sourceDir, problemsDescriptions, coverageInfo, licensesInfo.packages, licensesInfo.licenses, reportUrl, isPrMode, exports2.DEPENDENCY_CHARS_LIMIT, exports2.VIEW_REPORT_OPTIONS);
+          problems.summary = (0, output_12.getSummary)(toolName, projectDir, sourceDir, problemsDescriptions, coverageInfo, licensesInfo.packages, licensesInfo.licenses, reportUrl, isPrMode, exports2.DEPENDENCY_CHARS_LIMIT, exports2.VIEW_REPORT_OPTIONS, sanityProblemsCount);
           if (isPrMode && postComment) {
             yield (0, utils_12.postResultsToPRComments)(toolName, sourceDir, problems.summary, problemsDescriptions.length != 0, postComment);
           }
@@ -49580,6 +49621,7 @@ Stderr: ${result.stderr}`);
         const inputs = getInputs();
         const args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
         if (inputs.prMode && isMergeRequest()) {
+          yield warnIfMergeCommitCheckout();
           const sha = yield getPrSha();
           if (sha !== "") {
             args.push("--commit", sha);
@@ -49595,6 +49637,19 @@ Stderr: ${result.stderr}`);
       });
     }
     __name(qodanaScan, "qodanaScan");
+    function warnIfMergeCommitCheckout() {
+      return __awaiter2(this, void 0, void 0, function* () {
+        try {
+          const { stdout } = yield gitOutput(utils_12.MERGE_COMMIT_PARENTS_ARGS, true);
+          if ((0, utils_12.isMergeCommit)(stdout)) {
+            console.warn(`${utils_12.MERGE_COMMIT_PR_WARNING} Use a standard merge request pipeline (merged-results pipelines check out a pre-merged commit), or check out the source-branch head before scanning.`);
+          }
+        } catch (e) {
+          debug(`Failed to check whether HEAD is a merge commit: ${e.message}`);
+        }
+      });
+    }
+    __name(warnIfMergeCommitCheckout, "warnIfMergeCommitCheckout");
     function getPrSha() {
       return __awaiter2(this, void 0, void 0, function* () {
         try {
