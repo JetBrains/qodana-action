@@ -267,6 +267,7 @@ function getRowsByLevel(annotations: ProblemDescriptor[], level: string): string
  * @param prMode Whether the analysis was run in the pull request mode.
  * @param dependencyCharsLimit Limit on how many characters can be included in comment
  * @param reportViewOptionsHelp Instructions of how to configure a report viewing for tool
+ * @param sanityProblemsCount The number of sanity problems detected during the analysis.
  */
 export function getSummary(
   toolName: string,
@@ -279,7 +280,8 @@ export function getSummary(
   reportUrl: string,
   prMode: boolean,
   dependencyCharsLimit: number,
-  reportViewOptionsHelp: string
+  reportViewOptionsHelp: string,
+  sanityProblemsCount = 0
 ): string {
   const contactBlock = wrapToToggleBlock('Contact Qodana team', SUMMARY_MISC)
   let licensesBlock = ''
@@ -293,6 +295,7 @@ export function getSummary(
   if (prMode) {
     prModeBlock = SUMMARY_PR_MODE
   }
+  const sanityBlock = getSanityWarning(sanityProblemsCount, reportUrl)
   if (reportUrl !== '') {
     const firstToolName = toolName.split(' ')[0]
     toolName = toolName.replace(
@@ -330,6 +333,7 @@ export function getSummary(
     `**${problemsDescriptors.length} ${getProblemPlural(
       problemsDescriptors.length
     )}** were found`,
+    ...(sanityBlock !== '' ? [sanityBlock] : []),
     '',
     SUMMARY_TABLE_HEADER,
     SUMMARY_TABLE_SEP,
@@ -365,6 +369,29 @@ export function getSummary(
  */
 export function getProblemPlural(count: number): string {
   return `new problem${count !== 1 ? 's' : ''}`
+}
+
+export function getSanityProblemPlural(count: number): string {
+  return `sanity problem${count !== 1 ? 's' : ''}`
+}
+
+/**
+ * Builds a warning about detected sanity problems for the summary comment.
+ * Returns an empty string when there are no sanity problems.
+ * @param count The number of sanity problems detected during the analysis.
+ * @param reportUrl The URL to the Qodana report (may be empty).
+ * @returns A Markdown warning string, or '' when count is 0.
+ */
+function getSanityWarning(count: number, reportUrl: string): string {
+  if (count === 0) {
+    return ''
+  }
+  const link = reportUrl !== '' ? `[report](${reportUrl})` : 'report'
+  return (
+    `⚠️ We also discovered **${count} ${getSanityProblemPlural(count)}** ` +
+    `during the analysis. They may indicate that the project is misconfigured. ` +
+    `For more info, open the ${link}.`
+  )
 }
 
 /**

@@ -18,6 +18,7 @@
 import * as core from '@actions/core'
 import {
   getCoverageFromSarif,
+  getSanityProblemsCount,
   QODANA_SARIF_NAME,
   QODANA_SHORT_SARIF_NAME,
   VERSION
@@ -92,6 +93,9 @@ export async function publishOutput(
   try {
     const problems = parseSarif(`${resultsDir}/${QODANA_SARIF_NAME}`)
     const reportUrl = getReportURL(resultsDir)
+    const sanityProblemsCount = getSanityProblemsCount(
+      `${resultsDir}/${QODANA_SARIF_NAME}`
+    )
     const coverageInfo = getCoverageStats(
       getCoverageFromSarif(`${resultsDir}/${QODANA_SHORT_SARIF_NAME}`),
       true
@@ -114,7 +118,8 @@ export async function publishOutput(
       reportUrl,
       isPrMode,
       DEPENDENCY_CHARS_LIMIT,
-      VIEW_REPORT_OPTIONS
+      VIEW_REPORT_OPTIONS,
+      sanityProblemsCount
     )
     // source dir is needed for project distinction in monorepo
     const jobName = `${toolName}` + (sourceDir === '' ? '' : ` (${sourceDir})`)
