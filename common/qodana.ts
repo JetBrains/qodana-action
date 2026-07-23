@@ -349,6 +349,22 @@ export function getCoverageFromSarif(sarifPath: string): Coverage {
 }
 
 /**
+ * Read the number of sanity problems from the SARIF file.
+ * Sanity problems are stored in `runs[0].properties['qodana.sanity.results']`.
+ */
+export function getSanityProblemsCount(sarifPath: string): number {
+  if (fs.existsSync(sarifPath)) {
+    const sarifContents = JSON.parse(
+      fs.readFileSync(sarifPath, {encoding: 'utf8'})
+    )
+    return (
+      sarifContents.runs?.[0]?.properties?.['qodana.sanity.results']?.length ?? 0
+    )
+  }
+  return 0
+}
+
+/**
  * Get the SHA256 checksum of the given file.
  * @param file absolute path to the file.
  */

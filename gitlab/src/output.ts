@@ -8,6 +8,7 @@ import {
 } from '../../common/output'
 import {
   getCoverageFromSarif,
+  getSanityProblemsCount,
   QODANA_SARIF_NAME,
   QODANA_SHORT_SARIF_NAME,
   VERSION
@@ -51,6 +52,9 @@ export async function publishOutput(
       getQodanaHelpString()
     )
     const reportUrl = getReportURL(resultsDir)
+    const sanityProblemsCount = getSanityProblemsCount(
+      `${resultsDir}/${QODANA_SARIF_NAME}`
+    )
     const coverageInfo = getCoverageStats(
       getCoverageFromSarif(`${resultsDir}/${QODANA_SHORT_SARIF_NAME}`),
       true
@@ -71,7 +75,8 @@ export async function publishOutput(
       reportUrl,
       isPrMode,
       DEPENDENCY_CHARS_LIMIT,
-      VIEW_REPORT_OPTIONS
+      VIEW_REPORT_OPTIONS,
+      sanityProblemsCount
     )
     if (isPrMode && postComment) {
       await postResultsToPRComments(

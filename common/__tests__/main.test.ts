@@ -15,7 +15,7 @@
  */
 
 import {expect, test, describe, beforeEach} from '@jest/globals'
-import {getCoverageFromSarif, getNativeModePrefix, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
+import {getCoverageFromSarif, getNativeModePrefix, getSanityProblemsCount, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
   getCoverageStats,
   getReportURL, parseSarif
@@ -88,6 +88,18 @@ test('test sarif with no problems to output annotations', () => {
     "This is a test help string"
   )
   expect(result.problemDescriptions).toEqual(output)
+})
+
+test('test sanity problems count from sarif with sanity results', () => {
+  expect(getSanityProblemsCount('__tests__/data/sanity.sarif.json')).toEqual(1)
+})
+
+test('test sanity problems count from sarif without sanity results', () => {
+  expect(getSanityProblemsCount('__tests__/data/some.sarif.json')).toEqual(0)
+})
+
+test('test sanity problems count from missing sarif file', () => {
+  expect(getSanityProblemsCount('__tests__/data/does.not.exist.json')).toEqual(0)
 })
 
 describe('getReportURL', () => {
