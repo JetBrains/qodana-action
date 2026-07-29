@@ -96,8 +96,8 @@ describe('getInputs cache key native mode prefix', () => {
 
   // Matches the defaults defined in action.yaml for primary-cache-key and
   // additional-cache-key after GitHub expression interpolation.
-  const PRIMARY_KEY = 'qodana-2026.1-refs/heads/main-abc'
-  const ADDITIONAL_KEY = 'qodana-2026.1-refs/heads/main'
+  const PRIMARY_KEY = 'qodana-2026.2-refs/heads/main-abc'
+  const ADDITIONAL_KEY = 'qodana-2026.2-refs/heads/main'
 
   it('prepends native-false- when args have no native flags', () => {
     setupCoreMock('', PRIMARY_KEY, ADDITIONAL_KEY)

@@ -75,7 +75,7 @@ test('validate branch names', () => {
     'refs/heads/main',
     'refs/tags/v1.0.0',
     'refs/pull/123/merge',
-    'v2026.1.3'
+    'v2026.2.0'
   ]
   for (let branchName of validBranchNames) {
     expect(validateBranchName(branchName)).toEqual(branchName)
@@ -279,7 +279,7 @@ To get \`*.log\` files or any other Qodana artifacts, run the action with \`uplo
 so that the action will upload the files as the job artifacts:
 \`\`\`yaml
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2026.1.3
+        uses: JetBrains/qodana-action@v2026.2.0
         with:
           upload-result: true
 \`\`\`

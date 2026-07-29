@@ -78,7 +78,7 @@ export function getProcessPlatformName(): string {
 }
 
 /**
- * Finds the latest nightly release tag (e.g. "v2026.1-nightly") from GitHub.
+ * Finds the latest nightly release tag (e.g. "v2026.2-nightly") from GitHub.
  * Throws an error if the API call fails or no matching release is found to save QA time
  */
 async function getLatestNightlyTag(): Promise<string> {
