@@ -91,7 +91,7 @@ so that the job will upload the files as the job artifacts:
 
 \`\`\`yaml
         include:
-          - component: $CI_SERVER_FQDN/qodana/qodana/qodana-gitlab-ci@2026.1.3
+          - component: $CI_SERVER_FQDN/qodana/qodana/qodana-gitlab-ci@2026.2.0
             inputs:
               upload-result: true
 \`\`\`
