@@ -160,6 +160,8 @@ describe('putReaction', () => {
   }
 
   const OWN_LOGIN = 'github-actions[bot]'
+  const OTHER_LOGIN = 'human'
+  const TOKEN = 'token'
 
   function mockOctokit(
     reactions: {id: number; content: string; user: {login: string} | null}[],
@@ -184,40 +186,36 @@ describe('putReaction', () => {
     return {paginate, deleteForIssue, createForIssue, listForIssue}
   }
 
-  const booleanInputs = [
-    'cache-default-branch-only',
-    'upload-result',
-    'use-caches',
-    'use-annotations',
-    'pr-mode',
-    'post-pr-comment'
-  ]
-
-  beforeEach(() => {
-    for (const name of booleanInputs) {
-      process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] = 'false'
-    }
-  })
-
   afterEach(() => {
     jest.restoreAllMocks()
-    for (const name of booleanInputs) {
-      delete process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`]
-    }
   })
 
   it("deletes only its own old reactions and leaves other users' alone", async () => {
     initPrContext({number: 123})
     const {paginate, deleteForIssue, createForIssue, listForIssue} =
       mockOctokit([
-        {id: 1, content: 'eyes', user: {login: OWN_LOGIN}},
-        {id: 2, content: 'eyes', user: {login: OWN_LOGIN}},
-        {id: 3, content: 'eyes', user: {login: 'human'}}, // must survive
-        {id: 4, content: '+1', user: {login: OWN_LOGIN}} // wrong content
+        {
+          id: 1,
+          content: ANALYSIS_STARTED_REACTION,
+          user: {login: OWN_LOGIN}
+        },
+        {
+          id: 2,
+          content: ANALYSIS_STARTED_REACTION,
+          user: {login: OTHER_LOGIN} // another user's reaction, must survive
+        },
+        {
+          id: 3,
+          content: ANALYSIS_FINISHED_REACTION,
+          user: {login: OWN_LOGIN} // the new reaction, must survive
+        }
       ])
-    deleteForIssue.mockRejectedValueOnce(new Error('403 forbidden'))
 
-    await putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION)
+    await putReaction(
+      TOKEN,
+      ANALYSIS_FINISHED_REACTION,
+      ANALYSIS_STARTED_REACTION
+    )
 
     // new reaction created first (its author identifies us)
     expect(createForIssue).toHaveBeenCalledWith(
@@ -228,27 +226,62 @@ describe('putReaction', () => {
       listForIssue,
       expect.objectContaining({issue_number: 123, per_page: 100})
     )
-    // both of our eyes attempted (first fails, second still tried); human & +1 untouched
-    expect(deleteForIssue).toHaveBeenCalledTimes(2)
+    expect(deleteForIssue).toHaveBeenCalledTimes(1)
     expect(deleteForIssue).toHaveBeenCalledWith(
       expect.objectContaining({reaction_id: 1})
     )
+  })
+
+  it('does not fail when the deletion is rejected', async () => {
+    initPrContext({number: 123})
+    const {deleteForIssue} = mockOctokit([
+      {id: 1, content: ANALYSIS_STARTED_REACTION, user: {login: OWN_LOGIN}}
+    ])
+    deleteForIssue.mockRejectedValueOnce(new Error('403 forbidden'))
+
+    await putReaction(
+      TOKEN,
+      ANALYSIS_FINISHED_REACTION,
+      ANALYSIS_STARTED_REACTION
+    )
+
+    expect(deleteForIssue).toHaveBeenCalledTimes(1)
     expect(deleteForIssue).toHaveBeenCalledWith(
-      expect.objectContaining({reaction_id: 2})
+      expect.objectContaining({reaction_id: 1})
     )
-    expect(deleteForIssue).not.toHaveBeenCalledWith(
-      expect.objectContaining({reaction_id: 3})
+  })
+
+  it('does not delete when the old reaction equals the new one', async () => {
+    initPrContext({number: 123})
+    const {paginate, deleteForIssue, createForIssue} = mockOctokit([
+      {id: 1, content: ANALYSIS_STARTED_REACTION, user: {login: OWN_LOGIN}}
+    ])
+
+    await putReaction(
+      TOKEN,
+      ANALYSIS_STARTED_REACTION,
+      ANALYSIS_STARTED_REACTION
     )
+
+    expect(createForIssue).toHaveBeenCalledWith(
+      expect.objectContaining({content: ANALYSIS_STARTED_REACTION})
+    )
+    expect(paginate).not.toHaveBeenCalled()
+    expect(deleteForIssue).not.toHaveBeenCalled()
   })
 
   it('does not delete when the created reaction has no identifiable author', async () => {
     initPrContext({number: 123})
     const {paginate, deleteForIssue, createForIssue} = mockOctokit(
-      [{id: 1, content: 'eyes', user: {login: OWN_LOGIN}}],
+      [{id: 1, content: ANALYSIS_STARTED_REACTION, user: {login: OWN_LOGIN}}],
       null
     )
 
-    await putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION)
+    await putReaction(
+      TOKEN,
+      ANALYSIS_FINISHED_REACTION,
+      ANALYSIS_STARTED_REACTION
+    )
 
     expect(createForIssue).toHaveBeenCalled()
     expect(paginate).not.toHaveBeenCalled()
@@ -259,7 +292,7 @@ describe('putReaction', () => {
     initPrContext({number: 123})
     const {paginate, deleteForIssue, createForIssue} = mockOctokit([])
 
-    await putReaction(ANALYSIS_STARTED_REACTION, '')
+    await putReaction(TOKEN, ANALYSIS_STARTED_REACTION, '')
 
     expect(paginate).not.toHaveBeenCalled()
     expect(deleteForIssue).not.toHaveBeenCalled()
@@ -272,7 +305,11 @@ describe('putReaction', () => {
     initPrContext(undefined)
     const getOctokit = jest.spyOn(github, 'getOctokit')
 
-    await putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION)
+    await putReaction(
+      TOKEN,
+      ANALYSIS_FINISHED_REACTION,
+      ANALYSIS_STARTED_REACTION
+    )
 
     expect(getOctokit).not.toHaveBeenCalled()
   })

@@ -26,6 +26,7 @@ import {
 import {
   ANALYSIS_FINISHED_REACTION,
   ANALYSIS_STARTED_REACTION,
+  getInputs,
   postResultsToPRComments,
   putReaction
 } from './utils'
@@ -124,7 +125,11 @@ export async function publishOutput(
     // source dir is needed for project distinction in monorepo
     const jobName = `${toolName}` + (sourceDir === '' ? '' : ` (${sourceDir})`)
     await Promise.all([
-      putReaction(ANALYSIS_FINISHED_REACTION, ANALYSIS_STARTED_REACTION),
+      putReaction(
+        getInputs().githubToken,
+        ANALYSIS_FINISHED_REACTION,
+        ANALYSIS_STARTED_REACTION
+      ),
       postResultsToPRComments(
         toolName,
         problems.summary,
