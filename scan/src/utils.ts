@@ -565,14 +565,16 @@ export async function updateComment(
 
 /**
  * Updates the reaction on the pull request to the given 'newReaction'.
- * Removes the action's own 'oldReaction' reactions if 'oldReaction' is non-empty,
- * leaving reactions added by other users untouched.
+ * Removes the action's own 'oldReaction' reactions if 'oldReaction' is non-empty
+ * and differs from 'newReaction', leaving reactions added by other users untouched.
  *
+ * @param githubToken The token used to authenticate the GitHub API calls.
  * @param newReaction The new reaction to be added.
  * @param oldReaction The old reaction to be removed (if non-empty).
  * @returns A Promise resolving to void.
  */
 export async function putReaction(
+  githubToken: string,
   newReaction: Reaction,
   oldReaction: string
 ): Promise<void> {
@@ -582,7 +584,7 @@ export async function putReaction(
   if (!pr) {
     return
   }
-  const client = github.getOctokit(getInputs().githubToken)
+  const client = github.getOctokit(githubToken)
   const issue_number = pr.number
 
   // Create the new reaction first so its author identifies us: the token may be
@@ -599,7 +601,7 @@ export async function putReaction(
     core.debug(`Failed to set reaction – ${(error as Error).message}`)
   }
 
-  if (oldReaction !== '' && ownLogin) {
+  if (oldReaction !== '' && oldReaction !== newReaction && ownLogin) {
     try {
       const reactions = await client.paginate(
         client.rest.reactions.listForIssue,
