@@ -45983,20 +45983,20 @@ var require_index_min = __commonJS({
     var d = /* @__PURE__ */ __name((s, e) => () => (e || s((e = { exports: {} }).exports, e), e.exports), "d");
     var We = d((F) => {
       "use strict";
-      var Oo = F && F.__importDefault || function(s) {
+      var Do = F && F.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
       Object.defineProperty(F, "__esModule", { value: true });
       F.Minipass = F.isWritable = F.isReadable = F.isStream = void 0;
-      var Cr = typeof process == "object" && process ? process : { stdout: null, stderr: null }, ts = require("node:events"), jr = Oo(require("node:stream")), Ro = require("node:string_decoder"), vo = /* @__PURE__ */ __name((s) => !!s && typeof s == "object" && (s instanceof Ht || s instanceof jr.default || (0, F.isReadable)(s) || (0, F.isWritable)(s)), "vo");
-      F.isStream = vo;
-      var To = /* @__PURE__ */ __name((s) => !!s && typeof s == "object" && s instanceof ts.EventEmitter && typeof s.pipe == "function" && s.pipe !== jr.default.Writable.prototype.pipe, "To");
-      F.isReadable = To;
-      var Do = /* @__PURE__ */ __name((s) => !!s && typeof s == "object" && s instanceof ts.EventEmitter && typeof s.write == "function" && typeof s.end == "function", "Do");
-      F.isWritable = Do;
-      var le = /* @__PURE__ */ Symbol("EOF"), ue = /* @__PURE__ */ Symbol("maybeEmitEnd"), _e = /* @__PURE__ */ Symbol("emittedEnd"), kt = /* @__PURE__ */ Symbol("emittingEnd"), ft = /* @__PURE__ */ Symbol("emittedError"), jt = /* @__PURE__ */ Symbol("closed"), Br = /* @__PURE__ */ Symbol("read"), xt = /* @__PURE__ */ Symbol("flush"), zr = /* @__PURE__ */ Symbol("flushChunk"), K = /* @__PURE__ */ Symbol("encoding"), Ue = /* @__PURE__ */ Symbol("decoder"), O = /* @__PURE__ */ Symbol("flowing"), dt = /* @__PURE__ */ Symbol("paused"), qe = /* @__PURE__ */ Symbol("resume"), R = /* @__PURE__ */ Symbol("buffer"), I = /* @__PURE__ */ Symbol("pipes"), v = /* @__PURE__ */ Symbol("bufferLength"), Vi = /* @__PURE__ */ Symbol("bufferPush"), Ut = /* @__PURE__ */ Symbol("bufferShift"), N = /* @__PURE__ */ Symbol("objectMode"), y = /* @__PURE__ */ Symbol("destroyed"), $i = /* @__PURE__ */ Symbol("error"), Xi = /* @__PURE__ */ Symbol("emitData"), kr = /* @__PURE__ */ Symbol("emitEnd"), Qi = /* @__PURE__ */ Symbol("emitEnd2"), J = /* @__PURE__ */ Symbol("async"), Ji = /* @__PURE__ */ Symbol("abort"), qt = /* @__PURE__ */ Symbol("aborted"), mt = /* @__PURE__ */ Symbol("signal"), Pe = /* @__PURE__ */ Symbol("dataListeners"), k = /* @__PURE__ */ Symbol("discarded"), pt = /* @__PURE__ */ __name((s) => Promise.resolve().then(s), "pt"), Po = /* @__PURE__ */ __name((s) => s(), "Po"), No = /* @__PURE__ */ __name((s) => s === "end" || s === "finish" || s === "prefinish", "No"), Mo = /* @__PURE__ */ __name((s) => s instanceof ArrayBuffer || !!s && typeof s == "object" && s.constructor && s.constructor.name === "ArrayBuffer" && s.byteLength >= 0, "Mo"), Lo = /* @__PURE__ */ __name((s) => !Buffer.isBuffer(s) && ArrayBuffer.isView(s), "Lo"), Wt = class {
+      var kr = typeof process == "object" && process ? process : { stdout: null, stderr: null }, ss = require("node:events"), qr = Do(require("node:stream")), Po = require("node:string_decoder"), No = /* @__PURE__ */ __name((s) => !!s && typeof s == "object" && (s instanceof Zt || s instanceof qr.default || (0, F.isReadable)(s) || (0, F.isWritable)(s)), "No");
+      F.isStream = No;
+      var Mo = /* @__PURE__ */ __name((s) => !!s && typeof s == "object" && s instanceof ss.EventEmitter && typeof s.pipe == "function" && s.pipe !== qr.default.Writable.prototype.pipe, "Mo");
+      F.isReadable = Mo;
+      var Lo = /* @__PURE__ */ __name((s) => !!s && typeof s == "object" && s instanceof ss.EventEmitter && typeof s.write == "function" && typeof s.end == "function", "Lo");
+      F.isWritable = Lo;
+      var ce = /* @__PURE__ */ Symbol("EOF"), ue = /* @__PURE__ */ Symbol("maybeEmitEnd"), we = /* @__PURE__ */ Symbol("emittedEnd"), jt = /* @__PURE__ */ Symbol("emittingEnd"), dt = /* @__PURE__ */ Symbol("emittedError"), Ut = /* @__PURE__ */ Symbol("closed"), xr = /* @__PURE__ */ Symbol("read"), qt = /* @__PURE__ */ Symbol("flush"), jr = /* @__PURE__ */ Symbol("flushChunk"), K = /* @__PURE__ */ Symbol("encoding"), Ue = /* @__PURE__ */ Symbol("decoder"), R = /* @__PURE__ */ Symbol("flowing"), mt = /* @__PURE__ */ Symbol("paused"), qe = /* @__PURE__ */ Symbol("resume"), O = /* @__PURE__ */ Symbol("buffer"), I = /* @__PURE__ */ Symbol("pipes"), v = /* @__PURE__ */ Symbol("bufferLength"), Xi = /* @__PURE__ */ Symbol("bufferPush"), Wt = /* @__PURE__ */ Symbol("bufferShift"), N = /* @__PURE__ */ Symbol("objectMode"), E = /* @__PURE__ */ Symbol("destroyed"), Qi = /* @__PURE__ */ Symbol("error"), Ji = /* @__PURE__ */ Symbol("emitData"), Ur = /* @__PURE__ */ Symbol("emitEnd"), es = /* @__PURE__ */ Symbol("emitEnd2"), J = /* @__PURE__ */ Symbol("async"), ts = /* @__PURE__ */ Symbol("abort"), Ht = /* @__PURE__ */ Symbol("aborted"), pt = /* @__PURE__ */ Symbol("signal"), Ne = /* @__PURE__ */ Symbol("dataListeners"), x = /* @__PURE__ */ Symbol("discarded"), _t = /* @__PURE__ */ __name((s) => Promise.resolve().then(s), "_t"), Ao = /* @__PURE__ */ __name((s) => s(), "Ao"), Io = /* @__PURE__ */ __name((s) => s === "end" || s === "finish" || s === "prefinish", "Io"), Fo = /* @__PURE__ */ __name((s) => s instanceof ArrayBuffer || !!s && typeof s == "object" && s.constructor && s.constructor.name === "ArrayBuffer" && s.byteLength >= 0, "Fo"), Co = /* @__PURE__ */ __name((s) => !Buffer.isBuffer(s) && ArrayBuffer.isView(s), "Co"), Gt = class {
         static {
-          __name(this, "Wt");
+          __name(this, "Gt");
         }
         src;
         dest;
@@ -46013,9 +46013,9 @@ var require_index_min = __commonJS({
         end() {
           this.unpipe(), this.opts.end && this.dest.end();
         }
-      }, es = class extends Wt {
+      }, is = class extends Gt {
         static {
-          __name(this, "es");
+          __name(this, "is");
         }
         unpipe() {
           this.src.removeListener("error", this.proxyErrors), super.unpipe();
@@ -46023,37 +46023,37 @@ var require_index_min = __commonJS({
         constructor(e, t, i) {
           super(e, t, i), this.proxyErrors = (r) => this.dest.emit("error", r), e.on("error", this.proxyErrors);
         }
-      }, Ao = /* @__PURE__ */ __name((s) => !!s.objectMode, "Ao"), Io = /* @__PURE__ */ __name((s) => !s.objectMode && !!s.encoding && s.encoding !== "buffer", "Io"), Ht = class extends ts.EventEmitter {
+      }, Bo = /* @__PURE__ */ __name((s) => !!s.objectMode, "Bo"), zo = /* @__PURE__ */ __name((s) => !s.objectMode && !!s.encoding && s.encoding !== "buffer", "zo"), Zt = class extends ss.EventEmitter {
         static {
-          __name(this, "Ht");
+          __name(this, "Zt");
         }
-        [O] = false;
-        [dt] = false;
+        [R] = false;
+        [mt] = false;
         [I] = [];
-        [R] = [];
+        [O] = [];
         [N];
         [K];
         [J];
         [Ue];
-        [le] = false;
-        [_e] = false;
-        [kt] = false;
+        [ce] = false;
+        [we] = false;
         [jt] = false;
-        [ft] = null;
+        [Ut] = false;
+        [dt] = null;
         [v] = 0;
-        [y] = false;
-        [mt];
-        [qt] = false;
-        [Pe] = 0;
-        [k] = false;
+        [E] = false;
+        [pt];
+        [Ht] = false;
+        [Ne] = 0;
+        [x] = false;
         writable = true;
         readable = true;
         constructor(...e) {
           let t = e[0] || {};
           if (super(), t.objectMode && typeof t.encoding == "string") throw new TypeError("Encoding and objectMode may not be used together");
-          Ao(t) ? (this[N] = true, this[K] = null) : Io(t) ? (this[K] = t.encoding, this[N] = false) : (this[N] = false, this[K] = null), this[J] = !!t.async, this[Ue] = this[K] ? new Ro.StringDecoder(this[K]) : null, t && t.debugExposeBuffer === true && Object.defineProperty(this, "buffer", { get: /* @__PURE__ */ __name(() => this[R], "get") }), t && t.debugExposePipes === true && Object.defineProperty(this, "pipes", { get: /* @__PURE__ */ __name(() => this[I], "get") });
+          Bo(t) ? (this[N] = true, this[K] = null) : zo(t) ? (this[K] = t.encoding, this[N] = false) : (this[N] = false, this[K] = null), this[J] = !!t.async, this[Ue] = this[K] ? new Po.StringDecoder(this[K]) : null, t && t.debugExposeBuffer === true && Object.defineProperty(this, "buffer", { get: /* @__PURE__ */ __name(() => this[O], "get") }), t && t.debugExposePipes === true && Object.defineProperty(this, "pipes", { get: /* @__PURE__ */ __name(() => this[I], "get") });
           let { signal: i } = t;
-          i && (this[mt] = i, i.aborted ? this[Ji]() : i.addEventListener("abort", () => this[Ji]()));
+          i && (this[pt] = i, i.aborted ? this[ts]() : i.addEventListener("abort", () => this[ts]()));
         }
         get bufferLength() {
           return this[v];
@@ -46079,99 +46079,99 @@ var require_index_min = __commonJS({
         set async(e) {
           this[J] = this[J] || !!e;
         }
-        [Ji]() {
-          this[qt] = true, this.emit("abort", this[mt]?.reason), this.destroy(this[mt]?.reason);
+        [ts]() {
+          this[Ht] = true, this.emit("abort", this[pt]?.reason), this.destroy(this[pt]?.reason);
         }
         get aborted() {
-          return this[qt];
+          return this[Ht];
         }
         set aborted(e) {
         }
         write(e, t, i) {
-          if (this[qt]) return false;
-          if (this[le]) throw new Error("write after end");
-          if (this[y]) return this.emit("error", Object.assign(new Error("Cannot call write after a stream was destroyed"), { code: "ERR_STREAM_DESTROYED" })), true;
+          if (this[Ht]) return false;
+          if (this[ce]) throw new Error("write after end");
+          if (this[E]) return this.emit("error", Object.assign(new Error("Cannot call write after a stream was destroyed"), { code: "ERR_STREAM_DESTROYED" })), true;
           typeof t == "function" && (i = t, t = "utf8"), t || (t = "utf8");
-          let r = this[J] ? pt : Po;
+          let r = this[J] ? _t : Ao;
           if (!this[N] && !Buffer.isBuffer(e)) {
-            if (Lo(e)) e = Buffer.from(e.buffer, e.byteOffset, e.byteLength);
-            else if (Mo(e)) e = Buffer.from(e);
+            if (Co(e)) e = Buffer.from(e.buffer, e.byteOffset, e.byteLength);
+            else if (Fo(e)) e = Buffer.from(e);
             else if (typeof e != "string") throw new Error("Non-contiguous data written to non-objectMode stream");
           }
-          return this[N] ? (this[O] && this[v] !== 0 && this[xt](true), this[O] ? this.emit("data", e) : this[Vi](e), this[v] !== 0 && this.emit("readable"), i && r(i), this[O]) : e.length ? (typeof e == "string" && !(t === this[K] && !this[Ue]?.lastNeed) && (e = Buffer.from(e, t)), Buffer.isBuffer(e) && this[K] && (e = this[Ue].write(e)), this[O] && this[v] !== 0 && this[xt](true), this[O] ? this.emit("data", e) : this[Vi](e), this[v] !== 0 && this.emit("readable"), i && r(i), this[O]) : (this[v] !== 0 && this.emit("readable"), i && r(i), this[O]);
+          return this[N] ? (this[R] && this[v] !== 0 && this[qt](true), this[R] ? this.emit("data", e) : this[Xi](e), this[v] !== 0 && this.emit("readable"), i && r(i), this[R]) : e.length ? (typeof e == "string" && !(t === this[K] && !this[Ue]?.lastNeed) && (e = Buffer.from(e, t)), Buffer.isBuffer(e) && this[K] && (e = this[Ue].write(e)), this[R] && this[v] !== 0 && this[qt](true), this[R] ? this.emit("data", e) : this[Xi](e), this[v] !== 0 && this.emit("readable"), i && r(i), this[R]) : (this[v] !== 0 && this.emit("readable"), i && r(i), this[R]);
         }
         read(e) {
-          if (this[y]) return null;
-          if (this[k] = false, this[v] === 0 || e === 0 || e && e > this[v]) return this[ue](), null;
-          this[N] && (e = null), this[R].length > 1 && !this[N] && (this[R] = [this[K] ? this[R].join("") : Buffer.concat(this[R], this[v])]);
-          let t = this[Br](e || null, this[R][0]);
+          if (this[E]) return null;
+          if (this[x] = false, this[v] === 0 || e === 0 || e && e > this[v]) return this[ue](), null;
+          this[N] && (e = null), this[O].length > 1 && !this[N] && (this[O] = [this[K] ? this[O].join("") : Buffer.concat(this[O], this[v])]);
+          let t = this[xr](e || null, this[O][0]);
           return this[ue](), t;
         }
-        [Br](e, t) {
-          if (this[N]) this[Ut]();
+        [xr](e, t) {
+          if (this[N]) this[Wt]();
           else {
             let i = t;
-            e === i.length || e === null ? this[Ut]() : typeof i == "string" ? (this[R][0] = i.slice(e), t = i.slice(0, e), this[v] -= e) : (this[R][0] = i.subarray(e), t = i.subarray(0, e), this[v] -= e);
+            e === i.length || e === null ? this[Wt]() : typeof i == "string" ? (this[O][0] = i.slice(e), t = i.slice(0, e), this[v] -= e) : (this[O][0] = i.subarray(e), t = i.subarray(0, e), this[v] -= e);
           }
-          return this.emit("data", t), !this[R].length && !this[le] && this.emit("drain"), t;
+          return this.emit("data", t), !this[O].length && !this[ce] && this.emit("drain"), t;
         }
         end(e, t, i) {
-          return typeof e == "function" && (i = e, e = void 0), typeof t == "function" && (i = t, t = "utf8"), e !== void 0 && this.write(e, t), i && this.once("end", i), this[le] = true, this.writable = false, (this[O] || !this[dt]) && this[ue](), this;
+          return typeof e == "function" && (i = e, e = void 0), typeof t == "function" && (i = t, t = "utf8"), e !== void 0 && this.write(e, t), i && this.once("end", i), this[ce] = true, this.writable = false, (this[R] || !this[mt]) && this[ue](), this;
         }
         [qe]() {
-          this[y] || (!this[Pe] && !this[I].length && (this[k] = true), this[dt] = false, this[O] = true, this.emit("resume"), this[R].length ? this[xt]() : this[le] ? this[ue]() : this.emit("drain"));
+          this[E] || (!this[Ne] && !this[I].length && (this[x] = true), this[mt] = false, this[R] = true, this.emit("resume"), this[O].length ? this[qt]() : this[ce] ? this[ue]() : this.emit("drain"));
         }
         resume() {
           return this[qe]();
         }
         pause() {
-          this[O] = false, this[dt] = true, this[k] = false;
+          this[R] = false, this[mt] = true, this[x] = false;
         }
         get destroyed() {
-          return this[y];
+          return this[E];
         }
         get flowing() {
-          return this[O];
+          return this[R];
         }
         get paused() {
-          return this[dt];
+          return this[mt];
         }
-        [Vi](e) {
-          this[N] ? this[v] += 1 : this[v] += e.length, this[R].push(e);
+        [Xi](e) {
+          this[N] ? this[v] += 1 : this[v] += e.length, this[O].push(e);
         }
-        [Ut]() {
-          return this[N] ? this[v] -= 1 : this[v] -= this[R][0].length, this[R].shift();
+        [Wt]() {
+          return this[N] ? this[v] -= 1 : this[v] -= this[O][0].length, this[O].shift();
         }
-        [xt](e = false) {
+        [qt](e = false) {
           do
             ;
-          while (this[zr](this[Ut]()) && this[R].length);
-          !e && !this[R].length && !this[le] && this.emit("drain");
+          while (this[jr](this[Wt]()) && this[O].length);
+          !e && !this[O].length && !this[ce] && this.emit("drain");
         }
-        [zr](e) {
-          return this.emit("data", e), this[O];
+        [jr](e) {
+          return this.emit("data", e), this[R];
         }
         pipe(e, t) {
-          if (this[y]) return e;
-          this[k] = false;
-          let i = this[_e];
-          return t = t || {}, e === Cr.stdout || e === Cr.stderr ? t.end = false : t.end = t.end !== false, t.proxyErrors = !!t.proxyErrors, i ? t.end && e.end() : (this[I].push(t.proxyErrors ? new es(this, e, t) : new Wt(this, e, t)), this[J] ? pt(() => this[qe]()) : this[qe]()), e;
+          if (this[E]) return e;
+          this[x] = false;
+          let i = this[we];
+          return t = t || {}, e === kr.stdout || e === kr.stderr ? t.end = false : t.end = t.end !== false, t.proxyErrors = !!t.proxyErrors, i ? t.end && e.end() : (this[I].push(t.proxyErrors ? new is(this, e, t) : new Gt(this, e, t)), this[J] ? _t(() => this[qe]()) : this[qe]()), e;
         }
         unpipe(e) {
           let t = this[I].find((i) => i.dest === e);
-          t && (this[I].length === 1 ? (this[O] && this[Pe] === 0 && (this[O] = false), this[I] = []) : this[I].splice(this[I].indexOf(t), 1), t.unpipe());
+          t && (this[I].length === 1 ? (this[R] && this[Ne] === 0 && (this[R] = false), this[I] = []) : this[I].splice(this[I].indexOf(t), 1), t.unpipe());
         }
         addListener(e, t) {
           return this.on(e, t);
         }
         on(e, t) {
           let i = super.on(e, t);
-          if (e === "data") this[k] = false, this[Pe]++, !this[I].length && !this[O] && this[qe]();
+          if (e === "data") this[x] = false, this[Ne]++, !this[I].length && !this[R] && this[qe]();
           else if (e === "readable" && this[v] !== 0) super.emit("readable");
-          else if (No(e) && this[_e]) super.emit(e), this.removeAllListeners(e);
-          else if (e === "error" && this[ft]) {
+          else if (Io(e) && this[we]) super.emit(e), this.removeAllListeners(e);
+          else if (e === "error" && this[dt]) {
             let r = t;
-            this[J] ? pt(() => r.call(this, this[ft])) : r.call(this, this[ft]);
+            this[J] ? _t(() => r.call(this, this[dt])) : r.call(this, this[dt]);
           }
           return i;
         }
@@ -46180,30 +46180,30 @@ var require_index_min = __commonJS({
         }
         off(e, t) {
           let i = super.off(e, t);
-          return e === "data" && (this[Pe] = this.listeners("data").length, this[Pe] === 0 && !this[k] && !this[I].length && (this[O] = false)), i;
+          return e === "data" && (this[Ne] = this.listeners("data").length, this[Ne] === 0 && !this[x] && !this[I].length && (this[R] = false)), i;
         }
         removeAllListeners(e) {
           let t = super.removeAllListeners(e);
-          return (e === "data" || e === void 0) && (this[Pe] = 0, !this[k] && !this[I].length && (this[O] = false)), t;
+          return (e === "data" || e === void 0) && (this[Ne] = 0, !this[x] && !this[I].length && (this[R] = false)), t;
         }
         get emittedEnd() {
-          return this[_e];
+          return this[we];
         }
         [ue]() {
-          !this[kt] && !this[_e] && !this[y] && this[R].length === 0 && this[le] && (this[kt] = true, this.emit("end"), this.emit("prefinish"), this.emit("finish"), this[jt] && this.emit("close"), this[kt] = false);
+          !this[jt] && !this[we] && !this[E] && this[O].length === 0 && this[ce] && (this[jt] = true, this.emit("end"), this.emit("prefinish"), this.emit("finish"), this[Ut] && this.emit("close"), this[jt] = false);
         }
         emit(e, ...t) {
           let i = t[0];
-          if (e !== "error" && e !== "close" && e !== y && this[y]) return false;
-          if (e === "data") return !this[N] && !i ? false : this[J] ? (pt(() => this[Xi](i)), true) : this[Xi](i);
-          if (e === "end") return this[kr]();
+          if (e !== "error" && e !== "close" && e !== E && this[E]) return false;
+          if (e === "data") return !this[N] && !i ? false : this[J] ? (_t(() => this[Ji](i)), true) : this[Ji](i);
+          if (e === "end") return this[Ur]();
           if (e === "close") {
-            if (this[jt] = true, !this[_e] && !this[y]) return false;
+            if (this[Ut] = true, !this[we] && !this[E]) return false;
             let n = super.emit("close");
             return this.removeAllListeners("close"), n;
           } else if (e === "error") {
-            this[ft] = i, super.emit($i, i);
-            let n = !this[mt] || this.listeners("error").length ? super.emit("error", i) : false;
+            this[dt] = i, super.emit(Qi, i);
+            let n = !this[pt] || this.listeners("error").length ? super.emit("error", i) : false;
             return this[ue](), n;
           } else if (e === "resume") {
             let n = super.emit("resume");
@@ -46215,20 +46215,20 @@ var require_index_min = __commonJS({
           let r = super.emit(e, ...t);
           return this[ue](), r;
         }
-        [Xi](e) {
+        [Ji](e) {
           for (let i of this[I]) i.dest.write(e) === false && this.pause();
-          let t = this[k] ? false : super.emit("data", e);
+          let t = this[x] ? false : super.emit("data", e);
           return this[ue](), t;
         }
-        [kr]() {
-          return this[_e] ? false : (this[_e] = true, this.readable = false, this[J] ? (pt(() => this[Qi]()), true) : this[Qi]());
+        [Ur]() {
+          return this[we] ? false : (this[we] = true, this.readable = false, this[J] ? (_t(() => this[es]()), true) : this[es]());
         }
-        [Qi]() {
+        [es]() {
           if (this[Ue]) {
             let t = this[Ue].end();
             if (t) {
               for (let i of this[I]) i.dest.write(t);
-              this[k] || super.emit("data", t);
+              this[x] || super.emit("data", t);
             }
           }
           for (let t of this[I]) t.end();
@@ -46250,26 +46250,26 @@ var require_index_min = __commonJS({
         }
         async promise() {
           return new Promise((e, t) => {
-            this.on(y, () => t(new Error("stream destroyed"))), this.on("error", (i) => t(i)), this.on("end", () => e());
+            this.on(E, () => t(new Error("stream destroyed"))), this.on("error", (i) => t(i)), this.on("end", () => e());
           });
         }
         [Symbol.asyncIterator]() {
-          this[k] = false;
+          this[x] = false;
           let e = false, t = /* @__PURE__ */ __name(async () => (this.pause(), e = true, { value: void 0, done: true }), "t");
           return { next: /* @__PURE__ */ __name(() => {
             if (e) return t();
             let r = this.read();
             if (r !== null) return Promise.resolve({ done: false, value: r });
-            if (this[le]) return t();
-            let n, o, a = /* @__PURE__ */ __name((c) => {
-              this.off("data", h), this.off("end", l), this.off(y, u), t(), o(c);
-            }, "a"), h = /* @__PURE__ */ __name((c) => {
-              this.off("error", a), this.off("end", l), this.off(y, u), this.pause(), n({ value: c, done: !!this[le] });
+            if (this[ce]) return t();
+            let n, o, a = /* @__PURE__ */ __name((u) => {
+              this.off("data", h), this.off("end", l), this.off(E, c), t(), o(u);
+            }, "a"), h = /* @__PURE__ */ __name((u) => {
+              this.off("error", a), this.off("end", l), this.off(E, c), this.pause(), n({ value: u, done: !!this[ce] });
             }, "h"), l = /* @__PURE__ */ __name(() => {
-              this.off("error", a), this.off("data", h), this.off(y, u), t(), n({ done: true, value: void 0 });
-            }, "l"), u = /* @__PURE__ */ __name(() => a(new Error("stream destroyed")), "u");
-            return new Promise((c, E) => {
-              o = E, n = c, this.once(y, u), this.once("error", a), this.once("end", l), this.once("data", h);
+              this.off("error", a), this.off("data", h), this.off(E, c), t(), n({ done: true, value: void 0 });
+            }, "l"), c = /* @__PURE__ */ __name(() => a(new Error("stream destroyed")), "c");
+            return new Promise((u, b) => {
+              o = b, n = u, this.once(E, c), this.once("error", a), this.once("end", l), this.once("data", h);
             });
           }, "next"), throw: t, return: t, [Symbol.asyncIterator]() {
             return this;
@@ -46277,51 +46277,51 @@ var require_index_min = __commonJS({
           } };
         }
         [Symbol.iterator]() {
-          this[k] = false;
-          let e = false, t = /* @__PURE__ */ __name(() => (this.pause(), this.off($i, t), this.off(y, t), this.off("end", t), e = true, { done: true, value: void 0 }), "t"), i = /* @__PURE__ */ __name(() => {
+          this[x] = false;
+          let e = false, t = /* @__PURE__ */ __name(() => (this.pause(), this.off(Qi, t), this.off(E, t), this.off("end", t), e = true, { done: true, value: void 0 }), "t"), i = /* @__PURE__ */ __name(() => {
             if (e) return t();
             let r = this.read();
             return r === null ? t() : { done: false, value: r };
           }, "i");
-          return this.once("end", t), this.once($i, t), this.once(y, t), { next: i, throw: t, return: t, [Symbol.iterator]() {
+          return this.once("end", t), this.once(Qi, t), this.once(E, t), { next: i, throw: t, return: t, [Symbol.iterator]() {
             return this;
           }, [Symbol.dispose]: () => {
           } };
         }
         destroy(e) {
-          if (this[y]) return e ? this.emit("error", e) : this.emit(y), this;
-          this[y] = true, this[k] = true, this[R].length = 0, this[v] = 0;
+          if (this[E]) return e ? this.emit("error", e) : this.emit(E), this;
+          this[E] = true, this[x] = true, this[O].length = 0, this[v] = 0;
           let t = this;
-          return typeof t.close == "function" && !this[jt] && t.close(), e ? this.emit("error", e) : this.emit(y), this;
+          return typeof t.close == "function" && !this[Ut] && t.close(), e ? this.emit("error", e) : this.emit(E), this;
         }
         static get isStream() {
           return F.isStream;
         }
       };
-      F.Minipass = Ht;
+      F.Minipass = Zt;
     });
     var Ke = d((W) => {
       "use strict";
-      var xr = W && W.__importDefault || function(s) {
+      var Wr = W && W.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
       Object.defineProperty(W, "__esModule", { value: true });
       W.WriteStreamSync = W.WriteStream = W.ReadStreamSync = W.ReadStream = void 0;
-      var Fo = xr(require("events")), B = xr(require("fs")), Co = We(), Bo = B.default.writev, ye = /* @__PURE__ */ Symbol("_autoClose"), $ = /* @__PURE__ */ Symbol("_close"), _t = /* @__PURE__ */ Symbol("_ended"), p = /* @__PURE__ */ Symbol("_fd"), is = /* @__PURE__ */ Symbol("_finished"), fe = /* @__PURE__ */ Symbol("_flags"), ss = /* @__PURE__ */ Symbol("_flush"), as = /* @__PURE__ */ Symbol("_handleChunk"), hs = /* @__PURE__ */ Symbol("_makeBuf"), yt = /* @__PURE__ */ Symbol("_mode"), Zt = /* @__PURE__ */ Symbol("_needDrain"), Ge = /* @__PURE__ */ Symbol("_onerror"), Ye = /* @__PURE__ */ Symbol("_onopen"), rs = /* @__PURE__ */ Symbol("_onread"), He = /* @__PURE__ */ Symbol("_onwrite"), Ee = /* @__PURE__ */ Symbol("_open"), V = /* @__PURE__ */ Symbol("_path"), we = /* @__PURE__ */ Symbol("_pos"), ee = /* @__PURE__ */ Symbol("_queue"), Ze = /* @__PURE__ */ Symbol("_read"), ns = /* @__PURE__ */ Symbol("_readSize"), ce = /* @__PURE__ */ Symbol("_reading"), wt = /* @__PURE__ */ Symbol("_remain"), os = /* @__PURE__ */ Symbol("_size"), Gt = /* @__PURE__ */ Symbol("_write"), Ne = /* @__PURE__ */ Symbol("_writing"), Yt = /* @__PURE__ */ Symbol("_defaultFlag"), Me = /* @__PURE__ */ Symbol("_errored"), Kt = class extends Co.Minipass {
+      var ko = Wr(require("events")), z = Wr(require("fs")), xo = We(), jo = z.default.writev, Ee = /* @__PURE__ */ Symbol("_autoClose"), $ = /* @__PURE__ */ Symbol("_close"), wt = /* @__PURE__ */ Symbol("_ended"), p = /* @__PURE__ */ Symbol("_fd"), rs = /* @__PURE__ */ Symbol("_finished"), de = /* @__PURE__ */ Symbol("_flags"), ns = /* @__PURE__ */ Symbol("_flush"), ls = /* @__PURE__ */ Symbol("_handleChunk"), cs = /* @__PURE__ */ Symbol("_makeBuf"), Et = /* @__PURE__ */ Symbol("_mode"), Yt = /* @__PURE__ */ Symbol("_needDrain"), Ze = /* @__PURE__ */ Symbol("_onerror"), Ye = /* @__PURE__ */ Symbol("_onopen"), os = /* @__PURE__ */ Symbol("_onread"), He = /* @__PURE__ */ Symbol("_onwrite"), be = /* @__PURE__ */ Symbol("_open"), V = /* @__PURE__ */ Symbol("_path"), ye = /* @__PURE__ */ Symbol("_pos"), ee = /* @__PURE__ */ Symbol("_queue"), Ge = /* @__PURE__ */ Symbol("_read"), as = /* @__PURE__ */ Symbol("_readSize"), fe = /* @__PURE__ */ Symbol("_reading"), yt = /* @__PURE__ */ Symbol("_remain"), hs = /* @__PURE__ */ Symbol("_size"), Kt = /* @__PURE__ */ Symbol("_write"), Me = /* @__PURE__ */ Symbol("_writing"), Vt = /* @__PURE__ */ Symbol("_defaultFlag"), Le = /* @__PURE__ */ Symbol("_errored"), $t = class extends xo.Minipass {
         static {
-          __name(this, "Kt");
+          __name(this, "$t");
         }
-        [Me] = false;
+        [Le] = false;
         [p];
         [V];
-        [ns];
-        [ce] = false;
-        [os];
-        [wt];
-        [ye];
+        [as];
+        [fe] = false;
+        [hs];
+        [yt];
+        [Ee];
         constructor(e, t) {
           if (t = t || {}, super(t), this.readable = true, this.writable = false, typeof e != "string") throw new TypeError("path must be a string");
-          this[Me] = false, this[p] = typeof t.fd == "number" ? t.fd : void 0, this[V] = e, this[ns] = t.readSize || 16 * 1024 * 1024, this[ce] = false, this[os] = typeof t.size == "number" ? t.size : 1 / 0, this[wt] = this[os], this[ye] = typeof t.autoClose == "boolean" ? t.autoClose : true, typeof this[p] == "number" ? this[Ze]() : this[Ee]();
+          this[Le] = false, this[p] = typeof t.fd == "number" ? t.fd : void 0, this[V] = e, this[as] = t.readSize || 16 * 1024 * 1024, this[fe] = false, this[hs] = typeof t.size == "number" ? t.size : 1 / 0, this[yt] = this[hs], this[Ee] = typeof t.autoClose == "boolean" ? t.autoClose : true, typeof this[p] == "number" ? this[Ge]() : this[be]();
         }
         get fd() {
           return this[p];
@@ -46335,38 +46335,38 @@ var require_index_min = __commonJS({
         end() {
           throw new TypeError("this is a readable stream");
         }
-        [Ee]() {
-          B.default.open(this[V], "r", (e, t) => this[Ye](e, t));
+        [be]() {
+          z.default.open(this[V], "r", (e, t) => this[Ye](e, t));
         }
         [Ye](e, t) {
-          e ? this[Ge](e) : (this[p] = t, this.emit("open", t), this[Ze]());
+          e ? this[Ze](e) : (this[p] = t, this.emit("open", t), this[Ge]());
         }
-        [hs]() {
-          return Buffer.allocUnsafe(Math.min(this[ns], this[wt]));
+        [cs]() {
+          return Buffer.allocUnsafe(Math.min(this[as], this[yt]));
         }
-        [Ze]() {
-          if (!this[ce]) {
-            this[ce] = true;
-            let e = this[hs]();
-            if (e.length === 0) return process.nextTick(() => this[rs](null, 0, e));
-            B.default.read(this[p], e, 0, e.length, null, (t, i, r) => this[rs](t, i, r));
+        [Ge]() {
+          if (!this[fe]) {
+            this[fe] = true;
+            let e = this[cs]();
+            if (e.length === 0) return process.nextTick(() => this[os](null, 0, e));
+            z.default.read(this[p], e, 0, e.length, null, (t, i, r) => this[os](t, i, r));
           }
         }
-        [rs](e, t, i) {
-          this[ce] = false, e ? this[Ge](e) : this[as](t, i) && this[Ze]();
+        [os](e, t, i) {
+          this[fe] = false, e ? this[Ze](e) : this[ls](t, i) && this[Ge]();
         }
         [$]() {
-          if (this[ye] && typeof this[p] == "number") {
+          if (this[Ee] && typeof this[p] == "number") {
             let e = this[p];
-            this[p] = void 0, B.default.close(e, (t) => t ? this.emit("error", t) : this.emit("close"));
+            this[p] = void 0, z.default.close(e, (t) => t ? this.emit("error", t) : this.emit("close"));
           }
         }
-        [Ge](e) {
-          this[ce] = true, this[$](), this.emit("error", e);
+        [Ze](e) {
+          this[fe] = true, this[$](), this.emit("error", e);
         }
-        [as](e, t) {
+        [ls](e, t) {
           let i = false;
-          return this[wt] -= e, e > 0 && (i = super.write(e < t.length ? t.subarray(0, e) : t)), (e === 0 || this[wt] <= 0) && (i = false, this[$](), super.end()), i;
+          return this[yt] -= e, e > 0 && (i = super.write(e < t.length ? t.subarray(0, e) : t)), (e === 0 || this[yt] <= 0) && (i = false, this[$](), super.end()), i;
         }
         emit(e, ...t) {
           switch (e) {
@@ -46374,37 +46374,37 @@ var require_index_min = __commonJS({
             case "finish":
               return false;
             case "drain":
-              return typeof this[p] == "number" && this[Ze](), false;
+              return typeof this[p] == "number" && this[Ge](), false;
             case "error":
-              return this[Me] ? false : (this[Me] = true, super.emit(e, ...t));
+              return this[Le] ? false : (this[Le] = true, super.emit(e, ...t));
             default:
               return super.emit(e, ...t);
           }
         }
       };
-      W.ReadStream = Kt;
-      var ls = class extends Kt {
+      W.ReadStream = $t;
+      var us = class extends $t {
         static {
-          __name(this, "ls");
+          __name(this, "us");
         }
-        [Ee]() {
+        [be]() {
           let e = true;
           try {
-            this[Ye](null, B.default.openSync(this[V], "r")), e = false;
+            this[Ye](null, z.default.openSync(this[V], "r")), e = false;
           } finally {
             e && this[$]();
           }
         }
-        [Ze]() {
+        [Ge]() {
           let e = true;
           try {
-            if (!this[ce]) {
-              this[ce] = true;
+            if (!this[fe]) {
+              this[fe] = true;
               do {
-                let t = this[hs](), i = t.length === 0 ? 0 : B.default.readSync(this[p], t, 0, t.length, null);
-                if (!this[as](i, t)) break;
+                let t = this[cs](), i = t.length === 0 ? 0 : z.default.readSync(this[p], t, 0, t.length, null);
+                if (!this[ls](i, t)) break;
               } while (true);
-              this[ce] = false;
+              this[fe] = false;
             }
             e = false;
           } finally {
@@ -46412,41 +46412,41 @@ var require_index_min = __commonJS({
           }
         }
         [$]() {
-          if (this[ye] && typeof this[p] == "number") {
+          if (this[Ee] && typeof this[p] == "number") {
             let e = this[p];
-            this[p] = void 0, B.default.closeSync(e), this.emit("close");
+            this[p] = void 0, z.default.closeSync(e), this.emit("close");
           }
         }
       };
-      W.ReadStreamSync = ls;
-      var Vt = class extends Fo.default {
+      W.ReadStreamSync = us;
+      var Xt = class extends ko.default {
         static {
-          __name(this, "Vt");
+          __name(this, "Xt");
         }
         readable = false;
         writable = true;
+        [Le] = false;
         [Me] = false;
-        [Ne] = false;
-        [_t] = false;
+        [wt] = false;
         [ee] = [];
-        [Zt] = false;
+        [Yt] = false;
         [V];
-        [yt];
-        [ye];
+        [Et];
+        [Ee];
         [p];
-        [Yt];
-        [fe];
-        [is] = false;
-        [we];
+        [Vt];
+        [de];
+        [rs] = false;
+        [ye];
         constructor(e, t) {
-          t = t || {}, super(t), this[V] = e, this[p] = typeof t.fd == "number" ? t.fd : void 0, this[yt] = t.mode === void 0 ? 438 : t.mode, this[we] = typeof t.start == "number" ? t.start : void 0, this[ye] = typeof t.autoClose == "boolean" ? t.autoClose : true;
-          let i = this[we] !== void 0 ? "r+" : "w";
-          this[Yt] = t.flags === void 0, this[fe] = t.flags === void 0 ? i : t.flags, this[p] === void 0 && this[Ee]();
+          t = t || {}, super(t), this[V] = e, this[p] = typeof t.fd == "number" ? t.fd : void 0, this[Et] = t.mode === void 0 ? 438 : t.mode, this[ye] = typeof t.start == "number" ? t.start : void 0, this[Ee] = typeof t.autoClose == "boolean" ? t.autoClose : true;
+          let i = this[ye] !== void 0 ? "r+" : "w";
+          this[Vt] = t.flags === void 0, this[de] = t.flags === void 0 ? i : t.flags, this[p] === void 0 && this[be]();
         }
         emit(e, ...t) {
           if (e === "error") {
-            if (this[Me]) return false;
-            this[Me] = true;
+            if (this[Le]) return false;
+            this[Le] = true;
           }
           return super.emit(e, ...t);
         }
@@ -46456,68 +46456,68 @@ var require_index_min = __commonJS({
         get path() {
           return this[V];
         }
-        [Ge](e) {
-          this[$](), this[Ne] = true, this.emit("error", e);
+        [Ze](e) {
+          this[$](), this[Me] = true, this.emit("error", e);
         }
-        [Ee]() {
-          B.default.open(this[V], this[fe], this[yt], (e, t) => this[Ye](e, t));
+        [be]() {
+          z.default.open(this[V], this[de], this[Et], (e, t) => this[Ye](e, t));
         }
         [Ye](e, t) {
-          this[Yt] && this[fe] === "r+" && e && e.code === "ENOENT" ? (this[fe] = "w", this[Ee]()) : e ? this[Ge](e) : (this[p] = t, this.emit("open", t), this[Ne] || this[ss]());
+          this[Vt] && this[de] === "r+" && e && e.code === "ENOENT" ? (this[de] = "w", this[be]()) : e ? this[Ze](e) : (this[p] = t, this.emit("open", t), this[Me] || this[ns]());
         }
         end(e, t) {
-          return e && this.write(e, t), this[_t] = true, !this[Ne] && !this[ee].length && typeof this[p] == "number" && this[He](null, 0), this;
+          return e && this.write(e, t), this[wt] = true, !this[Me] && !this[ee].length && typeof this[p] == "number" && this[He](null, 0), this;
         }
         write(e, t) {
-          return typeof e == "string" && (e = Buffer.from(e, t)), this[_t] ? (this.emit("error", new Error("write() after end()")), false) : this[p] === void 0 || this[Ne] || this[ee].length ? (this[ee].push(e), this[Zt] = true, false) : (this[Ne] = true, this[Gt](e), true);
+          return typeof e == "string" && (e = Buffer.from(e, t)), this[wt] ? (this.emit("error", new Error("write() after end()")), false) : this[p] === void 0 || this[Me] || this[ee].length ? (this[ee].push(e), this[Yt] = true, false) : (this[Me] = true, this[Kt](e), true);
         }
-        [Gt](e) {
-          B.default.write(this[p], e, 0, e.length, this[we], (t, i) => this[He](t, i));
+        [Kt](e) {
+          z.default.write(this[p], e, 0, e.length, this[ye], (t, i) => this[He](t, i));
         }
         [He](e, t) {
-          e ? this[Ge](e) : (this[we] !== void 0 && typeof t == "number" && (this[we] += t), this[ee].length ? this[ss]() : (this[Ne] = false, this[_t] && !this[is] ? (this[is] = true, this[$](), this.emit("finish")) : this[Zt] && (this[Zt] = false, this.emit("drain"))));
+          e ? this[Ze](e) : (this[ye] !== void 0 && typeof t == "number" && (this[ye] += t), this[ee].length ? this[ns]() : (this[Me] = false, this[wt] && !this[rs] ? (this[rs] = true, this[$](), this.emit("finish")) : this[Yt] && (this[Yt] = false, this.emit("drain"))));
         }
-        [ss]() {
-          if (this[ee].length === 0) this[_t] && this[He](null, 0);
-          else if (this[ee].length === 1) this[Gt](this[ee].pop());
+        [ns]() {
+          if (this[ee].length === 0) this[wt] && this[He](null, 0);
+          else if (this[ee].length === 1) this[Kt](this[ee].pop());
           else {
             let e = this[ee];
-            this[ee] = [], Bo(this[p], e, this[we], (t, i) => this[He](t, i));
+            this[ee] = [], jo(this[p], e, this[ye], (t, i) => this[He](t, i));
           }
         }
         [$]() {
-          if (this[ye] && typeof this[p] == "number") {
+          if (this[Ee] && typeof this[p] == "number") {
             let e = this[p];
-            this[p] = void 0, B.default.close(e, (t) => t ? this.emit("error", t) : this.emit("close"));
+            this[p] = void 0, z.default.close(e, (t) => t ? this.emit("error", t) : this.emit("close"));
           }
         }
       };
-      W.WriteStream = Vt;
-      var us = class extends Vt {
+      W.WriteStream = Xt;
+      var fs4 = class extends Xt {
         static {
-          __name(this, "us");
+          __name(this, "fs");
         }
-        [Ee]() {
+        [be]() {
           let e;
-          if (this[Yt] && this[fe] === "r+") try {
-            e = B.default.openSync(this[V], this[fe], this[yt]);
+          if (this[Vt] && this[de] === "r+") try {
+            e = z.default.openSync(this[V], this[de], this[Et]);
           } catch (t) {
-            if (t?.code === "ENOENT") return this[fe] = "w", this[Ee]();
+            if (t?.code === "ENOENT") return this[de] = "w", this[be]();
             throw t;
           }
-          else e = B.default.openSync(this[V], this[fe], this[yt]);
+          else e = z.default.openSync(this[V], this[de], this[Et]);
           this[Ye](null, e);
         }
         [$]() {
-          if (this[ye] && typeof this[p] == "number") {
+          if (this[Ee] && typeof this[p] == "number") {
             let e = this[p];
-            this[p] = void 0, B.default.closeSync(e), this.emit("close");
+            this[p] = void 0, z.default.closeSync(e), this.emit("close");
           }
         }
-        [Gt](e) {
+        [Kt](e) {
           let t = true;
           try {
-            this[He](null, B.default.writeSync(this[p], e, 0, e.length, this[we])), t = false;
+            this[He](null, z.default.writeSync(this[p], e, 0, e.length, this[ye])), t = false;
           } finally {
             if (t) try {
               this[$]();
@@ -46526,79 +46526,79 @@ var require_index_min = __commonJS({
           }
         }
       };
-      W.WriteStreamSync = us;
+      W.WriteStreamSync = fs4;
     });
-    var $t = d((b) => {
+    var Qt = d((S) => {
       "use strict";
-      Object.defineProperty(b, "__esModule", { value: true });
-      b.dealias = b.isNoFile = b.isFile = b.isAsync = b.isSync = b.isAsyncNoFile = b.isSyncNoFile = b.isAsyncFile = b.isSyncFile = void 0;
-      var zo = /* @__PURE__ */ new Map([["C", "cwd"], ["f", "file"], ["z", "gzip"], ["P", "preservePaths"], ["U", "unlink"], ["strip-components", "strip"], ["stripComponents", "strip"], ["keep-newer", "newer"], ["keepNewer", "newer"], ["keep-newer-files", "newer"], ["keepNewerFiles", "newer"], ["k", "keep"], ["keep-existing", "keep"], ["keepExisting", "keep"], ["m", "noMtime"], ["no-mtime", "noMtime"], ["p", "preserveOwner"], ["L", "follow"], ["h", "follow"], ["onentry", "onReadEntry"]]), ko = /* @__PURE__ */ __name((s) => !!s.sync && !!s.file, "ko");
-      b.isSyncFile = ko;
-      var jo = /* @__PURE__ */ __name((s) => !s.sync && !!s.file, "jo");
-      b.isAsyncFile = jo;
-      var xo = /* @__PURE__ */ __name((s) => !!s.sync && !s.file, "xo");
-      b.isSyncNoFile = xo;
-      var Uo = /* @__PURE__ */ __name((s) => !s.sync && !s.file, "Uo");
-      b.isAsyncNoFile = Uo;
-      var qo = /* @__PURE__ */ __name((s) => !!s.sync, "qo");
-      b.isSync = qo;
-      var Wo = /* @__PURE__ */ __name((s) => !s.sync, "Wo");
-      b.isAsync = Wo;
-      var Ho = /* @__PURE__ */ __name((s) => !!s.file, "Ho");
-      b.isFile = Ho;
-      var Zo = /* @__PURE__ */ __name((s) => !s.file, "Zo");
-      b.isNoFile = Zo;
-      var Go = /* @__PURE__ */ __name((s) => {
-        let e = zo.get(s);
+      Object.defineProperty(S, "__esModule", { value: true });
+      S.dealias = S.isNoFile = S.isFile = S.isAsync = S.isSync = S.isAsyncNoFile = S.isSyncNoFile = S.isAsyncFile = S.isSyncFile = void 0;
+      var Uo = /* @__PURE__ */ new Map([["C", "cwd"], ["f", "file"], ["z", "gzip"], ["P", "preservePaths"], ["U", "unlink"], ["strip-components", "strip"], ["stripComponents", "strip"], ["keep-newer", "newer"], ["keepNewer", "newer"], ["keep-newer-files", "newer"], ["keepNewerFiles", "newer"], ["k", "keep"], ["keep-existing", "keep"], ["keepExisting", "keep"], ["m", "noMtime"], ["no-mtime", "noMtime"], ["p", "preserveOwner"], ["L", "follow"], ["h", "follow"], ["onentry", "onReadEntry"]]), qo = /* @__PURE__ */ __name((s) => !!s.sync && !!s.file, "qo");
+      S.isSyncFile = qo;
+      var Wo = /* @__PURE__ */ __name((s) => !s.sync && !!s.file, "Wo");
+      S.isAsyncFile = Wo;
+      var Ho = /* @__PURE__ */ __name((s) => !!s.sync && !s.file, "Ho");
+      S.isSyncNoFile = Ho;
+      var Go = /* @__PURE__ */ __name((s) => !s.sync && !s.file, "Go");
+      S.isAsyncNoFile = Go;
+      var Zo = /* @__PURE__ */ __name((s) => !!s.sync, "Zo");
+      S.isSync = Zo;
+      var Yo = /* @__PURE__ */ __name((s) => !s.sync, "Yo");
+      S.isAsync = Yo;
+      var Ko = /* @__PURE__ */ __name((s) => !!s.file, "Ko");
+      S.isFile = Ko;
+      var Vo = /* @__PURE__ */ __name((s) => !s.file, "Vo");
+      S.isNoFile = Vo;
+      var $o = /* @__PURE__ */ __name((s) => {
+        let e = Uo.get(s);
         return e || s;
-      }, "Go"), Yo = /* @__PURE__ */ __name((s = {}) => {
+      }, "$o"), Xo = /* @__PURE__ */ __name((s = {}) => {
         if (!s) return {};
         let e = {};
         for (let [t, i] of Object.entries(s)) {
-          let r = Go(t);
+          let r = $o(t);
           e[r] = i;
         }
         return e.chmod === void 0 && e.noChmod === false && (e.chmod = true), delete e.noChmod, e;
-      }, "Yo");
-      b.dealias = Yo;
+      }, "Xo");
+      S.dealias = Xo;
     });
-    var Ve = d((Xt) => {
+    var Ve = d((Jt) => {
       "use strict";
-      Object.defineProperty(Xt, "__esModule", { value: true });
-      Xt.makeCommand = void 0;
-      var Et = $t(), Ko = /* @__PURE__ */ __name((s, e, t, i, r) => Object.assign((n = [], o, a) => {
+      Object.defineProperty(Jt, "__esModule", { value: true });
+      Jt.makeCommand = void 0;
+      var bt = Qt(), Qo = /* @__PURE__ */ __name((s, e, t, i, r) => Object.assign((n = [], o, a) => {
         Array.isArray(n) && (o = n, n = {}), typeof o == "function" && (a = o, o = void 0), o = o ? Array.from(o) : [];
-        let h = (0, Et.dealias)(n);
-        if (r?.(h, o), (0, Et.isSyncFile)(h)) {
+        let h = (0, bt.dealias)(n);
+        if (r?.(h, o), (0, bt.isSyncFile)(h)) {
           if (typeof a == "function") throw new TypeError("callback not supported for sync tar functions");
           return s(h, o);
-        } else if ((0, Et.isAsyncFile)(h)) {
+        } else if ((0, bt.isAsyncFile)(h)) {
           let l = e(h, o);
           return a ? l.then(() => a(), a) : l;
-        } else if ((0, Et.isSyncNoFile)(h)) {
+        } else if ((0, bt.isSyncNoFile)(h)) {
           if (typeof a == "function") throw new TypeError("callback not supported for sync tar functions");
           return t(h, o);
-        } else if ((0, Et.isAsyncNoFile)(h)) {
+        } else if ((0, bt.isAsyncNoFile)(h)) {
           if (typeof a == "function") throw new TypeError("callback only supported with file option");
           return i(h, o);
         }
         throw new Error("impossible options??");
-      }, { syncFile: s, asyncFile: e, syncNoFile: t, asyncNoFile: i, validate: r }), "Ko");
-      Xt.makeCommand = Ko;
+      }, { syncFile: s, asyncFile: e, syncNoFile: t, asyncNoFile: i, validate: r }), "Qo");
+      Jt.makeCommand = Qo;
     });
-    var cs = d(($e) => {
+    var ds = d(($e) => {
       "use strict";
-      var Vo = $e && $e.__importDefault || function(s) {
+      var Jo = $e && $e.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
       Object.defineProperty($e, "__esModule", { value: true });
       $e.constants = void 0;
-      var $o = Vo(require("zlib")), Xo = $o.default.constants || { ZLIB_VERNUM: 4736 };
-      $e.constants = Object.freeze(Object.assign(/* @__PURE__ */ Object.create(null), { Z_NO_FLUSH: 0, Z_PARTIAL_FLUSH: 1, Z_SYNC_FLUSH: 2, Z_FULL_FLUSH: 3, Z_FINISH: 4, Z_BLOCK: 5, Z_OK: 0, Z_STREAM_END: 1, Z_NEED_DICT: 2, Z_ERRNO: -1, Z_STREAM_ERROR: -2, Z_DATA_ERROR: -3, Z_MEM_ERROR: -4, Z_BUF_ERROR: -5, Z_VERSION_ERROR: -6, Z_NO_COMPRESSION: 0, Z_BEST_SPEED: 1, Z_BEST_COMPRESSION: 9, Z_DEFAULT_COMPRESSION: -1, Z_FILTERED: 1, Z_HUFFMAN_ONLY: 2, Z_RLE: 3, Z_FIXED: 4, Z_DEFAULT_STRATEGY: 0, DEFLATE: 1, INFLATE: 2, GZIP: 3, GUNZIP: 4, DEFLATERAW: 5, INFLATERAW: 6, UNZIP: 7, BROTLI_DECODE: 8, BROTLI_ENCODE: 9, Z_MIN_WINDOWBITS: 8, Z_MAX_WINDOWBITS: 15, Z_DEFAULT_WINDOWBITS: 15, Z_MIN_CHUNK: 64, Z_MAX_CHUNK: 1 / 0, Z_DEFAULT_CHUNK: 16384, Z_MIN_MEMLEVEL: 1, Z_MAX_MEMLEVEL: 9, Z_DEFAULT_MEMLEVEL: 8, Z_MIN_LEVEL: -1, Z_MAX_LEVEL: 9, Z_DEFAULT_LEVEL: -1, BROTLI_OPERATION_PROCESS: 0, BROTLI_OPERATION_FLUSH: 1, BROTLI_OPERATION_FINISH: 2, BROTLI_OPERATION_EMIT_METADATA: 3, BROTLI_MODE_GENERIC: 0, BROTLI_MODE_TEXT: 1, BROTLI_MODE_FONT: 2, BROTLI_DEFAULT_MODE: 0, BROTLI_MIN_QUALITY: 0, BROTLI_MAX_QUALITY: 11, BROTLI_DEFAULT_QUALITY: 11, BROTLI_MIN_WINDOW_BITS: 10, BROTLI_MAX_WINDOW_BITS: 24, BROTLI_LARGE_MAX_WINDOW_BITS: 30, BROTLI_DEFAULT_WINDOW: 22, BROTLI_MIN_INPUT_BLOCK_BITS: 16, BROTLI_MAX_INPUT_BLOCK_BITS: 24, BROTLI_PARAM_MODE: 0, BROTLI_PARAM_QUALITY: 1, BROTLI_PARAM_LGWIN: 2, BROTLI_PARAM_LGBLOCK: 3, BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING: 4, BROTLI_PARAM_SIZE_HINT: 5, BROTLI_PARAM_LARGE_WINDOW: 6, BROTLI_PARAM_NPOSTFIX: 7, BROTLI_PARAM_NDIRECT: 8, BROTLI_DECODER_RESULT_ERROR: 0, BROTLI_DECODER_RESULT_SUCCESS: 1, BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT: 2, BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT: 3, BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION: 0, BROTLI_DECODER_PARAM_LARGE_WINDOW: 1, BROTLI_DECODER_NO_ERROR: 0, BROTLI_DECODER_SUCCESS: 1, BROTLI_DECODER_NEEDS_MORE_INPUT: 2, BROTLI_DECODER_NEEDS_MORE_OUTPUT: 3, BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_NIBBLE: -1, BROTLI_DECODER_ERROR_FORMAT_RESERVED: -2, BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_META_NIBBLE: -3, BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_ALPHABET: -4, BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_SAME: -5, BROTLI_DECODER_ERROR_FORMAT_CL_SPACE: -6, BROTLI_DECODER_ERROR_FORMAT_HUFFMAN_SPACE: -7, BROTLI_DECODER_ERROR_FORMAT_CONTEXT_MAP_REPEAT: -8, BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_1: -9, BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_2: -10, BROTLI_DECODER_ERROR_FORMAT_TRANSFORM: -11, BROTLI_DECODER_ERROR_FORMAT_DICTIONARY: -12, BROTLI_DECODER_ERROR_FORMAT_WINDOW_BITS: -13, BROTLI_DECODER_ERROR_FORMAT_PADDING_1: -14, BROTLI_DECODER_ERROR_FORMAT_PADDING_2: -15, BROTLI_DECODER_ERROR_FORMAT_DISTANCE: -16, BROTLI_DECODER_ERROR_DICTIONARY_NOT_SET: -19, BROTLI_DECODER_ERROR_INVALID_ARGUMENTS: -20, BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MODES: -21, BROTLI_DECODER_ERROR_ALLOC_TREE_GROUPS: -22, BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MAP: -25, BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_1: -26, BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_2: -27, BROTLI_DECODER_ERROR_ALLOC_BLOCK_TYPE_TREES: -30, BROTLI_DECODER_ERROR_UNREACHABLE: -31 }, Xo));
+      var ea = Jo(require("zlib")), ta = ea.default.constants || { ZLIB_VERNUM: 4736 };
+      $e.constants = Object.freeze(Object.assign(/* @__PURE__ */ Object.create(null), { Z_NO_FLUSH: 0, Z_PARTIAL_FLUSH: 1, Z_SYNC_FLUSH: 2, Z_FULL_FLUSH: 3, Z_FINISH: 4, Z_BLOCK: 5, Z_OK: 0, Z_STREAM_END: 1, Z_NEED_DICT: 2, Z_ERRNO: -1, Z_STREAM_ERROR: -2, Z_DATA_ERROR: -3, Z_MEM_ERROR: -4, Z_BUF_ERROR: -5, Z_VERSION_ERROR: -6, Z_NO_COMPRESSION: 0, Z_BEST_SPEED: 1, Z_BEST_COMPRESSION: 9, Z_DEFAULT_COMPRESSION: -1, Z_FILTERED: 1, Z_HUFFMAN_ONLY: 2, Z_RLE: 3, Z_FIXED: 4, Z_DEFAULT_STRATEGY: 0, DEFLATE: 1, INFLATE: 2, GZIP: 3, GUNZIP: 4, DEFLATERAW: 5, INFLATERAW: 6, UNZIP: 7, BROTLI_DECODE: 8, BROTLI_ENCODE: 9, Z_MIN_WINDOWBITS: 8, Z_MAX_WINDOWBITS: 15, Z_DEFAULT_WINDOWBITS: 15, Z_MIN_CHUNK: 64, Z_MAX_CHUNK: 1 / 0, Z_DEFAULT_CHUNK: 16384, Z_MIN_MEMLEVEL: 1, Z_MAX_MEMLEVEL: 9, Z_DEFAULT_MEMLEVEL: 8, Z_MIN_LEVEL: -1, Z_MAX_LEVEL: 9, Z_DEFAULT_LEVEL: -1, BROTLI_OPERATION_PROCESS: 0, BROTLI_OPERATION_FLUSH: 1, BROTLI_OPERATION_FINISH: 2, BROTLI_OPERATION_EMIT_METADATA: 3, BROTLI_MODE_GENERIC: 0, BROTLI_MODE_TEXT: 1, BROTLI_MODE_FONT: 2, BROTLI_DEFAULT_MODE: 0, BROTLI_MIN_QUALITY: 0, BROTLI_MAX_QUALITY: 11, BROTLI_DEFAULT_QUALITY: 11, BROTLI_MIN_WINDOW_BITS: 10, BROTLI_MAX_WINDOW_BITS: 24, BROTLI_LARGE_MAX_WINDOW_BITS: 30, BROTLI_DEFAULT_WINDOW: 22, BROTLI_MIN_INPUT_BLOCK_BITS: 16, BROTLI_MAX_INPUT_BLOCK_BITS: 24, BROTLI_PARAM_MODE: 0, BROTLI_PARAM_QUALITY: 1, BROTLI_PARAM_LGWIN: 2, BROTLI_PARAM_LGBLOCK: 3, BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING: 4, BROTLI_PARAM_SIZE_HINT: 5, BROTLI_PARAM_LARGE_WINDOW: 6, BROTLI_PARAM_NPOSTFIX: 7, BROTLI_PARAM_NDIRECT: 8, BROTLI_DECODER_RESULT_ERROR: 0, BROTLI_DECODER_RESULT_SUCCESS: 1, BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT: 2, BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT: 3, BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION: 0, BROTLI_DECODER_PARAM_LARGE_WINDOW: 1, BROTLI_DECODER_NO_ERROR: 0, BROTLI_DECODER_SUCCESS: 1, BROTLI_DECODER_NEEDS_MORE_INPUT: 2, BROTLI_DECODER_NEEDS_MORE_OUTPUT: 3, BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_NIBBLE: -1, BROTLI_DECODER_ERROR_FORMAT_RESERVED: -2, BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_META_NIBBLE: -3, BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_ALPHABET: -4, BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_SAME: -5, BROTLI_DECODER_ERROR_FORMAT_CL_SPACE: -6, BROTLI_DECODER_ERROR_FORMAT_HUFFMAN_SPACE: -7, BROTLI_DECODER_ERROR_FORMAT_CONTEXT_MAP_REPEAT: -8, BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_1: -9, BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_2: -10, BROTLI_DECODER_ERROR_FORMAT_TRANSFORM: -11, BROTLI_DECODER_ERROR_FORMAT_DICTIONARY: -12, BROTLI_DECODER_ERROR_FORMAT_WINDOW_BITS: -13, BROTLI_DECODER_ERROR_FORMAT_PADDING_1: -14, BROTLI_DECODER_ERROR_FORMAT_PADDING_2: -15, BROTLI_DECODER_ERROR_FORMAT_DISTANCE: -16, BROTLI_DECODER_ERROR_DICTIONARY_NOT_SET: -19, BROTLI_DECODER_ERROR_INVALID_ARGUMENTS: -20, BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MODES: -21, BROTLI_DECODER_ERROR_ALLOC_TREE_GROUPS: -22, BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MAP: -25, BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_1: -26, BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_2: -27, BROTLI_DECODER_ERROR_ALLOC_BLOCK_TYPE_TREES: -30, BROTLI_DECODER_ERROR_UNREACHABLE: -31 }, ta));
     });
-    var Ts = d((f) => {
+    var Ps = d((f) => {
       "use strict";
-      var Qo = f && f.__createBinding || (Object.create ? (function(s, e, t, i) {
+      var ia = f && f.__createBinding || (Object.create ? (function(s, e, t, i) {
         i === void 0 && (i = t);
         var r = Object.getOwnPropertyDescriptor(e, t);
         (!r || ("get" in r ? !e.__esModule : r.writable || r.configurable)) && (r = { enumerable: true, get: /* @__PURE__ */ __name(function() {
@@ -46606,11 +46606,11 @@ var require_index_min = __commonJS({
         }, "get") }), Object.defineProperty(s, i, r);
       }) : (function(s, e, t, i) {
         i === void 0 && (i = t), s[i] = e[t];
-      })), Jo = f && f.__setModuleDefault || (Object.create ? (function(s, e) {
+      })), sa = f && f.__setModuleDefault || (Object.create ? (function(s, e) {
         Object.defineProperty(s, "default", { enumerable: true, value: e });
       }) : function(s, e) {
         s.default = e;
-      }), ea = f && f.__importStar || /* @__PURE__ */ (function() {
+      }), ra = f && f.__importStar || /* @__PURE__ */ (function() {
         var s = /* @__PURE__ */ __name(function(e) {
           return s = Object.getOwnPropertyNames || function(t) {
             var i = [];
@@ -46621,24 +46621,24 @@ var require_index_min = __commonJS({
         return function(e) {
           if (e && e.__esModule) return e;
           var t = {};
-          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && Qo(t, e, i[r]);
-          return Jo(t, e), t;
+          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && ia(t, e, i[r]);
+          return sa(t, e), t;
         };
-      })(), ta = f && f.__importDefault || function(s) {
+      })(), na = f && f.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
       Object.defineProperty(f, "__esModule", { value: true });
       f.ZstdDecompress = f.ZstdCompress = f.BrotliDecompress = f.BrotliCompress = f.Unzip = f.InflateRaw = f.DeflateRaw = f.Gunzip = f.Gzip = f.Inflate = f.Deflate = f.Zlib = f.ZlibError = f.constants = void 0;
-      var ms = ta(require("assert")), Le = require("buffer"), ia = We(), Ur = ea(require("zlib")), te = cs(), sa = cs();
+      var _s = na(require("assert")), Ae = require("buffer"), oa = We(), Hr = ra(require("zlib")), te = ds(), aa = ds();
       Object.defineProperty(f, "constants", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-        return sa.constants;
+        return aa.constants;
       }, "get") });
-      var ra = Le.Buffer.concat, qr = Object.getOwnPropertyDescriptor(Le.Buffer, "concat"), na = /* @__PURE__ */ __name((s) => s, "na"), fs4 = qr?.writable === true || qr?.set !== void 0 ? (s) => {
-        Le.Buffer.concat = s ? na : ra;
+      var ha = Ae.Buffer.concat, Gr = Object.getOwnPropertyDescriptor(Ae.Buffer, "concat"), la = /* @__PURE__ */ __name((s) => s, "la"), ms = Gr?.writable === true || Gr?.set !== void 0 ? (s) => {
+        Ae.Buffer.concat = s ? la : ha;
       } : (s) => {
-      }, Ae = /* @__PURE__ */ Symbol("_superWrite"), Ie = class extends Error {
+      }, Ie = /* @__PURE__ */ Symbol("_superWrite"), Fe = class extends Error {
         static {
-          __name(this, "Ie");
+          __name(this, "Fe");
         }
         code;
         errno;
@@ -46649,10 +46649,10 @@ var require_index_min = __commonJS({
           return "ZlibError";
         }
       };
-      f.ZlibError = Ie;
-      var ds = /* @__PURE__ */ Symbol("flushFlag"), bt = class extends ia.Minipass {
+      f.ZlibError = Fe;
+      var ps = /* @__PURE__ */ Symbol("flushFlag"), St = class extends oa.Minipass {
         static {
-          __name(this, "bt");
+          __name(this, "St");
         }
         #e = false;
         #i = false;
@@ -46672,24 +46672,24 @@ var require_index_min = __commonJS({
         }
         constructor(e, t) {
           if (!e || typeof e != "object") throw new TypeError("invalid options for ZlibBase constructor");
-          if (super(e), this.#s = e.flush ?? 0, this.#n = e.finishFlush ?? 0, this.#r = e.fullFlushFlag ?? 0, typeof Ur[t] != "function") throw new TypeError("Compression method not supported: " + t);
+          if (super(e), this.#s = e.flush ?? 0, this.#n = e.finishFlush ?? 0, this.#r = e.fullFlushFlag ?? 0, typeof Hr[t] != "function") throw new TypeError("Compression method not supported: " + t);
           try {
-            this.#t = new Ur[t](e);
+            this.#t = new Hr[t](e);
           } catch (i) {
-            throw new Ie(i, this.constructor);
+            throw new Fe(i, this.constructor);
           }
           this.#o = (i) => {
             this.#e || (this.#e = true, this.close(), this.emit("error", i));
-          }, this.#t?.on("error", (i) => this.#o(new Ie(i))), this.once("end", () => this.close);
+          }, this.#t?.on("error", (i) => this.#o(new Fe(i))), this.once("end", () => this.close);
         }
         close() {
           this.#t && (this.#t.close(), this.#t = void 0, this.emit("close"));
         }
         reset() {
-          if (!this.#e) return (0, ms.default)(this.#t, "zlib binding closed"), this.#t.reset?.();
+          if (!this.#e) return (0, _s.default)(this.#t, "zlib binding closed"), this.#t.reset?.();
         }
         flush(e) {
-          this.ended || (typeof e != "number" && (e = this.#r), this.write(Object.assign(Le.Buffer.alloc(0), { [ds]: e })));
+          this.ended || (typeof e != "number" && (e = this.#r), this.write(Object.assign(Ae.Buffer.alloc(0), { [ps]: e })));
         }
         end(e, t, i) {
           return typeof e == "function" && (i = e, t = void 0, e = void 0), typeof t == "function" && (i = t, t = void 0), e && (t ? this.write(e, t) : this.write(e)), this.flush(this.#n), this.#i = true, super.end(i);
@@ -46697,37 +46697,37 @@ var require_index_min = __commonJS({
         get ended() {
           return this.#i;
         }
-        [Ae](e) {
+        [Ie](e) {
           return super.write(e);
         }
         write(e, t, i) {
-          if (typeof t == "function" && (i = t, t = "utf8"), typeof e == "string" && (e = Le.Buffer.from(e, t)), this.#e) return;
-          (0, ms.default)(this.#t, "zlib binding closed");
+          if (typeof t == "function" && (i = t, t = "utf8"), typeof e == "string" && (e = Ae.Buffer.from(e, t)), this.#e) return;
+          (0, _s.default)(this.#t, "zlib binding closed");
           let r = this.#t._handle, n = r.close;
           r.close = () => {
           };
           let o = this.#t.close;
           this.#t.close = () => {
-          }, fs4(true);
+          }, ms(true);
           let a;
           try {
-            let l = typeof e[ds] == "number" ? e[ds] : this.#s;
-            a = this.#t._processChunk(e, l), fs4(false);
+            let l = typeof e[ps] == "number" ? e[ps] : this.#s;
+            a = this.#t._processChunk(e, l), ms(false);
           } catch (l) {
-            fs4(false), this.#o(new Ie(l, this.write));
+            ms(false), this.#o(new Fe(l, this.write));
           } finally {
             this.#t && (this.#t._handle = r, r.close = n, this.#t.close = o, this.#t.removeAllListeners("error"));
           }
-          this.#t && this.#t.on("error", (l) => this.#o(new Ie(l, this.write)));
+          this.#t && this.#t.on("error", (l) => this.#o(new Fe(l, this.write)));
           let h;
           if (a) if (Array.isArray(a) && a.length > 0) {
             let l = a[0];
-            h = this[Ae](Le.Buffer.from(l));
-            for (let u = 1; u < a.length; u++) h = this[Ae](a[u]);
-          } else h = this[Ae](Le.Buffer.from(a));
+            h = this[Ie](Ae.Buffer.from(l));
+            for (let c = 1; c < a.length; c++) h = this[Ie](a[c]);
+          } else h = this[Ie](Ae.Buffer.from(a));
           return i && i(), h;
         }
-      }, ie = class extends bt {
+      }, ie = class extends St {
         static {
           __name(this, "ie");
         }
@@ -46741,7 +46741,7 @@ var require_index_min = __commonJS({
             if (!this.handle) throw new Error("cannot switch params when binding is closed");
             if (!this.handle.params) throw new Error("not supported in this implementation");
             if (this.#e !== e || this.#i !== t) {
-              this.flush(te.constants.Z_SYNC_FLUSH), (0, ms.default)(this.handle, "zlib binding closed");
+              this.flush(te.constants.Z_SYNC_FLUSH), (0, _s.default)(this.handle, "zlib binding closed");
               let i = this.handle.flush;
               this.handle.flush = (r, n) => {
                 typeof r == "function" && (n = r, r = this.flushFlag), this.flush(r), n?.();
@@ -46757,180 +46757,181 @@ var require_index_min = __commonJS({
         }
       };
       f.Zlib = ie;
-      var ps = class extends ie {
+      var ws = class extends ie {
         static {
-          __name(this, "ps");
+          __name(this, "ws");
         }
         constructor(e) {
           super(e, "Deflate");
         }
       };
-      f.Deflate = ps;
-      var _s = class extends ie {
-        static {
-          __name(this, "_s");
-        }
-        constructor(e) {
-          super(e, "Inflate");
-        }
-      };
-      f.Inflate = _s;
-      var ws = class extends ie {
-        static {
-          __name(this, "ws");
-        }
-        #e;
-        constructor(e) {
-          super(e, "Gzip"), this.#e = e && !!e.portable;
-        }
-        [Ae](e) {
-          return this.#e ? (this.#e = false, e[9] = 255, super[Ae](e)) : super[Ae](e);
-        }
-      };
-      f.Gzip = ws;
+      f.Deflate = ws;
       var ys = class extends ie {
         static {
           __name(this, "ys");
         }
         constructor(e) {
-          super(e, "Gunzip");
+          super(e, "Inflate");
         }
       };
-      f.Gunzip = ys;
+      f.Inflate = ys;
       var Es = class extends ie {
         static {
           __name(this, "Es");
         }
+        #e;
         constructor(e) {
-          super(e, "DeflateRaw");
+          super(e, "Gzip"), this.#e = e && !!e.portable;
+        }
+        [Ie](e) {
+          return this.#e ? (this.#e = false, e[9] = 255, super[Ie](e)) : super[Ie](e);
         }
       };
-      f.DeflateRaw = Es;
+      f.Gzip = Es;
       var bs = class extends ie {
         static {
           __name(this, "bs");
         }
         constructor(e) {
-          super(e, "InflateRaw");
+          super(e, "Gunzip");
         }
       };
-      f.InflateRaw = bs;
+      f.Gunzip = bs;
       var Ss = class extends ie {
         static {
           __name(this, "Ss");
         }
         constructor(e) {
+          super(e, "DeflateRaw");
+        }
+      };
+      f.DeflateRaw = Ss;
+      var gs = class extends ie {
+        static {
+          __name(this, "gs");
+        }
+        constructor(e) {
+          super(e, "InflateRaw");
+        }
+      };
+      f.InflateRaw = gs;
+      var Rs = class extends ie {
+        static {
+          __name(this, "Rs");
+        }
+        constructor(e) {
           super(e, "Unzip");
         }
       };
-      f.Unzip = Ss;
-      var Qt = class extends bt {
+      f.Unzip = Rs;
+      var ei = class extends St {
         static {
-          __name(this, "Qt");
+          __name(this, "ei");
         }
         constructor(e, t) {
           e = e || {}, e.flush = e.flush || te.constants.BROTLI_OPERATION_PROCESS, e.finishFlush = e.finishFlush || te.constants.BROTLI_OPERATION_FINISH, e.fullFlushFlag = te.constants.BROTLI_OPERATION_FLUSH, super(e, t);
         }
-      }, gs = class extends Qt {
+      }, Os = class extends ei {
         static {
-          __name(this, "gs");
+          __name(this, "Os");
         }
         constructor(e) {
           super(e, "BrotliCompress");
         }
       };
-      f.BrotliCompress = gs;
-      var Os = class extends Qt {
+      f.BrotliCompress = Os;
+      var vs = class extends ei {
         static {
-          __name(this, "Os");
+          __name(this, "vs");
         }
         constructor(e) {
           super(e, "BrotliDecompress");
         }
       };
-      f.BrotliDecompress = Os;
-      var Jt = class extends bt {
+      f.BrotliDecompress = vs;
+      var ti = class extends St {
         static {
-          __name(this, "Jt");
+          __name(this, "ti");
         }
         constructor(e, t) {
           e = e || {}, e.flush = e.flush || te.constants.ZSTD_e_continue, e.finishFlush = e.finishFlush || te.constants.ZSTD_e_end, e.fullFlushFlag = te.constants.ZSTD_e_flush, super(e, t);
         }
-      }, Rs = class extends Jt {
+      }, Ts = class extends ti {
         static {
-          __name(this, "Rs");
+          __name(this, "Ts");
         }
         constructor(e) {
           super(e, "ZstdCompress");
         }
       };
-      f.ZstdCompress = Rs;
-      var vs = class extends Jt {
+      f.ZstdCompress = Ts;
+      var Ds = class extends ti {
         static {
-          __name(this, "vs");
+          __name(this, "Ds");
         }
         constructor(e) {
           super(e, "ZstdDecompress");
         }
       };
-      f.ZstdDecompress = vs;
+      f.ZstdDecompress = Ds;
     });
-    var Zr = d((Xe) => {
+    var Kr = d((Xe) => {
       "use strict";
       Object.defineProperty(Xe, "__esModule", { value: true });
       Xe.parse = Xe.encode = void 0;
-      var oa = /* @__PURE__ */ __name((s, e) => {
-        if (Number.isSafeInteger(s)) s < 0 ? ha(s, e) : aa(s, e);
+      var ca = /* @__PURE__ */ __name((s, e) => {
+        if (Number.isSafeInteger(s)) s < 0 ? fa(s, e) : ua(s, e);
         else throw Error("cannot encode number outside of javascript safe integer range");
         return e;
-      }, "oa");
-      Xe.encode = oa;
-      var aa = /* @__PURE__ */ __name((s, e) => {
+      }, "ca");
+      Xe.encode = ca;
+      var ua = /* @__PURE__ */ __name((s, e) => {
         e[0] = 128;
         for (var t = e.length; t > 1; t--) e[t - 1] = s & 255, s = Math.floor(s / 256);
-      }, "aa"), ha = /* @__PURE__ */ __name((s, e) => {
+      }, "ua"), fa = /* @__PURE__ */ __name((s, e) => {
         e[0] = 255;
         var t = false;
         s = s * -1;
         for (var i = e.length; i > 1; i--) {
           var r = s & 255;
-          s = Math.floor(s / 256), t ? e[i - 1] = Wr(r) : r === 0 ? e[i - 1] = 0 : (t = true, e[i - 1] = Hr(r));
+          s = Math.floor(s / 256), t ? e[i - 1] = Zr(r) : r === 0 ? e[i - 1] = 0 : (t = true, e[i - 1] = Yr(r));
         }
-      }, "ha"), la = /* @__PURE__ */ __name((s) => {
-        let e = s[0], t = e === 128 ? ca(s.subarray(1, s.length)) : e === 255 ? ua(s) : null;
+      }, "fa"), da = /* @__PURE__ */ __name((s) => {
+        let e = s[0], t = e === 128 ? pa(s.subarray(1, s.length)) : e === 255 ? ma(s) : null;
         if (t === null) throw Error("invalid base256 encoding");
         if (!Number.isSafeInteger(t)) throw Error("parsed number outside of javascript safe integer range");
         return t;
-      }, "la");
-      Xe.parse = la;
-      var ua = /* @__PURE__ */ __name((s) => {
+      }, "da");
+      Xe.parse = da;
+      var ma = /* @__PURE__ */ __name((s) => {
         for (var e = s.length, t = 0, i = false, r = e - 1; r > -1; r--) {
           var n = Number(s[r]), o;
-          i ? o = Wr(n) : n === 0 ? o = n : (i = true, o = Hr(n)), o !== 0 && (t -= o * Math.pow(256, e - r - 1));
+          i ? o = Zr(n) : n === 0 ? o = n : (i = true, o = Yr(n)), o !== 0 && (t -= o * Math.pow(256, e - r - 1));
         }
         return t;
-      }, "ua"), ca = /* @__PURE__ */ __name((s) => {
+      }, "ma"), pa = /* @__PURE__ */ __name((s) => {
         for (var e = s.length, t = 0, i = e - 1; i > -1; i--) {
           var r = Number(s[i]);
           r !== 0 && (t += r * Math.pow(256, e - i - 1));
         }
         return t;
-      }, "ca"), Wr = /* @__PURE__ */ __name((s) => (255 ^ s) & 255, "Wr"), Hr = /* @__PURE__ */ __name((s) => (255 ^ s) + 1 & 255, "Hr");
+      }, "pa"), Zr = /* @__PURE__ */ __name((s) => (255 ^ s) & 255, "Zr"), Yr = /* @__PURE__ */ __name((s) => (255 ^ s) + 1 & 255, "Yr");
     });
-    var Ds = d((j) => {
+    var Ns = d((C) => {
       "use strict";
-      Object.defineProperty(j, "__esModule", { value: true });
-      j.code = j.name = j.isName = j.isCode = void 0;
-      var fa = /* @__PURE__ */ __name((s) => j.name.has(s), "fa");
-      j.isCode = fa;
-      var da = /* @__PURE__ */ __name((s) => j.code.has(s), "da");
-      j.isName = da;
-      j.name = /* @__PURE__ */ new Map([["0", "File"], ["", "OldFile"], ["1", "Link"], ["2", "SymbolicLink"], ["3", "CharacterDevice"], ["4", "BlockDevice"], ["5", "Directory"], ["6", "FIFO"], ["7", "ContiguousFile"], ["g", "GlobalExtendedHeader"], ["x", "ExtendedHeader"], ["A", "SolarisACL"], ["D", "GNUDumpDir"], ["I", "Inode"], ["K", "NextFileHasLongLinkpath"], ["L", "NextFileHasLongPath"], ["M", "ContinuationFile"], ["N", "OldGnuLongPath"], ["S", "SparseFile"], ["V", "TapeVolumeHeader"], ["X", "OldExtendedHeader"]]);
-      j.code = new Map(Array.from(j.name).map((s) => [s[1], s[0]]));
+      Object.defineProperty(C, "__esModule", { value: true });
+      C.code = C.name = C.normalFsTypes = C.isName = C.isCode = void 0;
+      var _a = /* @__PURE__ */ __name((s) => C.name.has(s), "_a");
+      C.isCode = _a;
+      var wa = /* @__PURE__ */ __name((s) => C.code.has(s), "wa");
+      C.isName = wa;
+      C.normalFsTypes = /* @__PURE__ */ new Set(["0", "", "1", "2", "3", "4", "5", "6", "7", "D"]);
+      C.name = /* @__PURE__ */ new Map([["0", "File"], ["", "OldFile"], ["1", "Link"], ["2", "SymbolicLink"], ["3", "CharacterDevice"], ["4", "BlockDevice"], ["5", "Directory"], ["6", "FIFO"], ["7", "ContiguousFile"], ["g", "GlobalExtendedHeader"], ["x", "ExtendedHeader"], ["A", "SolarisACL"], ["D", "GNUDumpDir"], ["I", "Inode"], ["K", "NextFileHasLongLinkpath"], ["L", "NextFileHasLongPath"], ["M", "ContinuationFile"], ["N", "OldGnuLongPath"], ["S", "SparseFile"], ["V", "TapeVolumeHeader"], ["X", "OldExtendedHeader"]]);
+      C.code = new Map(Array.from(C.name).map((s) => [s[1], s[0]]));
     });
-    var Je = d((se) => {
+    var et = d((se) => {
       "use strict";
-      var ma = se && se.__createBinding || (Object.create ? (function(s, e, t, i) {
+      var ya = se && se.__createBinding || (Object.create ? (function(s, e, t, i) {
         i === void 0 && (i = t);
         var r = Object.getOwnPropertyDescriptor(e, t);
         (!r || ("get" in r ? !e.__esModule : r.writable || r.configurable)) && (r = { enumerable: true, get: /* @__PURE__ */ __name(function() {
@@ -46938,11 +46939,11 @@ var require_index_min = __commonJS({
         }, "get") }), Object.defineProperty(s, i, r);
       }) : (function(s, e, t, i) {
         i === void 0 && (i = t), s[i] = e[t];
-      })), pa = se && se.__setModuleDefault || (Object.create ? (function(s, e) {
+      })), Ea = se && se.__setModuleDefault || (Object.create ? (function(s, e) {
         Object.defineProperty(s, "default", { enumerable: true, value: e });
       }) : function(s, e) {
         s.default = e;
-      }), Gr = se && se.__importStar || /* @__PURE__ */ (function() {
+      }), Vr = se && se.__importStar || /* @__PURE__ */ (function() {
         var s = /* @__PURE__ */ __name(function(e) {
           return s = Object.getOwnPropertyNames || function(t) {
             var i = [];
@@ -46953,15 +46954,15 @@ var require_index_min = __commonJS({
         return function(e) {
           if (e && e.__esModule) return e;
           var t = {};
-          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && ma(t, e, i[r]);
-          return pa(t, e), t;
+          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && ya(t, e, i[r]);
+          return Ea(t, e), t;
         };
       })();
       Object.defineProperty(se, "__esModule", { value: true });
       se.Header = void 0;
-      var Qe = require("node:path"), Yr = Gr(Zr()), St = Gr(Ds()), Ms = class {
+      var Qe = require("node:path"), $r = Vr(Kr()), Je = Vr(Ns()), ba = /* @__PURE__ */ __name((s) => s === void 0 || s < 0 ? void 0 : s, "ba"), As = class {
         static {
-          __name(this, "Ms");
+          __name(this, "As");
         }
         cksumValid = false;
         needPax = false;
@@ -46989,47 +46990,46 @@ var require_index_min = __commonJS({
         }
         decode(e, t, i, r) {
           if (t || (t = 0), !e || !(e.length >= t + 512)) throw new Error("need 512 bytes for header");
-          this.path = i?.path ?? Fe(e, t, 100), this.mode = i?.mode ?? r?.mode ?? be(e, t + 100, 8), this.uid = i?.uid ?? r?.uid ?? be(e, t + 108, 8), this.gid = i?.gid ?? r?.gid ?? be(e, t + 116, 8), this.size = i?.size ?? r?.size ?? be(e, t + 124, 12), this.mtime = i?.mtime ?? r?.mtime ?? Ps(e, t + 136, 12), this.cksum = be(e, t + 148, 12), r && this.#i(r, true), i && this.#i(i);
-          let n = Fe(e, t + 156, 1);
-          if (St.isCode(n) && (this.#e = n || "0"), this.#e === "0" && this.path.slice(-1) === "/" && (this.#e = "5"), this.#e === "5" && (this.size = 0), this.linkpath = Fe(e, t + 157, 100), e.subarray(t + 257, t + 265).toString() === "ustar\x0000") if (this.uname = i?.uname ?? r?.uname ?? Fe(e, t + 265, 32), this.gname = i?.gname ?? r?.gname ?? Fe(e, t + 297, 32), this.devmaj = i?.devmaj ?? r?.devmaj ?? be(e, t + 329, 8) ?? 0, this.devmin = i?.devmin ?? r?.devmin ?? be(e, t + 337, 8) ?? 0, e[t + 475] !== 0) {
-            let a = Fe(e, t + 345, 155);
-            this.path = a + "/" + this.path;
+          let n = Ce(e, t + 156, 1), o = Je.normalFsTypes.has(n), a = o ? i : void 0, h = o ? r : void 0;
+          if (this.path = a?.path ?? Ce(e, t, 100), this.mode = a?.mode ?? h?.mode ?? Se(e, t + 100, 8), this.uid = a?.uid ?? h?.uid ?? Se(e, t + 108, 8), this.gid = a?.gid ?? h?.gid ?? Se(e, t + 116, 8), this.size = ba(a?.size ?? h?.size ?? Se(e, t + 124, 12)), this.mtime = a?.mtime ?? h?.mtime ?? Ms(e, t + 136, 12), this.cksum = Se(e, t + 148, 12), h && this.#i(h, true), a && this.#i(a), Je.isCode(n) && (this.#e = n || "0"), this.#e === "0" && this.path.slice(-1) === "/" && (this.#e = "5"), this.#e === "5" && (this.size = 0), this.linkpath = Ce(e, t + 157, 100), e.subarray(t + 257, t + 265).toString() === "ustar\x0000") if (this.uname = a?.uname ?? h?.uname ?? Ce(e, t + 265, 32), this.gname = a?.gname ?? h?.gname ?? Ce(e, t + 297, 32), this.devmaj = a?.devmaj ?? h?.devmaj ?? Se(e, t + 329, 8) ?? 0, this.devmin = a?.devmin ?? h?.devmin ?? Se(e, t + 337, 8) ?? 0, e[t + 475] !== 0) {
+            let c = Ce(e, t + 345, 155);
+            this.path = c + "/" + this.path;
           } else {
-            let a = Fe(e, t + 345, 130);
-            a && (this.path = a + "/" + this.path), this.atime = i?.atime ?? r?.atime ?? Ps(e, t + 476, 12), this.ctime = i?.ctime ?? r?.ctime ?? Ps(e, t + 488, 12);
+            let c = Ce(e, t + 345, 130);
+            c && (this.path = c + "/" + this.path), this.atime = i?.atime ?? r?.atime ?? Ms(e, t + 476, 12), this.ctime = i?.ctime ?? r?.ctime ?? Ms(e, t + 488, 12);
           }
-          let o = 256;
-          for (let a = t; a < t + 148; a++) o += e[a];
-          for (let a = t + 156; a < t + 512; a++) o += e[a];
-          this.cksumValid = o === this.cksum, this.cksum === void 0 && o === 256 && (this.nullBlock = true);
+          let l = 256;
+          for (let c = t; c < t + 148; c++) l += e[c];
+          for (let c = t + 156; c < t + 512; c++) l += e[c];
+          this.cksumValid = l === this.cksum, this.cksum === void 0 && l === 256 && (this.nullBlock = true);
         }
         #i(e, t = false) {
-          Object.assign(this, Object.fromEntries(Object.entries(e).filter(([i, r]) => !(r == null || i === "path" && t || i === "linkpath" && t || i === "global"))));
+          Object.assign(this, Object.fromEntries(Object.entries(e).filter(([i, r]) => !(r == null || i === "size" && Number(r) < 0 || i === "path" && t || i === "linkpath" && t || i === "global"))));
         }
         encode(e, t = 0) {
           if (e || (e = this.block = Buffer.alloc(512)), this.#e === "Unsupported" && (this.#e = "0"), !(e.length >= t + 512)) throw new Error("need 512 bytes for header");
-          let i = this.ctime || this.atime ? 130 : 155, r = _a(this.path || "", i), n = r[0], o = r[1];
-          this.needPax = !!r[2], this.needPax = Ce(e, t, 100, n) || this.needPax, this.needPax = Se(e, t + 100, 8, this.mode) || this.needPax, this.needPax = Se(e, t + 108, 8, this.uid) || this.needPax, this.needPax = Se(e, t + 116, 8, this.gid) || this.needPax, this.needPax = Se(e, t + 124, 12, this.size) || this.needPax, this.needPax = Ns(e, t + 136, 12, this.mtime) || this.needPax, e[t + 156] = Number(this.#e.codePointAt(0)), this.needPax = Ce(e, t + 157, 100, this.linkpath) || this.needPax, e.write("ustar\x0000", t + 257, 8), this.needPax = Ce(e, t + 265, 32, this.uname) || this.needPax, this.needPax = Ce(e, t + 297, 32, this.gname) || this.needPax, this.needPax = Se(e, t + 329, 8, this.devmaj) || this.needPax, this.needPax = Se(e, t + 337, 8, this.devmin) || this.needPax, this.needPax = Ce(e, t + 345, i, o) || this.needPax, e[t + 475] !== 0 ? this.needPax = Ce(e, t + 345, 155, o) || this.needPax : (this.needPax = Ce(e, t + 345, 130, o) || this.needPax, this.needPax = Ns(e, t + 476, 12, this.atime) || this.needPax, this.needPax = Ns(e, t + 488, 12, this.ctime) || this.needPax);
+          let i = this.ctime || this.atime ? 130 : 155, r = Sa(this.path || "", i), n = r[0], o = r[1];
+          this.needPax = !!r[2], this.needPax = Be(e, t, 100, n) || this.needPax, this.needPax = ge(e, t + 100, 8, this.mode) || this.needPax, this.needPax = ge(e, t + 108, 8, this.uid) || this.needPax, this.needPax = ge(e, t + 116, 8, this.gid) || this.needPax, this.needPax = ge(e, t + 124, 12, this.size) || this.needPax, this.needPax = Ls(e, t + 136, 12, this.mtime) || this.needPax, e[t + 156] = Number(this.#e.codePointAt(0)), this.needPax = Be(e, t + 157, 100, this.linkpath) || this.needPax, e.write("ustar\x0000", t + 257, 8), this.needPax = Be(e, t + 265, 32, this.uname) || this.needPax, this.needPax = Be(e, t + 297, 32, this.gname) || this.needPax, this.needPax = ge(e, t + 329, 8, this.devmaj) || this.needPax, this.needPax = ge(e, t + 337, 8, this.devmin) || this.needPax, this.needPax = Be(e, t + 345, i, o) || this.needPax, e[t + 475] !== 0 ? this.needPax = Be(e, t + 345, 155, o) || this.needPax : (this.needPax = Be(e, t + 345, 130, o) || this.needPax, this.needPax = Ls(e, t + 476, 12, this.atime) || this.needPax, this.needPax = Ls(e, t + 488, 12, this.ctime) || this.needPax);
           let a = 256;
           for (let h = t; h < t + 148; h++) a += e[h];
           for (let h = t + 156; h < t + 512; h++) a += e[h];
-          return this.cksum = a, Se(e, t + 148, 8, this.cksum), this.cksumValid = true, this.needPax;
+          return this.cksum = a, ge(e, t + 148, 8, this.cksum), this.cksumValid = true, this.needPax;
         }
         get type() {
-          return this.#e === "Unsupported" ? this.#e : St.name.get(this.#e);
+          return this.#e === "Unsupported" ? this.#e : Je.name.get(this.#e);
         }
         get typeKey() {
           return this.#e;
         }
         set type(e) {
-          let t = String(St.code.get(e));
-          if (St.isCode(t) || t === "Unsupported") this.#e = t;
-          else if (St.isCode(e)) this.#e = e;
+          let t = String(Je.code.get(e));
+          if (Je.isCode(t) || t === "Unsupported") this.#e = t;
+          else if (Je.isCode(e)) this.#e = e;
           else throw new TypeError("invalid entry type: " + e);
         }
       };
-      se.Header = Ms;
-      var _a = /* @__PURE__ */ __name((s, e) => {
+      se.Header = As;
+      var Sa = /* @__PURE__ */ __name((s, e) => {
         let i = s, r = "", n, o = Qe.posix.parse(s).root || ".";
         if (Buffer.byteLength(i) < 100) n = [i, r, false];
         else {
@@ -47040,13 +47040,13 @@ var require_index_min = __commonJS({
           n || (n = [s.slice(0, 99), "", true]);
         }
         return n;
-      }, "_a"), Fe = /* @__PURE__ */ __name((s, e, t) => s.subarray(e, e + t).toString("utf8").replace(/\0.*/, ""), "Fe"), Ps = /* @__PURE__ */ __name((s, e, t) => wa(be(s, e, t)), "Ps"), wa = /* @__PURE__ */ __name((s) => s === void 0 ? void 0 : new Date(s * 1e3), "wa"), be = /* @__PURE__ */ __name((s, e, t) => Number(s[e]) & 128 ? Yr.parse(s.subarray(e, e + t)) : Ea(s, e, t), "be"), ya = /* @__PURE__ */ __name((s) => isNaN(s) ? void 0 : s, "ya"), Ea = /* @__PURE__ */ __name((s, e, t) => ya(parseInt(s.subarray(e, e + t).toString("utf8").replace(/\0.*$/, "").trim(), 8)), "Ea"), ba = { 12: 8589934591, 8: 2097151 }, Se = /* @__PURE__ */ __name((s, e, t, i) => i === void 0 ? false : i > ba[t] || i < 0 ? (Yr.encode(i, s.subarray(e, e + t)), true) : (Sa(s, e, t, i), false), "Se"), Sa = /* @__PURE__ */ __name((s, e, t, i) => s.write(ga(i, t), e, t, "ascii"), "Sa"), ga = /* @__PURE__ */ __name((s, e) => Oa(Math.floor(s).toString(8), e), "ga"), Oa = /* @__PURE__ */ __name((s, e) => (s.length === e - 1 ? s : new Array(e - s.length - 1).join("0") + s + " ") + "\0", "Oa"), Ns = /* @__PURE__ */ __name((s, e, t, i) => i === void 0 ? false : Se(s, e, t, i.getTime() / 1e3), "Ns"), Ra = new Array(156).join("\0"), Ce = /* @__PURE__ */ __name((s, e, t, i) => i === void 0 ? false : (s.write(i + Ra, e, t, "utf8"), i.length !== Buffer.byteLength(i) || i.length > t), "Ce");
+      }, "Sa"), Ce = /* @__PURE__ */ __name((s, e, t) => s.subarray(e, e + t).toString("utf8").replace(/\0.*/, ""), "Ce"), Ms = /* @__PURE__ */ __name((s, e, t) => ga(Se(s, e, t)), "Ms"), ga = /* @__PURE__ */ __name((s) => s === void 0 ? void 0 : new Date(s * 1e3), "ga"), Se = /* @__PURE__ */ __name((s, e, t) => Number(s[e]) & 128 ? $r.parse(s.subarray(e, e + t)) : Oa(s, e, t), "Se"), Ra = /* @__PURE__ */ __name((s) => isNaN(s) ? void 0 : s, "Ra"), Oa = /* @__PURE__ */ __name((s, e, t) => Ra(parseInt(s.subarray(e, e + t).toString("utf8").replace(/\0.*$/, "").trim(), 8)), "Oa"), va = { 12: 8589934591, 8: 2097151 }, ge = /* @__PURE__ */ __name((s, e, t, i) => i === void 0 ? false : i > va[t] || i < 0 ? ($r.encode(i, s.subarray(e, e + t)), true) : (Ta(s, e, t, i), false), "ge"), Ta = /* @__PURE__ */ __name((s, e, t, i) => s.write(Da(i, t), e, t, "ascii"), "Ta"), Da = /* @__PURE__ */ __name((s, e) => Pa(Math.floor(s).toString(8), e), "Da"), Pa = /* @__PURE__ */ __name((s, e) => (s.length === e - 1 ? s : new Array(e - s.length - 1).join("0") + s + " ") + "\0", "Pa"), Ls = /* @__PURE__ */ __name((s, e, t, i) => i === void 0 ? false : ge(s, e, t, i.getTime() / 1e3), "Ls"), Na = new Array(156).join("\0"), Be = /* @__PURE__ */ __name((s, e, t, i) => i === void 0 ? false : (s.write(i + Na, e, t, "utf8"), i.length !== Buffer.byteLength(i) || i.length > t), "Be");
     });
-    var ti = d((ei) => {
+    var si = d((ii) => {
       "use strict";
-      Object.defineProperty(ei, "__esModule", { value: true });
-      ei.Pax = void 0;
-      var va = require("node:path"), Ta = Je(), Ls = class s {
+      Object.defineProperty(ii, "__esModule", { value: true });
+      ii.Pax = void 0;
+      var Ma = require("node:path"), La = et(), Is = class s {
         static {
           __name(this, "s");
         }
@@ -47075,7 +47075,7 @@ var require_index_min = __commonJS({
           if (e === "") return Buffer.allocUnsafe(0);
           let t = Buffer.byteLength(e), i = 512 * Math.ceil(1 + t / 512), r = Buffer.allocUnsafe(i);
           for (let n = 0; n < 512; n++) r[n] = 0;
-          new Ta.Header({ path: ("PaxHeader/" + (0, va.basename)(this.path ?? "")).slice(0, 99), mode: this.mode || 420, uid: this.uid, gid: this.gid, size: t, mtime: this.mtime, type: this.global ? "GlobalExtendedHeader" : "ExtendedHeader", linkpath: "", uname: this.uname || "", gname: this.gname || "", devmaj: 0, devmin: 0, atime: this.atime, ctime: this.ctime }).encode(r), r.write(e, 512, t, "utf8");
+          new La.Header({ path: ("PaxHeader/" + (0, Ma.basename)(this.path ?? "")).slice(0, 99), mode: this.mode || 420, uid: this.uid, gid: this.gid, size: t, mtime: this.mtime, type: this.global ? "GlobalExtendedHeader" : "ExtendedHeader", linkpath: "", uname: this.uname || "", gname: this.gname || "", devmaj: 0, devmin: 0, atime: this.atime, ctime: this.ctime }).encode(r), r.write(e, 512, t, "utf8");
           for (let n = t + 512; n < r.length; n++) r[n] = 0;
           return r;
         }
@@ -47089,35 +47089,63 @@ var require_index_min = __commonJS({
           return n + o >= Math.pow(10, o) && (o += 1), o + n + r;
         }
         static parse(e, t, i = false) {
-          return new s(Da(Pa(e), t), i);
+          return new s(Aa(Ia(e), t), i);
         }
       };
-      ei.Pax = Ls;
-      var Da = /* @__PURE__ */ __name((s, e) => e ? Object.assign({}, e, s) : s, "Da"), Pa = /* @__PURE__ */ __name((s) => s.replace(/\n$/, "").split(`
-`).reduce(Na, /* @__PURE__ */ Object.create(null)), "Pa"), Na = /* @__PURE__ */ __name((s, e) => {
+      ii.Pax = Is;
+      var Aa = /* @__PURE__ */ __name((s, e) => e ? Object.assign({}, e, s) : s, "Aa"), Ia = /* @__PURE__ */ __name((s) => s.replace(/\n$/, "").split(`
+`).reduce(Fa, /* @__PURE__ */ Object.create(null)), "Ia"), Fa = /* @__PURE__ */ __name((s, e) => {
         let t = parseInt(e, 10);
         if (t !== Buffer.byteLength(e) + 1) return s;
         e = e.slice((t + " ").length);
         let i = e.split("="), r = i.shift();
         if (!r) return s;
-        let n = r.replace(/^SCHILY\.(dev|ino|nlink)/, "$1"), o = i.join("=");
-        return s[n] = /^([A-Z]+\.)?([mac]|birth|creation)time$/.test(n) ? new Date(Number(o) * 1e3) : /^[0-9]+$/.test(o) ? +o : o, s;
-      }, "Na");
+        let n = r.replace(/^SCHILY\.(dev|ino|nlink)/, "$1"), o = i.join("=").replace(/\0.*/, "");
+        switch (n) {
+          case "path":
+          case "linkpath":
+          case "type":
+          case "charset":
+          case "comment":
+          case "gname":
+          case "uname":
+            s[n] = o;
+            break;
+          case "ctime":
+          case "atime":
+          case "mtime":
+            s[n] = new Date(Number(o) * 1e3);
+            break;
+          case "size":
+            let a = +o;
+            a >= 0 && (s[n] = a);
+            break;
+          case "gid":
+          case "uid":
+          case "dev":
+          case "ino":
+          case "nlink":
+          case "mode":
+            s[n] = +o;
+            break;
+        }
+        return s;
+      }, "Fa");
     });
-    var et = d((ii) => {
-      "use strict";
-      Object.defineProperty(ii, "__esModule", { value: true });
-      ii.normalizeWindowsPath = void 0;
-      var Ma = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform;
-      ii.normalizeWindowsPath = Ma !== "win32" ? (s) => s : (s) => s && s.replaceAll(/\\/g, "/");
-    });
-    var ni = d((ri) => {
+    var tt = d((ri) => {
       "use strict";
       Object.defineProperty(ri, "__esModule", { value: true });
-      ri.ReadEntry = void 0;
-      var La = We(), si = et(), As = class extends La.Minipass {
+      ri.normalizeWindowsPath = void 0;
+      var Ca = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform;
+      ri.normalizeWindowsPath = Ca !== "win32" ? (s) => String(s) : (s) => String(s).replaceAll(/\\/g, "/");
+    });
+    var Cs = d((oi) => {
+      "use strict";
+      Object.defineProperty(oi, "__esModule", { value: true });
+      oi.ReadEntry = void 0;
+      var Ba = We(), ni = tt(), Fs = class extends Ba.Minipass {
         static {
-          __name(this, "As");
+          __name(this, "Fs");
         }
         extended;
         globalExtended;
@@ -47170,7 +47198,7 @@ var require_index_min = __commonJS({
               this.ignore = true;
           }
           if (!e.path) throw new Error("no path provided for tar.ReadEntry");
-          this.path = (0, si.normalizeWindowsPath)(e.path), this.mode = e.mode, this.mode && (this.mode = this.mode & 4095), this.uid = e.uid, this.gid = e.gid, this.uname = e.uname, this.gname = e.gname, this.size = this.remain, this.mtime = e.mtime, this.atime = e.atime, this.ctime = e.ctime, this.linkpath = e.linkpath ? (0, si.normalizeWindowsPath)(e.linkpath) : void 0, this.uname = e.uname, this.gname = e.gname, t && this.#e(t), i && this.#e(i, true);
+          this.path = (0, ni.normalizeWindowsPath)(e.path), this.mode = e.mode, this.mode && (this.mode = this.mode & 4095), this.uid = e.uid, this.gid = e.gid, this.uname = e.uname, this.gname = e.gname, this.size = this.remain, this.mtime = e.mtime, this.atime = e.atime, this.ctime = e.ctime, this.linkpath = e.linkpath ? (0, ni.normalizeWindowsPath)(e.linkpath) : void 0, this.uname = e.uname, this.gname = e.gname, t && this.#e(t), i && this.#e(i, true);
         }
         write(e) {
           let t = e.length;
@@ -47179,27 +47207,27 @@ var require_index_min = __commonJS({
           return this.remain = Math.max(0, i - t), this.blockRemain = Math.max(0, r - t), this.ignore ? true : i >= t ? super.write(e) : super.write(e.subarray(0, i));
         }
         #e(e, t = false) {
-          e.path && (e.path = (0, si.normalizeWindowsPath)(e.path)), e.linkpath && (e.linkpath = (0, si.normalizeWindowsPath)(e.linkpath)), Object.assign(this, Object.fromEntries(Object.entries(e).filter(([i, r]) => !(r == null || i === "path" && t))));
+          e.path && (e.path = (0, ni.normalizeWindowsPath)(e.path)), e.linkpath && (e.linkpath = (0, ni.normalizeWindowsPath)(e.linkpath)), Object.assign(this, Object.fromEntries(Object.entries(e).filter(([i, r]) => !(r == null || i === "path" && t))));
         }
       };
-      ri.ReadEntry = As;
+      oi.ReadEntry = Fs;
     });
-    var ai = d((oi) => {
+    var hi = d((ai) => {
       "use strict";
-      Object.defineProperty(oi, "__esModule", { value: true });
-      oi.warnMethod = void 0;
-      var Aa = /* @__PURE__ */ __name((s, e, t, i = {}) => {
+      Object.defineProperty(ai, "__esModule", { value: true });
+      ai.warnMethod = void 0;
+      var za = /* @__PURE__ */ __name((s, e, t, i = {}) => {
         s.file && (i.file = s.file), s.cwd && (i.cwd = s.cwd), i.code = t instanceof Error && t.code || e, i.tarCode = e, !s.strict && i.recoverable !== false ? (t instanceof Error && (i = Object.assign(t, i), t = t.message), s.emit("warn", e, t, i)) : t instanceof Error ? s.emit("error", Object.assign(t, i)) : s.emit("error", Object.assign(new Error(`${e}: ${t}`), i));
-      }, "Aa");
-      oi.warnMethod = Aa;
+      }, "za");
+      ai.warnMethod = za;
     });
-    var pi = d((mi) => {
+    var _i = d((pi) => {
       "use strict";
-      Object.defineProperty(mi, "__esModule", { value: true });
-      mi.Parser = void 0;
-      var Ia = require("events"), Is = Ts(), Kr = Je(), Vr = ti(), Fa = ni(), Ca = ai(), Ba = 1024 * 1024, ks = Buffer.from([31, 139]), js = Buffer.from([40, 181, 47, 253]), za = Math.max(ks.length, js.length), H = /* @__PURE__ */ Symbol("state"), Be = /* @__PURE__ */ Symbol("writeEntry"), de = /* @__PURE__ */ Symbol("readEntry"), Fs = /* @__PURE__ */ Symbol("nextEntry"), $r = /* @__PURE__ */ Symbol("processEntry"), re = /* @__PURE__ */ Symbol("extendedHeader"), gt = /* @__PURE__ */ Symbol("globalExtendedHeader"), ge = /* @__PURE__ */ Symbol("meta"), Xr = /* @__PURE__ */ Symbol("emitMeta"), _ = /* @__PURE__ */ Symbol("buffer"), me = /* @__PURE__ */ Symbol("queue"), Oe = /* @__PURE__ */ Symbol("ended"), Cs = /* @__PURE__ */ Symbol("emittedEnd"), ze = /* @__PURE__ */ Symbol("emit"), S = /* @__PURE__ */ Symbol("unzip"), hi = /* @__PURE__ */ Symbol("consumeChunk"), li = /* @__PURE__ */ Symbol("consumeChunkSub"), Bs = /* @__PURE__ */ Symbol("consumeBody"), Qr = /* @__PURE__ */ Symbol("consumeMeta"), Jr = /* @__PURE__ */ Symbol("consumeHeader"), Ot = /* @__PURE__ */ Symbol("consuming"), zs = /* @__PURE__ */ Symbol("bufferConcat"), ui = /* @__PURE__ */ Symbol("maybeEnd"), tt = /* @__PURE__ */ Symbol("writing"), Re = /* @__PURE__ */ Symbol("aborted"), ci = /* @__PURE__ */ Symbol("onDone"), ke = /* @__PURE__ */ Symbol("sawValidEntry"), fi = /* @__PURE__ */ Symbol("sawNullBlock"), di = /* @__PURE__ */ Symbol("sawEOF"), en = /* @__PURE__ */ Symbol("closeStream"), ka = /* @__PURE__ */ __name(() => true, "ka"), xs = class extends Ia.EventEmitter {
+      Object.defineProperty(pi, "__esModule", { value: true });
+      pi.Parser = void 0;
+      var ka = require("events"), Bs = Ps(), Xr = et(), Qr = si(), xa = Cs(), ja = hi(), Ua = 1024 * 1024, qs = Buffer.from([31, 139]), Ws = Buffer.from([40, 181, 47, 253]), qa = Math.max(qs.length, Ws.length), H = /* @__PURE__ */ Symbol("state"), ze = /* @__PURE__ */ Symbol("writeEntry"), me = /* @__PURE__ */ Symbol("readEntry"), zs = /* @__PURE__ */ Symbol("nextEntry"), Jr = /* @__PURE__ */ Symbol("processEntry"), re = /* @__PURE__ */ Symbol("extendedHeader"), gt = /* @__PURE__ */ Symbol("globalExtendedHeader"), Re = /* @__PURE__ */ Symbol("meta"), en = /* @__PURE__ */ Symbol("emitMeta"), _ = /* @__PURE__ */ Symbol("buffer"), pe = /* @__PURE__ */ Symbol("queue"), Oe = /* @__PURE__ */ Symbol("ended"), ks = /* @__PURE__ */ Symbol("emittedEnd"), ke = /* @__PURE__ */ Symbol("emit"), y = /* @__PURE__ */ Symbol("unzip"), li = /* @__PURE__ */ Symbol("consumeChunk"), ci = /* @__PURE__ */ Symbol("consumeChunkSub"), xs = /* @__PURE__ */ Symbol("consumeBody"), tn = /* @__PURE__ */ Symbol("consumeMeta"), sn = /* @__PURE__ */ Symbol("consumeHeader"), Rt = /* @__PURE__ */ Symbol("consuming"), js = /* @__PURE__ */ Symbol("bufferConcat"), ui = /* @__PURE__ */ Symbol("maybeEnd"), it = /* @__PURE__ */ Symbol("writing"), ne = /* @__PURE__ */ Symbol("aborted"), fi = /* @__PURE__ */ Symbol("onDone"), xe = /* @__PURE__ */ Symbol("sawValidEntry"), di = /* @__PURE__ */ Symbol("sawNullBlock"), mi = /* @__PURE__ */ Symbol("sawEOF"), rn = /* @__PURE__ */ Symbol("closeStream"), Wa = 1e3, Ot = /* @__PURE__ */ Symbol("compressedBytesRead"), Us = /* @__PURE__ */ Symbol("decompressedBytesRead"), nn = /* @__PURE__ */ Symbol("checkDecompressionRatio"), Ha = /* @__PURE__ */ __name(() => true, "Ha"), Hs = class extends ka.EventEmitter {
         static {
-          __name(this, "xs");
+          __name(this, "Hs");
         }
         file;
         strict;
@@ -47207,118 +47235,121 @@ var require_index_min = __commonJS({
         filter;
         brotli;
         zstd;
+        maxDecompressionRatio;
         writable = true;
         readable = false;
-        [me] = [];
+        [pe] = [];
         [_];
-        [de];
-        [Be];
+        [me];
+        [ze];
         [H] = "begin";
-        [ge] = "";
+        [Re] = "";
         [re];
         [gt];
         [Oe] = false;
-        [S];
-        [Re] = false;
-        [ke];
-        [fi] = false;
+        [y];
+        [ne] = false;
+        [xe];
         [di] = false;
-        [tt] = false;
-        [Ot] = false;
-        [Cs] = false;
+        [mi] = false;
+        [it] = false;
+        [Rt] = false;
+        [ks] = false;
+        [Ot] = 0;
+        [Us] = 0;
         constructor(e = {}) {
-          super(), this.file = e.file || "", this.on(ci, () => {
-            (this[H] === "begin" || this[ke] === false) && this.warn("TAR_BAD_ARCHIVE", "Unrecognized archive format");
-          }), e.ondone ? this.on(ci, e.ondone) : this.on(ci, () => {
+          super(), this.file = e.file || "", this.on(fi, () => {
+            (this[H] === "begin" || this[xe] === false) && this.warn("TAR_BAD_ARCHIVE", "Unrecognized archive format");
+          }), e.ondone ? this.on(fi, e.ondone) : this.on(fi, () => {
             this.emit("prefinish"), this.emit("finish"), this.emit("end");
-          }), this.strict = !!e.strict, this.maxMetaEntrySize = e.maxMetaEntrySize || Ba, this.filter = typeof e.filter == "function" ? e.filter : ka;
+          }), this.strict = !!e.strict, this.maxDecompressionRatio = typeof e.maxDecompressionRatio == "number" ? e.maxDecompressionRatio : Wa, this.maxMetaEntrySize = e.maxMetaEntrySize || Ua, this.filter = typeof e.filter == "function" ? e.filter : Ha;
           let t = e.file && (e.file.endsWith(".tar.br") || e.file.endsWith(".tbr"));
           this.brotli = !(e.gzip || e.zstd) && e.brotli !== void 0 ? e.brotli : t ? void 0 : false;
           let i = e.file && (e.file.endsWith(".tar.zst") || e.file.endsWith(".tzst"));
-          this.zstd = !(e.gzip || e.brotli) && e.zstd !== void 0 ? e.zstd : i ? true : void 0, this.on("end", () => this[en]()), typeof e.onwarn == "function" && this.on("warn", e.onwarn), typeof e.onReadEntry == "function" && this.on("entry", e.onReadEntry);
+          this.zstd = !(e.gzip || e.brotli) && e.zstd !== void 0 ? e.zstd : i ? true : void 0, this.on("end", () => this[rn]()), typeof e.onwarn == "function" && this.on("warn", e.onwarn), typeof e.onReadEntry == "function" && this.on("entry", e.onReadEntry);
         }
         warn(e, t, i = {}) {
-          (0, Ca.warnMethod)(this, e, t, i);
+          (0, ja.warnMethod)(this, e, t, i);
         }
-        [Jr](e, t) {
-          this[ke] === void 0 && (this[ke] = false);
+        [sn](e, t) {
+          this[xe] === void 0 && (this[xe] = false);
           let i;
           try {
-            i = new Kr.Header(e, t, this[re], this[gt]);
+            i = new Xr.Header(e, t, this[re], this[gt]);
           } catch (r) {
             return this.warn("TAR_ENTRY_INVALID", r);
           }
-          if (i.nullBlock) this[fi] ? (this[di] = true, this[H] === "begin" && (this[H] = "header"), this[ze]("eof")) : (this[fi] = true, this[ze]("nullBlock"));
-          else if (this[fi] = false, !i.cksumValid) this.warn("TAR_ENTRY_INVALID", "checksum failure", { header: i });
+          if (i.nullBlock) this[di] ? (this[mi] = true, this[H] === "begin" && (this[H] = "header"), this[ke]("eof")) : (this[di] = true, this[ke]("nullBlock"));
+          else if (this[di] = false, !i.cksumValid) this.warn("TAR_ENTRY_INVALID", "checksum failure", { header: i });
           else if (!i.path) this.warn("TAR_ENTRY_INVALID", "path is required", { header: i });
           else {
             let r = i.type;
             if (/^(Symbolic)?Link$/.test(r) && !i.linkpath) this.warn("TAR_ENTRY_INVALID", "linkpath required", { header: i });
             else if (!/^(Symbolic)?Link$/.test(r) && !/^(Global)?ExtendedHeader$/.test(r) && i.linkpath) this.warn("TAR_ENTRY_INVALID", "linkpath forbidden", { header: i });
             else {
-              let n = this[Be] = new Fa.ReadEntry(i, this[re], this[gt]);
-              if (!this[ke]) if (n.remain) {
+              let n = this[ze] = new xa.ReadEntry(i, this[re], this[gt]);
+              if (!this[xe]) if (n.remain) {
                 let o = /* @__PURE__ */ __name(() => {
-                  n.invalid || (this[ke] = true);
+                  n.invalid || (this[xe] = true);
                 }, "o");
                 n.on("end", o);
-              } else this[ke] = true;
-              n.meta ? n.size > this.maxMetaEntrySize ? (n.ignore = true, this[ze]("ignoredEntry", n), this[H] = "ignore", n.resume()) : n.size > 0 && (this[ge] = "", n.on("data", (o) => this[ge] += o), this[H] = "meta") : (this[re] = void 0, n.ignore = n.ignore || !this.filter(n.path, n), n.ignore ? (this[ze]("ignoredEntry", n), this[H] = n.remain ? "ignore" : "header", n.resume()) : (n.remain ? this[H] = "body" : (this[H] = "header", n.end()), this[de] ? this[me].push(n) : (this[me].push(n), this[Fs]())));
+              } else this[xe] = true;
+              n.meta ? n.size > this.maxMetaEntrySize ? (n.ignore = true, this[ke]("ignoredEntry", n), this[H] = "ignore", n.resume()) : n.size > 0 && (this[Re] = "", n.on("data", (o) => this[Re] += o), this[H] = "meta") : (this[re] = void 0, n.ignore = n.ignore || !this.filter(n.path, n), n.ignore ? (this[ke]("ignoredEntry", n), this[H] = n.remain ? "ignore" : "header", n.resume()) : (n.remain ? this[H] = "body" : (this[H] = "header", n.end()), this[me] ? this[pe].push(n) : (this[pe].push(n), this[zs]())));
             }
           }
         }
-        [en]() {
+        [rn]() {
           queueMicrotask(() => this.emit("close"));
         }
-        [$r](e) {
+        [Jr](e) {
           let t = true;
-          if (!e) this[de] = void 0, t = false;
+          if (!e) this[me] = void 0, t = false;
           else if (Array.isArray(e)) {
             let [i, ...r] = e;
             this.emit(i, ...r);
-          } else this[de] = e, this.emit("entry", e), e.emittedEnd || (e.on("end", () => this[Fs]()), t = false);
+          } else this[me] = e, this.emit("entry", e), e.emittedEnd || (e.on("end", () => this[zs]()), t = false);
           return t;
         }
-        [Fs]() {
+        [zs]() {
           do
             ;
-          while (this[$r](this[me].shift()));
-          if (this[me].length === 0) {
-            let e = this[de];
-            !e || e.flowing || e.size === e.remain ? this[tt] || this.emit("drain") : e.once("drain", () => this.emit("drain"));
+          while (this[Jr](this[pe].shift()));
+          if (this[pe].length === 0) {
+            let e = this[me];
+            !e || e.flowing || e.size === e.remain ? this[it] || this.emit("drain") : e.once("drain", () => this.emit("drain"));
           }
         }
-        [Bs](e, t) {
-          let i = this[Be];
+        [xs](e, t) {
+          let i = this[ze];
           if (!i) throw new Error("attempt to consume body without entry??");
           let r = i.blockRemain ?? 0, n = r >= e.length && t === 0 ? e : e.subarray(t, t + r);
-          return i.write(n), i.blockRemain || (this[H] = "header", this[Be] = void 0, i.end()), n.length;
+          return i.write(n), i.blockRemain || (this[H] = "header", this[ze] = void 0, i.end()), n.length;
         }
-        [Qr](e, t) {
-          let i = this[Be], r = this[Bs](e, t);
-          return !this[Be] && i && this[Xr](i), r;
+        [tn](e, t) {
+          let i = this[ze], r = this[xs](e, t);
+          return !this[ze] && i && this[en](i), r;
         }
-        [ze](e, t, i) {
-          this[me].length === 0 && !this[de] ? this.emit(e, t, i) : this[me].push([e, t, i]);
+        [ke](e, t, i) {
+          this[pe].length === 0 && !this[me] ? this.emit(e, t, i) : this[pe].push([e, t, i]);
         }
-        [Xr](e) {
-          switch (this[ze]("meta", this[ge]), e.type) {
+        [en](e) {
+          switch (this[ke]("meta", this[Re]), e.type) {
             case "ExtendedHeader":
             case "OldExtendedHeader":
-              this[re] = Vr.Pax.parse(this[ge], this[re], false);
+              this[re] = Qr.Pax.parse(this[Re], this[re], false);
               break;
             case "GlobalExtendedHeader":
-              this[gt] = Vr.Pax.parse(this[ge], this[gt], true);
+              this[gt] = Qr.Pax.parse(this[Re], this[gt], true);
               break;
             case "NextFileHasLongPath":
             case "OldGnuLongPath": {
               let t = this[re] ?? /* @__PURE__ */ Object.create(null);
-              this[re] = t, t.path = this[ge].replace(/\0.*/, "");
+              this[re] = t, t.path = this[Re].replace(/\0.*/, "");
               break;
             }
             case "NextFileHasLongLinkpath": {
               let t = this[re] || /* @__PURE__ */ Object.create(null);
-              this[re] = t, t.linkpath = this[ge].replace(/\0.*/, "");
+              this[re] = t, t.linkpath = this[Re].replace(/\0.*/, "");
               break;
             }
             default:
@@ -47326,86 +47357,101 @@ var require_index_min = __commonJS({
           }
         }
         abort(e) {
-          this[Re] = true, this.emit("abort", e), this.warn("TAR_ABORT", e, { recoverable: false });
+          if (!this[ne]) {
+            if (this[y]) {
+              let t = this[y];
+              t.write = () => true, t.end = () => t, t.emit = () => false, t.destroy?.();
+            }
+            this[ne] = true, this.emit("abort", e), this.warn("TAR_ABORT", e, { recoverable: false });
+          }
+        }
+        [nn](e) {
+          this[Us] += e.length;
+          let t = this[Us] / this[Ot];
+          return t > this.maxDecompressionRatio ? (this.abort(new Error(`max decompression ratio exceeded: ${t.toFixed(2)} > ${this.maxDecompressionRatio}`)), false) : true;
         }
         write(e, t, i) {
-          if (typeof t == "function" && (i = t, t = void 0), typeof e == "string" && (e = Buffer.from(e, typeof t == "string" ? t : "utf8")), this[Re]) return i?.(), false;
-          if ((this[S] === void 0 || this.brotli === void 0 && this[S] === false) && e) {
-            if (this[_] && (e = Buffer.concat([this[_], e]), this[_] = void 0), e.length < za) return this[_] = e, i?.(), true;
-            for (let h = 0; this[S] === void 0 && h < ks.length; h++) e[h] !== ks[h] && (this[S] = false);
+          if (typeof t == "function" && (i = t, t = void 0), typeof e == "string" && (e = Buffer.from(e, typeof t == "string" ? t : "utf8")), this[ne]) return i?.(), false;
+          if ((this[y] === void 0 || this.brotli === void 0 && this[y] === false) && e) {
+            if (this[_] && (e = Buffer.concat([this[_], e]), this[_] = void 0), e.length < qa) return this[_] = e, i?.(), true;
+            for (let h = 0; this[y] === void 0 && h < qs.length; h++) e[h] !== qs[h] && (this[y] = false);
             let o = false;
-            if (this[S] === false && this.zstd !== false) {
+            if (this[y] === false && this.zstd !== false) {
               o = true;
-              for (let h = 0; h < js.length; h++) if (e[h] !== js[h]) {
+              for (let h = 0; h < Ws.length; h++) if (e[h] !== Ws[h]) {
                 o = false;
                 break;
               }
             }
             let a = this.brotli === void 0 && !o;
-            if (this[S] === false && a) if (e.length < 512) if (this[Oe]) this.brotli = true;
+            if (this[y] === false && a) if (e.length < 512) if (this[Oe]) this.brotli = true;
             else return this[_] = e, i?.(), true;
             else try {
-              new Kr.Header(e.subarray(0, 512)), this.brotli = false;
+              new Xr.Header(e.subarray(0, 512)), this.brotli = false;
             } catch {
               this.brotli = true;
             }
-            if (this[S] === void 0 || this[S] === false && (this.brotli || o)) {
+            if (this[y] === void 0 || this[y] === false && (this.brotli || o)) {
               let h = this[Oe];
-              this[Oe] = false, this[S] = this[S] === void 0 ? new Is.Unzip({}) : o ? new Is.ZstdDecompress({}) : new Is.BrotliDecompress({}), this[S].on("data", (u) => this[hi](u)), this[S].on("error", (u) => this.abort(u)), this[S].on("end", () => {
-                this[Oe] = true, this[hi]();
-              }), this[tt] = true;
-              let l = !!this[S][h ? "end" : "write"](e);
-              return this[tt] = false, i?.(), l;
+              this[Oe] = false, this[y] = this[y] === void 0 ? new Bs.Unzip({}) : o ? new Bs.ZstdDecompress({}) : new Bs.BrotliDecompress({}), this[y].on("data", (c) => {
+                this[nn](c) && this[li](c);
+              }), this[y].on("error", (c) => {
+                this[ne] || this.abort(c);
+              }), this[y].on("end", () => {
+                this[Oe] = true, this[li]();
+              }), this[it] = true, this[Ot] += e.length;
+              let l = !!this[y][h ? "end" : "write"](e);
+              return this[it] = false, i?.(), l;
             }
           }
-          this[tt] = true, this[S] ? this[S].write(e) : this[hi](e), this[tt] = false;
-          let n = this[me].length > 0 ? false : this[de] ? this[de].flowing : true;
-          return !n && this[me].length === 0 && this[de]?.once("drain", () => this.emit("drain")), i?.(), n;
+          this[it] = true, this[y] ? (this[Ot] += e.length, this[y].write(e)) : this[li](e), this[it] = false;
+          let n = this[pe].length > 0 ? false : this[me] ? this[me].flowing : true;
+          return !n && this[pe].length === 0 && this[me]?.once("drain", () => this.emit("drain")), i?.(), n;
         }
-        [zs](e) {
-          e && !this[Re] && (this[_] = this[_] ? Buffer.concat([this[_], e]) : e);
+        [js](e) {
+          e && !this[ne] && (this[_] = this[_] ? Buffer.concat([this[_], e]) : e);
         }
         [ui]() {
-          if (this[Oe] && !this[Cs] && !this[Re] && !this[Ot]) {
-            this[Cs] = true;
-            let e = this[Be];
-            if (e && e.blockRemain) {
+          if (this[Oe] && !this[ks] && !this[ne] && !this[Rt]) {
+            this[ks] = true;
+            let e = this[ze];
+            if (e?.blockRemain) {
               let t = this[_] ? this[_].length : 0;
               this.warn("TAR_BAD_ARCHIVE", `Truncated input (needed ${e.blockRemain} more bytes, only ${t} available)`, { entry: e }), this[_] && e.write(this[_]), e.end();
             }
-            this[ze](ci);
+            this[ke](fi);
           }
         }
-        [hi](e) {
-          if (this[Ot] && e) this[zs](e);
+        [li](e) {
+          if (this[Rt] && e) this[js](e);
           else if (!e && !this[_]) this[ui]();
           else if (e) {
-            if (this[Ot] = true, this[_]) {
-              this[zs](e);
+            if (this[Rt] = true, this[_]) {
+              this[js](e);
               let t = this[_];
-              this[_] = void 0, this[li](t);
-            } else this[li](e);
-            for (; this[_] && this[_]?.length >= 512 && !this[Re] && !this[di]; ) {
+              this[_] = void 0, this[ci](t);
+            } else this[ci](e);
+            for (; this[_] && this[_]?.length >= 512 && !this[ne] && !this[mi]; ) {
               let t = this[_];
-              this[_] = void 0, this[li](t);
+              this[_] = void 0, this[ci](t);
             }
-            this[Ot] = false;
+            this[Rt] = false;
           }
           (!this[_] || this[Oe]) && this[ui]();
         }
-        [li](e) {
+        [ci](e) {
           let t = 0, i = e.length;
-          for (; t + 512 <= i && !this[Re] && !this[di]; ) switch (this[H]) {
+          for (; t + 512 <= i && !this[ne] && !this[mi]; ) switch (this[H]) {
             case "begin":
             case "header":
-              this[Jr](e, t), t += 512;
+              this[sn](e, t), t += 512;
               break;
             case "ignore":
             case "body":
-              t += this[Bs](e, t);
+              t += this[xs](e, t);
               break;
             case "meta":
-              t += this[Qr](e, t);
+              t += this[tn](e, t);
               break;
             default:
               throw new Error("invalid state: " + this[H]);
@@ -47413,25 +47459,25 @@ var require_index_min = __commonJS({
           t < i && (this[_] = this[_] ? Buffer.concat([e.subarray(t), this[_]]) : e.subarray(t));
         }
         end(e, t, i) {
-          return typeof e == "function" && (i = e, t = void 0, e = void 0), typeof t == "function" && (i = t, t = void 0), typeof e == "string" && (e = Buffer.from(e, t)), i && this.once("finish", i), this[Re] || (this[S] ? (e && this[S].write(e), this[S].end()) : (this[Oe] = true, (this.brotli === void 0 || this.zstd === void 0) && (e = e || Buffer.alloc(0)), e && this.write(e), this[ui]())), this;
+          return typeof e == "function" && (i = e, t = void 0, e = void 0), typeof t == "function" && (i = t, t = void 0), typeof e == "string" && (e = Buffer.from(e, t)), i && this.once("finish", i), this[ne] || (this[y] ? (e && (this[Ot] += e.length, this[y].write(e)), this[y].end()) : (this[Oe] = true, (this.brotli === void 0 || this.zstd === void 0) && (e = e || Buffer.alloc(0)), e && this.write(e), this[ui]())), this;
         }
       };
-      mi.Parser = xs;
+      pi.Parser = Hs;
     });
-    var wi = d((_i) => {
+    var yi = d((wi) => {
       "use strict";
-      Object.defineProperty(_i, "__esModule", { value: true });
-      _i.stripTrailingSlashes = void 0;
-      var ja = /* @__PURE__ */ __name((s) => {
+      Object.defineProperty(wi, "__esModule", { value: true });
+      wi.stripTrailingSlashes = void 0;
+      var Ga = /* @__PURE__ */ __name((s) => {
         let e = s.length - 1, t = -1;
         for (; e > -1 && s.charAt(e) === "/"; ) t = e, e--;
         return t === -1 ? s : s.slice(0, t);
-      }, "ja");
-      _i.stripTrailingSlashes = ja;
+      }, "Ga");
+      wi.stripTrailingSlashes = Ga;
     });
-    var st = d((C) => {
+    var rt = d((B) => {
       "use strict";
-      var xa = C && C.__createBinding || (Object.create ? (function(s, e, t, i) {
+      var Za = B && B.__createBinding || (Object.create ? (function(s, e, t, i) {
         i === void 0 && (i = t);
         var r = Object.getOwnPropertyDescriptor(e, t);
         (!r || ("get" in r ? !e.__esModule : r.writable || r.configurable)) && (r = { enumerable: true, get: /* @__PURE__ */ __name(function() {
@@ -47439,11 +47485,11 @@ var require_index_min = __commonJS({
         }, "get") }), Object.defineProperty(s, i, r);
       }) : (function(s, e, t, i) {
         i === void 0 && (i = t), s[i] = e[t];
-      })), Ua = C && C.__setModuleDefault || (Object.create ? (function(s, e) {
+      })), Ya = B && B.__setModuleDefault || (Object.create ? (function(s, e) {
         Object.defineProperty(s, "default", { enumerable: true, value: e });
       }) : function(s, e) {
         s.default = e;
-      }), qa = C && C.__importStar || /* @__PURE__ */ (function() {
+      }), Ka = B && B.__importStar || /* @__PURE__ */ (function() {
         var s = /* @__PURE__ */ __name(function(e) {
           return s = Object.getOwnPropertyNames || function(t) {
             var i = [];
@@ -47454,44 +47500,45 @@ var require_index_min = __commonJS({
         return function(e) {
           if (e && e.__esModule) return e;
           var t = {};
-          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && xa(t, e, i[r]);
-          return Ua(t, e), t;
+          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && Za(t, e, i[r]);
+          return Ya(t, e), t;
         };
-      })(), Wa = C && C.__importDefault || function(s) {
+      })(), Va = B && B.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
-      Object.defineProperty(C, "__esModule", { value: true });
-      C.list = C.filesFilter = void 0;
-      var Ha = qa(Ke()), it = Wa(require("node:fs")), tn = require("path"), Za = Ve(), yi = pi(), Us = wi(), Ga = /* @__PURE__ */ __name((s) => {
+      Object.defineProperty(B, "__esModule", { value: true });
+      B.list = B.filesFilter = void 0;
+      var $a = Ka(Ke()), st = Va(require("node:fs")), on = require("path"), Xa = Ve(), Ei = _i(), Gs = yi(), Qa = /* @__PURE__ */ __name((s) => {
         let e = s.onReadEntry;
         s.onReadEntry = e ? (t) => {
           e(t), t.resume();
         } : (t) => t.resume();
-      }, "Ga"), Ya = /* @__PURE__ */ __name((s, e) => {
-        let t = new Map(e.map((n) => [(0, Us.stripTrailingSlashes)(n), true])), i = s.filter, r = /* @__PURE__ */ __name((n, o = "") => {
-          let a = o || (0, tn.parse)(n).root || ".", h;
-          if (n === a) h = false;
+      }, "Qa"), Ja = /* @__PURE__ */ __name((s, e) => {
+        let t = new Map(e.map((o) => [(0, Gs.stripTrailingSlashes)(o), true])), i = s.filter, r = 100, n = /* @__PURE__ */ __name((o, a = "", h = 0) => {
+          if (h >= r) return t.set(o, false), false;
+          let l = a || (0, on.parse)(o).root || ".", c;
+          if (o === l) c = false;
           else {
-            let l = t.get(n);
-            h = l !== void 0 ? l : r((0, tn.dirname)(n), a);
+            let u = t.get(o);
+            c = u !== void 0 ? u : n((0, on.dirname)(o), l, h + 1);
           }
-          return t.set(n, h), h;
-        }, "r");
-        s.filter = i ? (n, o) => i(n, o) && r((0, Us.stripTrailingSlashes)(n)) : (n) => r((0, Us.stripTrailingSlashes)(n));
-      }, "Ya");
-      C.filesFilter = Ya;
-      var Ka = /* @__PURE__ */ __name((s) => {
-        let e = new yi.Parser(s), t = s.file, i;
+          return t.set(o, c), c;
+        }, "n");
+        s.filter = i ? (o, a) => i(o, a) && n((0, Gs.stripTrailingSlashes)(o)) : (o) => n((0, Gs.stripTrailingSlashes)(o));
+      }, "Ja");
+      B.filesFilter = Ja;
+      var eh = /* @__PURE__ */ __name((s) => {
+        let e = new Ei.Parser(s), t = s.file, i;
         try {
-          i = it.default.openSync(t, "r");
-          let r = it.default.fstatSync(i), n = s.maxReadSize || 16 * 1024 * 1024;
+          i = st.default.openSync(t, "r");
+          let r = st.default.fstatSync(i), n = s.maxReadSize || 16 * 1024 * 1024;
           if (r.size < n) {
-            let o = Buffer.allocUnsafe(r.size), a = it.default.readSync(i, o, 0, r.size, 0);
+            let o = Buffer.allocUnsafe(r.size), a = st.default.readSync(i, o, 0, r.size, 0);
             e.end(a === o.byteLength ? o : o.subarray(0, a));
           } else {
             let o = 0, a = Buffer.allocUnsafe(n);
             for (; o < r.size; ) {
-              let h = it.default.readSync(i, a, 0, n, o);
+              let h = st.default.readSync(i, a, 0, n, o);
               if (h === 0) break;
               o += h, e.write(a.subarray(0, h));
             }
@@ -47499,59 +47546,59 @@ var require_index_min = __commonJS({
           }
         } finally {
           if (typeof i == "number") try {
-            it.default.closeSync(i);
+            st.default.closeSync(i);
           } catch {
           }
         }
-      }, "Ka"), Va = /* @__PURE__ */ __name((s, e) => {
-        let t = new yi.Parser(s), i = s.maxReadSize || 16 * 1024 * 1024, r = s.file;
+      }, "eh"), th = /* @__PURE__ */ __name((s, e) => {
+        let t = new Ei.Parser(s), i = s.maxReadSize || 16 * 1024 * 1024, r = s.file;
         return new Promise((o, a) => {
-          t.on("error", a), t.on("end", o), it.default.stat(r, (h, l) => {
+          t.on("error", a), t.on("end", o), st.default.stat(r, (h, l) => {
             if (h) a(h);
             else {
-              let u = new Ha.ReadStream(r, { readSize: i, size: l.size });
-              u.on("error", a), u.pipe(t);
+              let c = new $a.ReadStream(r, { readSize: i, size: l.size });
+              c.on("error", a), c.pipe(t);
             }
           });
         });
-      }, "Va");
-      C.list = (0, Za.makeCommand)(Ka, Va, (s) => new yi.Parser(s), (s) => new yi.Parser(s), (s, e) => {
-        e?.length && (0, C.filesFilter)(s, e), s.noResume || Ga(s);
+      }, "th");
+      B.list = (0, Xa.makeCommand)(eh, th, (s) => new Ei.Parser(s), (s) => new Ei.Parser(s), (s, e) => {
+        e?.length && (0, B.filesFilter)(s, e), s.noResume || Qa(s);
       });
     });
-    var sn = d((Ei) => {
-      "use strict";
-      Object.defineProperty(Ei, "__esModule", { value: true });
-      Ei.modeFix = void 0;
-      var $a = /* @__PURE__ */ __name((s, e, t) => (s &= 4095, t && (s = (s | 384) & -19), e && (s & 256 && (s |= 64), s & 32 && (s |= 8), s & 4 && (s |= 1)), s), "$a");
-      Ei.modeFix = $a;
-    });
-    var qs = d((bi) => {
+    var an = d((bi) => {
       "use strict";
       Object.defineProperty(bi, "__esModule", { value: true });
-      bi.stripAbsolutePath = void 0;
-      var Xa = require("node:path"), { isAbsolute: Qa, parse: rn } = Xa.win32, Ja = /* @__PURE__ */ __name((s) => {
-        let e = "", t = rn(s);
-        for (; Qa(s) || t.root; ) {
+      bi.modeFix = void 0;
+      var ih = /* @__PURE__ */ __name((s, e, t) => (s &= 4095, t && (s = (s | 384) & -19), e && (s & 256 && (s |= 64), s & 32 && (s |= 8), s & 4 && (s |= 1)), s), "ih");
+      bi.modeFix = ih;
+    });
+    var Zs = d((Si) => {
+      "use strict";
+      Object.defineProperty(Si, "__esModule", { value: true });
+      Si.stripAbsolutePath = void 0;
+      var sh = require("node:path"), { isAbsolute: rh, parse: hn } = sh.win32, nh = /* @__PURE__ */ __name((s) => {
+        let e = "", t = hn(s);
+        for (; rh(s) || t.root; ) {
           let i = s.charAt(0) === "/" && s.slice(0, 4) !== "//?/" ? "/" : t.root;
-          s = s.slice(i.length), e += i, t = rn(s);
+          s = s.slice(i.length), e += i, t = hn(s);
         }
         return [e, s];
-      }, "Ja");
-      bi.stripAbsolutePath = Ja;
+      }, "nh");
+      Si.stripAbsolutePath = nh;
     });
-    var Hs = d((rt) => {
+    var Ks = d((nt) => {
       "use strict";
-      Object.defineProperty(rt, "__esModule", { value: true });
-      rt.decode = rt.encode = void 0;
-      var Si = ["|", "<", ">", "?", ":"], Ws = Si.map((s) => String.fromCodePoint(61440 + Number(s.codePointAt(0)))), eh = new Map(Si.map((s, e) => [s, Ws[e]])), th = new Map(Ws.map((s, e) => [s, Si[e]])), ih = /* @__PURE__ */ __name((s) => Si.reduce((e, t) => e.split(t).join(eh.get(t)), s), "ih");
-      rt.encode = ih;
-      var sh = /* @__PURE__ */ __name((s) => Ws.reduce((e, t) => e.split(t).join(th.get(t)), s), "sh");
-      rt.decode = sh;
+      Object.defineProperty(nt, "__esModule", { value: true });
+      nt.decode = nt.encode = void 0;
+      var gi = ["|", "<", ">", "?", ":"], Ys = gi.map((s) => String.fromCodePoint(61440 + Number(s.codePointAt(0)))), oh = new Map(gi.map((s, e) => [s, Ys[e]])), ah = new Map(Ys.map((s, e) => [s, gi[e]])), hh = /* @__PURE__ */ __name((s) => gi.reduce((e, t) => e.split(t).join(oh.get(t)), s), "hh");
+      nt.encode = hh;
+      var lh = /* @__PURE__ */ __name((s) => Ys.reduce((e, t) => e.split(t).join(ah.get(t)), s), "lh");
+      nt.decode = lh;
     });
-    var tr = d((M) => {
+    var nr = d((M) => {
       "use strict";
-      var rh = M && M.__createBinding || (Object.create ? (function(s, e, t, i) {
+      var ch = M && M.__createBinding || (Object.create ? (function(s, e, t, i) {
         i === void 0 && (i = t);
         var r = Object.getOwnPropertyDescriptor(e, t);
         (!r || ("get" in r ? !e.__esModule : r.writable || r.configurable)) && (r = { enumerable: true, get: /* @__PURE__ */ __name(function() {
@@ -47559,11 +47606,11 @@ var require_index_min = __commonJS({
         }, "get") }), Object.defineProperty(s, i, r);
       }) : (function(s, e, t, i) {
         i === void 0 && (i = t), s[i] = e[t];
-      })), nh = M && M.__setModuleDefault || (Object.create ? (function(s, e) {
+      })), uh = M && M.__setModuleDefault || (Object.create ? (function(s, e) {
         Object.defineProperty(s, "default", { enumerable: true, value: e });
       }) : function(s, e) {
         s.default = e;
-      }), oh = M && M.__importStar || /* @__PURE__ */ (function() {
+      }), fh = M && M.__importStar || /* @__PURE__ */ (function() {
         var s = /* @__PURE__ */ __name(function(e) {
           return s = Object.getOwnPropertyNames || function(t) {
             var i = [];
@@ -47574,17 +47621,17 @@ var require_index_min = __commonJS({
         return function(e) {
           if (e && e.__esModule) return e;
           var t = {};
-          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && rh(t, e, i[r]);
-          return nh(t, e), t;
+          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && ch(t, e, i[r]);
+          return uh(t, e), t;
         };
-      })(), un = M && M.__importDefault || function(s) {
+      })(), mn = M && M.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
       Object.defineProperty(M, "__esModule", { value: true });
       M.WriteEntryTar = M.WriteEntrySync = M.WriteEntry = void 0;
-      var oe = un(require("fs")), cn = We(), nn = un(require("path")), fn = Je(), dn = sn(), ne = et(), mn = $t(), pn = ti(), _n = qs(), ah = wi(), wn = ai(), hh = oh(Hs()), yn = /* @__PURE__ */ __name((s, e) => e ? (s = (0, ne.normalizeWindowsPath)(s).replace(/^\.(\/|$)/, ""), (0, ah.stripTrailingSlashes)(e) + "/" + s) : (0, ne.normalizeWindowsPath)(s), "yn"), lh = 16 * 1024 * 1024, on = /* @__PURE__ */ Symbol("process"), an = /* @__PURE__ */ Symbol("file"), hn = /* @__PURE__ */ Symbol("directory"), Gs = /* @__PURE__ */ Symbol("symlink"), ln = /* @__PURE__ */ Symbol("hardlink"), Rt = /* @__PURE__ */ Symbol("header"), gi = /* @__PURE__ */ Symbol("read"), Ys = /* @__PURE__ */ Symbol("lstat"), Oi = /* @__PURE__ */ Symbol("onlstat"), Ks = /* @__PURE__ */ Symbol("onread"), Vs = /* @__PURE__ */ Symbol("onreadlink"), $s = /* @__PURE__ */ Symbol("openfile"), Xs = /* @__PURE__ */ Symbol("onopenfile"), ve = /* @__PURE__ */ Symbol("close"), Ri = /* @__PURE__ */ Symbol("mode"), Qs = /* @__PURE__ */ Symbol("awaitDrain"), Zs = /* @__PURE__ */ Symbol("ondrain"), ae = /* @__PURE__ */ Symbol("prefix"), vi = class extends cn.Minipass {
+      var ae = mn(require("fs")), pn = We(), ln = mn(require("path")), _n = et(), wn = an(), oe = tt(), yn = Qt(), En = si(), bn = Zs(), dh = yi(), Sn = hi(), mh = fh(Ks()), gn = /* @__PURE__ */ __name((s, e) => e ? (s = (0, oe.normalizeWindowsPath)(s).replace(/^\.(\/|$)/, ""), (0, dh.stripTrailingSlashes)(e) + "/" + s) : (0, oe.normalizeWindowsPath)(s), "gn"), ph = 16 * 1024 * 1024, cn = /* @__PURE__ */ Symbol("process"), un = /* @__PURE__ */ Symbol("file"), fn = /* @__PURE__ */ Symbol("directory"), $s = /* @__PURE__ */ Symbol("symlink"), dn = /* @__PURE__ */ Symbol("hardlink"), vt = /* @__PURE__ */ Symbol("header"), Ri = /* @__PURE__ */ Symbol("read"), Xs = /* @__PURE__ */ Symbol("lstat"), Oi = /* @__PURE__ */ Symbol("onlstat"), Qs = /* @__PURE__ */ Symbol("onread"), Js = /* @__PURE__ */ Symbol("onreadlink"), er = /* @__PURE__ */ Symbol("openfile"), tr = /* @__PURE__ */ Symbol("onopenfile"), ve = /* @__PURE__ */ Symbol("close"), vi = /* @__PURE__ */ Symbol("mode"), ir = /* @__PURE__ */ Symbol("awaitDrain"), Vs = /* @__PURE__ */ Symbol("ondrain"), he = /* @__PURE__ */ Symbol("prefix"), Ti = class extends pn.Minipass {
         static {
-          __name(this, "vi");
+          __name(this, "Ti");
         }
         path;
         portable;
@@ -47617,110 +47664,110 @@ var require_index_min = __commonJS({
         onWriteEntry;
         #e = false;
         constructor(e, t = {}) {
-          let i = (0, mn.dealias)(t);
-          super(), this.path = (0, ne.normalizeWindowsPath)(e), this.portable = !!i.portable, this.maxReadSize = i.maxReadSize || lh, this.linkCache = i.linkCache || /* @__PURE__ */ new Map(), this.statCache = i.statCache || /* @__PURE__ */ new Map(), this.preservePaths = !!i.preservePaths, this.cwd = (0, ne.normalizeWindowsPath)(i.cwd || process.cwd()), this.strict = !!i.strict, this.noPax = !!i.noPax, this.noMtime = !!i.noMtime, this.mtime = i.mtime, this.prefix = i.prefix ? (0, ne.normalizeWindowsPath)(i.prefix) : void 0, this.onWriteEntry = i.onWriteEntry, typeof i.onwarn == "function" && this.on("warn", i.onwarn);
+          let i = (0, yn.dealias)(t);
+          super(), this.path = (0, oe.normalizeWindowsPath)(e), this.portable = !!i.portable, this.maxReadSize = i.maxReadSize || ph, this.linkCache = i.linkCache || /* @__PURE__ */ new Map(), this.statCache = i.statCache || /* @__PURE__ */ new Map(), this.preservePaths = !!i.preservePaths, this.cwd = (0, oe.normalizeWindowsPath)(i.cwd || process.cwd()), this.strict = !!i.strict, this.noPax = !!i.noPax, this.noMtime = !!i.noMtime, this.mtime = i.mtime, this.prefix = i.prefix ? (0, oe.normalizeWindowsPath)(i.prefix) : void 0, this.onWriteEntry = i.onWriteEntry, typeof i.onwarn == "function" && this.on("warn", i.onwarn);
           let r = false;
           if (!this.preservePaths) {
-            let [o, a] = (0, _n.stripAbsolutePath)(this.path);
+            let [o, a] = (0, bn.stripAbsolutePath)(this.path);
             o && typeof a == "string" && (this.path = a, r = o);
           }
-          this.win32 = !!i.win32 || process.platform === "win32", this.win32 && (this.path = hh.decode(this.path.replaceAll(/\\/g, "/")), e = e.replaceAll(/\\/g, "/")), this.absolute = (0, ne.normalizeWindowsPath)(i.absolute || nn.default.resolve(this.cwd, e)), this.path === "" && (this.path = "./"), r && this.warn("TAR_ENTRY_INFO", `stripping ${r} from absolute path`, { entry: this, path: r + this.path });
+          this.win32 = !!i.win32 || process.platform === "win32", this.win32 && (this.path = mh.decode(this.path.replaceAll(/\\/g, "/")), e = e.replaceAll(/\\/g, "/")), this.absolute = (0, oe.normalizeWindowsPath)(i.absolute || ln.default.resolve(this.cwd, e)), this.path === "" && (this.path = "./"), r && this.warn("TAR_ENTRY_INFO", `stripping ${r} from absolute path`, { entry: this, path: r + this.path });
           let n = this.statCache.get(this.absolute);
-          n ? this[Oi](n) : this[Ys]();
+          n ? this[Oi](n) : this[Xs]();
         }
         warn(e, t, i = {}) {
-          return (0, wn.warnMethod)(this, e, t, i);
+          return (0, Sn.warnMethod)(this, e, t, i);
         }
         emit(e, ...t) {
           return e === "error" && (this.#e = true), super.emit(e, ...t);
         }
-        [Ys]() {
-          oe.default.lstat(this.absolute, (e, t) => {
+        [Xs]() {
+          ae.default.lstat(this.absolute, (e, t) => {
             if (e) return this.emit("error", e);
             this[Oi](t);
           });
         }
         [Oi](e) {
-          this.statCache.set(this.absolute, e), this.stat = e, e.isFile() || (e.size = 0), this.type = uh(e), this.emit("stat", e), this[on]();
+          this.statCache.set(this.absolute, e), this.stat = e, e.isFile() || (e.size = 0), this.type = _h(e), this.emit("stat", e), this[cn]();
         }
-        [on]() {
+        [cn]() {
           switch (this.type) {
             case "File":
-              return this[an]();
+              return this[un]();
             case "Directory":
-              return this[hn]();
+              return this[fn]();
             case "SymbolicLink":
-              return this[Gs]();
+              return this[$s]();
             default:
               return this.end();
           }
         }
-        [Ri](e) {
-          return (0, dn.modeFix)(e, this.type === "Directory", this.portable);
+        [vi](e) {
+          return (0, wn.modeFix)(e, this.type === "Directory", this.portable);
         }
-        [ae](e) {
-          return yn(e, this.prefix);
+        [he](e) {
+          return gn(e, this.prefix);
         }
-        [Rt]() {
+        [vt]() {
           if (!this.stat) throw new Error("cannot write header before stat");
-          this.type === "Directory" && this.portable && (this.noMtime = true), this.onWriteEntry?.(this), this.header = new fn.Header({ path: this[ae](this.path), linkpath: this.type === "Link" && this.linkpath !== void 0 ? this[ae](this.linkpath) : this.linkpath, mode: this[Ri](this.stat.mode), uid: this.portable ? void 0 : this.stat.uid, gid: this.portable ? void 0 : this.stat.gid, size: this.stat.size, mtime: this.noMtime ? void 0 : this.mtime || this.stat.mtime, type: this.type === "Unsupported" ? void 0 : this.type, uname: this.portable ? void 0 : this.stat.uid === this.myuid ? this.myuser : "", atime: this.portable ? void 0 : this.stat.atime, ctime: this.portable ? void 0 : this.stat.ctime }), this.header.encode() && !this.noPax && super.write(new pn.Pax({ atime: this.portable ? void 0 : this.header.atime, ctime: this.portable ? void 0 : this.header.ctime, gid: this.portable ? void 0 : this.header.gid, mtime: this.noMtime ? void 0 : this.mtime || this.header.mtime, path: this[ae](this.path), linkpath: this.type === "Link" && this.linkpath !== void 0 ? this[ae](this.linkpath) : this.linkpath, size: this.header.size, uid: this.portable ? void 0 : this.header.uid, uname: this.portable ? void 0 : this.header.uname, dev: this.portable ? void 0 : this.stat.dev, ino: this.portable ? void 0 : this.stat.ino, nlink: this.portable ? void 0 : this.stat.nlink }).encode());
+          this.type === "Directory" && this.portable && (this.noMtime = true), this.onWriteEntry?.(this), this.header = new _n.Header({ path: this[he](this.path), linkpath: this.type === "Link" && this.linkpath !== void 0 ? this[he](this.linkpath) : this.linkpath, mode: this[vi](this.stat.mode), uid: this.portable ? void 0 : this.stat.uid, gid: this.portable ? void 0 : this.stat.gid, size: this.stat.size, mtime: this.noMtime ? void 0 : this.mtime || this.stat.mtime, type: this.type === "Unsupported" ? void 0 : this.type, uname: this.portable ? void 0 : this.stat.uid === this.myuid ? this.myuser : "", atime: this.portable ? void 0 : this.stat.atime, ctime: this.portable ? void 0 : this.stat.ctime }), this.header.encode() && !this.noPax && super.write(new En.Pax({ atime: this.portable ? void 0 : this.header.atime, ctime: this.portable ? void 0 : this.header.ctime, gid: this.portable ? void 0 : this.header.gid, mtime: this.noMtime ? void 0 : this.mtime || this.header.mtime, path: this[he](this.path), linkpath: this.type === "Link" && this.linkpath !== void 0 ? this[he](this.linkpath) : this.linkpath, size: this.header.size, uid: this.portable ? void 0 : this.header.uid, uname: this.portable ? void 0 : this.header.uname, dev: this.portable ? void 0 : this.stat.dev, ino: this.portable ? void 0 : this.stat.ino, nlink: this.portable ? void 0 : this.stat.nlink }).encode());
           let e = this.header?.block;
           if (!e) throw new Error("failed to encode header");
           super.write(e);
         }
-        [hn]() {
+        [fn]() {
           if (!this.stat) throw new Error("cannot create directory entry without stat");
-          this.path.slice(-1) !== "/" && (this.path += "/"), this.stat.size = 0, this[Rt](), this.end();
+          this.path.slice(-1) !== "/" && (this.path += "/"), this.stat.size = 0, this[vt](), this.end();
         }
-        [Gs]() {
-          oe.default.readlink(this.absolute, (e, t) => {
+        [$s]() {
+          ae.default.readlink(this.absolute, (e, t) => {
             if (e) return this.emit("error", e);
-            this[Vs](t);
+            this[Js](t);
           });
         }
-        [Vs](e) {
-          this.linkpath = (0, ne.normalizeWindowsPath)(e), this[Rt](), this.end();
+        [Js](e) {
+          this.linkpath = (0, oe.normalizeWindowsPath)(e), this[vt](), this.end();
         }
-        [ln](e) {
+        [dn](e) {
           if (!this.stat) throw new Error("cannot create link entry without stat");
-          this.type = "Link", this.linkpath = (0, ne.normalizeWindowsPath)(nn.default.relative(this.cwd, e)), this.stat.size = 0, this[Rt](), this.end();
+          this.type = "Link", this.linkpath = (0, oe.normalizeWindowsPath)(ln.default.relative(this.cwd, e)), this.stat.size = 0, this[vt](), this.end();
         }
-        [an]() {
+        [un]() {
           if (!this.stat) throw new Error("cannot create file entry without stat");
           if (this.stat.nlink > 1) {
             let e = `${this.stat.dev}:${this.stat.ino}`, t = this.linkCache.get(e);
-            if (t?.indexOf(this.cwd) === 0) return this[ln](t);
+            if (t?.indexOf(this.cwd) === 0) return this[dn](t);
             this.linkCache.set(e, this.absolute);
           }
-          if (this[Rt](), this.stat.size === 0) return this.end();
-          this[$s]();
+          if (this[vt](), this.stat.size === 0) return this.end();
+          this[er]();
         }
-        [$s]() {
-          oe.default.open(this.absolute, "r", (e, t) => {
+        [er]() {
+          ae.default.open(this.absolute, "r", (e, t) => {
             if (e) return this.emit("error", e);
-            this[Xs](t);
+            this[tr](t);
           });
         }
-        [Xs](e) {
+        [tr](e) {
           if (this.fd = e, this.#e) return this[ve]();
           if (!this.stat) throw new Error("should stat before calling onopenfile");
           this.blockLen = 512 * Math.ceil(this.stat.size / 512), this.blockRemain = this.blockLen;
           let t = Math.min(this.blockLen, this.maxReadSize);
-          this.buf = Buffer.allocUnsafe(t), this.offset = 0, this.pos = 0, this.remain = this.stat.size, this.length = this.buf.length, this[gi]();
+          this.buf = Buffer.allocUnsafe(t), this.offset = 0, this.pos = 0, this.remain = this.stat.size, this.length = this.buf.length, this[Ri]();
         }
-        [gi]() {
+        [Ri]() {
           let { fd: e, buf: t, offset: i, length: r, pos: n } = this;
           if (e === void 0 || t === void 0) throw new Error("cannot read file without first opening");
-          oe.default.read(e, t, i, r, n, (o, a) => {
+          ae.default.read(e, t, i, r, n, (o, a) => {
             if (o) return this[ve](() => this.emit("error", o));
-            this[Ks](a);
+            this[Qs](a);
           });
         }
         [ve](e = () => {
         }) {
-          this.fd !== void 0 && oe.default.close(this.fd, e);
+          this.fd !== void 0 && ae.default.close(this.fd, e);
         }
-        [Ks](e) {
+        [Qs](e) {
           if (e <= 0 && this.remain > 0) {
             let r = Object.assign(new Error("encountered unexpected EOF"), { path: this.absolute, syscall: "read", code: "EOF" });
             return this[ve](() => this.emit("error", r));
@@ -47732,9 +47779,9 @@ var require_index_min = __commonJS({
           if (!this.buf) throw new Error("should have created buffer prior to reading");
           if (e === this.remain) for (let r = e; r < this.length && e < this.blockRemain; r++) this.buf[r + this.offset] = 0, e++, this.remain++;
           let t = this.offset === 0 && e === this.buf.length ? this.buf : this.buf.subarray(this.offset, this.offset + e);
-          this.write(t) ? this[Zs]() : this[Qs](() => this[Zs]());
+          this.write(t) ? this[Vs]() : this[ir](() => this[Vs]());
         }
-        [Qs](e) {
+        [ir](e) {
           this.once("drain", e);
         }
         write(e, t, i) {
@@ -47744,34 +47791,34 @@ var require_index_min = __commonJS({
           }
           return this.remain -= e.length, this.blockRemain -= e.length, this.pos += e.length, this.offset += e.length, super.write(e, null, i);
         }
-        [Zs]() {
+        [Vs]() {
           if (!this.remain) return this.blockRemain && super.write(Buffer.alloc(this.blockRemain)), this[ve]((e) => e ? this.emit("error", e) : this.end());
           if (!this.buf) throw new Error("buffer lost somehow in ONDRAIN");
-          this.offset >= this.length && (this.buf = Buffer.allocUnsafe(Math.min(this.blockRemain, this.buf.length)), this.offset = 0), this.length = this.buf.length - this.offset, this[gi]();
+          this.offset >= this.length && (this.buf = Buffer.allocUnsafe(Math.min(this.blockRemain, this.buf.length)), this.offset = 0), this.length = this.buf.length - this.offset, this[Ri]();
         }
       };
-      M.WriteEntry = vi;
-      var Js = class extends vi {
+      M.WriteEntry = Ti;
+      var sr = class extends Ti {
         static {
-          __name(this, "Js");
+          __name(this, "sr");
         }
         sync = true;
-        [Ys]() {
-          this[Oi](oe.default.lstatSync(this.absolute));
-        }
-        [Gs]() {
-          this[Vs](oe.default.readlinkSync(this.absolute));
+        [Xs]() {
+          this[Oi](ae.default.lstatSync(this.absolute));
         }
         [$s]() {
-          this[Xs](oe.default.openSync(this.absolute, "r"));
+          this[Js](ae.default.readlinkSync(this.absolute));
         }
-        [gi]() {
+        [er]() {
+          this[tr](ae.default.openSync(this.absolute, "r"));
+        }
+        [Ri]() {
           let e = true;
           try {
             let { fd: t, buf: i, offset: r, length: n, pos: o } = this;
             if (t === void 0 || i === void 0) throw new Error("fd and buf must be set in READ method");
-            let a = oe.default.readSync(t, i, r, n, o);
-            this[Ks](a), e = false;
+            let a = ae.default.readSync(t, i, r, n, o);
+            this[Qs](a), e = false;
           } finally {
             if (e) try {
               this[ve](() => {
@@ -47780,18 +47827,18 @@ var require_index_min = __commonJS({
             }
           }
         }
-        [Qs](e) {
+        [ir](e) {
           e();
         }
         [ve](e = () => {
         }) {
-          this.fd !== void 0 && oe.default.closeSync(this.fd), e();
+          this.fd !== void 0 && ae.default.closeSync(this.fd), e();
         }
       };
-      M.WriteEntrySync = Js;
-      var er = class extends cn.Minipass {
+      M.WriteEntrySync = sr;
+      var rr = class extends pn.Minipass {
         static {
-          __name(this, "er");
+          __name(this, "rr");
         }
         blockLen = 0;
         blockRemain = 0;
@@ -47821,29 +47868,29 @@ var require_index_min = __commonJS({
         size;
         onWriteEntry;
         warn(e, t, i = {}) {
-          return (0, wn.warnMethod)(this, e, t, i);
+          return (0, Sn.warnMethod)(this, e, t, i);
         }
         constructor(e, t = {}) {
-          let i = (0, mn.dealias)(t);
+          let i = (0, yn.dealias)(t);
           super(), this.preservePaths = !!i.preservePaths, this.portable = !!i.portable, this.strict = !!i.strict, this.noPax = !!i.noPax, this.noMtime = !!i.noMtime, this.onWriteEntry = i.onWriteEntry, this.readEntry = e;
           let { type: r } = e;
           if (r === "Unsupported") throw new Error("writing entry that should be ignored");
-          this.type = r, this.type === "Directory" && this.portable && (this.noMtime = true), this.prefix = i.prefix, this.path = (0, ne.normalizeWindowsPath)(e.path), this.mode = e.mode !== void 0 ? this[Ri](e.mode) : void 0, this.uid = this.portable ? void 0 : e.uid, this.gid = this.portable ? void 0 : e.gid, this.uname = this.portable ? void 0 : e.uname, this.gname = this.portable ? void 0 : e.gname, this.size = e.size, this.mtime = this.noMtime ? void 0 : i.mtime || e.mtime, this.atime = this.portable ? void 0 : e.atime, this.ctime = this.portable ? void 0 : e.ctime, this.linkpath = e.linkpath !== void 0 ? (0, ne.normalizeWindowsPath)(e.linkpath) : void 0, typeof i.onwarn == "function" && this.on("warn", i.onwarn);
+          this.type = r, this.type === "Directory" && this.portable && (this.noMtime = true), this.prefix = i.prefix, this.path = (0, oe.normalizeWindowsPath)(e.path), this.mode = e.mode !== void 0 ? this[vi](e.mode) : void 0, this.uid = this.portable ? void 0 : e.uid, this.gid = this.portable ? void 0 : e.gid, this.uname = this.portable ? void 0 : e.uname, this.gname = this.portable ? void 0 : e.gname, this.size = e.size, this.mtime = this.noMtime ? void 0 : i.mtime || e.mtime, this.atime = this.portable ? void 0 : e.atime, this.ctime = this.portable ? void 0 : e.ctime, this.linkpath = e.linkpath !== void 0 ? (0, oe.normalizeWindowsPath)(e.linkpath) : void 0, typeof i.onwarn == "function" && this.on("warn", i.onwarn);
           let n = false;
           if (!this.preservePaths) {
-            let [a, h] = (0, _n.stripAbsolutePath)(this.path);
+            let [a, h] = (0, bn.stripAbsolutePath)(this.path);
             a && typeof h == "string" && (this.path = h, n = a);
           }
-          this.remain = e.size, this.blockRemain = e.startBlockSize, this.onWriteEntry?.(this), this.header = new fn.Header({ path: this[ae](this.path), linkpath: this.type === "Link" && this.linkpath !== void 0 ? this[ae](this.linkpath) : this.linkpath, mode: this.mode, uid: this.portable ? void 0 : this.uid, gid: this.portable ? void 0 : this.gid, size: this.size, mtime: this.noMtime ? void 0 : this.mtime, type: this.type, uname: this.portable ? void 0 : this.uname, atime: this.portable ? void 0 : this.atime, ctime: this.portable ? void 0 : this.ctime }), n && this.warn("TAR_ENTRY_INFO", `stripping ${n} from absolute path`, { entry: this, path: n + this.path }), this.header.encode() && !this.noPax && super.write(new pn.Pax({ atime: this.portable ? void 0 : this.atime, ctime: this.portable ? void 0 : this.ctime, gid: this.portable ? void 0 : this.gid, mtime: this.noMtime ? void 0 : this.mtime, path: this[ae](this.path), linkpath: this.type === "Link" && this.linkpath !== void 0 ? this[ae](this.linkpath) : this.linkpath, size: this.size, uid: this.portable ? void 0 : this.uid, uname: this.portable ? void 0 : this.uname, dev: this.portable ? void 0 : this.readEntry.dev, ino: this.portable ? void 0 : this.readEntry.ino, nlink: this.portable ? void 0 : this.readEntry.nlink }).encode());
+          this.remain = e.size, this.blockRemain = e.startBlockSize, this.onWriteEntry?.(this), this.header = new _n.Header({ path: this[he](this.path), linkpath: this.type === "Link" && this.linkpath !== void 0 ? this[he](this.linkpath) : this.linkpath, mode: this.mode, uid: this.portable ? void 0 : this.uid, gid: this.portable ? void 0 : this.gid, size: this.size, mtime: this.noMtime ? void 0 : this.mtime, type: this.type, uname: this.portable ? void 0 : this.uname, atime: this.portable ? void 0 : this.atime, ctime: this.portable ? void 0 : this.ctime }), n && this.warn("TAR_ENTRY_INFO", `stripping ${n} from absolute path`, { entry: this, path: n + this.path }), this.header.encode() && !this.noPax && super.write(new En.Pax({ atime: this.portable ? void 0 : this.atime, ctime: this.portable ? void 0 : this.ctime, gid: this.portable ? void 0 : this.gid, mtime: this.noMtime ? void 0 : this.mtime, path: this[he](this.path), linkpath: this.type === "Link" && this.linkpath !== void 0 ? this[he](this.linkpath) : this.linkpath, size: this.size, uid: this.portable ? void 0 : this.uid, uname: this.portable ? void 0 : this.uname, dev: this.portable ? void 0 : this.readEntry.dev, ino: this.portable ? void 0 : this.readEntry.ino, nlink: this.portable ? void 0 : this.readEntry.nlink }).encode());
           let o = this.header?.block;
           if (!o) throw new Error("failed to encode header");
           super.write(o), e.pipe(this);
         }
-        [ae](e) {
-          return yn(e, this.prefix);
+        [he](e) {
+          return gn(e, this.prefix);
         }
-        [Ri](e) {
-          return (0, dn.modeFix)(e, this.type === "Directory", this.portable);
+        [vi](e) {
+          return (0, wn.modeFix)(e, this.type === "Directory", this.portable);
         }
         write(e, t, i) {
           typeof t == "function" && (i = t, t = void 0), typeof e == "string" && (e = Buffer.from(e, typeof t == "string" ? t : "utf8"));
@@ -47855,14 +47902,14 @@ var require_index_min = __commonJS({
           return this.blockRemain && super.write(Buffer.alloc(this.blockRemain)), typeof e == "function" && (i = e, t = void 0, e = void 0), typeof t == "function" && (i = t, t = void 0), typeof e == "string" && (e = Buffer.from(e, t ?? "utf8")), i && this.once("finish", i), e ? super.end(e, i) : super.end(i), this;
         }
       };
-      M.WriteEntryTar = er;
-      var uh = /* @__PURE__ */ __name((s) => s.isFile() ? "File" : s.isDirectory() ? "Directory" : s.isSymbolicLink() ? "SymbolicLink" : "Unsupported", "uh");
+      M.WriteEntryTar = rr;
+      var _h = /* @__PURE__ */ __name((s) => s.isFile() ? "File" : s.isDirectory() ? "Directory" : s.isSymbolicLink() ? "SymbolicLink" : "Unsupported", "_h");
     });
-    var En = d((ot) => {
+    var Rn = d((at) => {
       "use strict";
-      Object.defineProperty(ot, "__esModule", { value: true });
-      ot.Node = ot.Yallist = void 0;
-      var ir = class s {
+      Object.defineProperty(at, "__esModule", { value: true });
+      at.Node = at.Yallist = void 0;
+      var or = class s {
         static {
           __name(this, "s");
         }
@@ -47896,11 +47943,11 @@ var require_index_min = __commonJS({
           e.list = this, e.prev = t, t && (t.next = e), this.tail = e, this.head || (this.head = e), this.length++;
         }
         push(...e) {
-          for (let t = 0, i = e.length; t < i; t++) fh(this, e[t]);
+          for (let t = 0, i = e.length; t < i; t++) yh(this, e[t]);
           return this.length;
         }
         unshift(...e) {
-          for (var t = 0, i = e.length; t < i; t++) dh(this, e[t]);
+          for (var t = 0, i = e.length; t < i; t++) Eh(this, e[t]);
           return this.length;
         }
         pop() {
@@ -47996,7 +48043,7 @@ var require_index_min = __commonJS({
           let n = [];
           for (let o = 0; r && o < t; o++) n.push(r.value), r = this.removeNode(r);
           r ? r !== this.tail && (r = r.prev) : r = this.tail;
-          for (let o of i) r = ch(this, r, o);
+          for (let o of i) r = wh(this, r, o);
           return n;
         }
         reverse() {
@@ -48008,23 +48055,23 @@ var require_index_min = __commonJS({
           return this.head = t, this.tail = e, this;
         }
       };
-      ot.Yallist = ir;
-      function ch(s, e, t) {
-        let i = e, r = e ? e.next : s.head, n = new nt(t, i, r, s);
+      at.Yallist = or;
+      function wh(s, e, t) {
+        let i = e, r = e ? e.next : s.head, n = new ot(t, i, r, s);
         return n.next === void 0 && (s.tail = n), n.prev === void 0 && (s.head = n), s.length++, n;
       }
-      __name(ch, "ch");
-      function fh(s, e) {
-        s.tail = new nt(e, s.tail, void 0, s), s.head || (s.head = s.tail), s.length++;
+      __name(wh, "wh");
+      function yh(s, e) {
+        s.tail = new ot(e, s.tail, void 0, s), s.head || (s.head = s.tail), s.length++;
       }
-      __name(fh, "fh");
-      function dh(s, e) {
-        s.head = new nt(e, void 0, s.head, s), s.tail || (s.tail = s.head), s.length++;
+      __name(yh, "yh");
+      function Eh(s, e) {
+        s.head = new ot(e, void 0, s.head, s), s.tail || (s.tail = s.head), s.length++;
       }
-      __name(dh, "dh");
-      var nt = class {
+      __name(Eh, "Eh");
+      var ot = class {
         static {
-          __name(this, "nt");
+          __name(this, "ot");
         }
         list;
         next;
@@ -48034,11 +48081,11 @@ var require_index_min = __commonJS({
           this.list = r, this.value = e, t ? (t.next = this, this.prev = t) : this.prev = void 0, i ? (i.prev = this, this.next = i) : this.next = void 0;
         }
       };
-      ot.Node = nt;
+      at.Node = ot;
     });
-    var Ii = d((L) => {
+    var Ci = d((L) => {
       "use strict";
-      var mh = L && L.__createBinding || (Object.create ? (function(s, e, t, i) {
+      var bh = L && L.__createBinding || (Object.create ? (function(s, e, t, i) {
         i === void 0 && (i = t);
         var r = Object.getOwnPropertyDescriptor(e, t);
         (!r || ("get" in r ? !e.__esModule : r.writable || r.configurable)) && (r = { enumerable: true, get: /* @__PURE__ */ __name(function() {
@@ -48046,11 +48093,11 @@ var require_index_min = __commonJS({
         }, "get") }), Object.defineProperty(s, i, r);
       }) : (function(s, e, t, i) {
         i === void 0 && (i = t), s[i] = e[t];
-      })), ph = L && L.__setModuleDefault || (Object.create ? (function(s, e) {
+      })), Sh = L && L.__setModuleDefault || (Object.create ? (function(s, e) {
         Object.defineProperty(s, "default", { enumerable: true, value: e });
       }) : function(s, e) {
         s.default = e;
-      }), _h = L && L.__importStar || /* @__PURE__ */ (function() {
+      }), gh = L && L.__importStar || /* @__PURE__ */ (function() {
         var s = /* @__PURE__ */ __name(function(e) {
           return s = Object.getOwnPropertyNames || function(t) {
             var i = [];
@@ -48061,17 +48108,17 @@ var require_index_min = __commonJS({
         return function(e) {
           if (e && e.__esModule) return e;
           var t = {};
-          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && mh(t, e, i[r]);
-          return ph(t, e), t;
+          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && bh(t, e, i[r]);
+          return Sh(t, e), t;
         };
-      })(), Rn = L && L.__importDefault || function(s) {
+      })(), Pn = L && L.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
       Object.defineProperty(L, "__esModule", { value: true });
       L.PackSync = L.Pack = L.PackJob = void 0;
-      var Li = Rn(require("fs")), lr = tr(), Dt = class {
+      var Ii = Pn(require("fs")), fr = nr(), Nt = class {
         static {
-          __name(this, "Dt");
+          __name(this, "Nt");
         }
         path;
         absolute;
@@ -48079,16 +48126,17 @@ var require_index_min = __commonJS({
         stat;
         readdir;
         pending = false;
+        pendingLink = false;
         ignore = false;
         piped = false;
         constructor(e, t) {
           this.path = e || "./", this.absolute = t;
         }
       };
-      L.PackJob = Dt;
-      var wh = We(), sr = _h(Ts()), yh = En(), Eh = ni(), bh = ai(), bn = Buffer.alloc(1024), Ti = /* @__PURE__ */ Symbol("onStat"), vt = /* @__PURE__ */ Symbol("ended"), X = /* @__PURE__ */ Symbol("queue"), je = /* @__PURE__ */ Symbol("current"), xe = /* @__PURE__ */ Symbol("process"), Tt = /* @__PURE__ */ Symbol("processing"), rr = /* @__PURE__ */ Symbol("processJob"), Q = /* @__PURE__ */ Symbol("jobs"), nr = /* @__PURE__ */ Symbol("jobDone"), Di = /* @__PURE__ */ Symbol("addFSEntry"), Sn = /* @__PURE__ */ Symbol("addTarEntry"), ur = /* @__PURE__ */ Symbol("stat"), cr = /* @__PURE__ */ Symbol("readdir"), Pi = /* @__PURE__ */ Symbol("onreaddir"), Ni = /* @__PURE__ */ Symbol("pipe"), gn = /* @__PURE__ */ Symbol("entry"), or = /* @__PURE__ */ Symbol("entryOpt"), Mi = /* @__PURE__ */ Symbol("writeEntryClass"), vn = /* @__PURE__ */ Symbol("write"), ar = /* @__PURE__ */ Symbol("ondrain"), On = Rn(require("path")), hr = et(), Ai = class extends wh.Minipass {
+      L.PackJob = Nt;
+      var Rh = We(), ar = gh(Ps()), Oh = Rn(), vh = hi(), On = Buffer.alloc(1024), Pi = /* @__PURE__ */ Symbol("onStat"), Tt = /* @__PURE__ */ Symbol("ended"), X = /* @__PURE__ */ Symbol("queue"), Dt = /* @__PURE__ */ Symbol("pendingLinks"), Te = /* @__PURE__ */ Symbol("current"), je = /* @__PURE__ */ Symbol("process"), Pt = /* @__PURE__ */ Symbol("processing"), Di = /* @__PURE__ */ Symbol("processJob"), Q = /* @__PURE__ */ Symbol("jobs"), hr = /* @__PURE__ */ Symbol("jobDone"), Ni = /* @__PURE__ */ Symbol("addFSEntry"), vn = /* @__PURE__ */ Symbol("addTarEntry"), dr = /* @__PURE__ */ Symbol("stat"), mr = /* @__PURE__ */ Symbol("readdir"), Mi = /* @__PURE__ */ Symbol("onreaddir"), Li = /* @__PURE__ */ Symbol("pipe"), Tn = /* @__PURE__ */ Symbol("entry"), lr = /* @__PURE__ */ Symbol("entryOpt"), Ai = /* @__PURE__ */ Symbol("writeEntryClass"), Nn = /* @__PURE__ */ Symbol("write"), cr = /* @__PURE__ */ Symbol("ondrain"), Dn = Pn(require("path")), ur = tt(), Fi = class extends Rh.Minipass {
         static {
-          __name(this, "Ai");
+          __name(this, "Fi");
         }
         sync = false;
         opt;
@@ -48110,123 +48158,139 @@ var require_index_min = __commonJS({
         mtime;
         filter;
         jobs;
-        [Mi];
+        [Ai];
         onWriteEntry;
         [X];
+        [Dt] = /* @__PURE__ */ new Map();
         [Q] = 0;
+        [Pt] = false;
         [Tt] = false;
-        [vt] = false;
         constructor(e = {}) {
-          if (super(), this.opt = e, this.file = e.file || "", this.cwd = e.cwd || process.cwd(), this.maxReadSize = e.maxReadSize, this.preservePaths = !!e.preservePaths, this.strict = !!e.strict, this.noPax = !!e.noPax, this.prefix = (0, hr.normalizeWindowsPath)(e.prefix || ""), this.linkCache = e.linkCache || /* @__PURE__ */ new Map(), this.statCache = e.statCache || /* @__PURE__ */ new Map(), this.readdirCache = e.readdirCache || /* @__PURE__ */ new Map(), this.onWriteEntry = e.onWriteEntry, this[Mi] = lr.WriteEntry, typeof e.onwarn == "function" && this.on("warn", e.onwarn), this.portable = !!e.portable, e.gzip || e.brotli || e.zstd) {
+          if (super(), this.opt = e, this.file = e.file || "", this.cwd = e.cwd || process.cwd(), this.maxReadSize = e.maxReadSize, this.preservePaths = !!e.preservePaths, this.strict = !!e.strict, this.noPax = !!e.noPax, this.prefix = (0, ur.normalizeWindowsPath)(e.prefix || ""), this.linkCache = e.linkCache || /* @__PURE__ */ new Map(), this.statCache = e.statCache || /* @__PURE__ */ new Map(), this.readdirCache = e.readdirCache || /* @__PURE__ */ new Map(), this.onWriteEntry = e.onWriteEntry, this[Ai] = fr.WriteEntry, typeof e.onwarn == "function" && this.on("warn", e.onwarn), this.portable = !!e.portable, e.gzip || e.brotli || e.zstd) {
             if ((e.gzip ? 1 : 0) + (e.brotli ? 1 : 0) + (e.zstd ? 1 : 0) > 1) throw new TypeError("gzip, brotli, zstd are mutually exclusive");
-            if (e.gzip && (typeof e.gzip != "object" && (e.gzip = {}), this.portable && (e.gzip.portable = true), this.zip = new sr.Gzip(e.gzip)), e.brotli && (typeof e.brotli != "object" && (e.brotli = {}), this.zip = new sr.BrotliCompress(e.brotli)), e.zstd && (typeof e.zstd != "object" && (e.zstd = {}), this.zip = new sr.ZstdCompress(e.zstd)), !this.zip) throw new Error("impossible");
+            if (e.gzip && (typeof e.gzip != "object" && (e.gzip = {}), this.portable && (e.gzip.portable = true), this.zip = new ar.Gzip(e.gzip)), e.brotli && (typeof e.brotli != "object" && (e.brotli = {}), this.zip = new ar.BrotliCompress(e.brotli)), e.zstd && (typeof e.zstd != "object" && (e.zstd = {}), this.zip = new ar.ZstdCompress(e.zstd)), !this.zip) throw new Error("impossible");
             let t = this.zip;
-            t.on("data", (i) => super.write(i)), t.on("end", () => super.end()), t.on("drain", () => this[ar]()), this.on("resume", () => t.resume());
-          } else this.on("drain", this[ar]);
-          this.noDirRecurse = !!e.noDirRecurse, this.follow = !!e.follow, this.noMtime = !!e.noMtime, e.mtime && (this.mtime = e.mtime), this.filter = typeof e.filter == "function" ? e.filter : () => true, this[X] = new yh.Yallist(), this[Q] = 0, this.jobs = Number(e.jobs) || 4, this[Tt] = false, this[vt] = false;
+            t.on("data", (i) => super.write(i)), t.on("end", () => super.end()), t.on("drain", () => this[cr]()), this.on("resume", () => t.resume());
+          } else this.on("drain", this[cr]);
+          this.noDirRecurse = !!e.noDirRecurse, this.follow = !!e.follow, this.noMtime = !!e.noMtime, e.mtime && (this.mtime = e.mtime), this.filter = typeof e.filter == "function" ? e.filter : () => true, this[X] = new Oh.Yallist(), this[Q] = 0, this.jobs = Number(e.jobs) || 4, this[Pt] = false, this[Tt] = false;
         }
-        [vn](e) {
+        [Nn](e) {
           return super.write(e);
         }
         add(e) {
           return this.write(e), this;
         }
         end(e, t, i) {
-          return typeof e == "function" && (i = e, e = void 0), typeof t == "function" && (i = t, t = void 0), e && this.add(e), this[vt] = true, this[xe](), i && i(), this;
+          return typeof e == "function" && (i = e, e = void 0), typeof t == "function" && (i = t, t = void 0), e && this.add(e), this[Tt] = true, this[je](), i && i(), this;
         }
         write(e) {
-          if (this[vt]) throw new Error("write after end");
-          return e instanceof Eh.ReadEntry ? this[Sn](e) : this[Di](e), this.flowing;
+          if (this[Tt]) throw new Error("write after end");
+          return typeof e == "string" ? this[Ni](e) : this[vn](e), this.flowing;
         }
-        [Sn](e) {
-          let t = (0, hr.normalizeWindowsPath)(On.default.resolve(this.cwd, e.path));
+        [vn](e) {
+          let t = (0, ur.normalizeWindowsPath)(Dn.default.resolve(this.cwd, e.path));
           if (!this.filter(e.path, e)) e.resume();
           else {
-            let i = new Dt(e.path, t);
-            i.entry = new lr.WriteEntryTar(e, this[or](i)), i.entry.on("end", () => this[nr](i)), this[Q] += 1, this[X].push(i);
+            let i = new Nt(e.path, t);
+            i.entry = new fr.WriteEntryTar(e, this[lr](i)), i.entry.on("end", () => this[hr](i)), this[Q] += 1, this[X].push(i);
           }
-          this[xe]();
+          this[je]();
         }
-        [Di](e) {
-          let t = (0, hr.normalizeWindowsPath)(On.default.resolve(this.cwd, e));
-          this[X].push(new Dt(e, t)), this[xe]();
+        [Ni](e) {
+          let t = (0, ur.normalizeWindowsPath)(Dn.default.resolve(this.cwd, e));
+          this[X].push(new Nt(e, t)), this[je]();
         }
-        [ur](e) {
+        [dr](e) {
           e.pending = true, this[Q] += 1;
           let t = this.follow ? "stat" : "lstat";
-          Li.default[t](e.absolute, (i, r) => {
-            e.pending = false, this[Q] -= 1, i ? this.emit("error", i) : this[Ti](e, r);
-          });
-        }
-        [Ti](e, t) {
-          this.statCache.set(e.absolute, t), e.stat = t, this.filter(e.path, t) ? t.isFile() && t.nlink > 1 && e === this[je] && !this.linkCache.get(`${t.dev}:${t.ino}`) && !this.sync && this[rr](e) : e.ignore = true, this[xe]();
-        }
-        [cr](e) {
-          e.pending = true, this[Q] += 1, Li.default.readdir(e.absolute, (t, i) => {
-            if (e.pending = false, this[Q] -= 1, t) return this.emit("error", t);
-            this[Pi](e, i);
+          Ii.default[t](e.absolute, (i, r) => {
+            e.pending = false, this[Q] -= 1, i ? this.emit("error", i) : this[Pi](e, r);
           });
         }
         [Pi](e, t) {
-          this.readdirCache.set(e.absolute, t), e.readdir = t, this[xe]();
+          if (this.statCache.set(e.absolute, t), e.stat = t, !this.filter(e.path, t)) e.ignore = true;
+          else if (t.isFile() && t.nlink > 1 && !this.linkCache.get(`${t.dev}:${t.ino}`) && !this.sync) if (e === this[Te]) this[Di](e);
+          else {
+            let i = `${t.dev}:${t.ino}`, r = this[Dt].get(i);
+            r ? r.push(e) : this[Dt].set(i, [e]), e.pendingLink = true, e.pending = true;
+          }
+          this[je]();
         }
-        [xe]() {
-          if (!this[Tt]) {
-            this[Tt] = true;
-            for (let e = this[X].head; e && this[Q] < this.jobs; e = e.next) if (this[rr](e.value), e.value.ignore) {
+        [mr](e) {
+          e.pending = true, this[Q] += 1, Ii.default.readdir(e.absolute, (t, i) => {
+            if (e.pending = false, this[Q] -= 1, t) return this.emit("error", t);
+            this[Mi](e, i);
+          });
+        }
+        [Mi](e, t) {
+          this.readdirCache.set(e.absolute, t), e.readdir = t, this[je]();
+        }
+        [je]() {
+          if (!this[Pt]) {
+            this[Pt] = true;
+            for (let e = this[X].head; e && this[Q] < this.jobs; e = e.next) if (this[Di](e.value), e.value.ignore) {
               let t = e.next;
               this[X].removeNode(e), e.next = t;
             }
-            this[Tt] = false, this[vt] && this[X].length === 0 && this[Q] === 0 && (this.zip ? this.zip.end(bn) : (super.write(bn), super.end()));
+            this[Pt] = false, this[Tt] && this[X].length === 0 && this[Q] === 0 && (this.zip ? this.zip.end(On) : (super.write(On), super.end()));
           }
         }
-        get [je]() {
+        get [Te]() {
           return this[X] && this[X].head && this[X].head.value;
         }
-        [nr](e) {
-          this[X].shift(), this[Q] -= 1, this[xe]();
+        [hr](e) {
+          this[X].shift(), this[Q] -= 1;
+          let { stat: t } = e;
+          if (t && t.isFile() && t.nlink > 1) {
+            let i = `${t.dev}:${t.ino}`, r = this[Dt].get(i);
+            if (r) {
+              this[Dt].delete(i);
+              for (let n of r) n.pending = false, this[Di](n);
+            }
+          }
+          this[je]();
         }
-        [rr](e) {
-          if (!e.pending) {
+        [Di](e) {
+          if (e.pending && e.pendingLink && e === this[Te] && (e.pending = false, e.pendingLink = false), !e.pending) {
             if (e.entry) {
-              e === this[je] && !e.piped && this[Ni](e);
+              e === this[Te] && !e.piped && this[Li](e);
               return;
             }
             if (!e.stat) {
               let t = this.statCache.get(e.absolute);
-              t ? this[Ti](e, t) : this[ur](e);
+              t ? this[Pi](e, t) : this[dr](e);
             }
             if (e.stat && !e.ignore) {
               if (!this.noDirRecurse && e.stat.isDirectory() && !e.readdir) {
                 let t = this.readdirCache.get(e.absolute);
-                if (t ? this[Pi](e, t) : this[cr](e), !e.readdir) return;
+                if (t ? this[Mi](e, t) : this[mr](e), !e.readdir) return;
               }
-              if (e.entry = this[gn](e), !e.entry) {
+              if (e.entry = this[Tn](e), !e.entry) {
                 e.ignore = true;
                 return;
               }
-              e === this[je] && !e.piped && this[Ni](e);
+              e === this[Te] && !e.piped && this[Li](e);
             }
           }
         }
-        [or](e) {
+        [lr](e) {
           return { onwarn: /* @__PURE__ */ __name((t, i, r) => this.warn(t, i, r), "onwarn"), noPax: this.noPax, cwd: this.cwd, absolute: e.absolute, preservePaths: this.preservePaths, maxReadSize: this.maxReadSize, strict: this.strict, portable: this.portable, linkCache: this.linkCache, statCache: this.statCache, noMtime: this.noMtime, mtime: this.mtime, prefix: this.prefix, onWriteEntry: this.onWriteEntry };
         }
-        [gn](e) {
+        [Tn](e) {
           this[Q] += 1;
           try {
-            return new this[Mi](e.path, this[or](e)).on("end", () => this[nr](e)).on("error", (i) => this.emit("error", i));
+            return new this[Ai](e.path, this[lr](e)).on("end", () => this[hr](e)).on("error", (i) => this.emit("error", i));
           } catch (t) {
             this.emit("error", t);
           }
         }
-        [ar]() {
-          this[je] && this[je].entry && this[je].entry.resume();
+        [cr]() {
+          this[Te] && this[Te].entry && this[Te].entry.resume();
         }
-        [Ni](e) {
+        [Li](e) {
           e.piped = true, e.readdir && e.readdir.forEach((r) => {
             let n = e.path, o = n === "./" ? "" : n.replace(/\/*$/, "/");
-            this[Di](o + r);
+            this[Ni](o + r);
           });
           let t = e.entry, i = this.zip;
           if (!t) throw new Error("cannot pipe without source");
@@ -48240,159 +48304,159 @@ var require_index_min = __commonJS({
           return this.zip && this.zip.pause(), super.pause();
         }
         warn(e, t, i = {}) {
-          (0, bh.warnMethod)(this, e, t, i);
+          (0, vh.warnMethod)(this, e, t, i);
         }
       };
-      L.Pack = Ai;
-      var fr = class extends Ai {
+      L.Pack = Fi;
+      var pr = class extends Fi {
         static {
-          __name(this, "fr");
+          __name(this, "pr");
         }
         sync = true;
         constructor(e) {
-          super(e), this[Mi] = lr.WriteEntrySync;
+          super(e), this[Ai] = fr.WriteEntrySync;
         }
         pause() {
         }
         resume() {
         }
-        [ur](e) {
+        [dr](e) {
           let t = this.follow ? "statSync" : "lstatSync";
-          this[Ti](e, Li.default[t](e.absolute));
+          this[Pi](e, Ii.default[t](e.absolute));
         }
-        [cr](e) {
-          this[Pi](e, Li.default.readdirSync(e.absolute));
+        [mr](e) {
+          this[Mi](e, Ii.default.readdirSync(e.absolute));
         }
-        [Ni](e) {
+        [Li](e) {
           let t = e.entry, i = this.zip;
           if (e.readdir && e.readdir.forEach((r) => {
             let n = e.path, o = n === "./" ? "" : n.replace(/\/*$/, "/");
-            this[Di](o + r);
+            this[Ni](o + r);
           }), !t) throw new Error("Cannot pipe without source");
           i ? t.on("data", (r) => {
             i.write(r);
           }) : t.on("data", (r) => {
-            super[vn](r);
+            super[Nn](r);
           });
         }
       };
-      L.PackSync = fr;
+      L.PackSync = pr;
     });
-    var dr = d((at) => {
+    var _r = d((ht) => {
       "use strict";
-      var Sh = at && at.__importDefault || function(s) {
+      var Th = ht && ht.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
-      Object.defineProperty(at, "__esModule", { value: true });
-      at.create = void 0;
-      var Tn = Ke(), Dn = Sh(require("node:path")), Pn = st(), gh = Ve(), Fi = Ii(), Oh = /* @__PURE__ */ __name((s, e) => {
-        let t = new Fi.PackSync(s), i = new Tn.WriteStreamSync(s.file, { mode: s.mode || 438 });
-        t.pipe(i), Nn(t, e);
-      }, "Oh"), Rh = /* @__PURE__ */ __name((s, e) => {
-        let t = new Fi.Pack(s), i = new Tn.WriteStream(s.file, { mode: s.mode || 438 });
+      Object.defineProperty(ht, "__esModule", { value: true });
+      ht.create = void 0;
+      var Mn = Ke(), Ln = Th(require("node:path")), An = rt(), Dh = Ve(), Bi = Ci(), Ph = /* @__PURE__ */ __name((s, e) => {
+        let t = new Bi.PackSync(s), i = new Mn.WriteStreamSync(s.file, { mode: s.mode || 438 });
+        t.pipe(i), In(t, e);
+      }, "Ph"), Nh = /* @__PURE__ */ __name((s, e) => {
+        let t = new Bi.Pack(s), i = new Mn.WriteStream(s.file, { mode: s.mode || 438 });
         t.pipe(i);
         let r = new Promise((n, o) => {
           i.on("error", o), i.on("close", n), t.on("error", o);
         });
-        return Mn(t, e).catch((n) => t.emit("error", n)), r;
-      }, "Rh"), Nn = /* @__PURE__ */ __name((s, e) => {
+        return Fn(t, e).catch((n) => t.emit("error", n)), r;
+      }, "Nh"), In = /* @__PURE__ */ __name((s, e) => {
         e.forEach((t) => {
-          t.charAt(0) === "@" ? (0, Pn.list)({ file: Dn.default.resolve(s.cwd, t.slice(1)), sync: true, noResume: true, onReadEntry: /* @__PURE__ */ __name((i) => s.add(i), "onReadEntry") }) : s.add(t);
+          t.charAt(0) === "@" ? (0, An.list)({ file: Ln.default.resolve(s.cwd, t.slice(1)), sync: true, noResume: true, onReadEntry: /* @__PURE__ */ __name((i) => s.add(i), "onReadEntry") }) : s.add(t);
         }), s.end();
-      }, "Nn"), Mn = /* @__PURE__ */ __name(async (s, e) => {
-        for (let t of e) t.charAt(0) === "@" ? await (0, Pn.list)({ file: Dn.default.resolve(String(s.cwd), t.slice(1)), noResume: true, onReadEntry: /* @__PURE__ */ __name((i) => {
+      }, "In"), Fn = /* @__PURE__ */ __name(async (s, e) => {
+        for (let t of e) t.charAt(0) === "@" ? await (0, An.list)({ file: Ln.default.resolve(String(s.cwd), t.slice(1)), noResume: true, onReadEntry: /* @__PURE__ */ __name((i) => {
           s.add(i);
         }, "onReadEntry") }) : s.add(t);
         s.end();
-      }, "Mn"), vh = /* @__PURE__ */ __name((s, e) => {
-        let t = new Fi.PackSync(s);
-        return Nn(t, e), t;
-      }, "vh"), Th = /* @__PURE__ */ __name((s, e) => {
-        let t = new Fi.Pack(s);
-        return Mn(t, e).catch((i) => t.emit("error", i)), t;
-      }, "Th");
-      at.create = (0, gh.makeCommand)(Oh, Rh, vh, Th, (s, e) => {
+      }, "Fn"), Mh = /* @__PURE__ */ __name((s, e) => {
+        let t = new Bi.PackSync(s);
+        return In(t, e), t;
+      }, "Mh"), Lh = /* @__PURE__ */ __name((s, e) => {
+        let t = new Bi.Pack(s);
+        return Fn(t, e).catch((i) => t.emit("error", i)), t;
+      }, "Lh");
+      ht.create = (0, Dh.makeCommand)(Ph, Nh, Mh, Lh, (s, e) => {
         if (!e?.length) throw new TypeError("no paths specified to add to archive");
       });
     });
-    var jn = d((ht) => {
+    var Wn = d((lt) => {
       "use strict";
-      var Dh = ht && ht.__importDefault || function(s) {
+      var Ah = lt && lt.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
-      Object.defineProperty(ht, "__esModule", { value: true });
-      ht.getWriteFlag = void 0;
-      var In = Dh(require("fs")), Ph = process.env.__FAKE_PLATFORM__ || process.platform, Fn = Ph === "win32", { O_CREAT: Cn, O_NOFOLLOW: Ln, O_TRUNC: Bn, O_WRONLY: zn } = In.default.constants, kn = Number(process.env.__FAKE_FS_O_FILENAME__) || In.default.constants.UV_FS_O_FILEMAP || 0, Nh = Fn && !!kn, Mh = 512 * 1024, Lh = kn | Bn | Cn | zn, An = !Fn && typeof Ln == "number" ? Ln | Bn | Cn | zn : null;
-      ht.getWriteFlag = An !== null ? () => An : Nh ? (s) => s < Mh ? Lh : "w" : () => "w";
+      Object.defineProperty(lt, "__esModule", { value: true });
+      lt.getWriteFlag = void 0;
+      var zn = Ah(require("fs")), Ih = process.env.__FAKE_PLATFORM__ || process.platform, kn = Ih === "win32", { O_CREAT: xn, O_NOFOLLOW: Cn, O_TRUNC: jn, O_WRONLY: Un } = zn.default.constants, qn = Number(process.env.__FAKE_FS_O_FILENAME__) || zn.default.constants.UV_FS_O_FILEMAP || 0, Fh = kn && !!qn, Ch = 512 * 1024, Bh = qn | jn | xn | Un, Bn = !kn && typeof Cn == "number" ? Cn | jn | xn | Un : null;
+      lt.getWriteFlag = Bn !== null ? () => Bn : Fh ? (s) => s < Ch ? Bh : "w" : () => "w";
     });
-    var Un = d((he) => {
+    var Gn = d((le) => {
       "use strict";
-      var xn = he && he.__importDefault || function(s) {
+      var Hn = le && le.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
-      Object.defineProperty(he, "__esModule", { value: true });
-      he.chownrSync = he.chownr = void 0;
-      var Bi = xn(require("node:fs")), Pt = xn(require("node:path")), mr = /* @__PURE__ */ __name((s, e, t) => {
+      Object.defineProperty(le, "__esModule", { value: true });
+      le.chownrSync = le.chownr = void 0;
+      var ki = Hn(require("node:fs")), Mt = Hn(require("node:path")), wr = /* @__PURE__ */ __name((s, e, t) => {
         try {
-          return Bi.default.lchownSync(s, e, t);
+          return ki.default.lchownSync(s, e, t);
         } catch (i) {
           if (i?.code !== "ENOENT") throw i;
         }
-      }, "mr"), Ci = /* @__PURE__ */ __name((s, e, t, i) => {
-        Bi.default.lchown(s, e, t, (r) => {
+      }, "wr"), zi = /* @__PURE__ */ __name((s, e, t, i) => {
+        ki.default.lchown(s, e, t, (r) => {
           i(r && r?.code !== "ENOENT" ? r : null);
         });
-      }, "Ci"), Ah = /* @__PURE__ */ __name((s, e, t, i, r) => {
-        if (e.isDirectory()) (0, he.chownr)(Pt.default.resolve(s, e.name), t, i, (n) => {
+      }, "zi"), zh = /* @__PURE__ */ __name((s, e, t, i, r) => {
+        if (e.isDirectory()) (0, le.chownr)(Mt.default.resolve(s, e.name), t, i, (n) => {
           if (n) return r(n);
-          let o = Pt.default.resolve(s, e.name);
-          Ci(o, t, i, r);
+          let o = Mt.default.resolve(s, e.name);
+          zi(o, t, i, r);
         });
         else {
-          let n = Pt.default.resolve(s, e.name);
-          Ci(n, t, i, r);
+          let n = Mt.default.resolve(s, e.name);
+          zi(n, t, i, r);
         }
-      }, "Ah"), Ih = /* @__PURE__ */ __name((s, e, t, i) => {
-        Bi.default.readdir(s, { withFileTypes: true }, (r, n) => {
+      }, "zh"), kh = /* @__PURE__ */ __name((s, e, t, i) => {
+        ki.default.readdir(s, { withFileTypes: true }, (r, n) => {
           if (r) {
             if (r.code === "ENOENT") return i();
             if (r.code !== "ENOTDIR" && r.code !== "ENOTSUP") return i(r);
           }
-          if (r || !n.length) return Ci(s, e, t, i);
+          if (r || !n.length) return zi(s, e, t, i);
           let o = n.length, a = null, h = /* @__PURE__ */ __name((l) => {
             if (!a) {
               if (l) return i(a = l);
-              if (--o === 0) return Ci(s, e, t, i);
+              if (--o === 0) return zi(s, e, t, i);
             }
           }, "h");
-          for (let l of n) Ah(s, l, e, t, h);
+          for (let l of n) zh(s, l, e, t, h);
         });
-      }, "Ih");
-      he.chownr = Ih;
-      var Fh = /* @__PURE__ */ __name((s, e, t, i) => {
-        e.isDirectory() && (0, he.chownrSync)(Pt.default.resolve(s, e.name), t, i), mr(Pt.default.resolve(s, e.name), t, i);
-      }, "Fh"), Ch = /* @__PURE__ */ __name((s, e, t) => {
+      }, "kh");
+      le.chownr = kh;
+      var xh = /* @__PURE__ */ __name((s, e, t, i) => {
+        e.isDirectory() && (0, le.chownrSync)(Mt.default.resolve(s, e.name), t, i), wr(Mt.default.resolve(s, e.name), t, i);
+      }, "xh"), jh = /* @__PURE__ */ __name((s, e, t) => {
         let i;
         try {
-          i = Bi.default.readdirSync(s, { withFileTypes: true });
+          i = ki.default.readdirSync(s, { withFileTypes: true });
         } catch (r) {
           let n = r;
           if (n?.code === "ENOENT") return;
-          if (n?.code === "ENOTDIR" || n?.code === "ENOTSUP") return mr(s, e, t);
+          if (n?.code === "ENOTDIR" || n?.code === "ENOTSUP") return wr(s, e, t);
           throw n;
         }
-        for (let r of i) Fh(s, r, e, t);
-        return mr(s, e, t);
-      }, "Ch");
-      he.chownrSync = Ch;
+        for (let r of i) xh(s, r, e, t);
+        return wr(s, e, t);
+      }, "jh");
+      le.chownrSync = jh;
     });
-    var qn = d((zi) => {
+    var Zn = d((xi) => {
       "use strict";
-      Object.defineProperty(zi, "__esModule", { value: true });
-      zi.CwdError = void 0;
-      var pr = class extends Error {
+      Object.defineProperty(xi, "__esModule", { value: true });
+      xi.CwdError = void 0;
+      var yr = class extends Error {
         static {
-          __name(this, "pr");
+          __name(this, "yr");
         }
         path;
         code;
@@ -48404,15 +48468,15 @@ var require_index_min = __commonJS({
           return "CwdError";
         }
       };
-      zi.CwdError = pr;
+      xi.CwdError = yr;
     });
-    var wr = d((ki) => {
+    var br = d((ji) => {
       "use strict";
-      Object.defineProperty(ki, "__esModule", { value: true });
-      ki.SymlinkError = void 0;
-      var _r = class extends Error {
+      Object.defineProperty(ji, "__esModule", { value: true });
+      ji.SymlinkError = void 0;
+      var Er = class extends Error {
         static {
-          __name(this, "_r");
+          __name(this, "Er");
         }
         path;
         symlink;
@@ -48425,112 +48489,112 @@ var require_index_min = __commonJS({
           return "SymlinkError";
         }
       };
-      ki.SymlinkError = _r;
+      ji.SymlinkError = Er;
     });
-    var Yn = d((Te) => {
+    var Xn = d((De) => {
       "use strict";
-      var Er = Te && Te.__importDefault || function(s) {
+      var gr = De && De.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
-      Object.defineProperty(Te, "__esModule", { value: true });
-      Te.mkdirSync = Te.mkdir = void 0;
-      var Wn = Un(), x = Er(require("node:fs")), Bh = Er(require("node:fs/promises")), ji = Er(require("node:path")), Hn = qn(), pe = et(), Zn = wr(), zh = /* @__PURE__ */ __name((s, e) => {
-        x.default.stat(s, (t, i) => {
-          (t || !i.isDirectory()) && (t = new Hn.CwdError(s, t?.code || "ENOTDIR")), e(t);
+      Object.defineProperty(De, "__esModule", { value: true });
+      De.mkdirSync = De.mkdir = void 0;
+      var Yn = Gn(), j = gr(require("node:fs")), Uh = gr(require("node:fs/promises")), Ui = gr(require("node:path")), Kn = Zn(), _e = tt(), Vn = br(), qh = /* @__PURE__ */ __name((s, e) => {
+        j.default.stat(s, (t, i) => {
+          (t || !i.isDirectory()) && (t = new Kn.CwdError(s, t?.code || "ENOTDIR")), e(t);
         });
-      }, "zh"), kh = /* @__PURE__ */ __name((s, e, t) => {
-        s = (0, pe.normalizeWindowsPath)(s);
-        let i = e.umask ?? 18, r = e.mode | 448, n = (r & i) !== 0, o = e.uid, a = e.gid, h = typeof o == "number" && typeof a == "number" && (o !== e.processUid || a !== e.processGid), l = e.preserve, u = e.unlink, c = (0, pe.normalizeWindowsPath)(e.cwd), E = /* @__PURE__ */ __name((w, P) => {
-          w ? t(w) : P && h ? (0, Wn.chownr)(P, o, a, (zt) => E(zt)) : n ? x.default.chmod(s, r, t) : t();
-        }, "E");
-        if (s === c) return zh(s, E);
-        if (l) return Bh.default.mkdir(s, { mode: r, recursive: true }).then((w) => E(null, w ?? void 0), E);
-        let A = (0, pe.normalizeWindowsPath)(ji.default.relative(c, s)).split("/");
-        yr(c, A, r, u, c, void 0, E);
-      }, "kh");
-      Te.mkdir = kh;
-      var yr = /* @__PURE__ */ __name((s, e, t, i, r, n, o) => {
+      }, "qh"), Wh = /* @__PURE__ */ __name((s, e, t) => {
+        s = (0, _e.normalizeWindowsPath)(s);
+        let i = e.umask ?? 18, r = e.mode | 448, n = (r & i) !== 0, o = e.uid, a = e.gid, h = typeof o == "number" && typeof a == "number" && (o !== e.processUid || a !== e.processGid), l = e.preserve, c = e.unlink, u = (0, _e.normalizeWindowsPath)(e.cwd), b = /* @__PURE__ */ __name((w, P) => {
+          w ? t(w) : P && h ? (0, Yn.chownr)(P, o, a, (xt) => b(xt)) : n ? j.default.chmod(s, r, t) : t();
+        }, "b");
+        if (s === u) return qh(s, b);
+        if (l) return Uh.default.mkdir(s, { mode: r, recursive: true }).then((w) => b(null, w ?? void 0), b);
+        let A = (0, _e.normalizeWindowsPath)(Ui.default.relative(u, s)).split("/");
+        Sr(u, A, r, c, u, void 0, b);
+      }, "Wh");
+      De.mkdir = Wh;
+      var Sr = /* @__PURE__ */ __name((s, e, t, i, r, n, o) => {
         if (e.length === 0) return o(null, n);
-        let a = e.shift(), h = (0, pe.normalizeWindowsPath)(ji.default.resolve(s + "/" + a));
-        x.default.mkdir(h, t, Gn(h, e, t, i, r, n, o));
-      }, "yr"), Gn = /* @__PURE__ */ __name((s, e, t, i, r, n, o) => (a) => {
-        a ? x.default.lstat(s, (h, l) => {
-          if (h) h.path = h.path && (0, pe.normalizeWindowsPath)(h.path), o(h);
-          else if (l.isDirectory()) yr(s, e, t, i, r, n, o);
-          else if (i) x.default.unlink(s, (u) => {
-            if (u) return o(u);
-            x.default.mkdir(s, t, Gn(s, e, t, i, r, n, o));
+        let a = e.shift(), h = (0, _e.normalizeWindowsPath)(Ui.default.resolve(s + "/" + a));
+        j.default.mkdir(h, t, $n(h, e, t, i, r, n, o));
+      }, "Sr"), $n = /* @__PURE__ */ __name((s, e, t, i, r, n, o) => (a) => {
+        a ? j.default.lstat(s, (h, l) => {
+          if (h) h.path = h.path && (0, _e.normalizeWindowsPath)(h.path), o(h);
+          else if (l.isDirectory()) Sr(s, e, t, i, r, n, o);
+          else if (i) j.default.unlink(s, (c) => {
+            if (c) return o(c);
+            j.default.mkdir(s, t, $n(s, e, t, i, r, n, o));
           });
           else {
-            if (l.isSymbolicLink()) return o(new Zn.SymlinkError(s, s + "/" + e.join("/")));
+            if (l.isSymbolicLink()) return o(new Vn.SymlinkError(s, s + "/" + e.join("/")));
             o(a);
           }
-        }) : (n = n || s, yr(s, e, t, i, r, n, o));
-      }, "Gn"), jh = /* @__PURE__ */ __name((s) => {
+        }) : (n = n || s, Sr(s, e, t, i, r, n, o));
+      }, "$n"), Hh = /* @__PURE__ */ __name((s) => {
         let e = false, t;
         try {
-          e = x.default.statSync(s).isDirectory();
+          e = j.default.statSync(s).isDirectory();
         } catch (i) {
           t = i?.code;
         } finally {
-          if (!e) throw new Hn.CwdError(s, t ?? "ENOTDIR");
+          if (!e) throw new Kn.CwdError(s, t ?? "ENOTDIR");
         }
-      }, "jh"), xh = /* @__PURE__ */ __name((s, e) => {
-        s = (0, pe.normalizeWindowsPath)(s);
-        let t = e.umask ?? 18, i = e.mode | 448, r = (i & t) !== 0, n = e.uid, o = e.gid, a = typeof n == "number" && typeof o == "number" && (n !== e.processUid || o !== e.processGid), h = e.preserve, l = e.unlink, u = (0, pe.normalizeWindowsPath)(e.cwd), c = /* @__PURE__ */ __name((w) => {
-          w && a && (0, Wn.chownrSync)(w, n, o), r && x.default.chmodSync(s, i);
-        }, "c");
-        if (s === u) return jh(u), c();
-        if (h) return c(x.default.mkdirSync(s, { mode: i, recursive: true }) ?? void 0);
-        let D = (0, pe.normalizeWindowsPath)(ji.default.relative(u, s)).split("/"), A;
-        for (let w = D.shift(), P = u; w && (P += "/" + w); w = D.shift()) {
-          P = (0, pe.normalizeWindowsPath)(ji.default.resolve(P));
+      }, "Hh"), Gh = /* @__PURE__ */ __name((s, e) => {
+        s = (0, _e.normalizeWindowsPath)(s);
+        let t = e.umask ?? 18, i = e.mode | 448, r = (i & t) !== 0, n = e.uid, o = e.gid, a = typeof n == "number" && typeof o == "number" && (n !== e.processUid || o !== e.processGid), h = e.preserve, l = e.unlink, c = (0, _e.normalizeWindowsPath)(e.cwd), u = /* @__PURE__ */ __name((w) => {
+          w && a && (0, Yn.chownrSync)(w, n, o), r && j.default.chmodSync(s, i);
+        }, "u");
+        if (s === c) return Hh(c), u();
+        if (h) return u(j.default.mkdirSync(s, { mode: i, recursive: true }) ?? void 0);
+        let D = (0, _e.normalizeWindowsPath)(Ui.default.relative(c, s)).split("/"), A;
+        for (let w = D.shift(), P = c; w && (P += "/" + w); w = D.shift()) {
+          P = (0, _e.normalizeWindowsPath)(Ui.default.resolve(P));
           try {
-            x.default.mkdirSync(P, i), A = A || P;
+            j.default.mkdirSync(P, i), A = A || P;
           } catch {
-            let zt = x.default.lstatSync(P);
-            if (zt.isDirectory()) continue;
+            let xt = j.default.lstatSync(P);
+            if (xt.isDirectory()) continue;
             if (l) {
-              x.default.unlinkSync(P), x.default.mkdirSync(P, i), A = A || P;
+              j.default.unlinkSync(P), j.default.mkdirSync(P, i), A = A || P;
               continue;
-            } else if (zt.isSymbolicLink()) return new Zn.SymlinkError(P, P + "/" + D.join("/"));
+            } else if (xt.isSymbolicLink()) return new Vn.SymlinkError(P, P + "/" + D.join("/"));
           }
         }
-        return c(A);
-      }, "xh");
-      Te.mkdirSync = xh;
+        return u(A);
+      }, "Gh");
+      De.mkdirSync = Gh;
     });
-    var Vn = d((xi) => {
+    var Jn = d((qi) => {
       "use strict";
-      Object.defineProperty(xi, "__esModule", { value: true });
-      xi.normalizeUnicode = void 0;
-      var br = /* @__PURE__ */ Object.create(null), Kn = 1e4, lt = /* @__PURE__ */ new Set(), Uh = /* @__PURE__ */ __name((s) => {
-        lt.has(s) ? lt.delete(s) : br[s] = s.normalize("NFD").toLocaleLowerCase("en").toLocaleUpperCase("en"), lt.add(s);
-        let e = br[s], t = lt.size - Kn;
-        if (t > Kn / 10) {
-          for (let i of lt) if (lt.delete(i), delete br[i], --t <= 0) break;
+      Object.defineProperty(qi, "__esModule", { value: true });
+      qi.normalizeUnicode = void 0;
+      var Rr = /* @__PURE__ */ Object.create(null), Qn = 1e4, ct = /* @__PURE__ */ new Set(), Zh = /* @__PURE__ */ __name((s) => {
+        ct.has(s) ? ct.delete(s) : Rr[s] = s.normalize("NFD").toLocaleLowerCase("en").toLocaleUpperCase("en"), ct.add(s);
+        let e = Rr[s], t = ct.size - Qn;
+        if (t > Qn / 10) {
+          for (let i of ct) if (ct.delete(i), delete Rr[i], --t <= 0) break;
         }
         return e;
-      }, "Uh");
-      xi.normalizeUnicode = Uh;
+      }, "Zh");
+      qi.normalizeUnicode = Zh;
     });
-    var Xn = d((Ui) => {
+    var to = d((Wi) => {
       "use strict";
-      Object.defineProperty(Ui, "__esModule", { value: true });
-      Ui.PathReservations = void 0;
-      var $n = require("node:path"), qh = Vn(), Wh = wi(), Hh = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform, Zh = Hh === "win32", Gh = /* @__PURE__ */ __name((s) => s.split("/").slice(0, -1).reduce((t, i) => {
+      Object.defineProperty(Wi, "__esModule", { value: true });
+      Wi.PathReservations = void 0;
+      var eo = require("node:path"), Yh = Jn(), Kh = yi(), Vh = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform, $h = Vh === "win32", Xh = /* @__PURE__ */ __name((s) => s.split("/").slice(0, -1).reduce((t, i) => {
         let r = t.at(-1);
-        return r !== void 0 && (i = (0, $n.join)(r, i)), t.push(i || "/"), t;
-      }, []), "Gh"), Sr = class {
+        return r !== void 0 && (i = (0, eo.join)(r, i)), t.push(i || "/"), t;
+      }, []), "Xh"), Or = class {
         static {
-          __name(this, "Sr");
+          __name(this, "Or");
         }
         #e = /* @__PURE__ */ new Map();
         #i = /* @__PURE__ */ new Map();
         #s = /* @__PURE__ */ new Set();
         reserve(e, t) {
-          e = Zh ? ["win32 parallelization disabled"] : e.map((r) => (0, Wh.stripTrailingSlashes)((0, $n.join)((0, qh.normalizeUnicode)(r))));
-          let i = new Set(e.map((r) => Gh(r)).reduce((r, n) => r.concat(n)));
+          e = $h ? ["win32 parallelization disabled"] : e.map((r) => (0, Kh.stripTrailingSlashes)((0, eo.join)((0, Yh.normalizeUnicode)(r))));
+          let i = new Set(e.map((r) => Xh(r)).reduce((r, n) => r.concat(n)));
           this.#i.set(t, { dirs: i, paths: e });
           for (let r of e) {
             let n = this.#e.get(r);
@@ -48588,18 +48652,18 @@ var require_index_min = __commonJS({
           return this.#s.delete(e), n.forEach((o) => this.#r(o)), true;
         }
       };
-      Ui.PathReservations = Sr;
+      Wi.PathReservations = Or;
     });
-    var Qn = d((qi) => {
+    var io = d((Hi) => {
       "use strict";
-      Object.defineProperty(qi, "__esModule", { value: true });
-      qi.umask = void 0;
-      var Yh = /* @__PURE__ */ __name(() => process.umask(), "Yh");
-      qi.umask = Yh;
+      Object.defineProperty(Hi, "__esModule", { value: true });
+      Hi.umask = void 0;
+      var Qh = /* @__PURE__ */ __name(() => process.umask(), "Qh");
+      Hi.umask = Qh;
     });
-    var Ar = d((z) => {
+    var Cr = d((k) => {
       "use strict";
-      var Kh = z && z.__createBinding || (Object.create ? (function(s, e, t, i) {
+      var Jh = k && k.__createBinding || (Object.create ? (function(s, e, t, i) {
         i === void 0 && (i = t);
         var r = Object.getOwnPropertyDescriptor(e, t);
         (!r || ("get" in r ? !e.__esModule : r.writable || r.configurable)) && (r = { enumerable: true, get: /* @__PURE__ */ __name(function() {
@@ -48607,11 +48671,11 @@ var require_index_min = __commonJS({
         }, "get") }), Object.defineProperty(s, i, r);
       }) : (function(s, e, t, i) {
         i === void 0 && (i = t), s[i] = e[t];
-      })), Vh = z && z.__setModuleDefault || (Object.create ? (function(s, e) {
+      })), el = k && k.__setModuleDefault || (Object.create ? (function(s, e) {
         Object.defineProperty(s, "default", { enumerable: true, value: e });
       }) : function(s, e) {
         s.default = e;
-      }), ho = z && z.__importStar || /* @__PURE__ */ (function() {
+      }), fo = k && k.__importStar || /* @__PURE__ */ (function() {
         var s = /* @__PURE__ */ __name(function(e) {
           return s = Object.getOwnPropertyNames || function(t) {
             var i = [];
@@ -48622,33 +48686,33 @@ var require_index_min = __commonJS({
         return function(e) {
           if (e && e.__esModule) return e;
           var t = {};
-          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && Kh(t, e, i[r]);
-          return Vh(t, e), t;
+          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && Jh(t, e, i[r]);
+          return el(t, e), t;
         };
-      })(), Lr = z && z.__importDefault || function(s) {
+      })(), Fr = k && k.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
-      Object.defineProperty(z, "__esModule", { value: true });
-      z.UnpackSync = z.Unpack = void 0;
-      var $h = ho(Ke()), Xh = Lr(require("node:assert")), lo = require("node:crypto"), m = Lr(require("node:fs")), g = Lr(require("node:path")), uo = jn(), co = Yn(), U = et(), Qh = pi(), Jh = qs(), Jn = ho(Hs()), el = Xn(), fo = wr(), tl = Qn(), eo = /* @__PURE__ */ Symbol("onEntry"), vr = /* @__PURE__ */ Symbol("checkFs"), to = /* @__PURE__ */ Symbol("checkFs2"), Tr = /* @__PURE__ */ Symbol("isReusable"), Z = /* @__PURE__ */ Symbol("makeFs"), Dr = /* @__PURE__ */ Symbol("file"), Pr = /* @__PURE__ */ Symbol("directory"), Hi = /* @__PURE__ */ Symbol("link"), io = /* @__PURE__ */ Symbol("symlink"), so = /* @__PURE__ */ Symbol("hardlink"), Mt = /* @__PURE__ */ Symbol("ensureNoSymlink"), ro = /* @__PURE__ */ Symbol("unsupported"), no = /* @__PURE__ */ Symbol("checkPath"), gr = /* @__PURE__ */ Symbol("stripAbsolutePath"), De = /* @__PURE__ */ Symbol("mkdir"), T = /* @__PURE__ */ Symbol("onError"), Wi = /* @__PURE__ */ Symbol("pending"), oo = /* @__PURE__ */ Symbol("pend"), ut = /* @__PURE__ */ Symbol("unpend"), Or = /* @__PURE__ */ Symbol("ended"), Rr = /* @__PURE__ */ Symbol("maybeClose"), Nr = /* @__PURE__ */ Symbol("skip"), Lt = /* @__PURE__ */ Symbol("doChown"), At = /* @__PURE__ */ Symbol("uid"), It = /* @__PURE__ */ Symbol("gid"), Ft = /* @__PURE__ */ Symbol("checkedCwd"), il = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform, Ct = il === "win32", sl = 1024, rl = /* @__PURE__ */ __name((s, e) => {
-        if (!Ct) return m.default.unlink(s, e);
-        let t = s + ".DELETE." + (0, lo.randomBytes)(16).toString("hex");
+      Object.defineProperty(k, "__esModule", { value: true });
+      k.UnpackSync = k.Unpack = void 0;
+      var tl = fo(Ke()), il = Fr(require("node:assert")), mo = require("node:crypto"), m = Fr(require("node:fs")), g = Fr(require("node:path")), po = Wn(), _o = Xn(), U = tt(), sl = _i(), rl = Zs(), so = fo(Ks()), nl = to(), wo = br(), ol = io(), ro = /* @__PURE__ */ Symbol("onEntry"), Pr = /* @__PURE__ */ Symbol("checkFs"), no = /* @__PURE__ */ Symbol("checkFs2"), Nr = /* @__PURE__ */ Symbol("isReusable"), G = /* @__PURE__ */ Symbol("makeFs"), Mr = /* @__PURE__ */ Symbol("file"), Lr = /* @__PURE__ */ Symbol("directory"), Zi = /* @__PURE__ */ Symbol("link"), oo = /* @__PURE__ */ Symbol("symlink"), ao = /* @__PURE__ */ Symbol("hardlink"), At = /* @__PURE__ */ Symbol("ensureNoSymlink"), ho = /* @__PURE__ */ Symbol("unsupported"), lo = /* @__PURE__ */ Symbol("checkPath"), vr = /* @__PURE__ */ Symbol("stripAbsolutePath"), Pe = /* @__PURE__ */ Symbol("mkdir"), T = /* @__PURE__ */ Symbol("onError"), Gi = /* @__PURE__ */ Symbol("pending"), co = /* @__PURE__ */ Symbol("pend"), ut = /* @__PURE__ */ Symbol("unpend"), Tr = /* @__PURE__ */ Symbol("ended"), Dr = /* @__PURE__ */ Symbol("maybeClose"), Ar = /* @__PURE__ */ Symbol("skip"), It = /* @__PURE__ */ Symbol("doChown"), Ft = /* @__PURE__ */ Symbol("uid"), Ct = /* @__PURE__ */ Symbol("gid"), Bt = /* @__PURE__ */ Symbol("checkedCwd"), al = process.env.TESTING_TAR_FAKE_PLATFORM || process.platform, zt = al === "win32", hl = 1024, ll = /* @__PURE__ */ __name((s, e) => {
+        if (!zt) return m.default.unlink(s, e);
+        let t = s + ".DELETE." + (0, mo.randomBytes)(16).toString("hex");
         m.default.rename(s, t, (i) => {
           if (i) return e(i);
           m.default.unlink(t, e);
         });
-      }, "rl"), nl = /* @__PURE__ */ __name((s) => {
-        if (!Ct) return m.default.unlinkSync(s);
-        let e = s + ".DELETE." + (0, lo.randomBytes)(16).toString("hex");
+      }, "ll"), cl = /* @__PURE__ */ __name((s) => {
+        if (!zt) return m.default.unlinkSync(s);
+        let e = s + ".DELETE." + (0, mo.randomBytes)(16).toString("hex");
         m.default.renameSync(s, e), m.default.unlinkSync(e);
-      }, "nl"), ao = /* @__PURE__ */ __name((s, e, t) => s !== void 0 && s === s >>> 0 ? s : e !== void 0 && e === e >>> 0 ? e : t, "ao"), Zi = class extends Qh.Parser {
+      }, "cl"), uo = /* @__PURE__ */ __name((s, e, t) => s !== void 0 && s === s >>> 0 ? s : e !== void 0 && e === e >>> 0 ? e : t, "uo"), Yi = class extends sl.Parser {
         static {
-          __name(this, "Zi");
+          __name(this, "Yi");
         }
-        [Or] = false;
-        [Ft] = false;
-        [Wi] = 0;
-        reservations = new el.PathReservations();
+        [Tr] = false;
+        [Bt] = false;
+        [Gi] = 0;
+        reservations = new nl.PathReservations();
         transform;
         writable = true;
         readable = false;
@@ -48675,32 +48739,32 @@ var require_index_min = __commonJS({
         chmod;
         constructor(e = {}) {
           if (e.ondone = () => {
-            this[Or] = true, this[Rr]();
+            this[Tr] = true, this[Dr]();
           }, super(e), this.transform = e.transform, this.chmod = !!e.chmod, typeof e.uid == "number" || typeof e.gid == "number") {
             if (typeof e.uid != "number" || typeof e.gid != "number") throw new TypeError("cannot set owner without number uid and gid");
             if (e.preserveOwner) throw new TypeError("cannot preserve owner in archive and also set owner explicitly");
             this.uid = e.uid, this.gid = e.gid, this.setOwner = true;
           } else this.uid = void 0, this.gid = void 0, this.setOwner = false;
-          this.preserveOwner = e.preserveOwner === void 0 && typeof e.uid != "number" ? !!(process.getuid && process.getuid() === 0) : !!e.preserveOwner, this.processUid = (this.preserveOwner || this.setOwner) && process.getuid ? process.getuid() : void 0, this.processGid = (this.preserveOwner || this.setOwner) && process.getgid ? process.getgid() : void 0, this.maxDepth = typeof e.maxDepth == "number" ? e.maxDepth : sl, this.forceChown = e.forceChown === true, this.win32 = !!e.win32 || Ct, this.newer = !!e.newer, this.keep = !!e.keep, this.noMtime = !!e.noMtime, this.preservePaths = !!e.preservePaths, this.unlink = !!e.unlink, this.cwd = (0, U.normalizeWindowsPath)(g.default.resolve(e.cwd || process.cwd())), this.strip = Number(e.strip) || 0, this.processUmask = this.chmod ? typeof e.processUmask == "number" ? e.processUmask : (0, tl.umask)() : 0, this.umask = typeof e.umask == "number" ? e.umask : this.processUmask, this.dmode = e.dmode || 511 & ~this.umask, this.fmode = e.fmode || 438 & ~this.umask, this.on("entry", (t) => this[eo](t));
+          this.preserveOwner = e.preserveOwner === void 0 && typeof e.uid != "number" ? process.getuid?.() === 0 : !!e.preserveOwner, this.processUid = (this.preserveOwner || this.setOwner) && process.getuid ? process.getuid() : void 0, this.processGid = (this.preserveOwner || this.setOwner) && process.getgid ? process.getgid() : void 0, this.maxDepth = typeof e.maxDepth == "number" ? e.maxDepth : hl, this.forceChown = e.forceChown === true, this.win32 = !!e.win32 || zt, this.newer = !!e.newer, this.keep = !!e.keep, this.noMtime = !!e.noMtime, this.preservePaths = !!e.preservePaths, this.unlink = !!e.unlink, this.cwd = (0, U.normalizeWindowsPath)(g.default.resolve(e.cwd || process.cwd())), this.strip = Number(e.strip) || 0, this.processUmask = this.chmod ? typeof e.processUmask == "number" ? e.processUmask : (0, ol.umask)() : 0, this.umask = typeof e.umask == "number" ? e.umask : this.processUmask, this.dmode = e.dmode || 511 & ~this.umask, this.fmode = e.fmode || 438 & ~this.umask, this.on("entry", (t) => this[ro](t));
         }
         warn(e, t, i = {}) {
           return (e === "TAR_BAD_ARCHIVE" || e === "TAR_ABORT") && (i.recoverable = false), super.warn(e, t, i);
         }
-        [Rr]() {
-          this[Or] && this[Wi] === 0 && (this.emit("prefinish"), this.emit("finish"), this.emit("end"));
+        [Dr]() {
+          this[Tr] && this[Gi] === 0 && (this.emit("prefinish"), this.emit("finish"), this.emit("end"));
         }
-        [gr](e, t) {
+        [vr](e, t) {
           let i = e[t], { type: r } = e;
           if (!i || this.preservePaths) return true;
-          let [n, o] = (0, Jh.stripAbsolutePath)(i), a = o.replaceAll(/\\/g, "/").split("/");
-          if (a.includes("..") || Ct && /^[a-z]:\.\.$/i.test(a[0] ?? "")) {
+          let [n, o] = (0, rl.stripAbsolutePath)(i), a = o.replaceAll(/\\/g, "/").split("/");
+          if (a.includes("..") || zt && /^[a-z]:\.\.$/i.test(a[0] ?? "")) {
             if (t === "path" || r === "Link") return this.warn("TAR_ENTRY_ERROR", `${t} contains '..'`, { entry: e, [t]: i }), false;
             let h = g.default.posix.dirname(e.path), l = g.default.posix.normalize(g.default.posix.join(h, a.join("/")));
             if (l.startsWith("../") || l === "..") return this.warn("TAR_ENTRY_ERROR", `${t} escapes extraction directory`, { entry: e, [t]: i }), false;
           }
           return n && (e[t] = String(o), this.warn("TAR_ENTRY_INFO", `stripping ${n} from absolute ${t}`, { entry: e, [t]: i })), true;
         }
-        [no](e) {
+        [lo](e) {
           let t = (0, U.normalizeWindowsPath)(e.path), i = t.split("/");
           if (this.strip) {
             if (i.length < this.strip) return false;
@@ -48712,20 +48776,20 @@ var require_index_min = __commonJS({
             i.splice(0, this.strip), e.path = i.join("/");
           }
           if (isFinite(this.maxDepth) && i.length > this.maxDepth) return this.warn("TAR_ENTRY_ERROR", "path excessively deep", { entry: e, path: t, depth: i.length, maxDepth: this.maxDepth }), false;
-          if (!this[gr](e, "path") || !this[gr](e, "linkpath")) return false;
+          if (!this[vr](e, "path") || !this[vr](e, "linkpath")) return false;
           if (e.absolute = g.default.isAbsolute(e.path) ? (0, U.normalizeWindowsPath)(g.default.resolve(e.path)) : (0, U.normalizeWindowsPath)(g.default.resolve(this.cwd, e.path)), !this.preservePaths && typeof e.absolute == "string" && e.absolute.indexOf(this.cwd + "/") !== 0 && e.absolute !== this.cwd) return this.warn("TAR_ENTRY_ERROR", "path escaped extraction target", { entry: e, path: (0, U.normalizeWindowsPath)(e.path), resolvedPath: e.absolute, cwd: this.cwd }), false;
           if (e.absolute === this.cwd && e.type !== "Directory" && e.type !== "GNUDumpDir") return false;
           if (this.win32) {
             let { root: r } = g.default.win32.parse(String(e.absolute));
-            e.absolute = r + Jn.encode(String(e.absolute).slice(r.length));
+            e.absolute = r + so.encode(String(e.absolute).slice(r.length));
             let { root: n } = g.default.win32.parse(e.path);
-            e.path = n + Jn.encode(e.path.slice(n.length));
+            e.path = n + so.encode(e.path.slice(n.length));
           }
           return true;
         }
-        [eo](e) {
-          if (!this[no](e)) return e.resume();
-          switch (Xh.default.equal(typeof e.absolute, "string"), e.type) {
+        [ro](e) {
+          if (!this[lo](e)) return e.resume();
+          switch (il.default.equal(typeof e.absolute, "string"), e.type) {
             case "Directory":
             case "GNUDumpDir":
               e.mode && (e.mode = e.mode | 448);
@@ -48734,28 +48798,28 @@ var require_index_min = __commonJS({
             case "ContiguousFile":
             case "Link":
             case "SymbolicLink":
-              return this[vr](e);
+              return this[Pr](e);
             default:
-              return this[ro](e);
+              return this[ho](e);
           }
         }
         [T](e, t) {
           e.name === "CwdError" ? this.emit("error", e) : (this.warn("TAR_ENTRY_ERROR", e, { entry: t }), this[ut](), t.resume());
         }
-        [De](e, t, i) {
-          (0, co.mkdir)((0, U.normalizeWindowsPath)(e), { uid: this.uid, gid: this.gid, processUid: this.processUid, processGid: this.processGid, umask: this.processUmask, preserve: this.preservePaths, unlink: this.unlink, cwd: this.cwd, mode: t }, i);
-        }
-        [Lt](e) {
-          return this.forceChown || this.preserveOwner && (typeof e.uid == "number" && e.uid !== this.processUid || typeof e.gid == "number" && e.gid !== this.processGid) || typeof this.uid == "number" && this.uid !== this.processUid || typeof this.gid == "number" && this.gid !== this.processGid;
-        }
-        [At](e) {
-          return ao(this.uid, e.uid, this.processUid);
+        [Pe](e, t, i) {
+          (0, _o.mkdir)((0, U.normalizeWindowsPath)(e), { uid: this.uid, gid: this.gid, processUid: this.processUid, processGid: this.processGid, umask: this.processUmask, preserve: this.preservePaths, unlink: this.unlink, cwd: this.cwd, mode: t }, i);
         }
         [It](e) {
-          return ao(this.gid, e.gid, this.processGid);
+          return this.forceChown || this.preserveOwner && (typeof e.uid == "number" && e.uid !== this.processUid || typeof e.gid == "number" && e.gid !== this.processGid) || typeof this.uid == "number" && this.uid !== this.processUid || typeof this.gid == "number" && this.gid !== this.processGid;
         }
-        [Dr](e, t) {
-          let i = typeof e.mode == "number" ? e.mode & 4095 : this.fmode, r = new $h.WriteStream(String(e.absolute), { flags: (0, uo.getWriteFlag)(e.size), mode: i, autoClose: false });
+        [Ft](e) {
+          return uo(this.uid, e.uid, this.processUid);
+        }
+        [Ct](e) {
+          return uo(this.gid, e.gid, this.processGid);
+        }
+        [Mr](e, t) {
+          let i = typeof e.mode == "number" ? e.mode & 4095 : this.fmode, r = new tl.WriteStream(String(e.absolute), { flags: (0, po.getWriteFlag)(e.size), mode: i, autoClose: false });
           r.on("error", (h) => {
             r.fd && m.default.close(r.fd, () => {
             }), r.write = () => true, this[T](h, e), t();
@@ -48774,13 +48838,13 @@ var require_index_min = __commonJS({
             let h = String(e.absolute), l = r.fd;
             if (typeof l == "number" && e.mtime && !this.noMtime) {
               n++;
-              let u = e.atime || /* @__PURE__ */ new Date(), c = e.mtime;
-              m.default.futimes(l, u, c, (E) => E ? m.default.utimes(h, u, c, (D) => o(D && E)) : o());
+              let c = e.atime || /* @__PURE__ */ new Date(), u = e.mtime;
+              m.default.futimes(l, c, u, (b) => b ? m.default.utimes(h, c, u, (D) => o(D && b)) : o());
             }
-            if (typeof l == "number" && this[Lt](e)) {
+            if (typeof l == "number" && this[It](e)) {
               n++;
-              let u = this[At](e), c = this[It](e);
-              typeof u == "number" && typeof c == "number" && m.default.fchown(l, u, c, (E) => E ? m.default.chown(h, u, c, (D) => o(D && E)) : o());
+              let c = this[Ft](e), u = this[Ct](e);
+              typeof c == "number" && typeof u == "number" && m.default.fchown(l, c, u, (b) => b ? m.default.chown(h, c, u, (D) => o(D && b)) : o());
             }
             o();
           });
@@ -48789,9 +48853,9 @@ var require_index_min = __commonJS({
             this[T](h, e), t();
           }), e.pipe(a)), a.pipe(r);
         }
-        [Pr](e, t) {
+        [Lr](e, t) {
           let i = typeof e.mode == "number" ? e.mode & 4095 : this.dmode;
-          this[De](String(e.absolute), i, (r) => {
+          this[Pe](String(e.absolute), i, (r) => {
             if (r) {
               this[T](r, e), t();
               return;
@@ -48799,66 +48863,66 @@ var require_index_min = __commonJS({
             let n = 1, o = /* @__PURE__ */ __name(() => {
               --n === 0 && (t(), this[ut](), e.resume());
             }, "o");
-            e.mtime && !this.noMtime && (n++, m.default.utimes(String(e.absolute), e.atime || /* @__PURE__ */ new Date(), e.mtime, o)), this[Lt](e) && (n++, m.default.chown(String(e.absolute), Number(this[At](e)), Number(this[It](e)), o)), o();
+            e.mtime && !this.noMtime && (n++, m.default.utimes(String(e.absolute), e.atime || /* @__PURE__ */ new Date(), e.mtime, o)), this[It](e) && (n++, m.default.chown(String(e.absolute), Number(this[Ft](e)), Number(this[Ct](e)), o)), o();
           });
         }
-        [ro](e) {
+        [ho](e) {
           e.unsupported = true, this.warn("TAR_ENTRY_UNSUPPORTED", `unsupported entry type: ${e.type}`, { entry: e }), e.resume();
         }
-        [io](e, t) {
+        [oo](e, t) {
           let i = (0, U.normalizeWindowsPath)(g.default.relative(this.cwd, g.default.resolve(g.default.dirname(String(e.absolute)), String(e.linkpath)))).split("/");
-          this[Mt](e, this.cwd, i, () => this[Hi](e, String(e.linkpath), "symlink", t), (r) => {
+          this[At](e, this.cwd, i, () => this[Zi](e, String(e.linkpath), "symlink", t), (r) => {
             this[T](r, e), t();
           });
         }
-        [so](e, t) {
+        [ao](e, t) {
           let i = (0, U.normalizeWindowsPath)(g.default.resolve(this.cwd, String(e.linkpath))), r = (0, U.normalizeWindowsPath)(String(e.linkpath)).split("/");
-          this[Mt](e, this.cwd, r, () => this[Hi](e, i, "link", t), (n) => {
+          this[At](e, this.cwd, r, () => this[Zi](e, i, "link", t), (n) => {
             this[T](n, e), t();
           });
         }
-        [Mt](e, t, i, r, n) {
+        [At](e, t, i, r, n) {
           let o = i.shift();
           if (this.preservePaths || o === void 0) return r();
           let a = g.default.resolve(t, o);
           m.default.lstat(a, (h, l) => {
             if (h) return r();
-            if (l?.isSymbolicLink()) return n(new fo.SymlinkError(a, g.default.resolve(a, i.join("/"))));
-            this[Mt](e, a, i, r, n);
+            if (l?.isSymbolicLink()) return n(new wo.SymlinkError(a, g.default.resolve(a, i.join("/"))));
+            this[At](e, a, i, r, n);
           });
         }
-        [oo]() {
-          this[Wi]++;
+        [co]() {
+          this[Gi]++;
         }
         [ut]() {
-          this[Wi]--, this[Rr]();
+          this[Gi]--, this[Dr]();
         }
-        [Nr](e) {
+        [Ar](e) {
           this[ut](), e.resume();
         }
-        [Tr](e, t) {
-          return e.type === "File" && !this.unlink && t.isFile() && t.nlink <= 1 && !Ct;
+        [Nr](e, t) {
+          return e.type === "File" && !this.unlink && t.isFile() && t.nlink <= 1 && !zt;
         }
-        [vr](e) {
-          this[oo]();
+        [Pr](e) {
+          this[co]();
           let t = [e.path];
-          e.linkpath && t.push(e.linkpath), this.reservations.reserve(t, (i) => this[to](e, i));
+          e.linkpath && t.push(e.linkpath), this.reservations.reserve(t, (i) => this[no](e, i));
         }
-        [to](e, t) {
+        [no](e, t) {
           let i = /* @__PURE__ */ __name((a) => {
             t(a);
           }, "i"), r = /* @__PURE__ */ __name(() => {
-            this[De](this.cwd, this.dmode, (a) => {
+            this[Pe](this.cwd, this.dmode, (a) => {
               if (a) {
                 this[T](a, e), i();
                 return;
               }
-              this[Ft] = true, n();
+              this[Bt] = true, n();
             });
           }, "r"), n = /* @__PURE__ */ __name(() => {
             if (e.absolute !== this.cwd) {
               let a = (0, U.normalizeWindowsPath)(g.default.dirname(String(e.absolute)));
-              if (a !== this.cwd) return this[De](a, this.dmode, (h) => {
+              if (a !== this.cwd) return this[Pe](a, this.dmode, (h) => {
                 if (h) {
                   this[T](h, e), i();
                   return;
@@ -48870,24 +48934,24 @@ var require_index_min = __commonJS({
           }, "n"), o = /* @__PURE__ */ __name(() => {
             m.default.lstat(String(e.absolute), (a, h) => {
               if (h && (this.keep || this.newer && h.mtime > (e.mtime ?? h.mtime))) {
-                this[Nr](e), i();
+                this[Ar](e), i();
                 return;
               }
-              if (a || this[Tr](e, h)) return this[Z](null, e, i);
+              if (a || this[Nr](e, h)) return this[G](null, e, i);
               if (h.isDirectory()) {
                 if (e.type === "Directory") {
-                  let l = this.chmod && e.mode && (h.mode & 4095) !== e.mode, u = /* @__PURE__ */ __name((c) => this[Z](c ?? null, e, i), "u");
-                  return l ? m.default.chmod(String(e.absolute), Number(e.mode), u) : u();
+                  let l = this.chmod && e.mode && (h.mode & 4095) !== e.mode, c = /* @__PURE__ */ __name((u) => this[G](u ?? null, e, i), "c");
+                  return l ? m.default.chmod(String(e.absolute), Number(e.mode), c) : c();
                 }
-                if (e.absolute !== this.cwd) return m.default.rmdir(String(e.absolute), (l) => this[Z](l ?? null, e, i));
+                if (e.absolute !== this.cwd) return m.default.rmdir(String(e.absolute), (l) => this[G](l ?? null, e, i));
               }
-              if (e.absolute === this.cwd) return this[Z](null, e, i);
-              rl(String(e.absolute), (l) => this[Z](l ?? null, e, i));
+              if (e.absolute === this.cwd) return this[G](null, e, i);
+              ll(String(e.absolute), (l) => this[G](l ?? null, e, i));
             });
           }, "o");
-          this[Ft] ? n() : r();
+          this[Bt] ? n() : r();
         }
-        [Z](e, t, i) {
+        [G](e, t, i) {
           if (e) {
             this[T](e, t), i();
             return;
@@ -48896,68 +48960,68 @@ var require_index_min = __commonJS({
             case "File":
             case "OldFile":
             case "ContiguousFile":
-              return this[Dr](t, i);
+              return this[Mr](t, i);
             case "Link":
-              return this[so](t, i);
+              return this[ao](t, i);
             case "SymbolicLink":
-              return this[io](t, i);
+              return this[oo](t, i);
             case "Directory":
             case "GNUDumpDir":
-              return this[Pr](t, i);
+              return this[Lr](t, i);
           }
         }
-        [Hi](e, t, i, r) {
+        [Zi](e, t, i, r) {
           m.default[i](t, String(e.absolute), (n) => {
             n ? this[T](n, e) : (this[ut](), e.resume()), r();
           });
         }
       };
-      z.Unpack = Zi;
-      var Nt = /* @__PURE__ */ __name((s) => {
+      k.Unpack = Yi;
+      var Lt = /* @__PURE__ */ __name((s) => {
         try {
           return [null, s()];
         } catch (e) {
           return [e, null];
         }
-      }, "Nt"), Mr = class extends Zi {
+      }, "Lt"), Ir = class extends Yi {
         static {
-          __name(this, "Mr");
+          __name(this, "Ir");
         }
         sync = true;
-        [Z](e, t) {
-          return super[Z](e, t, () => {
+        [G](e, t) {
+          return super[G](e, t, () => {
           });
         }
-        [vr](e) {
-          if (!this[Ft]) {
-            let n = this[De](this.cwd, this.dmode);
+        [Pr](e) {
+          if (!this[Bt]) {
+            let n = this[Pe](this.cwd, this.dmode);
             if (n) return this[T](n, e);
-            this[Ft] = true;
+            this[Bt] = true;
           }
           if (e.absolute !== this.cwd) {
             let n = (0, U.normalizeWindowsPath)(g.default.dirname(String(e.absolute)));
             if (n !== this.cwd) {
-              let o = this[De](n, this.dmode);
+              let o = this[Pe](n, this.dmode);
               if (o) return this[T](o, e);
             }
           }
-          let [t, i] = Nt(() => m.default.lstatSync(String(e.absolute)));
-          if (i && (this.keep || this.newer && i.mtime > (e.mtime ?? i.mtime))) return this[Nr](e);
-          if (t || this[Tr](e, i)) return this[Z](null, e);
+          let [t, i] = Lt(() => m.default.lstatSync(String(e.absolute)));
+          if (i && (this.keep || this.newer && i.mtime > (e.mtime ?? i.mtime))) return this[Ar](e);
+          if (t || this[Nr](e, i)) return this[G](null, e);
           if (i.isDirectory()) {
             if (e.type === "Directory") {
-              let o = this.chmod && e.mode && (i.mode & 4095) !== e.mode, [a] = o ? Nt(() => {
+              let o = this.chmod && e.mode && (i.mode & 4095) !== e.mode, [a] = o ? Lt(() => {
                 m.default.chmodSync(String(e.absolute), Number(e.mode));
               }) : [];
-              return this[Z](a, e);
+              return this[G](a, e);
             }
-            let [n] = Nt(() => m.default.rmdirSync(String(e.absolute)));
-            this[Z](n, e);
+            let [n] = Lt(() => m.default.rmdirSync(String(e.absolute)));
+            this[G](n, e);
           }
-          let [r] = e.absolute === this.cwd ? [] : Nt(() => nl(String(e.absolute)));
-          this[Z](r, e);
+          let [r] = e.absolute === this.cwd ? [] : Lt(() => cl(String(e.absolute)));
+          this[G](r, e);
         }
-        [Dr](e, t) {
+        [Mr](e, t) {
           let i = typeof e.mode == "number" ? e.mode & 4095 : this.fmode, r = /* @__PURE__ */ __name((a) => {
             let h;
             try {
@@ -48968,7 +49032,7 @@ var require_index_min = __commonJS({
             (a || h) && this[T](a || h, e), t();
           }, "r"), n;
           try {
-            n = m.default.openSync(String(e.absolute), (0, uo.getWriteFlag)(e.size), i);
+            n = m.default.openSync(String(e.absolute), (0, po.getWriteFlag)(e.size), i);
           } catch (a) {
             return r(a);
           }
@@ -48985,31 +49049,31 @@ var require_index_min = __commonJS({
               let h = e.atime || /* @__PURE__ */ new Date(), l = e.mtime;
               try {
                 m.default.futimesSync(n, h, l);
-              } catch (u) {
+              } catch (c) {
                 try {
                   m.default.utimesSync(String(e.absolute), h, l);
                 } catch {
-                  a = u;
+                  a = c;
                 }
               }
             }
-            if (this[Lt](e)) {
-              let h = this[At](e), l = this[It](e);
+            if (this[It](e)) {
+              let h = this[Ft](e), l = this[Ct](e);
               try {
                 m.default.fchownSync(n, Number(h), Number(l));
-              } catch (u) {
+              } catch (c) {
                 try {
                   m.default.chownSync(String(e.absolute), Number(h), Number(l));
                 } catch {
-                  a = a || u;
+                  a = a || c;
                 }
               }
             }
             r(a);
           });
         }
-        [Pr](e, t) {
-          let i = typeof e.mode == "number" ? e.mode & 4095 : this.dmode, r = this[De](String(e.absolute), i);
+        [Lr](e, t) {
+          let i = typeof e.mode == "number" ? e.mode & 4095 : this.dmode, r = this[Pe](String(e.absolute), i);
           if (r) {
             this[T](r, e), t();
             return;
@@ -49018,31 +49082,31 @@ var require_index_min = __commonJS({
             m.default.utimesSync(String(e.absolute), e.atime || /* @__PURE__ */ new Date(), e.mtime);
           } catch {
           }
-          if (this[Lt](e)) try {
-            m.default.chownSync(String(e.absolute), Number(this[At](e)), Number(this[It](e)));
+          if (this[It](e)) try {
+            m.default.chownSync(String(e.absolute), Number(this[Ft](e)), Number(this[Ct](e)));
           } catch {
           }
           t(), e.resume();
         }
-        [De](e, t) {
+        [Pe](e, t) {
           try {
-            return (0, co.mkdirSync)((0, U.normalizeWindowsPath)(e), { uid: this.uid, gid: this.gid, processUid: this.processUid, processGid: this.processGid, umask: this.processUmask, preserve: this.preservePaths, unlink: this.unlink, cwd: this.cwd, mode: t });
+            return (0, _o.mkdirSync)((0, U.normalizeWindowsPath)(e), { uid: this.uid, gid: this.gid, processUid: this.processUid, processGid: this.processGid, umask: this.processUmask, preserve: this.preservePaths, unlink: this.unlink, cwd: this.cwd, mode: t });
           } catch (i) {
             return i;
           }
         }
-        [Mt](e, t, i, r, n) {
+        [At](e, t, i, r, n) {
           if (this.preservePaths || i.length === 0) return r();
           let o = t;
           for (let a of i) {
             o = g.default.resolve(o, a);
-            let [h, l] = Nt(() => m.default.lstatSync(o));
+            let [h, l] = Lt(() => m.default.lstatSync(o));
             if (h) return r();
-            if (l.isSymbolicLink()) return n(new fo.SymlinkError(o, g.default.resolve(t, i.join("/"))));
+            if (l.isSymbolicLink()) return n(new wo.SymlinkError(o, g.default.resolve(t, i.join("/"))));
           }
           r();
         }
-        [Hi](e, t, i, r) {
+        [Zi](e, t, i, r) {
           let n = `${i}Sync`;
           try {
             m.default[n](t, String(e.absolute)), r(), e.resume();
@@ -49051,11 +49115,11 @@ var require_index_min = __commonJS({
           }
         }
       };
-      z.UnpackSync = Mr;
+      k.UnpackSync = Ir;
     });
-    var Ir = d((G) => {
+    var Br = d((Z) => {
       "use strict";
-      var ol = G && G.__createBinding || (Object.create ? (function(s, e, t, i) {
+      var ul = Z && Z.__createBinding || (Object.create ? (function(s, e, t, i) {
         i === void 0 && (i = t);
         var r = Object.getOwnPropertyDescriptor(e, t);
         (!r || ("get" in r ? !e.__esModule : r.writable || r.configurable)) && (r = { enumerable: true, get: /* @__PURE__ */ __name(function() {
@@ -49063,11 +49127,11 @@ var require_index_min = __commonJS({
         }, "get") }), Object.defineProperty(s, i, r);
       }) : (function(s, e, t, i) {
         i === void 0 && (i = t), s[i] = e[t];
-      })), al = G && G.__setModuleDefault || (Object.create ? (function(s, e) {
+      })), fl = Z && Z.__setModuleDefault || (Object.create ? (function(s, e) {
         Object.defineProperty(s, "default", { enumerable: true, value: e });
       }) : function(s, e) {
         s.default = e;
-      }), hl = G && G.__importStar || /* @__PURE__ */ (function() {
+      }), dl = Z && Z.__importStar || /* @__PURE__ */ (function() {
         var s = /* @__PURE__ */ __name(function(e) {
           return s = Object.getOwnPropertyNames || function(t) {
             var i = [];
@@ -49078,42 +49142,42 @@ var require_index_min = __commonJS({
         return function(e) {
           if (e && e.__esModule) return e;
           var t = {};
-          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && ol(t, e, i[r]);
-          return al(t, e), t;
+          if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && ul(t, e, i[r]);
+          return fl(t, e), t;
         };
-      })(), ll = G && G.__importDefault || function(s) {
+      })(), ml = Z && Z.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
-      Object.defineProperty(G, "__esModule", { value: true });
-      G.extract = void 0;
-      var mo = hl(Ke()), po = ll(require("node:fs")), ul = st(), cl = Ve(), Gi = Ar(), fl = /* @__PURE__ */ __name((s) => {
-        let e = new Gi.UnpackSync(s), t = s.file, i = po.default.statSync(t), r = s.maxReadSize || 16 * 1024 * 1024;
-        new mo.ReadStreamSync(t, { readSize: r, size: i.size }).pipe(e);
-      }, "fl"), dl = /* @__PURE__ */ __name((s, e) => {
-        let t = new Gi.Unpack(s), i = s.maxReadSize || 16 * 1024 * 1024, r = s.file;
+      Object.defineProperty(Z, "__esModule", { value: true });
+      Z.extract = void 0;
+      var yo = dl(Ke()), Eo = ml(require("node:fs")), pl = rt(), _l = Ve(), Ki = Cr(), wl = /* @__PURE__ */ __name((s) => {
+        let e = new Ki.UnpackSync(s), t = s.file, i = Eo.default.statSync(t), r = s.maxReadSize || 16 * 1024 * 1024;
+        new yo.ReadStreamSync(t, { readSize: r, size: i.size }).pipe(e);
+      }, "wl"), yl = /* @__PURE__ */ __name((s, e) => {
+        let t = new Ki.Unpack(s), i = s.maxReadSize || 16 * 1024 * 1024, r = s.file;
         return new Promise((o, a) => {
-          t.on("error", a), t.on("close", o), po.default.stat(r, (h, l) => {
+          t.on("error", a), t.on("close", o), Eo.default.stat(r, (h, l) => {
             if (h) a(h);
             else {
-              let u = new mo.ReadStream(r, { readSize: i, size: l.size });
-              u.on("error", a), u.pipe(t);
+              let c = new yo.ReadStream(r, { readSize: i, size: l.size });
+              c.on("error", a), c.pipe(t);
             }
           });
         });
-      }, "dl");
-      G.extract = (0, cl.makeCommand)(fl, dl, (s) => new Gi.UnpackSync(s), (s) => new Gi.Unpack(s), (s, e) => {
-        e?.length && (0, ul.filesFilter)(s, e);
+      }, "yl");
+      Z.extract = (0, _l.makeCommand)(wl, yl, (s) => new Ki.UnpackSync(s), (s) => new Ki.Unpack(s), (s, e) => {
+        e?.length && (0, pl.filesFilter)(s, e);
       });
     });
-    var Yi = d((ct) => {
+    var Vi = d((ft) => {
       "use strict";
-      var _o = ct && ct.__importDefault || function(s) {
+      var bo = ft && ft.__importDefault || function(s) {
         return s && s.__esModule ? s : { default: s };
       };
-      Object.defineProperty(ct, "__esModule", { value: true });
-      ct.replace = void 0;
-      var wo = Ke(), q = _o(require("node:fs")), yo = _o(require("node:path")), Eo = Je(), bo = st(), ml = Ve(), pl = $t(), So = Ii(), _l = /* @__PURE__ */ __name((s, e) => {
-        let t = new So.PackSync(s), i = true, r, n;
+      Object.defineProperty(ft, "__esModule", { value: true });
+      ft.replace = void 0;
+      var So = Ke(), q = bo(require("node:fs")), go = bo(require("node:path")), Ro = et(), Oo = rt(), El = Ve(), bl = Qt(), vo = Ci(), Sl = /* @__PURE__ */ __name((s, e) => {
+        let t = new vo.PackSync(s), i = true, r, n;
         try {
           try {
             r = q.default.openSync(s.file, "r+");
@@ -49123,94 +49187,94 @@ var require_index_min = __commonJS({
           }
           let o = q.default.fstatSync(r), a = Buffer.alloc(512);
           e: for (n = 0; n < o.size; n += 512) {
-            for (let u = 0, c = 0; u < 512; u += c) {
-              if (c = q.default.readSync(r, a, u, a.length - u, n + u), n === 0 && a[0] === 31 && a[1] === 139) throw new Error("cannot append to compressed archives");
-              if (!c) break e;
+            for (let c = 0, u = 0; c < 512; c += u) {
+              if (u = q.default.readSync(r, a, c, a.length - c, n + c), n === 0 && a[0] === 31 && a[1] === 139) throw new Error("cannot append to compressed archives");
+              if (!u) break e;
             }
-            let h = new Eo.Header(a);
+            let h = new Ro.Header(a);
             if (!h.cksumValid) break;
             let l = 512 * Math.ceil((h.size || 0) / 512);
             if (n + l + 512 > o.size) break;
             n += l, s.mtimeCache && h.mtime && s.mtimeCache.set(String(h.path), h.mtime);
           }
-          i = false, wl(s, t, n, r, e);
+          i = false, gl(s, t, n, r, e);
         } finally {
           if (i) try {
             q.default.closeSync(r);
           } catch {
           }
         }
-      }, "_l"), wl = /* @__PURE__ */ __name((s, e, t, i, r) => {
-        let n = new wo.WriteStreamSync(s.file, { fd: i, start: t });
-        e.pipe(n), El(e, r);
-      }, "wl"), yl = /* @__PURE__ */ __name((s, e) => {
+      }, "Sl"), gl = /* @__PURE__ */ __name((s, e, t, i, r) => {
+        let n = new So.WriteStreamSync(s.file, { fd: i, start: t });
+        e.pipe(n), Ol(e, r);
+      }, "gl"), Rl = /* @__PURE__ */ __name((s, e) => {
         e = Array.from(e);
-        let t = new So.Pack(s), i = /* @__PURE__ */ __name((n, o, a) => {
+        let t = new vo.Pack(s), i = /* @__PURE__ */ __name((n, o, a) => {
           let h = /* @__PURE__ */ __name((D, A) => {
             D ? q.default.close(n, (w) => a(D)) : a(null, A);
           }, "h"), l = 0;
           if (o === 0) return h(null, 0);
-          let u = 0, c = Buffer.alloc(512), E = /* @__PURE__ */ __name((D, A) => {
+          let c = 0, u = Buffer.alloc(512), b = /* @__PURE__ */ __name((D, A) => {
             if (D || A === void 0) return h(D);
-            if (u += A, u < 512 && A) return q.default.read(n, c, u, c.length - u, l + u, E);
-            if (l === 0 && c[0] === 31 && c[1] === 139) return h(new Error("cannot append to compressed archives"));
-            if (u < 512) return h(null, l);
-            let w = new Eo.Header(c);
+            if (c += A, c < 512 && A) return q.default.read(n, u, c, u.length - c, l + c, b);
+            if (l === 0 && u[0] === 31 && u[1] === 139) return h(new Error("cannot append to compressed archives"));
+            if (c < 512) return h(null, l);
+            let w = new Ro.Header(u);
             if (!w.cksumValid) return h(null, l);
             let P = 512 * Math.ceil((w.size ?? 0) / 512);
             if (l + P + 512 > o || (l += P + 512, l >= o)) return h(null, l);
-            s.mtimeCache && w.mtime && s.mtimeCache.set(String(w.path), w.mtime), u = 0, q.default.read(n, c, 0, 512, l, E);
-          }, "E");
-          q.default.read(n, c, 0, 512, l, E);
+            s.mtimeCache && w.mtime && s.mtimeCache.set(String(w.path), w.mtime), c = 0, q.default.read(n, u, 0, 512, l, b);
+          }, "b");
+          q.default.read(n, u, 0, 512, l, b);
         }, "i");
         return new Promise((n, o) => {
           t.on("error", o);
-          let a = "r+", h = /* @__PURE__ */ __name((l, u) => {
+          let a = "r+", h = /* @__PURE__ */ __name((l, c) => {
             if (l && l.code === "ENOENT" && a === "r+") return a = "w+", q.default.open(s.file, a, h);
-            if (l || !u) return o(l);
-            q.default.fstat(u, (c, E) => {
-              if (c) return q.default.close(u, () => o(c));
-              i(u, E.size, (D, A) => {
+            if (l || !c) return o(l);
+            q.default.fstat(c, (u, b) => {
+              if (u) return q.default.close(c, () => o(u));
+              i(c, b.size, (D, A) => {
                 if (D) return o(D);
-                let w = new wo.WriteStream(s.file, { fd: u, start: A });
-                t.pipe(w), w.on("error", o), w.on("close", n), bl(t, e);
+                let w = new So.WriteStream(s.file, { fd: c, start: A });
+                t.pipe(w), w.on("error", o), w.on("close", n), vl(t, e);
               });
             });
           }, "h");
           q.default.open(s.file, a, h);
         });
-      }, "yl"), El = /* @__PURE__ */ __name((s, e) => {
+      }, "Rl"), Ol = /* @__PURE__ */ __name((s, e) => {
         e.forEach((t) => {
-          t.charAt(0) === "@" ? (0, bo.list)({ file: yo.default.resolve(s.cwd, t.slice(1)), sync: true, noResume: true, onReadEntry: /* @__PURE__ */ __name((i) => s.add(i), "onReadEntry") }) : s.add(t);
+          t.charAt(0) === "@" ? (0, Oo.list)({ file: go.default.resolve(s.cwd, t.slice(1)), sync: true, noResume: true, onReadEntry: /* @__PURE__ */ __name((i) => s.add(i), "onReadEntry") }) : s.add(t);
         }), s.end();
-      }, "El"), bl = /* @__PURE__ */ __name(async (s, e) => {
-        for (let t of e) t.charAt(0) === "@" ? await (0, bo.list)({ file: yo.default.resolve(String(s.cwd), t.slice(1)), noResume: true, onReadEntry: /* @__PURE__ */ __name((i) => s.add(i), "onReadEntry") }) : s.add(t);
+      }, "Ol"), vl = /* @__PURE__ */ __name(async (s, e) => {
+        for (let t of e) t.charAt(0) === "@" ? await (0, Oo.list)({ file: go.default.resolve(String(s.cwd), t.slice(1)), noResume: true, onReadEntry: /* @__PURE__ */ __name((i) => s.add(i), "onReadEntry") }) : s.add(t);
         s.end();
-      }, "bl");
-      ct.replace = (0, ml.makeCommand)(_l, yl, () => {
+      }, "vl");
+      ft.replace = (0, El.makeCommand)(Sl, Rl, () => {
         throw new TypeError("file is required");
       }, () => {
         throw new TypeError("file is required");
       }, (s, e) => {
-        if (!(0, pl.isFile)(s)) throw new TypeError("file is required");
+        if (!(0, bl.isFile)(s)) throw new TypeError("file is required");
         if (s.gzip || s.brotli || s.zstd || s.file.endsWith(".br") || s.file.endsWith(".tbr")) throw new TypeError("cannot append to compressed archives");
         if (!e?.length) throw new TypeError("no paths specified to add/replace");
       });
     });
-    var Fr = d((Ki) => {
+    var zr = d(($i) => {
       "use strict";
-      Object.defineProperty(Ki, "__esModule", { value: true });
-      Ki.update = void 0;
-      var Sl = Ve(), Bt = Yi();
-      Ki.update = (0, Sl.makeCommand)(Bt.replace.syncFile, Bt.replace.asyncFile, Bt.replace.syncNoFile, Bt.replace.asyncNoFile, (s, e = []) => {
-        Bt.replace.validate?.(s, e), gl(s);
+      Object.defineProperty($i, "__esModule", { value: true });
+      $i.update = void 0;
+      var Tl = Ve(), kt = Vi();
+      $i.update = (0, Tl.makeCommand)(kt.replace.syncFile, kt.replace.asyncFile, kt.replace.syncNoFile, kt.replace.asyncNoFile, (s, e = []) => {
+        kt.replace.validate?.(s, e), Dl(s);
       });
-      var gl = /* @__PURE__ */ __name((s) => {
+      var Dl = /* @__PURE__ */ __name((s) => {
         let e = s.filter;
         s.mtimeCache || (s.mtimeCache = /* @__PURE__ */ new Map()), s.filter = e ? (t, i) => e(t, i) && !((s.mtimeCache?.get(t) ?? i.mtime ?? 0) > (i.mtime ?? 0)) : (t, i) => !((s.mtimeCache?.get(t) ?? i.mtime ?? 0) > (i.mtime ?? 0));
-      }, "gl");
+      }, "Dl");
     });
-    var go = exports2 && exports2.__createBinding || (Object.create ? (function(s, e, t, i) {
+    var To = exports2 && exports2.__createBinding || (Object.create ? (function(s, e, t, i) {
       i === void 0 && (i = t);
       var r = Object.getOwnPropertyDescriptor(e, t);
       (!r || ("get" in r ? !e.__esModule : r.writable || r.configurable)) && (r = { enumerable: true, get: /* @__PURE__ */ __name(function() {
@@ -49219,15 +49283,15 @@ var require_index_min = __commonJS({
     }) : (function(s, e, t, i) {
       i === void 0 && (i = t), s[i] = e[t];
     }));
-    var Ol = exports2 && exports2.__setModuleDefault || (Object.create ? (function(s, e) {
+    var Pl = exports2 && exports2.__setModuleDefault || (Object.create ? (function(s, e) {
       Object.defineProperty(s, "default", { enumerable: true, value: e });
     }) : function(s, e) {
       s.default = e;
     });
     var Y = exports2 && exports2.__exportStar || function(s, e) {
-      for (var t in s) t !== "default" && !Object.prototype.hasOwnProperty.call(e, t) && go(e, s, t);
+      for (var t in s) t !== "default" && !Object.prototype.hasOwnProperty.call(e, t) && To(e, s, t);
     };
-    var Rl = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+    var Nl = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
       var s = /* @__PURE__ */ __name(function(e) {
         return s = Object.getOwnPropertyNames || function(t) {
           var i = [];
@@ -49238,45 +49302,45 @@ var require_index_min = __commonJS({
       return function(e) {
         if (e && e.__esModule) return e;
         var t = {};
-        if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && go(t, e, i[r]);
-        return Ol(t, e), t;
+        if (e != null) for (var i = s(e), r = 0; r < i.length; r++) i[r] !== "default" && To(t, e, i[r]);
+        return Pl(t, e), t;
       };
     })();
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.u = exports2.types = exports2.r = exports2.t = exports2.x = exports2.c = void 0;
-    Y(dr(), exports2);
-    var vl = dr();
+    Y(_r(), exports2);
+    var Ml = _r();
     Object.defineProperty(exports2, "c", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return vl.create;
+      return Ml.create;
     }, "get") });
-    Y(Ir(), exports2);
-    var Tl = Ir();
+    Y(Br(), exports2);
+    var Ll = Br();
     Object.defineProperty(exports2, "x", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return Tl.extract;
+      return Ll.extract;
     }, "get") });
-    Y(Je(), exports2);
-    Y(st(), exports2);
-    var Dl = st();
+    Y(et(), exports2);
+    Y(rt(), exports2);
+    var Al = rt();
     Object.defineProperty(exports2, "t", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return Dl.list;
+      return Al.list;
     }, "get") });
-    Y(Ii(), exports2);
-    Y(pi(), exports2);
-    Y(ti(), exports2);
-    Y(ni(), exports2);
-    Y(Yi(), exports2);
-    var Pl = Yi();
+    Y(Ci(), exports2);
+    Y(_i(), exports2);
+    Y(si(), exports2);
+    Y(Cs(), exports2);
+    Y(Vi(), exports2);
+    var Il = Vi();
     Object.defineProperty(exports2, "r", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return Pl.replace;
+      return Il.replace;
     }, "get") });
-    exports2.types = Rl(Ds());
-    Y(Ar(), exports2);
-    Y(Fr(), exports2);
-    var Nl = Fr();
+    exports2.types = Nl(Ns());
+    Y(Cr(), exports2);
+    Y(zr(), exports2);
+    var Fl = zr();
     Object.defineProperty(exports2, "u", { enumerable: true, get: /* @__PURE__ */ __name(function() {
-      return Nl.update;
+      return Fl.update;
     }, "get") });
-    Y(tr(), exports2);
+    Y(nr(), exports2);
   }
 });
 
