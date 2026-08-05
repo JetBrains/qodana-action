@@ -210,6 +210,7 @@ export function inputsDefaultFixture(): Inputs {
     pushFixes: 'none',
     commitMessage: '',
     nightlyVersion: '',
+    useInstalledCli: false,
     workingDirectory: ''
   }
 }

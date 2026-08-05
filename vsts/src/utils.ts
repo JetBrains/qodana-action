@@ -90,6 +90,7 @@ export function getInputs(): Inputs {
     commitMessage:
       tl.getInput('commitMessage', false) ||
       '🤖 Apply quick-fixes by Qodana \n\n[skip ci]',
+    useInstalledCli: tl.getBoolInput('useInstalledCli', false),
     workingDirectory: tl.getInput('workingDirectory', false) || '',
     // Not used by the Azure task
     additionalCacheKey: '',
@@ -138,15 +139,19 @@ export async function qodana(args: string[] = []): Promise<number> {
   })
 }
 
-/**
- * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
- * @param args qodana arguments
- * @param nightlyVersion nightly version to use (e.g. '2026.2'), empty for stable
- */
-export async function prepareAgent(
-  args: string[],
-  nightlyVersion = ''
-): Promise<void> {
+function verifyInstalledCli(): void {
+  const result = tl.execSync(EXECUTABLE, ['--version'], {
+    silent: true
+  })
+  if (result.code !== 0) {
+    throw new Error(
+      'Unable to use the preinstalled Qodana CLI. Ensure qodana is available on PATH.'
+    )
+  }
+  tl.warning(`Using preinstalled Qodana CLI version ${result.stdout.trim()}.`)
+}
+
+async function installCli(nightlyVersion: string): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
   const nightlyTag = await getNightlyTag(nightlyVersion)
@@ -167,6 +172,24 @@ export async function prepareAgent(
     extractRoot = await tool.extractTar(temp)
   }
   tool.prependPath(await tool.cacheDir(extractRoot, EXECUTABLE, VERSION))
+}
+
+/**
+ * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
+ * @param args qodana arguments
+ * @param nightlyVersion nightly version to use (e.g. '2026.2'), empty for stable
+ * @param useInstalledCli use or not already installed qodana-cli
+ */
+export async function prepareAgent(
+  args: string[],
+  nightlyVersion = '',
+  useInstalledCli = false
+): Promise<void> {
+  if (useInstalledCli) {
+    verifyInstalledCli()
+  } else {
+    await installCli(nightlyVersion)
+  }
   if (!isNativeMode(args) && !isPullSkipped(args)) {
     const pull = await qodana(getQodanaPullArgs(args))
     if (pull !== 0) {

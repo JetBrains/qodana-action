@@ -77,6 +77,7 @@ export function getInputs(): Inputs {
       '🤖 Apply quick-fixes by Qodana'
     ),
     nightlyVersion: getQodanaStringArg('NIGHTLY_VERSION', ''),
+    useInstalledCli: getQodanaBooleanArg('USE_INSTALLED_CLI', false),
     postComment: getQodanaBooleanArg('POST_MR_COMMENT', true),
     useCaches: getQodanaBooleanArg('USE_CACHES', true),
     // not used by GitLab
@@ -206,13 +207,13 @@ async function downloadTool(url: string): Promise<string> {
   return tempPath
 }
 
-export async function isCliInstalled(): Promise<boolean> {
-  return new Promise(resolve => {
-    exec('qodana -v', error => {
+export async function getCliVersion(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    exec('qodana --version', (error, stdout) => {
       if (error) {
-        resolve(false)
+        reject(error)
       } else {
-        resolve(true)
+        resolve(stdout.trim())
       }
     })
   })
@@ -248,13 +249,24 @@ export async function installCli(nightlyVersion: string): Promise<void> {
   process.env.PATH = process.env.PATH + separator + extractRoot
 }
 
-export async function prepareAgent(nightlyVersion: string): Promise<void> {
-  if (!(await isCliInstalled())) {
-    debug('CLI is not installed, installing...')
-    await installCli(nightlyVersion)
-  } else {
-    debug('CLI is already installed, skipping installation')
+export async function prepareAgent(
+  nightlyVersion: string,
+  useInstalledCli = false
+): Promise<void> {
+  if (useInstalledCli) {
+    let version: string
+    try {
+      version = await getCliVersion()
+    } catch {
+      throw new Error(
+        'Unable to use the preinstalled Qodana CLI. Ensure qodana is available on PATH.'
+      )
+    }
+    console.warn(`WARNING: Using preinstalled Qodana CLI version ${version}.`)
+    return
   }
+  debug('Installing Qodana CLI...')
+  await installCli(nightlyVersion)
 }
 
 export async function qodanaExec(args: string[]): Promise<number> {

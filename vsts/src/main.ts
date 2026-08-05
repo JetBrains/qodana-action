@@ -42,7 +42,11 @@ async function main(): Promise<void> {
     const inputs = getInputs()
     tl.mkdirP(inputs.resultsDir)
     tl.mkdirP(inputs.cacheDir)
-    await prepareAgent(inputs.args, inputs.nightlyVersion)
+    await prepareAgent(
+      inputs.args,
+      inputs.nightlyVersion,
+      inputs.useInstalledCli
+    )
     const exitCode = (await qodana()) as QodanaExitCode
     await Promise.all([
       pushQuickFixes(inputs.pushFixes, inputs.commitMessage),
