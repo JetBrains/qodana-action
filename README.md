@@ -280,6 +280,7 @@ with:
 | `post-pr-comment`           | Post a comment with the Qodana results summary to the pull request. Optional.                                                                                                                | `true`                                              |
 | `github-token`              | GitHub token to access the repository: post annotations, comments. Optional.                                                                                                                 | `${{ github.token }}`                               |
 | `push-fixes`                | Push Qodana fixes to the repository, can be `none`, `branch` to the current branch, or `pull-request`. Optional.                                                                             | `none`                                              |
+| `use-installed-cli`         | Use a Qodana CLI already available on `PATH` instead of downloading one. Optional.                                                                      | `false`                                             |
 
 
 ## Issue Tracker

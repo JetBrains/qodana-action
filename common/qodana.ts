@@ -281,6 +281,7 @@ export interface Inputs {
   pushFixes: PushFixesType
   commitMessage: string
   nightlyVersion: string
+  useInstalledCli: boolean
   workingDirectory: string
 }
 

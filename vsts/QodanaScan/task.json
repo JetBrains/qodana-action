@@ -71,6 +71,14 @@
       "helpMarkDown": "This option is for development purposes only. Do not use it in production."
     },
     {
+      "name": "useInstalledCli",
+      "type": "boolean",
+      "label": "Use preinstalled Qodana CLI",
+      "defaultValue": false,
+      "required": false,
+      "helpMarkDown": "Use a Qodana CLI already available on PATH instead of downloading one."
+    },
+    {
       "name": "prMode",
       "type": "boolean",
       "label": "PR Mode",

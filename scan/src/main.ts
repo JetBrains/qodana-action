@@ -77,7 +77,7 @@ async function main(): Promise<void> {
         ANALYSIS_STARTED_REACTION,
         ANALYSIS_FINISHED_REACTION
       ),
-      prepareAgent(inputs.args, inputs.nightlyVersion),
+      prepareAgent(inputs.args, inputs.nightlyVersion, inputs.useInstalledCli),
       restoreCachesPromise
     ])
     const reservedCacheKey = await restoreCachesPromise

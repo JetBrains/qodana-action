@@ -70,6 +70,10 @@ inputs:
     required: false
     default: ""
     deprecationMessage: 'This option is for development purposes only. Do not use it in production.'
+  use-installed-cli:
+    description: 'Use a Qodana CLI already available on PATH instead of downloading one.'
+    required: false
+    default: "false"
 runs:
   using: 'node24'
   main: 'scan/dist/index.js'

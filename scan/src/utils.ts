@@ -122,6 +122,7 @@ export function getInputs(): Inputs {
     pushFixes: core.getInput('push-fixes'),
     commitMessage: core.getInput('commit-message'),
     nightlyVersion: core.getInput('nightly-version'),
+    useInstalledCli: core.getBooleanInput('use-installed-cli'),
     // not used by the action
     workingDirectory: ''
   }
@@ -298,10 +299,20 @@ export async function pushQuickFixes(
   }
 }
 
-export async function prepareAgent(
-  args: string[],
-  nightlyVersion = ''
-): Promise<void> {
+async function verifyInstalledCli(): Promise<void> {
+  const result = await exec.getExecOutput(EXECUTABLE, ['--version'], {
+    ignoreReturnCode: true,
+    silent: true
+  })
+  if (result.exitCode !== 0) {
+    throw new Error(
+      'Unable to use the preinstalled Qodana CLI. Ensure qodana is available on PATH.'
+    )
+  }
+  core.warning(`Using preinstalled Qodana CLI version ${result.stdout.trim()}.`)
+}
+
+async function installCli(nightlyVersion: string): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
   const nightlyTag = await getNightlyTag(nightlyVersion)
@@ -328,6 +339,18 @@ export async function prepareAgent(
       nightlyVersion ? `nightly-${nightlyVersion}` : VERSION
     )
   )
+}
+
+export async function prepareAgent(
+  args: string[],
+  nightlyVersion = '',
+  useInstalledCli = false
+): Promise<void> {
+  if (useInstalledCli) {
+    await verifyInstalledCli()
+  } else {
+    await installCli(nightlyVersion)
+  }
   if (!isNativeMode(args) && !isPullSkipped(args)) {
     const exitCode = await qodana(getInputs(), getQodanaPullArgs(args))
     if (exitCode !== 0) {

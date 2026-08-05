@@ -81782,6 +81782,7 @@ var require_utils4 = __commonJS({
         postComment: tl2.getBoolInput("postPrComment", false),
         pushFixes: tl2.getInput("pushFixes", false) || "none",
         commitMessage: tl2.getInput("commitMessage", false) || "\u{1F916} Apply quick-fixes by Qodana \n\n[skip ci]",
+        useInstalledCli: tl2.getBoolInput("useInstalledCli", false),
         workingDirectory: tl2.getInput("workingDirectory", false) || "",
         // Not used by the Azure task
         additionalCacheKey: "",
@@ -81817,8 +81818,17 @@ var require_utils4 = __commonJS({
         return yield tl2.execAsync(qodana_12.EXECUTABLE, args, Object.assign(Object.assign({ ignoreReturnCode: true }, inputs.workingDirectory && { cwd: inputs.workingDirectory }), { env }));
       });
     }
-    function prepareAgent(args_1) {
-      return __awaiter2(this, arguments, void 0, function* (args, nightlyVersion = "") {
+    function verifyInstalledCli() {
+      const result2 = tl2.execSync(qodana_12.EXECUTABLE, ["--version"], {
+        silent: true
+      });
+      if (result2.code !== 0) {
+        throw new Error("Unable to use the preinstalled Qodana CLI. Ensure qodana is available on PATH.");
+      }
+      tl2.warning(`Using preinstalled Qodana CLI version ${result2.stdout.trim()}.`);
+    }
+    function installCli(nightlyVersion) {
+      return __awaiter2(this, void 0, void 0, function* () {
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
         const nightlyTag = yield (0, qodana_12.getNightlyTag)(nightlyVersion);
@@ -81837,6 +81847,15 @@ var require_utils4 = __commonJS({
           extractRoot = yield tool.extractTar(temp);
         }
         tool.prependPath(yield tool.cacheDir(extractRoot, qodana_12.EXECUTABLE, qodana_12.VERSION));
+      });
+    }
+    function prepareAgent(args_1) {
+      return __awaiter2(this, arguments, void 0, function* (args, nightlyVersion = "", useInstalledCli = false) {
+        if (useInstalledCli) {
+          verifyInstalledCli();
+        } else {
+          yield installCli(nightlyVersion);
+        }
         if (!(0, qodana_12.isNativeMode)(args) && !(0, qodana_12.isPullSkipped)(args)) {
           const pull = yield qodana((0, qodana_12.getQodanaPullArgs)(args));
           if (pull !== 0) {
@@ -82227,7 +82246,7 @@ function main() {
       const inputs = (0, utils_1.getInputs)();
       tl.mkdirP(inputs.resultsDir);
       tl.mkdirP(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs.args, inputs.nightlyVersion);
+      yield (0, utils_1.prepareAgent)(inputs.args, inputs.nightlyVersion, inputs.useInstalledCli);
       const exitCode = yield (0, utils_1.qodana)();
       yield Promise.all([
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage),

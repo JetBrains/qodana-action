@@ -49422,7 +49422,7 @@ var require_utils5 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getInputs = getInputs;
     exports2.execAsync = execAsync;
-    exports2.isCliInstalled = isCliInstalled;
+    exports2.getCliVersion = getCliVersion;
     exports2.installCli = installCli;
     exports2.prepareAgent = prepareAgent;
     exports2.qodanaExec = qodanaExec;
@@ -49481,6 +49481,7 @@ var require_utils5 = __commonJS({
         pushFixes,
         commitMessage: getQodanaStringArg("COMMIT_MESSAGE", "\u{1F916} Apply quick-fixes by Qodana"),
         nightlyVersion: getQodanaStringArg("NIGHTLY_VERSION", ""),
+        useInstalledCli: getQodanaBooleanArg("USE_INSTALLED_CLI", false),
         postComment: getQodanaBooleanArg("POST_MR_COMMENT", true),
         useCaches: getQodanaBooleanArg("USE_CACHES", true),
         // not used by GitLab
@@ -49603,20 +49604,20 @@ Stderr: ${result.stderr}`);
       });
     }
     __name(downloadTool, "downloadTool");
-    function isCliInstalled() {
+    function getCliVersion() {
       return __awaiter2(this, void 0, void 0, function* () {
-        return new Promise((resolve) => {
-          (0, child_process_1.exec)("qodana -v", (error) => {
+        return new Promise((resolve, reject) => {
+          (0, child_process_1.exec)("qodana --version", (error, stdout) => {
             if (error) {
-              resolve(false);
+              reject(error);
             } else {
-              resolve(true);
+              resolve(stdout.trim());
             }
           });
         });
       });
     }
-    __name(isCliInstalled, "isCliInstalled");
+    __name(getCliVersion, "getCliVersion");
     function installCli(nightlyVersion) {
       return __awaiter2(this, void 0, void 0, function* () {
         const arch = (0, qodana_12.getProcessArchName)();
@@ -49647,14 +49648,20 @@ Stderr: ${result.stderr}`);
       });
     }
     __name(installCli, "installCli");
-    function prepareAgent(nightlyVersion) {
-      return __awaiter2(this, void 0, void 0, function* () {
-        if (!(yield isCliInstalled())) {
-          debug("CLI is not installed, installing...");
-          yield installCli(nightlyVersion);
-        } else {
-          debug("CLI is already installed, skipping installation");
+    function prepareAgent(nightlyVersion_1) {
+      return __awaiter2(this, arguments, void 0, function* (nightlyVersion, useInstalledCli = false) {
+        if (useInstalledCli) {
+          let version2;
+          try {
+            version2 = yield getCliVersion();
+          } catch (_a) {
+            throw new Error("Unable to use the preinstalled Qodana CLI. Ensure qodana is available on PATH.");
+          }
+          console.warn(`WARNING: Using preinstalled Qodana CLI version ${version2}.`);
+          return;
         }
+        debug("Installing Qodana CLI...");
+        yield installCli(nightlyVersion);
       });
     }
     __name(prepareAgent, "prepareAgent");
@@ -50048,7 +50055,7 @@ function main() {
       fs3.mkdirSync(inputs.resultsDir, { recursive: true });
       fs3.mkdirSync(inputs.cacheDir, { recursive: true });
       (0, utils_1.prepareCaches)(inputs.cacheDir);
-      yield (0, utils_1.prepareAgent)(inputs.nightlyVersion);
+      yield (0, utils_1.prepareAgent)(inputs.nightlyVersion, inputs.useInstalledCli);
       const exitCode = yield (0, utils_1.qodanaScan)();
       yield Promise.all([
         (0, output_1.publishOutput)((0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode)),
