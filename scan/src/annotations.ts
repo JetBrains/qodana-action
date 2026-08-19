@@ -22,6 +22,7 @@ import type {Log, Result} from 'sarif'
 import {getWorkflowRunUrl, publishGitHubCheck} from './utils'
 import {getProblemPlural} from '../../common/output'
 import {parseRules, Rule} from '../../common/utils'
+import {OriginalUriBaseIds, resolveLocationUri} from './sarifPaths'
 
 function getQodanaHelpString(): string {
   return `This result was published with [Qodana GitHub Action](${getWorkflowRunUrl()})`
@@ -117,11 +118,13 @@ export interface Annotation {
  * Converts a SARIF result to a GitHub Check Annotation.
  * @param result The SARIF log to convert.
  * @param rules The map of SARIF rule IDs to their descriptions.
+ * @param originalUriBaseIds URI bases used to resolve the artifact location.
  * @returns GitHub Check annotations are created for each result.
  */
 function parseResult(
   result: Result,
-  rules: Map<string, Rule>
+  rules: Map<string, Rule>,
+  originalUriBaseIds: OriginalUriBaseIds
 ): Annotation | null {
   if (
     !result.locations ||
@@ -130,12 +133,14 @@ function parseResult(
   ) {
     return null
   }
-  const location = result.locations[0].physicalLocation
-  const region = location.region
+  const location = result.locations[0]
+  const resolvedUri = resolveLocationUri(location, originalUriBaseIds)
+  if (resolvedUri === null) return null
+  const region = location.physicalLocation?.region
   return {
     message: result.message.markdown ?? result.message.text!,
     title: rules.get(result.ruleId!)?.shortDescription,
-    path: location.artifactLocation!.uri!,
+    path: resolvedUri,
     start_line: region?.startLine || 0,
     end_line: region?.endLine || region?.startLine || 1,
     start_column:
@@ -166,6 +171,7 @@ export function parseSarif(path: string): Output {
   ) as Log
   const run = sarif.runs[0]
   const rules = parseRules(run.tool)
+  const originalUriBaseIds = run.originalUriBaseIds ?? {}
   let title = 'No new problems found by '
   let annotations: Annotation[] = []
   if (run.results?.length) {
@@ -175,7 +181,7 @@ export function parseSarif(path: string): Output {
           result.baselineState !== 'unchanged' &&
           result.baselineState !== 'absent'
       )
-      .map(result => parseResult(result, rules))
+      .map(result => parseResult(result, rules, originalUriBaseIds))
       .filter((a): a is Annotation => a !== null && a !== undefined)
     title = `${annotations.length} ${getProblemPlural(
       annotations.length

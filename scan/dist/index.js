@@ -135082,6 +135082,56 @@ var init_output = __esm({
   }
 });
 
+// lib/sarifPaths.js
+var require_sarifPaths = __commonJS({
+  "lib/sarifPaths.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.resolveUriBaseId = resolveUriBaseId;
+    exports2.resolveLocationUri = resolveLocationUri;
+    var CyclicUriBaseIdError = class extends Error {
+      static {
+        __name(this, "CyclicUriBaseIdError");
+      }
+    };
+    function resolveUriBaseIdImpl(originalUriBaseIds, uriBaseId, visited) {
+      var _a;
+      if (visited.includes(uriBaseId)) {
+        throw new CyclicUriBaseIdError();
+      }
+      visited.push(uriBaseId);
+      const artifactLocation = originalUriBaseIds[uriBaseId];
+      if (artifactLocation === void 0)
+        return "";
+      const uri = (_a = artifactLocation.uri) !== null && _a !== void 0 ? _a : "";
+      const parentUriBaseId = artifactLocation.uriBaseId;
+      const resolved = parentUriBaseId === void 0 ? uri : resolveUriBaseIdImpl(originalUriBaseIds, parentUriBaseId, visited) + uri;
+      return resolved === "" || resolved.endsWith("/") ? resolved : `${resolved}/`;
+    }
+    __name(resolveUriBaseIdImpl, "resolveUriBaseIdImpl");
+    function resolveUriBaseId(originalUriBaseIds, uriBaseId) {
+      try {
+        return resolveUriBaseIdImpl(originalUriBaseIds, uriBaseId, []);
+      } catch (error) {
+        if (error instanceof CyclicUriBaseIdError)
+          return "";
+        throw error;
+      }
+    }
+    __name(resolveUriBaseId, "resolveUriBaseId");
+    function resolveLocationUri(location, originalUriBaseIds) {
+      var _a;
+      const artifactLocation = (_a = location.physicalLocation) === null || _a === void 0 ? void 0 : _a.artifactLocation;
+      if (artifactLocation === void 0 || artifactLocation.uri === void 0) {
+        return null;
+      }
+      const uri = artifactLocation.uri;
+      return artifactLocation.uriBaseId === void 0 ? uri : resolveUriBaseId(originalUriBaseIds, artifactLocation.uriBaseId) + uri;
+    }
+    __name(resolveLocationUri, "resolveLocationUri");
+  }
+});
+
 // lib/annotations.js
 var require_annotations = __commonJS({
   "lib/annotations.js"(exports2) {
@@ -135165,6 +135215,7 @@ var require_annotations = __commonJS({
     var utils_12 = require_utils10();
     var output_12 = (init_output(), __toCommonJS(output_exports));
     var utils_2 = (init_utils3(), __toCommonJS(utils_exports));
+    var sarifPaths_1 = require_sarifPaths();
     function getQodanaHelpString() {
       return `This result was published with [Qodana GitHub Action](${(0, utils_12.getWorkflowRunUrl)()})`;
     }
@@ -135214,17 +135265,20 @@ var require_annotations = __commonJS({
       });
     }
     __name(publishAnnotations, "publishAnnotations");
-    function parseResult2(result, rules) {
-      var _a, _b;
+    function parseResult2(result, rules, originalUriBaseIds) {
+      var _a, _b, _c;
       if (!result.locations || result.locations.length === 0 || !result.locations[0].physicalLocation) {
         return null;
       }
-      const location = result.locations[0].physicalLocation;
-      const region = location.region;
+      const location = result.locations[0];
+      const resolvedUri = (0, sarifPaths_1.resolveLocationUri)(location, originalUriBaseIds);
+      if (resolvedUri === null)
+        return null;
+      const region = (_a = location.physicalLocation) === null || _a === void 0 ? void 0 : _a.region;
       return {
-        message: (_a = result.message.markdown) !== null && _a !== void 0 ? _a : result.message.text,
-        title: (_b = rules.get(result.ruleId)) === null || _b === void 0 ? void 0 : _b.shortDescription,
-        path: location.artifactLocation.uri,
+        message: (_b = result.message.markdown) !== null && _b !== void 0 ? _b : result.message.text,
+        title: (_c = rules.get(result.ruleId)) === null || _c === void 0 ? void 0 : _c.shortDescription,
+        path: resolvedUri,
         start_line: (region === null || region === void 0 ? void 0 : region.startLine) || 0,
         end_line: (region === null || region === void 0 ? void 0 : region.endLine) || (region === null || region === void 0 ? void 0 : region.startLine) || 1,
         start_column: (region === null || region === void 0 ? void 0 : region.startLine) === (region === null || region === void 0 ? void 0 : region.endColumn) ? region === null || region === void 0 ? void 0 : region.startColumn : void 0,
@@ -135243,14 +135297,15 @@ var require_annotations = __commonJS({
     }
     __name(parseResult2, "parseResult");
     function parseSarif2(path2) {
-      var _a;
+      var _a, _b;
       const sarif = JSON.parse(fs3.readFileSync(path2, { encoding: "utf8" }));
       const run = sarif.runs[0];
       const rules = (0, utils_2.parseRules)(run.tool);
+      const originalUriBaseIds = (_a = run.originalUriBaseIds) !== null && _a !== void 0 ? _a : {};
       let title = "No new problems found by ";
       let annotations = [];
-      if ((_a = run.results) === null || _a === void 0 ? void 0 : _a.length) {
-        annotations = run.results.filter((result) => result.baselineState !== "unchanged" && result.baselineState !== "absent").map((result) => parseResult2(result, rules)).filter((a) => a !== null && a !== void 0);
+      if ((_b = run.results) === null || _b === void 0 ? void 0 : _b.length) {
+        annotations = run.results.filter((result) => result.baselineState !== "unchanged" && result.baselineState !== "absent").map((result) => parseResult2(result, rules, originalUriBaseIds)).filter((a) => a !== null && a !== void 0);
         title = `${annotations.length} ${(0, output_12.getProblemPlural)(annotations.length)} found by `;
       }
       const name = run.tool.driver.fullName || "Qodana";

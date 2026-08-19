@@ -1,0 +1,51 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Qodana",
+          "fullName": "Qodana for .NET",
+          "rules": []
+        }
+      },
+      "originalUriBaseIds": {
+        "PROJECTROOT": {
+          "description": {
+            "text": "The root directory of the repository or workspace (--repository-root qodana CLI parameter)"
+          }
+        },
+        "SRCROOT": {
+          "uri": "services/widget",
+          "uriBaseId": "PROJECTROOT",
+          "description": {
+            "text": "The subdirectory within the project that was analyzed (--project-dir qodana CLI parameter)"
+          }
+        }
+      },
+      "results": [
+        {
+          "ruleId": "ExampleInspection",
+          "level": "warning",
+          "message": {
+            "text": "Example problem"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Widget.cs",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
