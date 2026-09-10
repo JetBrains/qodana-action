@@ -92,6 +92,50 @@ test('qodana scan command args', () => {
   expect(result).toEqual(defaultDockerRunCommandFixture())
 })
 
+test('qodana scan command args with inherited environment variables', () => {
+  const inputs = inputsDefaultFixture()
+  const result = getQodanaScanArgs(
+    inputs.args,
+    inputs.resultsDir,
+    inputs.cacheDir,
+    ['SPACE_USER', 'SPACE_KEY', 'UNSET_VARIABLE'],
+    {SPACE_USER: 'user', SPACE_KEY: 'secret'}
+  )
+  expect(result).toEqual([
+    'scan',
+    '--cache-dir',
+    '${{ runner.temp }}/qodana-caches',
+    '--results-dir',
+    '${{ runner.temp }}/qodana-results',
+    '--skip-pull',
+    '-e',
+    'SPACE_USER=user',
+    '-e',
+    'SPACE_KEY=secret',
+    '--baseline',
+    'qodana.sarif.json'
+  ])
+})
+
+test('qodana scan command args ignore environment variables in native mode', () => {
+  const inputs = inputsDefaultFixture()
+  const result = getQodanaScanArgs(
+    ['--ide'],
+    inputs.resultsDir,
+    inputs.cacheDir,
+    ['SPACE_KEY'],
+    {SPACE_KEY: 'secret'}
+  )
+  expect(result).toEqual([
+    'scan',
+    '--cache-dir',
+    '${{ runner.temp }}/qodana-caches',
+    '--results-dir',
+    '${{ runner.temp }}/qodana-results',
+    '--ide'
+  ])
+})
+
 test('test sarif with problems to output annotations', () => {
   const output = annotationsDefaultFixture()
   const result = parseSarif('__tests__/data/some.sarif.json')
@@ -194,6 +238,7 @@ export function annotationPropertyDefaultFixture(): AnnotationProperties {
 export function inputsDefaultFixture(): Inputs {
   return {
     args: ['--baseline', 'qodana.sarif.json'],
+    envVarsToLinter: [],
     resultsDir: '${{ runner.temp }}/qodana-results',
     cacheDir: '${{ runner.temp }}/qodana-caches',
     additionalCacheKey: '',

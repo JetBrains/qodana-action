@@ -39,6 +39,7 @@ let cachedInputs: Inputs | null = null
 import {
   BRANCH,
   compressFolder,
+  ENV_VARS_TO_LINTER_NATIVE_WARNING,
   EXECUTABLE,
   getProcessArchName,
   getProcessPlatformName,
@@ -51,6 +52,7 @@ import {
   Inputs,
   isNativeMode,
   NONE,
+  parseEnvVarNames,
   PULL_REQUEST,
   PushFixesType,
   sha256sum,
@@ -78,6 +80,9 @@ export function getInputs(): Inputs {
   const home = path.join(process.env['AGENT_TEMPDIRECTORY']!, 'qodana')
   cachedInputs = {
     args: parseRawArguments(tl.getInput('args', false) || ''),
+    envVarsToLinter: parseEnvVarNames(
+      tl.getInput('envVarsToLinter', false) || ''
+    ),
     resultsDir: tl.getInput('resultsDir', false) || path.join(home, 'results'),
     cacheDir: tl.getInput('cacheDir', false) || path.join(home, 'cache'),
     uploadResult: tl.getBoolInput('uploadResult', false),
@@ -116,7 +121,15 @@ export async function qodana(args: string[] = []): Promise<number> {
   }
   if (args.length === 0) {
     const inputs = getInputs()
-    args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
+    if (inputs.envVarsToLinter.length > 0 && isNativeMode(inputs.args)) {
+      tl.warning(ENV_VARS_TO_LINTER_NATIVE_WARNING)
+    }
+    args = getQodanaScanArgs(
+      inputs.args,
+      inputs.resultsDir,
+      inputs.cacheDir,
+      inputs.envVarsToLinter
+    )
     if (inputs.prMode && tl.getVariable('Build.Reason') === 'PullRequest') {
       await warnIfMergeCommitCheckout()
       const sha = await getPrSha()

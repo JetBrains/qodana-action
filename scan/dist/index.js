@@ -30471,6 +30471,7 @@ var qodana_exports = {};
 __export(qodana_exports, {
   BRANCH: () => BRANCH,
   COVERAGE_THRESHOLD: () => COVERAGE_THRESHOLD,
+  ENV_VARS_TO_LINTER_NATIVE_WARNING: () => ENV_VARS_TO_LINTER_NATIVE_WARNING,
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
   NONE: () => NONE,
@@ -30501,6 +30502,7 @@ __export(qodana_exports, {
   isExecutionSuccessful: () => isExecutionSuccessful,
   isNativeMode: () => isNativeMode,
   isPullSkipped: () => isPullSkipped,
+  parseEnvVarNames: () => parseEnvVarNames,
   sha256sum: () => sha256sum,
   validateBranchName: () => validateBranchName
 });
@@ -30610,7 +30612,7 @@ function getQodanaPullArgs(args) {
   }
   return pullArgs;
 }
-function getQodanaScanArgs(args, resultsDir, cacheDir) {
+function getQodanaScanArgs(args, resultsDir, cacheDir, envVarsToLinter = [], environment = process.env) {
   const cliArgs = [
     "scan",
     "--cache-dir",
@@ -30620,11 +30622,27 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
   ];
   if (!isNativeMode(args)) {
     cliArgs.push("--skip-pull");
+    envVarsToLinter.forEach((name) => {
+      const value = environment[name];
+      if (value !== void 0) {
+        cliArgs.push("-e", `${name}=${value}`);
+      }
+    });
   }
   if (args) {
     cliArgs.push(...args);
   }
   return cliArgs;
+}
+function parseEnvVarNames(rawNames) {
+  const names = rawNames.split(",").map((name) => name.trim()).filter((name) => name !== "");
+  const invalidName = names.find(
+    (name) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)
+  );
+  if (invalidName) {
+    throw new Error(`Invalid environment variable name: ${invalidName}`);
+  }
+  return [...new Set(names)];
 }
 function getCoverageFromSarif(sarifPath) {
   if (fs.existsSync(sarifPath)) {
@@ -30717,7 +30735,7 @@ async function compressFolder(srcDir, destFile) {
     zip.generateNodeStream({ streamFiles: true, compression: "DEFLATE" }).pipe(fs.createWriteStream(destFile)).on("error", (err) => reject(err)).on("finish", () => resolve());
   });
 }
-var import_crypto, fs, import_path, import_jszip, import_util, util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
+var import_crypto, fs, import_path, import_jszip, import_util, util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, ENV_VARS_TO_LINTER_NATIVE_WARNING, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
@@ -30742,6 +30760,7 @@ var init_qodana = __esm({
     QODANA_LICENSES_JSON = "third-party-libraries.json";
     EXECUTABLE = "qodana";
     VERSION = version;
+    ENV_VARS_TO_LINTER_NATIVE_WARNING = "Environment-variable forwarding is ignored in native mode because the linter already inherits the process environment.";
     COVERAGE_THRESHOLD = 50;
     __name(getQodanaSha256, "getQodanaSha256");
     __name(getProcessArchName, "getProcessArchName");
@@ -30761,6 +30780,7 @@ var init_qodana = __esm({
     __name(getNativeModePrefix, "getNativeModePrefix");
     __name(getQodanaPullArgs, "getQodanaPullArgs");
     __name(getQodanaScanArgs, "getQodanaScanArgs");
+    __name(parseEnvVarNames, "parseEnvVarNames");
     NONE = "none";
     BRANCH = "branch";
     PULL_REQUEST = "pull-request";
@@ -135627,6 +135647,7 @@ var require_utils10 = __commonJS({
       const nativePrefix = (0, qodana_12.getNativeModePrefix)(argList);
       cachedInputs = {
         args: argList,
+        envVarsToLinter: (0, qodana_12.parseEnvVarNames)(core2.getInput("env-vars-to-linter")),
         resultsDir: core2.getInput("results-dir"),
         cacheDir: core2.getInput("cache-dir"),
         primaryCacheKey: nativePrefix + core2.getInput("primary-cache-key"),
@@ -135705,7 +135726,10 @@ var require_utils10 = __commonJS({
     function qodana(inputs_1) {
       return __awaiter3(this, arguments, void 0, function* (inputs, args = []) {
         if (args.length === 0) {
-          args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir);
+          if (inputs.envVarsToLinter.length > 0 && (0, qodana_12.isNativeMode)(inputs.args)) {
+            core2.warning(qodana_12.ENV_VARS_TO_LINTER_NATIVE_WARNING);
+          }
+          args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir, inputs.envVarsToLinter);
           if (inputs.prMode) {
             yield warnIfMergeCommitCheckout();
             const sha = yield getPrSha();

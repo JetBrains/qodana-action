@@ -23,6 +23,14 @@
       "helpMarkDown": "[Qodana CLI `scan` arguments](https://github.com/jetbrains/qodana-cli#scan), e.g. `--log-level debug --property key=value`. Quote arguments containing spaces. Comma-separated format is deprecated."
     },
     {
+      "name": "envVarsToLinter",
+      "type": "string",
+      "label": "Environment variables to pass to the Qodana linter",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Comma-separated names of environment variables whose values should be passed to the Qodana linter container. Docker mode only; ignored in native mode because the linter already inherits the process environment."
+    },
+    {
       "name": "resultsDir",
       "type": "string",
       "label": "Results Directory",

@@ -9786,6 +9786,7 @@ var qodana_exports = {};
 __export(qodana_exports, {
   BRANCH: () => BRANCH,
   COVERAGE_THRESHOLD: () => COVERAGE_THRESHOLD,
+  ENV_VARS_TO_LINTER_NATIVE_WARNING: () => ENV_VARS_TO_LINTER_NATIVE_WARNING,
   EXECUTABLE: () => EXECUTABLE,
   FAIL_THRESHOLD_OUTPUT: () => FAIL_THRESHOLD_OUTPUT,
   NONE: () => NONE,
@@ -9816,6 +9817,7 @@ __export(qodana_exports, {
   isExecutionSuccessful: () => isExecutionSuccessful,
   isNativeMode: () => isNativeMode,
   isPullSkipped: () => isPullSkipped,
+  parseEnvVarNames: () => parseEnvVarNames,
   sha256sum: () => sha256sum,
   validateBranchName: () => validateBranchName
 });
@@ -9925,7 +9927,7 @@ function getQodanaPullArgs(args) {
   }
   return pullArgs;
 }
-function getQodanaScanArgs(args, resultsDir, cacheDir) {
+function getQodanaScanArgs(args, resultsDir, cacheDir, envVarsToLinter = [], environment = process.env) {
   const cliArgs = [
     "scan",
     "--cache-dir",
@@ -9935,11 +9937,27 @@ function getQodanaScanArgs(args, resultsDir, cacheDir) {
   ];
   if (!isNativeMode(args)) {
     cliArgs.push("--skip-pull");
+    envVarsToLinter.forEach((name) => {
+      const value = environment[name];
+      if (value !== void 0) {
+        cliArgs.push("-e", `${name}=${value}`);
+      }
+    });
   }
   if (args) {
     cliArgs.push(...args);
   }
   return cliArgs;
+}
+function parseEnvVarNames(rawNames) {
+  const names = rawNames.split(",").map((name) => name.trim()).filter((name) => name !== "");
+  const invalidName = names.find(
+    (name) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)
+  );
+  if (invalidName) {
+    throw new Error(`Invalid environment variable name: ${invalidName}`);
+  }
+  return [...new Set(names)];
 }
 function getCoverageFromSarif(sarifPath) {
   var _a, _b, _c, _d;
@@ -10034,7 +10052,7 @@ async function compressFolder(srcDir, destFile) {
     zip.generateNodeStream({ streamFiles: true, compression: "DEFLATE" }).pipe(fs.createWriteStream(destFile)).on("error", (err) => reject2(err)).on("finish", () => resolve());
   });
 }
-var import_crypto, fs, import_path, import_jszip, import_util, util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
+var import_crypto, fs, import_path, import_jszip, import_util, util, readdir2, stat2, mkdir2, SUPPORTED_PLATFORMS, SUPPORTED_ARCHS, FAIL_THRESHOLD_OUTPUT, QODANA_SARIF_NAME, QODANA_SHORT_SARIF_NAME, QODANA_REPORT_URL_NAME, QODANA_OPEN_IN_IDE_NAME, QODANA_LICENSES_MD, QODANA_LICENSES_JSON, EXECUTABLE, VERSION, ENV_VARS_TO_LINTER_NATIVE_WARNING, COVERAGE_THRESHOLD, QodanaExitCode, NONE, BRANCH, PULL_REQUEST;
 var init_qodana = __esm({
   "../common/qodana.ts"() {
     "use strict";
@@ -10059,6 +10077,7 @@ var init_qodana = __esm({
     QODANA_LICENSES_JSON = "third-party-libraries.json";
     EXECUTABLE = "qodana";
     VERSION = version;
+    ENV_VARS_TO_LINTER_NATIVE_WARNING = "Environment-variable forwarding is ignored in native mode because the linter already inherits the process environment.";
     COVERAGE_THRESHOLD = 50;
     QodanaExitCode = /* @__PURE__ */ ((QodanaExitCode2) => {
       QodanaExitCode2[QodanaExitCode2["Success"] = 0] = "Success";
@@ -81772,6 +81791,7 @@ var require_utils4 = __commonJS({
       const home = path_1.default.join(process.env["AGENT_TEMPDIRECTORY"], "qodana");
       cachedInputs = {
         args: (0, utils_12.parseRawArguments)(tl2.getInput("args", false) || ""),
+        envVarsToLinter: (0, qodana_12.parseEnvVarNames)(tl2.getInput("envVarsToLinter", false) || ""),
         resultsDir: tl2.getInput("resultsDir", false) || path_1.default.join(home, "results"),
         cacheDir: tl2.getInput("cacheDir", false) || path_1.default.join(home, "cache"),
         uploadResult: tl2.getBoolInput("uploadResult", false),
@@ -81800,7 +81820,10 @@ var require_utils4 = __commonJS({
         const env = Object.assign(Object.assign({}, process.env), { NONINTERACTIVE: "1" });
         if (args.length === 0) {
           const inputs2 = getInputs();
-          args = (0, qodana_12.getQodanaScanArgs)(inputs2.args, inputs2.resultsDir, inputs2.cacheDir);
+          if (inputs2.envVarsToLinter.length > 0 && (0, qodana_12.isNativeMode)(inputs2.args)) {
+            tl2.warning(qodana_12.ENV_VARS_TO_LINTER_NATIVE_WARNING);
+          }
+          args = (0, qodana_12.getQodanaScanArgs)(inputs2.args, inputs2.resultsDir, inputs2.cacheDir, inputs2.envVarsToLinter);
           if (inputs2.prMode && tl2.getVariable("Build.Reason") === "PullRequest") {
             yield warnIfMergeCommitCheckout();
             const sha = yield getPrSha();
