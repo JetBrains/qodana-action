@@ -40,6 +40,8 @@ export const QODANA_LICENSES_MD = 'thirdPartySoftwareList.md'
 export const QODANA_LICENSES_JSON = 'third-party-libraries.json'
 export const EXECUTABLE = 'qodana'
 export const VERSION = version
+export const ENV_VARS_TO_LINTER_NATIVE_WARNING =
+  'Environment-variable forwarding is ignored in native mode because the linter already inherits the process environment.'
 
 export const COVERAGE_THRESHOLD = 50
 
@@ -231,12 +233,16 @@ export function getQodanaPullArgs(args: string[]): string[] {
  * @param args additional CLI arguments.
  * @param resultsDir the directory to store the results.
  * @param cacheDir the directory to store the cache.
+ * @param envVarsToLinter environment variable names to pass to linter
+ * @param environment process environment
  * @returns The `qodana scan` command arguments.
  */
 export function getQodanaScanArgs(
   args: string[],
   resultsDir: string,
-  cacheDir: string
+  cacheDir: string,
+  envVarsToLinter: string[] = [],
+  environment: NodeJS.ProcessEnv = process.env
 ): string[] {
   const cliArgs: string[] = [
     'scan',
@@ -247,11 +253,36 @@ export function getQodanaScanArgs(
   ]
   if (!isNativeMode(args)) {
     cliArgs.push('--skip-pull')
+    envVarsToLinter.forEach(name => {
+      const value = environment[name]
+      if (value !== undefined) {
+        cliArgs.push('-e', `${name}=${value}`)
+      }
+    })
   }
   if (args) {
     cliArgs.push(...args)
   }
   return cliArgs
+}
+
+/**
+ * Parses a comma-separated list of environment variable names.
+ */
+export function parseEnvVarNames(rawNames: string): string[] {
+  const names = rawNames
+    .split(',')
+    .map(name => name.trim())
+    .filter(name => name !== '')
+
+  const invalidName = names.find(
+    name => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)
+  )
+  if (invalidName) {
+    throw new Error(`Invalid environment variable name: ${invalidName}`)
+  }
+
+  return [...new Set(names)]
 }
 
 export const NONE = 'none'
@@ -265,6 +296,7 @@ export type PushFixesType = (typeof PUSH_FIXES_TYPES)[number]
  */
 export interface Inputs {
   args: string[]
+  envVarsToLinter: string[]
   resultsDir: string
   cacheDir: string
   primaryCacheKey: string

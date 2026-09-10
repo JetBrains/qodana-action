@@ -26,6 +26,7 @@ import {Conclusion, getGitHubCheckConclusion, Output} from './annotations'
 import {
   BRANCH,
   compressFolder,
+  ENV_VARS_TO_LINTER_NATIVE_WARNING,
   EXECUTABLE,
   getProcessArchName,
   getProcessPlatformName,
@@ -39,6 +40,7 @@ import {
   getNativeModePrefix,
   isNativeMode,
   NONE,
+  parseEnvVarNames,
   PULL_REQUEST,
   PushFixesType,
   sha256sum,
@@ -106,6 +108,7 @@ export function getInputs(): Inputs {
   const nativePrefix = getNativeModePrefix(argList)
   cachedInputs = {
     args: argList,
+    envVarsToLinter: parseEnvVarNames(core.getInput('env-vars-to-linter')),
     resultsDir: core.getInput('results-dir'),
     cacheDir: core.getInput('cache-dir'),
     primaryCacheKey: nativePrefix + core.getInput('primary-cache-key'),
@@ -210,7 +213,15 @@ export async function qodana(
   args: string[] = []
 ): Promise<number> {
   if (args.length === 0) {
-    args = getQodanaScanArgs(inputs.args, inputs.resultsDir, inputs.cacheDir)
+    if (inputs.envVarsToLinter.length > 0 && isNativeMode(inputs.args)) {
+      core.warning(ENV_VARS_TO_LINTER_NATIVE_WARNING)
+    }
+    args = getQodanaScanArgs(
+      inputs.args,
+      inputs.resultsDir,
+      inputs.cacheDir,
+      inputs.envVarsToLinter
+    )
     if (inputs.prMode) {
       await warnIfMergeCommitCheckout()
       const sha = await getPrSha()

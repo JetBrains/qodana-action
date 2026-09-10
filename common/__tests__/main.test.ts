@@ -15,7 +15,7 @@
  */
 
 import {expect, test, describe, beforeEach} from '@jest/globals'
-import {getCoverageFromSarif, getNativeModePrefix, getSanityProblemsCount, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
+import {getCoverageFromSarif, getNativeModePrefix, getSanityProblemsCount, parseEnvVarNames, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
   getCoverageStats,
   getReportURL, parseSarif
@@ -209,6 +209,25 @@ describe('getNativeModePrefix', () => {
 
   test('returns native-true- when --within-docker false is present', () => {
     expect(getNativeModePrefix(['--within-docker', 'false'])).toBe('native-true-')
+  })
+})
+
+describe('parseEnvVarNames', () => {
+  test('parses, trims, and deduplicates variable names', () => {
+    expect(parseEnvVarNames('SPACE_USER, SPACE_KEY,SPACE_USER')).toEqual([
+      'SPACE_USER',
+      'SPACE_KEY'
+    ])
+  })
+
+  test('returns an empty list for empty input', () => {
+    expect(parseEnvVarNames('')).toEqual([])
+  })
+
+  test('rejects invalid variable names', () => {
+    expect(() => parseEnvVarNames('SPACE_USER,--env')).toThrow(
+      'Invalid environment variable name: --env'
+    )
   })
 })
 

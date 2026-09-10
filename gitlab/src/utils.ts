@@ -1,5 +1,6 @@
 import {
   BRANCH,
+  ENV_VARS_TO_LINTER_NATIVE_WARNING,
   EXECUTABLE,
   getProcessArchName,
   getProcessPlatformName,
@@ -9,7 +10,9 @@ import {
   getQodanaUrl,
   getNightlyTag,
   Inputs,
+  isNativeMode,
   NONE,
+  parseEnvVarNames,
   PULL_REQUEST,
   PushFixesType,
   sha256sum,
@@ -66,6 +69,9 @@ export function getInputs(): Inputs {
 
   cachedInputs = {
     args: argList,
+    envVarsToLinter: parseEnvVarNames(
+      getQodanaStringArg('ENV_VARS_TO_LINTER', '')
+    ),
     // user given results and cache dirs are used in uploadCache, prepareCaches and uploadArtifacts
     resultsDir: `${baseDir()}/results`,
     cacheDir: `${baseDir()}/cache`,
@@ -295,10 +301,14 @@ export async function qodanaExec(args: string[]): Promise<number> {
 
 export async function qodanaScan(): Promise<number> {
   const inputs = getInputs()
+  if (inputs.envVarsToLinter.length > 0 && isNativeMode(inputs.args)) {
+    console.warn(`WARNING: ${ENV_VARS_TO_LINTER_NATIVE_WARNING}`)
+  }
   const args = getQodanaScanArgs(
     inputs.args,
     inputs.resultsDir,
-    inputs.cacheDir
+    inputs.cacheDir,
+    inputs.envVarsToLinter
   )
   if (inputs.prMode && isMergeRequest()) {
     await warnIfMergeCommitCheckout()

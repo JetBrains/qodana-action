@@ -74,7 +74,8 @@ describe('getInputs cache key native mode prefix', () => {
   function setupCoreMock(
     args: string,
     primaryKey: string,
-    additionalKey: string
+    additionalKey: string,
+    envVarsToLinter = ''
   ): void {
     jest.doMock('@actions/core', () => ({
       getInput: (name: string) => {
@@ -85,6 +86,8 @@ describe('getInputs cache key native mode prefix', () => {
             return primaryKey
           case 'additional-cache-key':
             return additionalKey
+          case 'env-vars-to-linter':
+            return envVarsToLinter
           default:
             return ''
         }
@@ -136,6 +139,12 @@ describe('getInputs cache key native mode prefix', () => {
     expect(inputs.primaryCacheKey.startsWith(inputs.additionalCacheKey)).toBe(
       true
     )
+  })
+
+  it('reads environment variable names for the linter', () => {
+    setupCoreMock('', PRIMARY_KEY, ADDITIONAL_KEY, 'SPACE_USER, SPACE_KEY')
+    const {getInputs} = require('../src/utils')
+    expect(getInputs().envVarsToLinter).toEqual(['SPACE_USER', 'SPACE_KEY'])
   })
 })
 
