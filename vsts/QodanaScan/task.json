@@ -154,5 +154,6 @@
       "target": "index.js"
     }
   },
-  "minimumAgentVersion": "2.144.0"
+  "minimumAgentVersion": "2.144.0",
+  "showEnvironmentVariables": true
 }
