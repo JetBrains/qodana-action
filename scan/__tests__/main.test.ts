@@ -256,7 +256,8 @@ export function inputsDefaultFixture(): Inputs {
     commitMessage: '',
     nightlyVersion: '',
     useInstalledCli: false,
-    workingDirectory: ''
+    workingDirectory: '',
+    sarifArtifactLocation: ''
   }
 }
 

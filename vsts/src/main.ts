@@ -64,7 +64,11 @@ async function main(): Promise<void> {
         isExecutionSuccessful(exitCode)
       )
     ])
-    uploadSarif(inputs.resultsDir, inputs.uploadSarif)
+    uploadSarif(
+      inputs.resultsDir,
+      inputs.sarifArtifactLocation,
+      inputs.uploadSarif
+    )
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`)
     } else if (exitCode === QodanaExitCode.FailThreshold) {

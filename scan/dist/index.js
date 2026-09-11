@@ -135667,7 +135667,8 @@ var require_utils10 = __commonJS({
         nightlyVersion: core2.getInput("nightly-version"),
         useInstalledCli: core2.getBooleanInput("use-installed-cli"),
         // not used by the action
-        workingDirectory: ""
+        workingDirectory: "",
+        sarifArtifactLocation: ""
       };
       return cachedInputs;
     }

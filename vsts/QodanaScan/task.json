@@ -130,6 +130,14 @@
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "Working directory for the Qodana Task"
+    },
+    {
+      "name": "sarifArtifactLocation",
+      "type": "string",
+      "label": "SARIF Artifact Location",
+      "defaultValue": "CodeAnalysisLogs",
+      "required": false,
+      "helpMarkDown": "Artifact location and name used to upload qodana.sarif. The SARIF SAST Scans Tab extension discovers CodeAnalysisLogs, names containing _sdl_analysis, and names ending _sdl_sources."
     }
   ],
   "execution": {

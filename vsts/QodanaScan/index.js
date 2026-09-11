@@ -81761,6 +81761,7 @@ var require_utils4 = __commonJS({
     exports2.prepareAgent = prepareAgent;
     exports2.uploadArtifacts = uploadArtifacts;
     exports2.uploadSarif = uploadSarif;
+    exports2.isSarifArtifactNameSupported = isSarifArtifactNameSupported;
     exports2.getWorkflowRunUrl = getWorkflowRunUrl;
     exports2.postResultsToPRComments = postResultsToPRComments;
     exports2.getVariable = getVariable;
@@ -81810,7 +81811,8 @@ var require_utils4 = __commonJS({
         useAnnotations: false,
         useCaches: false,
         cacheDefaultBranchOnly: false,
-        githubToken: ""
+        githubToken: "",
+        sarifArtifactLocation: tl2.getInput("sarifArtifactLocation", false) || "CodeAnalysisLogs"
       };
       return cachedInputs;
     }
@@ -81902,18 +81904,25 @@ var require_utils4 = __commonJS({
         }
       });
     }
-    function uploadSarif(resultsDir, execute) {
+    function uploadSarif(resultsDir, sarifArtifactLocation, execute) {
       if (!execute) {
         return;
       }
       try {
+        const sarifArtifactName = path_1.default.basename(sarifArtifactLocation);
+        if (!isSarifArtifactNameSupported(sarifArtifactName)) {
+          tl2.warning(`SARIF SAST Scans Tab may not discover artifact '${sarifArtifactName}'. Use CodeAnalysisLogs, a name containing _sdl_analysis, or one ending _sdl_sources.`);
+        }
         const parentDir = path_1.default.dirname(resultsDir);
         const qodanaSarif = path_1.default.join(parentDir, "qodana.sarif");
         tl2.cp(path_1.default.join(resultsDir, "qodana.sarif.json"), qodanaSarif);
-        tl2.uploadArtifact("CodeAnalysisLogs", qodanaSarif, "CodeAnalysisLogs");
+        tl2.uploadArtifact(sarifArtifactLocation, qodanaSarif, sarifArtifactName);
       } catch (error) {
         tl2.warning(`Failed to upload SARIF \u2013 ${error.message}`);
       }
+    }
+    function isSarifArtifactNameSupported(name) {
+      return name === "CodeAnalysisLogs" || name.includes("_sdl_analysis") || name.endsWith("_sdl_sources");
     }
     function getSourceAndTargetBranches() {
       var _a, _b;
@@ -82276,7 +82285,7 @@ function main() {
         (0, utils_1.uploadArtifacts)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
         (0, output_1.publishOutput)((0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode))
       ]);
-      (0, utils_1.uploadSarif)(inputs.resultsDir, inputs.uploadSarif);
+      (0, utils_1.uploadSarif)(inputs.resultsDir, inputs.sarifArtifactLocation, inputs.uploadSarif);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         (0, utils_1.setFailed)(`qodana scan failed with exit code ${exitCode}`);
       } else if (exitCode === qodana_1.QodanaExitCode.FailThreshold) {
