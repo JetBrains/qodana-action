@@ -94,7 +94,8 @@ export function getInputs(): Inputs {
     cacheDefaultBranchOnly: false,
     githubToken: '',
     artifactName: '',
-    workingDirectory: ''
+    workingDirectory: '',
+    sarifArtifactLocation: ''
   }
   debug(`Got inputs: ${JSON.stringify(cachedInputs)}`)
   return cachedInputs

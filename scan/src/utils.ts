@@ -127,7 +127,8 @@ export function getInputs(): Inputs {
     nightlyVersion: core.getInput('nightly-version'),
     useInstalledCli: core.getBooleanInput('use-installed-cli'),
     // not used by the action
-    workingDirectory: ''
+    workingDirectory: '',
+    sarifArtifactLocation: ''
   }
   return cachedInputs
 }

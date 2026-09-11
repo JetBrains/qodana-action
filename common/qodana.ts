@@ -315,6 +315,7 @@ export interface Inputs {
   nightlyVersion: string
   useInstalledCli: boolean
   workingDirectory: string
+  sarifArtifactLocation: string
 }
 
 /**

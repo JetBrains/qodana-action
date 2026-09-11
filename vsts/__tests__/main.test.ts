@@ -1,6 +1,7 @@
 import {expect, test} from '@jest/globals'
 import {getSummary} from '../../common/output'
 import {DEPENDENCY_CHARS_LIMIT, VIEW_REPORT_OPTIONS} from '../src/output'
+import {isSarifArtifactNameSupported} from '../src/utils'
 import {
   outputEmptyFixture,
   problemDescriptorsDefaultFixture
@@ -38,6 +39,15 @@ test('test empty summary output', () => {
     VIEW_REPORT_OPTIONS
   )
   expect(result).toEqual(markdownEmptySummaryFixture())
+})
+
+test.each([
+  ['CodeAnalysisLogs', true],
+  ['custom_sdl_analysis_artifact', true],
+  ['custom_sdl_sources', true],
+  ['qodana-sarif', false]
+])('test SARIF artifact name compatibility for %s', (name, expected) => {
+  expect(isSarifArtifactNameSupported(name)).toBe(expected)
 })
 
 export function markdownSummaryFixture(): string {

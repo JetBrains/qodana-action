@@ -49513,7 +49513,8 @@ var require_utils5 = __commonJS({
         cacheDefaultBranchOnly: false,
         githubToken: "",
         artifactName: "",
-        workingDirectory: ""
+        workingDirectory: "",
+        sarifArtifactLocation: ""
       };
       debug(`Got inputs: ${JSON.stringify(cachedInputs)}`);
       return cachedInputs;

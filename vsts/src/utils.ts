@@ -103,7 +103,9 @@ export function getInputs(): Inputs {
     useAnnotations: false,
     useCaches: false,
     cacheDefaultBranchOnly: false,
-    githubToken: ''
+    githubToken: '',
+    sarifArtifactLocation:
+      tl.getInput('sarifArtifactLocation', false) || 'CodeAnalysisLogs'
   }
   return cachedInputs
 }
@@ -238,20 +240,40 @@ export async function uploadArtifacts(
 /**
  * Uploads the qodana.sarif.json from temp directory to Azure DevOps Pipelines job qodana.sarif artifact.
  * @param resultsDir The path to upload a report from.
+ * @param sarifArtifactLocation The Azure DevOps artifact location and name.
  * @param execute whether to execute promise or not.
  */
-export function uploadSarif(resultsDir: string, execute: boolean): void {
+export function uploadSarif(
+  resultsDir: string,
+  sarifArtifactLocation: string,
+  execute: boolean
+): void {
   if (!execute) {
     return
   }
   try {
+    const sarifArtifactName = path.basename(sarifArtifactLocation)
+    if (!isSarifArtifactNameSupported(sarifArtifactName)) {
+      tl.warning(
+        `SARIF SAST Scans Tab may not discover artifact '${sarifArtifactName}'. ` +
+          'Use CodeAnalysisLogs, a name containing _sdl_analysis, or one ending _sdl_sources.'
+      )
+    }
     const parentDir = path.dirname(resultsDir)
     const qodanaSarif = path.join(parentDir, 'qodana.sarif')
     tl.cp(path.join(resultsDir, 'qodana.sarif.json'), qodanaSarif)
-    tl.uploadArtifact('CodeAnalysisLogs', qodanaSarif, 'CodeAnalysisLogs')
+    tl.uploadArtifact(sarifArtifactLocation, qodanaSarif, sarifArtifactName)
   } catch (error) {
     tl.warning(`Failed to upload SARIF – ${(error as Error).message}`)
   }
+}
+
+export function isSarifArtifactNameSupported(name: string): boolean {
+  return (
+    name === 'CodeAnalysisLogs' ||
+    name.includes('_sdl_analysis') ||
+    name.endsWith('_sdl_sources')
+  )
 }
 
 function getSourceAndTargetBranches(): {
