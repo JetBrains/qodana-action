@@ -137,7 +137,7 @@
       "label": "SARIF Artifact Location",
       "defaultValue": "CodeAnalysisLogs",
       "required": false,
-      "helpMarkDown": "Artifact location and name used to upload qodana.sarif. The SARIF SAST Scans Tab extension discovers CodeAnalysisLogs, names containing _sdl_analysis, and names ending _sdl_sources."
+      "helpMarkDown": "Artifact location and name used to upload qodana.sarif. If you want results to be shown in SARIF SAST Scans tab, the path should end with the CodeAnalysisLogs directory or with name containing _sdl_analysis or ending with _sdl_sources"
     }
   ],
   "execution": {
