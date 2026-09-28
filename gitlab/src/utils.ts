@@ -195,7 +195,7 @@ async function git(args: string[], ignoreReturnCode = false): Promise<number> {
   return (await gitOutput(args, ignoreReturnCode)).returnCode
 }
 
-function isMergeRequest(): boolean {
+export function isMergeRequest(): boolean {
   return process.env.CI_PIPELINE_SOURCE === 'merge_request_event'
 }
 

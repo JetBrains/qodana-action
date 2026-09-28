@@ -28572,7 +28572,7 @@ so that the job will upload the files as the job artifacts:
           const problemsDescriptions = (_a = problems.problemDescriptions) !== null && _a !== void 0 ? _a : [];
           const toolName = (_b = problems.title.split("found by ")[1]) !== null && _b !== void 0 ? _b : output_12.QODANA_CHECK_NAME;
           problems.summary = (0, output_12.getSummary)(toolName, projectDir, sourceDir, problemsDescriptions, coverageInfo, licensesInfo.packages, licensesInfo.licenses, reportUrl, isPrMode, exports2.DEPENDENCY_CHARS_LIMIT, exports2.VIEW_REPORT_OPTIONS, sanityProblemsCount);
-          if (isPrMode && postComment) {
+          if ((0, utils_12.isMergeRequest)() && postComment) {
             yield (0, utils_12.postResultsToPRComments)(toolName, sourceDir, problems.summary, problemsDescriptions.length != 0, postComment);
           }
         } catch (e) {
@@ -49442,6 +49442,7 @@ var require_utils5 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getInputs = getInputs;
     exports2.execAsync = execAsync;
+    exports2.isMergeRequest = isMergeRequest;
     exports2.getCliVersion = getCliVersion;
     exports2.installCli = installCli;
     exports2.prepareAgent = prepareAgent;

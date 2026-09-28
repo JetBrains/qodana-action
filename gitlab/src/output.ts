@@ -13,7 +13,11 @@ import {
   QODANA_SHORT_SARIF_NAME,
   VERSION
 } from '../../common/qodana'
-import {getWorkflowRunUrl, postResultsToPRComments} from './utils'
+import {
+  getWorkflowRunUrl,
+  isMergeRequest,
+  postResultsToPRComments
+} from './utils'
 
 export const DEPENDENCY_CHARS_LIMIT = 65336 // 65,336 chars is the GitLab limit for a comment
 export const VIEW_REPORT_OPTIONS = `To be able to view the detailed Qodana report, you can either:
@@ -78,7 +82,7 @@ export async function publishOutput(
       VIEW_REPORT_OPTIONS,
       sanityProblemsCount
     )
-    if (isPrMode && postComment) {
+    if (isMergeRequest() && postComment) {
       await postResultsToPRComments(
         toolName,
         sourceDir,
