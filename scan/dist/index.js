@@ -135826,7 +135826,7 @@ ${statusOutput.stdout}`);
           const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
           const actualChecksum = (0, qodana_12.sha256sum)(temp);
           if (expectedChecksum !== actualChecksum) {
-            core2.setFailed((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
+            throw new Error((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
           }
         }
         let extractRoot;

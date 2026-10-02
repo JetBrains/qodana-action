@@ -333,7 +333,7 @@ async function installCli(nightlyVersion: string): Promise<void> {
     const expectedChecksum = getQodanaSha256(arch, platform)
     const actualChecksum = sha256sum(temp)
     if (expectedChecksum !== actualChecksum) {
-      core.setFailed(
+      throw new Error(
         getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
       )
     }
