@@ -455,7 +455,7 @@ async function createZipFromFolder(dir: string): Promise<JSZip> {
   const filePaths = await getFilePathsRecursively(dir)
   const zip = new JSZip()
   for (const filePath of filePaths) {
-    const relative = filePath.replace(absRoot, '')
+    const relative = path.relative(absRoot, filePath).split(path.sep).join('/')
     zip.file(relative, fs.createReadStream(filePath), {
       unixPermissions: '777'
     })
