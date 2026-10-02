@@ -10292,7 +10292,7 @@ async function createZipFromFolder(dir) {
   const filePaths = await getFilePathsRecursively(dir);
   const zip = new import_jszip.default();
   for (const filePath of filePaths) {
-    const relative = filePath.replace(absRoot, "");
+    const relative = import_path.default.relative(absRoot, filePath).split(import_path.default.sep).join("/");
     zip.file(relative, fs.createReadStream(filePath), {
       unixPermissions: "777"
     });
