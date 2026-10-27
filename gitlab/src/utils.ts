@@ -33,9 +33,8 @@ import {DiscussionSchema} from '@gitbeaker/rest'
 import * as os from 'os'
 import * as fs from 'fs'
 import axios from 'axios'
-import * as stream from 'stream'
 import {Readable} from 'stream'
-import {promisify} from 'util'
+import {pipeline} from 'stream/promises'
 import AdmZip from 'adm-zip'
 import * as tar from 'tar'
 import path from 'path'
@@ -218,15 +217,12 @@ async function withDownloadedFile<T>(
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'qodana-cli-download-'))
   try {
     const tempPath = path.join(tempDir, 'qodana-cli-archive')
-    const writer = fs.createWriteStream(tempPath)
     const response = await axios({
       url,
       method: 'GET',
       responseType: 'stream'
     })
-    const data = response.data as Readable
-    data.pipe(writer)
-    await promisify(stream.finished)(writer)
+    await pipeline(response.data as Readable, fs.createWriteStream(tempPath))
     return await callback(tempPath)
   } finally {
     fs.rmSync(tempDir, {recursive: true, force: true})

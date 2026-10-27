@@ -394,22 +394,20 @@ async function gitOutput(
   const token = process.env.SYSTEM_ACCESSTOKEN
   if (withCredentials && token !== undefined) {
     tl.setSecret(token)
-    // credentials are used only with `origin`, which is the repository the pipeline was triggered for
-    if (!process.env.BUILD_REPOSITORY_URI) {
-      throw new Error(
-        'Missing Azure Pipelines predefined variable: BUILD_REPOSITORY_URI'
-      )
-    }
-    const repositoryUrl = new URL(process.env.BUILD_REPOSITORY_URI)
+    // the token is sent only to repositories of the current organization (collection), so it also works
+    // for repositories other than the one the pipeline was triggered for, e.g. with multi-repo checkout
+    const collectionUrl = new URL(
+      getVariable('System.TeamFoundationCollectionUri')
+    )
     // a scope without a user name matches the origin URL with any user name
-    repositoryUrl.username = ''
-    repositoryUrl.password = ''
+    collectionUrl.username = ''
+    collectionUrl.password = ''
     // pass the token via environment: command line arguments are logged and visible to other processes
     const env = options.env ?? (process.env as Record<string, string>)
     options.env = {
       ...env,
       ...gitExtraHeaderEnv(
-        repositoryUrl.toString(),
+        collectionUrl.toString(),
         `AUTHORIZATION: bearer ${token}`,
         env
       )

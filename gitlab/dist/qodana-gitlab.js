@@ -52054,8 +52054,7 @@ var require_utils5 = __commonJS({
     var os = __importStar2(require("os"));
     var fs4 = __importStar2(require("fs"));
     var axios_1 = __importDefault(require_axios());
-    var stream = __importStar2(require("stream"));
-    var util_1 = require("util");
+    var promises_1 = require("stream/promises");
     var adm_zip_1 = __importDefault(require_adm_zip());
     var tar = __importStar2(require_index_min());
     var path_1 = __importDefault(require("path"));
@@ -52206,15 +52205,12 @@ Stderr: ${result.stderr}`);
         const tempDir = fs4.mkdtempSync(path_1.default.join(os.tmpdir(), "qodana-cli-download-"));
         try {
           const tempPath = path_1.default.join(tempDir, "qodana-cli-archive");
-          const writer = fs4.createWriteStream(tempPath);
           const response = yield (0, axios_1.default)({
             url,
             method: "GET",
             responseType: "stream"
           });
-          const data = response.data;
-          data.pipe(writer);
-          yield (0, util_1.promisify)(stream.finished)(writer);
+          yield (0, promises_1.pipeline)(response.data, fs4.createWriteStream(tempPath));
           return yield callback(tempPath);
         } finally {
           fs4.rmSync(tempDir, { recursive: true, force: true });

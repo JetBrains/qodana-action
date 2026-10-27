@@ -83077,14 +83077,11 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         const token = process.env.SYSTEM_ACCESSTOKEN;
         if (withCredentials && token !== void 0) {
           tl2.setSecret(token);
-          if (!process.env.BUILD_REPOSITORY_URI) {
-            throw new Error("Missing Azure Pipelines predefined variable: BUILD_REPOSITORY_URI");
-          }
-          const repositoryUrl = new URL(process.env.BUILD_REPOSITORY_URI);
-          repositoryUrl.username = "";
-          repositoryUrl.password = "";
+          const collectionUrl = new URL(getVariable("System.TeamFoundationCollectionUri"));
+          collectionUrl.username = "";
+          collectionUrl.password = "";
           const env = (_a = options.env) !== null && _a !== void 0 ? _a : process.env;
-          options.env = Object.assign(Object.assign({}, env), (0, utils_12.gitExtraHeaderEnv)(repositoryUrl.toString(), `AUTHORIZATION: bearer ${token}`, env));
+          options.env = Object.assign(Object.assign({}, env), (0, utils_12.gitExtraHeaderEnv)(collectionUrl.toString(), `AUTHORIZATION: bearer ${token}`, env));
         }
         result2.exitCode = yield tl2.execAsync("git", args, options).catch((error) => {
           tl2.warning(`Git command git ${args.join(" ")} failed: ${error.message}
