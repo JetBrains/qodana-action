@@ -20,6 +20,7 @@ import {
 } from '../../common/qodana'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 import {
+  gitExtraHeaderEnv,
   isMergeCommit,
   MERGE_COMMIT_PARENTS_ARGS,
   MERGE_COMMIT_PR_WARNING,
@@ -124,12 +125,13 @@ interface CommandOutput {
 export async function execAsync(
   executable: string,
   args: string[],
-  ignoreReturnCode: boolean
+  ignoreReturnCode: boolean,
+  env: NodeJS.ProcessEnv = process.env
 ): Promise<CommandOutput> {
   return new Promise((resolve, reject) => {
     let stdout = ''
     let stderr = ''
-    const proc = spawn(executable, args)
+    const proc = spawn(executable, args, {env})
     proc.stdout.on('data', (data: Buffer) => {
       stdout += data.toString()
     })
@@ -176,9 +178,10 @@ export async function execAsync(
 
 async function gitOutput(
   args: string[],
-  ignoreReturnCode = false
+  ignoreReturnCode = false,
+  env: NodeJS.ProcessEnv = process.env
 ): Promise<CommandOutput> {
-  const result = await execAsync('git', args, true)
+  const result = await execAsync('git', args, true, env)
   debug(`Git command with args ${args.join(' ')} output: ${inspect(result)})}`)
   if (result.returnCode !== 0 && ignoreReturnCode) {
     console.warn(
@@ -192,26 +195,42 @@ async function gitOutput(
   return result
 }
 
-async function git(args: string[], ignoreReturnCode = false): Promise<number> {
-  return (await gitOutput(args, ignoreReturnCode)).returnCode
+async function git(
+  args: string[],
+  ignoreReturnCode = false,
+  env: NodeJS.ProcessEnv = process.env
+): Promise<number> {
+  return (await gitOutput(args, ignoreReturnCode, env)).returnCode
 }
 
 function isMergeRequest(): boolean {
   return process.env.CI_PIPELINE_SOURCE === 'merge_request_event'
 }
 
-async function downloadTool(url: string): Promise<string> {
-  const tempPath = `${os.tmpdir()}/qodana-cli-${Date.now()}`
-  const writer = fs.createWriteStream(tempPath)
-  const response = await axios({
-    url,
-    method: 'GET',
-    responseType: 'stream'
-  })
-  const data = response.data as Readable
-  data.pipe(writer)
-  await promisify(stream.finished)(writer)
-  return tempPath
+/**
+ * Downloads the file into a private temporary directory, passes its path to the callback
+ * and removes the directory once the callback completes.
+ */
+async function withDownloadedFile<T>(
+  url: string,
+  callback: (filePath: string) => Promise<T>
+): Promise<T> {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'qodana-cli-download-'))
+  try {
+    const tempPath = path.join(tempDir, 'qodana-cli-archive')
+    const writer = fs.createWriteStream(tempPath)
+    const response = await axios({
+      url,
+      method: 'GET',
+      responseType: 'stream'
+    })
+    const data = response.data as Readable
+    data.pipe(writer)
+    await promisify(stream.finished)(writer)
+    return await callback(tempPath)
+  } finally {
+    fs.rmSync(tempDir, {recursive: true, force: true})
+  }
 }
 
 export async function getCliVersion(): Promise<string> {
@@ -230,28 +249,32 @@ export async function installCli(nightlyVersion: string): Promise<void> {
   const arch = getProcessArchName()
   const platform = getProcessPlatformName()
   const nightlyTag = await getNightlyTag(nightlyVersion)
-  const temp = await downloadTool(getQodanaUrl(arch, platform, nightlyTag))
-  if (!nightlyVersion) {
-    const expectedChecksum = getQodanaSha256(arch, platform)
-    const actualChecksum = sha256sum(temp)
-    if (actualChecksum !== expectedChecksum) {
-      throw new Error(
-        getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
-      )
+  const extractRoot = await withDownloadedFile(
+    getQodanaUrl(arch, platform, nightlyTag),
+    async archive => {
+      if (!nightlyVersion) {
+        const expectedChecksum = getQodanaSha256(arch, platform)
+        const actualChecksum = sha256sum(archive)
+        if (actualChecksum !== expectedChecksum) {
+          throw new Error(
+            getQodanaSha256MismatchMessage(expectedChecksum, actualChecksum)
+          )
+        }
+      }
+      // use a fresh private directory
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), 'qodana-cli-'))
+      if (process.platform === 'win32') {
+        const zip = new AdmZip(archive)
+        zip.extractAllTo(root, true)
+      } else {
+        await tar.x({
+          C: root,
+          f: archive
+        })
+      }
+      return root
     }
-  }
-  const extractRoot = `${os.tmpdir()}/qodana-cli`
-  fs.mkdirSync(extractRoot, {recursive: true})
-  if (process.platform === 'win32') {
-    const zip = new AdmZip(temp)
-    zip.extractAllTo(extractRoot, true)
-  } else {
-    await tar.x({
-      C: extractRoot,
-      f: temp
-    })
-  }
-  fs.rmSync(temp, {force: true})
+  )
   const separator = process.platform === 'win32' ? ';' : ':'
   process.env.PATH = process.env.PATH + separator + extractRoot
 }
@@ -614,12 +637,20 @@ async function gitPush(branch: string, force: boolean): Promise<void> {
 
   const token = process.env.QODANA_GITLAB_TOKEN || ''
 
-  const url = new URL(`${serverUrl}/${projectPath}.git`)
+  const pushUrl = new URL(`${serverUrl}/${projectPath}.git`).toString()
 
-  url.username = COMMIT_USER
-  url.password = token
-
-  const pushUrl = url.toString()
+  // pass the token via environment instead of the URL: command line arguments are logged
+  // on failure and visible to other processes
+  let env = process.env
+  if (token !== '') {
+    const credentials = Buffer.from(`${COMMIT_USER}:${token}`).toString(
+      'base64'
+    )
+    env = {
+      ...process.env,
+      ...gitExtraHeaderEnv(`Authorization: Basic ${credentials}`)
+    }
+  }
 
   const pushArgs = ['push']
   if (force) {
@@ -627,7 +658,7 @@ async function gitPush(branch: string, force: boolean): Promise<void> {
   }
   pushArgs.push('-o', 'ci.skip', pushUrl, branch)
 
-  await git(pushArgs)
+  await git(pushArgs, false, env)
 }
 
 async function createPr(

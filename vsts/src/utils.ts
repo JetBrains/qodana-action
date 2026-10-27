@@ -22,6 +22,7 @@ import fs from 'fs'
 import path from 'path'
 import * as GitInterfaces from 'azure-devops-node-api/interfaces/GitInterfaces'
 import {
+  gitExtraHeaderEnv,
   isMergeCommit,
   MERGE_COMMIT_PARENTS_ARGS,
   MERGE_COMMIT_PR_WARNING,
@@ -390,12 +391,15 @@ async function gitOutput(
   options.outStream = outStream
   options.errStream = errStream
 
-  if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== undefined) {
-    args = [
-      '-c',
-      `http.extraheader="AUTHORIZATION: bearer ${process.env.SYSTEM_ACCESSTOKEN}"`,
-      ...args
-    ]
+  const token = process.env.SYSTEM_ACCESSTOKEN
+  if (withCredentials && token !== undefined) {
+    tl.setSecret(token)
+    // pass the token via environment: command line arguments are logged and visible to other processes
+    const env = options.env ?? (process.env as Record<string, string>)
+    options.env = {
+      ...env,
+      ...gitExtraHeaderEnv(`AUTHORIZATION: bearer ${token}`, env)
+    }
   }
 
   result.exitCode = await tl.execAsync('git', args, options).catch(error => {
