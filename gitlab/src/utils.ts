@@ -648,7 +648,7 @@ async function gitPush(branch: string, force: boolean): Promise<void> {
     )
     env = {
       ...process.env,
-      ...gitExtraHeaderEnv(`Authorization: Basic ${credentials}`)
+      ...gitExtraHeaderEnv(pushUrl, `Authorization: Basic ${credentials}`)
     }
   }
 

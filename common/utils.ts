@@ -46,19 +46,22 @@ export function isMergeCommit(parents: string): boolean {
 }
 
 /**
- * Returns environment variables that add an `http.extraheader` entry to a git invocation.
+ * Returns environment variables that add an `http.<url>.extraheader` entry to a git invocation.
  * Safe to use for credentials.
+ * @param url the repository URL the header is sent to. Scoping matters: an unscoped header
+ * would also be sent to other hosts, e.g. to the LFS server set by `.lfsconfig` from the repository.
  * @param header the HTTP header, e.g. `Authorization: Basic ...`.
  * @param env the environment the git command is going to be run with.
  */
 export function gitExtraHeaderEnv(
+  url: string,
   header: string,
   env: NodeJS.ProcessEnv = process.env
 ): Record<string, string> {
   const index = parseInt(env.GIT_CONFIG_COUNT ?? '', 10) || 0
   return {
     GIT_CONFIG_COUNT: `${index + 1}`,
-    [`GIT_CONFIG_KEY_${index}`]: 'http.extraheader',
+    [`GIT_CONFIG_KEY_${index}`]: `http.${url}.extraheader`,
     [`GIT_CONFIG_VALUE_${index}`]: header
   }
 }

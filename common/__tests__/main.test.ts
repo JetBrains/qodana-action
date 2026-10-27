@@ -570,19 +570,23 @@ describe('parseRawArguments', () => {
 
 describe('gitExtraHeaderEnv', () => {
   test('adds the first entry when no git config is passed via environment', () => {
-    expect(gitExtraHeaderEnv('X: y', {})).toEqual({
+    expect(
+      gitExtraHeaderEnv('https://example.com/group/repo.git', 'X: y', {})
+    ).toEqual({
       GIT_CONFIG_COUNT: '1',
-      GIT_CONFIG_KEY_0: 'http.extraheader',
+      GIT_CONFIG_KEY_0: 'http.https://example.com/group/repo.git.extraheader',
       GIT_CONFIG_VALUE_0: 'X: y'
     })
   })
 
   test('appends to the entries already passed via environment', () => {
     expect(
-      gitExtraHeaderEnv('X: y', {GIT_CONFIG_COUNT: '2'})
+      gitExtraHeaderEnv('https://example.com/group/repo.git', 'X: y', {
+        GIT_CONFIG_COUNT: '2'
+      })
     ).toEqual({
       GIT_CONFIG_COUNT: '3',
-      GIT_CONFIG_KEY_2: 'http.extraheader',
+      GIT_CONFIG_KEY_2: 'http.https://example.com/group/repo.git.extraheader',
       GIT_CONFIG_VALUE_2: 'X: y'
     })
   })

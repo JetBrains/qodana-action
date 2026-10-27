@@ -10704,9 +10704,8 @@ var require_side_channel_list = __commonJS({
           }
         },
         "delete": function(key) {
-          var root2 = $o && $o.next;
           var deletedNode = listDelete($o, key);
-          if (deletedNode && root2 && root2 === deletedNode) {
+          if (deletedNode && $o && !$o.next) {
             $o = void 0;
           }
           return !!deletedNode;
@@ -11698,7 +11697,8 @@ var require_side_channel = __commonJS({
       var channel = {
         assert: function(key) {
           if (!channel.has(key)) {
-            throw new $TypeError("Side channel does not contain " + inspect2(key));
+            var keyDesc = key && Object(key) === key ? "the given object key" : inspect2(key);
+            throw new $TypeError("Side channel does not contain " + keyDesc);
           }
         },
         "delete": function(key) {
@@ -11754,6 +11754,7 @@ var require_utils2 = __commonJS({
     "use strict";
     var formats = require_formats();
     var getSideChannel = require_side_channel();
+    var defineProperty = require_es_define_property();
     var has3 = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
     var overflowChannel = getSideChannel();
@@ -11769,6 +11770,17 @@ var require_utils2 = __commonJS({
     };
     var setMaxIndex = function setMaxIndex2(obj, maxIndex) {
       overflowChannel.set(obj, maxIndex);
+    };
+    var conflictChannel = getSideChannel();
+    var markConflict = function markConflict2(obj, maxIndex) {
+      conflictChannel.set(obj, maxIndex);
+      return obj;
+    };
+    var isConflict = function isConflict2(obj) {
+      return conflictChannel.has(obj);
+    };
+    var getConflictIndex = function getConflictIndex2(obj) {
+      return conflictChannel.get(obj);
     };
     var hexTable = (function() {
       var array = [];
@@ -11801,6 +11813,39 @@ var require_utils2 = __commonJS({
       }
       return obj;
     };
+    var setProperty = function setProperty2(obj, key, value) {
+      if (key === "__proto__" && defineProperty) {
+        defineProperty(obj, key, {
+          configurable: true,
+          enumerable: true,
+          value,
+          writable: true
+        });
+      } else {
+        obj[key] = value;
+      }
+    };
+    var maxNumericIndex = function maxNumericIndex2(obj, min2) {
+      var max2 = min2;
+      var keys2 = Object.keys(obj);
+      for (var i = 0; i < keys2.length; ++i) {
+        var num = parseInt(keys2[i], 10);
+        if (String(num) === keys2[i] && num > max2) {
+          max2 = num;
+        }
+      }
+      return max2;
+    };
+    var limitedPair = function limitedPair2(first2, second, options) {
+      var pair = [first2, second];
+      if (options && typeof options.arrayLimit === "number" && pair.length > options.arrayLimit) {
+        if (options.throwOnLimitExceeded) {
+          throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+        }
+        return markOverflow(arrayToObject(pair, options), 1);
+      }
+      return pair;
+    };
     var merge = function merge2(target, source, options) {
       if (!source) {
         return target;
@@ -11808,7 +11853,10 @@ var require_utils2 = __commonJS({
       if (typeof source !== "object" && typeof source !== "function") {
         if (isArray(target)) {
           var nextIndex = target.length;
-          if (options && typeof options.arrayLimit === "number" && nextIndex > options.arrayLimit) {
+          if (options && typeof options.arrayLimit === "number" && nextIndex >= options.arrayLimit) {
+            if (options.throwOnLimitExceeded) {
+              throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+            }
             return markOverflow(arrayToObject(target.concat(source), options), nextIndex);
           }
           target[nextIndex] = source;
@@ -11817,13 +11865,21 @@ var require_utils2 = __commonJS({
             var newIndex = getMaxIndex(target) + 1;
             target[newIndex] = source;
             setMaxIndex(target, newIndex);
+          } else if (options && options.strictMerge && isConflict(target)) {
+            var nextConflict = getConflictIndex(target) + 1;
+            if (options.throwOnLimitExceeded && typeof options.arrayLimit === "number" && nextConflict >= options.arrayLimit) {
+              throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+            }
+            target[nextConflict] = source;
+            markConflict(target, nextConflict);
           } else if (options && options.strictMerge) {
-            return [target, source];
+            var conflict = limitedPair(target, source, options);
+            return isArray(conflict) ? markConflict(conflict, 1) : conflict;
           } else if (options && (options.plainObjects || options.allowPrototypes) || !has3.call(Object.prototype, source)) {
             target[source] = true;
           }
         } else {
-          return [target, source];
+          return limitedPair(target, source, options);
         }
         return target;
       }
@@ -11839,6 +11895,9 @@ var require_utils2 = __commonJS({
         }
         var combined = [target].concat(source);
         if (options && typeof options.arrayLimit === "number" && combined.length > options.arrayLimit) {
+          if (options.throwOnLimitExceeded) {
+            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+          }
           return markOverflow(arrayToObject(combined, options), combined.length - 1);
         }
         return combined;
@@ -11846,6 +11905,9 @@ var require_utils2 = __commonJS({
       var mergeTarget = target;
       if (isArray(target) && !isArray(source)) {
         mergeTarget = arrayToObject(target, options);
+        if (isConflict(target)) {
+          markConflict(mergeTarget, target.length - 1);
+        }
       }
       if (isArray(target) && isArray(source)) {
         source.forEach(function(item, i) {
@@ -11860,17 +11922,23 @@ var require_utils2 = __commonJS({
             target[i] = item;
           }
         });
+        if (options && typeof options.arrayLimit === "number" && target.length > options.arrayLimit) {
+          if (options.throwOnLimitExceeded) {
+            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+          }
+          return markOverflow(arrayToObject(target, options), target.length - 1);
+        }
         return target;
       }
       return Object.keys(source).reduce(function(acc, key) {
         var value = source[key];
         if (has3.call(acc, key)) {
-          acc[key] = merge2(acc[key], value, options);
+          setProperty(acc, key, merge2(acc[key], value, options));
         } else {
-          acc[key] = value;
+          setProperty(acc, key, value);
         }
         if (isOverflow(source) && !isOverflow(acc)) {
-          markOverflow(acc, getMaxIndex(source));
+          markOverflow(acc, maxNumericIndex(acc, getMaxIndex(source)));
         }
         if (isOverflow(acc)) {
           var keyNum = parseInt(key, 10);
@@ -11878,16 +11946,25 @@ var require_utils2 = __commonJS({
             setMaxIndex(acc, keyNum);
           }
         }
+        if (isConflict(acc)) {
+          var conflictKey = parseInt(key, 10);
+          if (String(conflictKey) === key && conflictKey > getConflictIndex(acc)) {
+            markConflict(acc, conflictKey);
+          }
+        }
         return acc;
       }, mergeTarget);
     };
     var assign = function assignSingleSource(target, source) {
       return Object.keys(source).reduce(function(acc, key) {
-        acc[key] = source[key];
+        setProperty(acc, key, source[key]);
         return acc;
       }, target);
     };
     var decode = function(str, defaultDecoder, charset) {
+      if (typeof str === "string" && str.indexOf("%") === -1) {
+        return str.indexOf("+") === -1 ? str : str.replace(/\+/g, " ");
+      }
       var strWithoutPlus = str.replace(/\+/g, " ");
       if (charset === "iso-8859-1") {
         return strWithoutPlus.replace(/%[0-9a-f]{2}/gi, unescape);
@@ -11898,6 +11975,52 @@ var require_utils2 = __commonJS({
         return strWithoutPlus;
       }
     };
+    var hasToPrimitive = typeof Symbol === "function" && typeof Symbol.toPrimitive === "symbol";
+    var arrayJoin = Array.prototype.join;
+    var arrayToString = Array.prototype.toString;
+    var objectToString = Object.prototype.toString;
+    var toCoercible = function toCoercible2(value, joining) {
+      if (!value || typeof value !== "object" && typeof value !== "function") {
+        return value;
+      }
+      if (hasToPrimitive && value[Symbol.toPrimitive] != null) {
+        return value;
+      }
+      if (isArray(value) && value.toString === arrayToString && value.join === arrayJoin) {
+        var ancestors = joining || getSideChannel();
+        if (ancestors.has(value)) {
+          return "";
+        }
+        ancestors.set(value, true);
+        var copy;
+        for (var i = 0; i < value.length; i += 1) {
+          var item = value[i];
+          var coerced = toCoercible2(item, ancestors);
+          if (!copy && coerced !== item) {
+            copy = [];
+            for (var j = 0; j < i; j += 1) {
+              copy[j] = value[j];
+            }
+          }
+          if (copy) {
+            copy[i] = coerced;
+          }
+        }
+        ancestors["delete"](value);
+        return copy || value;
+      }
+      if (typeof value.toString === "function") {
+        return value;
+      }
+      var valueOf = value.valueOf;
+      if (typeof valueOf === "function") {
+        var primitive = valueOf.call(value);
+        if (!primitive || typeof primitive !== "object" && typeof primitive !== "function") {
+          return String(primitive);
+        }
+      }
+      return objectToString.call(value);
+    };
     var limit = 1024;
     var encode = function encode2(str, defaultEncoder, charset, kind, format) {
       if (str.length === 0) {
@@ -11907,16 +12030,23 @@ var require_utils2 = __commonJS({
       if (typeof str === "symbol") {
         string = Symbol.prototype.toString.call(str);
       } else if (typeof str !== "string") {
-        string = String(str);
+        string = String(toCoercible(str));
       }
       if (charset === "iso-8859-1") {
         return escape(string).replace(/%u[0-9a-f]{4}/gi, function($0) {
           return "%26%23" + parseInt($0.slice(2), 16) + "%3B";
-        });
+        }).replace(/\+/g, "%2B");
       }
       var out = "";
       for (var j = 0; j < string.length; j += limit) {
         var segment = string.length >= limit ? string.slice(j, j + limit) : string;
+        if (j + limit < string.length) {
+          var last2 = segment.charCodeAt(segment.length - 1);
+          if (last2 >= 55296 && last2 <= 56319) {
+            segment = segment.slice(0, -1);
+            j -= 1;
+          }
+        }
         var arr = [];
         for (var i = 0; i < segment.length; ++i) {
           var c = segment.charCodeAt(i);
@@ -11946,7 +12076,7 @@ var require_utils2 = __commonJS({
     };
     var compact2 = function compact3(value) {
       var queue = [{ obj: { o: value }, prop: "o" }];
-      var refs = [];
+      var refs = getSideChannel();
       for (var i = 0; i < queue.length; ++i) {
         var item = queue[i];
         var obj = item.obj[item.prop];
@@ -11954,9 +12084,9 @@ var require_utils2 = __commonJS({
         for (var j = 0; j < keys2.length; ++j) {
           var key = keys2[j];
           var val = obj[key];
-          if (typeof val === "object" && val !== null && refs.indexOf(val) === -1) {
+          if (typeof val === "object" && val !== null && !refs.has(val)) {
             queue[queue.length] = { obj, prop: key };
-            refs[refs.length] = val;
+            refs.set(val, true);
           }
         }
       }
@@ -11970,17 +12100,27 @@ var require_utils2 = __commonJS({
       if (!obj || typeof obj !== "object") {
         return false;
       }
-      return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
+      return !!(obj.constructor && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj));
     };
-    var combine = function combine2(a, b, arrayLimit, plainObjects) {
+    var combine = function combine2(a, b, arrayLimit, plainObjects, throwOnLimitExceeded) {
       if (isOverflow(a)) {
-        var newIndex = getMaxIndex(a) + 1;
-        a[newIndex] = b;
+        if (throwOnLimitExceeded) {
+          throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+        }
+        var bValues = isArray(b) ? b : [b];
+        var newIndex = getMaxIndex(a);
+        for (var i = 0; i < bValues.length; ++i) {
+          newIndex += 1;
+          a[newIndex] = bValues[i];
+        }
         setMaxIndex(a, newIndex);
         return a;
       }
       var result2 = [].concat(a, b);
       if (result2.length > arrayLimit) {
+        if (throwOnLimitExceeded) {
+          throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+        }
         return markOverflow(arrayToObject(result2, { plainObjects }), result2.length - 1);
       }
       return result2;
@@ -12007,7 +12147,8 @@ var require_utils2 = __commonJS({
       isRegExp,
       markOverflow,
       maybeMap,
-      merge
+      merge,
+      toCoercible
     };
   }
 });
@@ -12048,6 +12189,7 @@ var require_stringify = __commonJS({
       charsetSentinel: false,
       commaRoundTrip: false,
       delimiter: "&",
+      depth: Infinity,
       encode: true,
       encodeDotInKeys: false,
       encoder: utils.encode,
@@ -12067,8 +12209,11 @@ var require_stringify = __commonJS({
       return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v === "bigint";
     };
     var sentinel = {};
-    var stringify = function stringify2(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter2, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel) {
+    var stringify = function stringify2(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter2, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel, depth, currentDepth) {
       var obj = object2;
+      if (currentDepth > depth) {
+        throw new RangeError("Input depth exceeded depth option of " + depth);
+      }
       var tmpSc = sideChannel;
       var step = 0;
       var findFlag = false;
@@ -12086,9 +12231,8 @@ var require_stringify = __commonJS({
           step = 0;
         }
       }
-      if (typeof filter2 === "function") {
-        obj = filter2(prefix, obj);
-      } else if (obj instanceof Date) {
+      obj = typeof filter2 === "function" ? filter2(prefix, obj) : obj;
+      if (obj instanceof Date) {
         obj = serializeDate(obj);
       } else if (generateArrayPrefix === "comma" && isArray(obj)) {
         obj = utils.maybeMap(obj, function(value2) {
@@ -12100,7 +12244,7 @@ var require_stringify = __commonJS({
       }
       if (obj === null) {
         if (strictNullHandling) {
-          return encoder && !encodeValuesOnly ? encoder(prefix, defaults.encoder, charset, "key", format) : prefix;
+          return formatter(encoder && !encodeValuesOnly ? encoder(prefix, defaults.encoder, charset, "key", format) : prefix);
         }
         obj = "";
       }
@@ -12118,18 +12262,20 @@ var require_stringify = __commonJS({
       var objKeys;
       if (generateArrayPrefix === "comma" && isArray(obj)) {
         if (encodeValuesOnly && encoder) {
-          obj = utils.maybeMap(obj, encoder);
+          obj = utils.maybeMap(obj, function(v) {
+            return v == null ? v : encoder(v, defaults.encoder, charset, "value", format);
+          });
         }
-        objKeys = [{ value: obj.length > 0 ? obj.join(",") || null : void 0 }];
+        objKeys = [{ value: obj.length > 0 ? utils.toCoercible(obj).join(",") || null : void 0 }];
       } else if (isArray(filter2)) {
         objKeys = filter2;
       } else {
         var keys2 = Object.keys(obj);
         objKeys = sort ? keys2.sort(sort) : keys2;
       }
-      var encodedPrefix = encodeDotInKeys ? String(prefix).replace(/\./g, "%2E") : String(prefix);
+      var encodedPrefix = String(prefix);
       var adjustedPrefix = commaRoundTrip && isArray(obj) && obj.length === 1 ? encodedPrefix + "[]" : encodedPrefix;
-      if (allowEmptyArrays && isArray(obj) && obj.length === 0) {
+      if (allowEmptyArrays && isArray(obj) && obj.length === 0 && Object.keys(obj).length === 0) {
         return adjustedPrefix + "[]";
       }
       for (var j = 0; j < objKeys.length; ++j) {
@@ -12161,7 +12307,9 @@ var require_stringify = __commonJS({
           formatter,
           encodeValuesOnly,
           charset,
-          valueSideChannel
+          valueSideChannel,
+          depth,
+          currentDepth + 1
         ));
       }
       return values2;
@@ -12196,7 +12344,7 @@ var require_stringify = __commonJS({
         filter2 = opts.filter;
       }
       var arrayFormat;
-      if (opts.arrayFormat in arrayPrefixGenerators) {
+      if (has3.call(arrayPrefixGenerators, opts.arrayFormat)) {
         arrayFormat = opts.arrayFormat;
       } else if ("indices" in opts) {
         arrayFormat = opts.indices ? "indices" : "repeat";
@@ -12216,6 +12364,7 @@ var require_stringify = __commonJS({
         charsetSentinel: typeof opts.charsetSentinel === "boolean" ? opts.charsetSentinel : defaults.charsetSentinel,
         commaRoundTrip: !!opts.commaRoundTrip,
         delimiter: typeof opts.delimiter === "undefined" ? defaults.delimiter : opts.delimiter,
+        depth: typeof opts.depth === "number" ? opts.depth : defaults.depth,
         encode: typeof opts.encode === "boolean" ? opts.encode : defaults.encode,
         encodeDotInKeys: typeof opts.encodeDotInKeys === "boolean" ? opts.encodeDotInKeys : defaults.encodeDotInKeys,
         encoder: typeof opts.encoder === "function" ? opts.encoder : defaults.encoder,
@@ -12256,13 +12405,17 @@ var require_stringify = __commonJS({
       var sideChannel = getSideChannel();
       for (var i = 0; i < objKeys.length; ++i) {
         var key = objKeys[i];
+        if (typeof key === "undefined" || key === null) {
+          continue;
+        }
         var value = obj[key];
         if (options.skipNulls && value === null) {
           continue;
         }
+        var encodedKey = options.encodeDotInKeys ? String(key).replace(/\./g, "%2E") : String(key);
         pushToArray(keys2, stringify(
           value,
-          key,
+          encodedKey,
           generateArrayPrefix,
           commaRoundTrip,
           options.allowEmptyArrays,
@@ -12278,16 +12431,18 @@ var require_stringify = __commonJS({
           options.formatter,
           options.encodeValuesOnly,
           options.charset,
-          sideChannel
+          sideChannel,
+          options.depth,
+          0
         ));
       }
       var joined = keys2.join(options.delimiter);
       var prefix = options.addQueryPrefix === true ? "?" : "";
       if (options.charsetSentinel) {
         if (options.charset === "iso-8859-1") {
-          prefix += "utf8=%26%2310003%3B&";
+          prefix += "utf8=%26%2310003%3B" + options.delimiter;
         } else {
-          prefix += "utf8=%E2%9C%93&";
+          prefix += "utf8=%E2%9C%93" + options.delimiter;
         }
       }
       return joined.length > 0 ? prefix + joined : "";
@@ -12299,9 +12454,53 @@ var require_stringify = __commonJS({
 var require_parse = __commonJS({
   "../node_modules/qs/lib/parse.js"(exports2, module2) {
     "use strict";
+    var getSideChannel = require_side_channel();
     var utils = require_utils2();
     var has3 = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
+    var getPrototypeOf = Object.getPrototypeOf;
+    var isPlainContainer = function isPlainContainer2(value) {
+      if (!value || typeof value !== "object") {
+        return false;
+      }
+      if (isArray(value)) {
+        return true;
+      }
+      var proto = getPrototypeOf(value);
+      return proto === Object.prototype || proto === null;
+    };
+    var emptyCopyOf = function emptyCopyOf2(value) {
+      if (isArray(value)) {
+        var arr = [];
+        arr.length = value.length;
+        return arr;
+      }
+      return getPrototypeOf(value) === null ? { __proto__: null } : {};
+    };
+    var copyInput = function copyInput2(input) {
+      var copies = getSideChannel();
+      var result2 = {};
+      var queue = [{ source: input, target: result2 }];
+      for (var i = 0; i < queue.length; ++i) {
+        var source = queue[i].source;
+        var target = queue[i].target;
+        var keys2 = Object.keys(source);
+        for (var j = 0; j < keys2.length; ++j) {
+          var value = source[keys2[j]];
+          if (isPlainContainer(value)) {
+            if (!copies.has(value)) {
+              var copy = emptyCopyOf(value);
+              copies.set(value, copy);
+              queue[queue.length] = { source: value, target: copy };
+            }
+            target[keys2[j]] = copies.get(value);
+          } else {
+            target[keys2[j]] = value;
+          }
+        }
+      }
+      return result2;
+    };
     var defaults = {
       allowDots: false,
       allowEmptyArrays: false,
@@ -12333,6 +12532,17 @@ var require_parse = __commonJS({
     };
     var parseArrayValue = function(val, options, currentArrayLength) {
       if (val && typeof val === "string" && options.comma && val.indexOf(",") > -1) {
+        if (options.throwOnLimitExceeded) {
+          var commaCount = 0;
+          var commaIndex = val.indexOf(",");
+          while (commaIndex > -1) {
+            commaCount += 1;
+            if (commaCount >= options.arrayLimit) {
+              throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+            }
+            commaIndex = val.indexOf(",", commaIndex + 1);
+          }
+        }
         return val.split(",");
       }
       if (options.throwOnLimitExceeded && currentArrayLength >= options.arrayLimit) {
@@ -12349,9 +12559,9 @@ var require_parse = __commonJS({
       var limit = options.parameterLimit === Infinity ? void 0 : options.parameterLimit;
       var parts = cleanStr.split(
         options.delimiter,
-        options.throwOnLimitExceeded ? limit + 1 : limit
+        options.throwOnLimitExceeded && typeof limit !== "undefined" ? limit + 1 : limit
       );
-      if (options.throwOnLimitExceeded && parts.length > limit) {
+      if (options.throwOnLimitExceeded && typeof limit !== "undefined" && parts.length > limit) {
         throw new RangeError("Parameter limit exceeded. Only " + limit + " parameter" + (limit === 1 ? "" : "s") + " allowed.");
       }
       var skipIndex = -1;
@@ -12377,6 +12587,7 @@ var require_parse = __commonJS({
         var part = parts[i];
         var bracketEqualsPos = part.indexOf("]=");
         var pos = bracketEqualsPos === -1 ? part.indexOf("=") : bracketEqualsPos + 1;
+        var isEmptyBracketKey = pos > 1 && part.slice(pos - 2, pos) === "[]";
         var key;
         var val;
         if (pos === -1) {
@@ -12400,23 +12611,21 @@ var require_parse = __commonJS({
         if (val && options.interpretNumericEntities && charset === "iso-8859-1") {
           val = interpretNumericEntities(String(val));
         }
-        if (part.indexOf("[]=") > -1) {
+        if (isEmptyBracketKey) {
           val = isArray(val) ? [val] : val;
         }
         if (options.comma && isArray(val) && val.length > options.arrayLimit) {
-          if (options.throwOnLimitExceeded) {
-            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
-          }
-          val = utils.combine([], val, options.arrayLimit, options.plainObjects);
+          val = utils.combine([], val, options.arrayLimit, options.plainObjects, options.throwOnLimitExceeded);
         }
         if (key !== null) {
           var existing = has3.call(obj, key);
-          if (existing && (options.duplicates === "combine" || part.indexOf("[]=") > -1)) {
+          if (existing && (options.duplicates === "combine" || isEmptyBracketKey)) {
             obj[key] = utils.combine(
               obj[key],
               val,
               options.arrayLimit,
-              options.plainObjects
+              options.plainObjects,
+              options.throwOnLimitExceeded
             );
           } else if (!existing || options.duplicates === "last") {
             obj[key] = val;
@@ -12443,7 +12652,8 @@ var require_parse = __commonJS({
               [],
               leaf,
               options.arrayLimit,
-              options.plainObjects
+              options.plainObjects,
+              options.throwOnLimitExceeded
             );
           }
         } else {
@@ -12470,8 +12680,35 @@ var require_parse = __commonJS({
       }
       return leaf;
     };
-    var splitKeyIntoSegments = function splitKeyIntoSegments2(givenKey, options) {
-      var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, "[$1]") : givenKey;
+    var topLevelDotsToBrackets = function topLevelDotsToBrackets2(key) {
+      var result2 = "";
+      var depth = 0;
+      for (var i = 0; i < key.length; i += 1) {
+        var cu = key.charCodeAt(i);
+        if (cu === 91) {
+          depth += 1;
+          result2 += "[";
+        } else if (cu === 93) {
+          if (depth > 0) {
+            depth -= 1;
+          }
+          result2 += "]";
+        } else if (cu === 46 && depth === 0 && i + 1 < key.length && key.charCodeAt(i + 1) !== 46 && key.charCodeAt(i + 1) !== 91) {
+          var start = i + 1;
+          var j = start;
+          while (j < key.length && key.charCodeAt(j) !== 46 && key.charCodeAt(j) !== 91) {
+            j += 1;
+          }
+          result2 += "[" + key.slice(start, j) + "]";
+          i = j - 1;
+        } else {
+          result2 += key.charAt(i);
+        }
+      }
+      return result2;
+    };
+    var splitKeyIntoSegments = function splitKeyIntoSegments2(originalKey, options) {
+      var key = options.allowDots ? topLevelDotsToBrackets(originalKey) : originalKey;
       if (options.depth <= 0) {
         if (!options.plainObjects && has3.call(Object.prototype, key)) {
           if (!options.allowPrototypes) {
@@ -12480,37 +12717,56 @@ var require_parse = __commonJS({
         }
         return [key];
       }
-      var brackets = /(\[[^[\]]*])/;
-      var child = /(\[[^[\]]*])/g;
-      var segment = brackets.exec(key);
-      var parent = segment ? key.slice(0, segment.index) : key;
-      var keys2 = [];
+      var segments = [];
+      var first2 = key.indexOf("[");
+      var parent = first2 >= 0 ? key.slice(0, first2) : key;
       if (parent) {
         if (!options.plainObjects && has3.call(Object.prototype, parent)) {
           if (!options.allowPrototypes) {
             return;
           }
         }
-        keys2[keys2.length] = parent;
+        segments[segments.length] = parent;
       }
-      var i = 0;
-      while ((segment = child.exec(key)) !== null && i < options.depth) {
-        i += 1;
-        var segmentContent = segment[1].slice(1, -1);
-        if (!options.plainObjects && has3.call(Object.prototype, segmentContent)) {
-          if (!options.allowPrototypes) {
-            return;
+      var n = key.length;
+      var open = first2;
+      var collected = 0;
+      while (open >= 0 && collected < options.depth) {
+        var level = 1;
+        var i = open + 1;
+        var close = -1;
+        while (i < n && close < 0) {
+          var cu = key.charCodeAt(i);
+          if (cu === 91) {
+            level += 1;
+          } else if (cu === 93) {
+            level -= 1;
+            if (level === 0) {
+              close = i;
+            }
           }
+          i += 1;
         }
-        keys2[keys2.length] = segment[1];
+        if (close < 0) {
+          segments[segments.length] = "[" + key.slice(open) + "]";
+          return segments;
+        }
+        var seg = key.slice(open, close + 1);
+        var content = seg.slice(1, -1);
+        if (!options.plainObjects && has3.call(Object.prototype, content) && !options.allowPrototypes) {
+          return;
+        }
+        segments[segments.length] = seg;
+        collected += 1;
+        open = key.indexOf("[", close + 1);
       }
-      if (segment) {
+      if (open >= 0) {
         if (options.strictDepth === true) {
           throw new RangeError("Input depth exceeded depth option of " + options.depth + " and strictDepth is true");
         }
-        keys2[keys2.length] = "[" + key.slice(segment.index) + "]";
+        segments[segments.length] = "[" + key.slice(open) + "]";
       }
-      return keys2;
+      return segments;
     };
     var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
       if (!givenKey) {
@@ -12578,7 +12834,7 @@ var require_parse = __commonJS({
       if (str === "" || str === null || typeof str === "undefined") {
         return options.plainObjects ? { __proto__: null } : {};
       }
-      var tempObj = typeof str === "string" ? parseValues(str, options) : str;
+      var tempObj = typeof str === "string" ? parseValues(str, options) : copyInput(str);
       var obj = options.plainObjects ? { __proto__: null } : {};
       var keys2 = Object.keys(tempObj);
       for (var i = 0; i < keys2.length; ++i) {
@@ -12614,6 +12870,11 @@ var require_Util = __commonJS({
   "../node_modules/typed-rest-client/Util.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+      function adopt(value) {
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
+        });
+      }
       return new (P || (P = Promise))(function(resolve, reject2) {
         function fulfilled(value) {
           try {
@@ -12630,44 +12891,41 @@ var require_Util = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : new P(function(resolve2) {
-            resolve2(result2.value);
-          }).then(fulfilled, rejected);
+          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.getUrl = getUrl;
+    exports2.decompressGzippedContent = decompressGzippedContent;
+    exports2.buildProxyBypassRegexFromEnv = buildProxyBypassRegexFromEnv;
+    exports2.obtainContentCharset = obtainContentCharset;
     var qs = require_lib4();
-    var url = require("url");
-    var path2 = require("path");
     var zlib = require("zlib");
     function getUrl(resource, baseUrl, queryParams) {
-      const pathApi = path2.posix || path2;
       let requestUrl = "";
       if (!baseUrl) {
         requestUrl = resource;
       } else if (!resource) {
         requestUrl = baseUrl;
       } else {
-        const base = url.parse(baseUrl);
-        const resultantUrl = url.parse(resource);
-        resultantUrl.protocol = resultantUrl.protocol || base.protocol;
-        resultantUrl.auth = resultantUrl.auth || base.auth;
-        resultantUrl.host = resultantUrl.host || base.host;
-        resultantUrl.pathname = pathApi.resolve(base.pathname, resultantUrl.pathname);
+        const effectiveBase = new URL(baseUrl);
+        if (!effectiveBase.pathname.endsWith("/")) {
+          effectiveBase.pathname += "/";
+        }
+        const resultantUrl = new URL(resource, effectiveBase.href);
         if (!resultantUrl.pathname.endsWith("/") && resource.endsWith("/")) {
           resultantUrl.pathname += "/";
         }
-        requestUrl = url.format(resultantUrl);
+        requestUrl = resultantUrl.href;
       }
       return queryParams ? getUrlWithParsedQueryParams(requestUrl, queryParams) : requestUrl;
     }
-    exports2.getUrl = getUrl;
     function getUrlWithParsedQueryParams(requestUrl, queryParams) {
-      const url2 = requestUrl.replace(/\?$/g, "");
+      const url = requestUrl.replace(/\?$/g, "");
       const parsedQueryParams = qs.stringify(queryParams.params, buildParamsStringifyOptions(queryParams));
-      return `${url2}${parsedQueryParams}`;
+      return `${url}${parsedQueryParams}`;
     }
     function buildParamsStringifyOptions(queryParams) {
       let options = {
@@ -12692,7 +12950,6 @@ var require_Util = __commonJS({
         }));
       });
     }
-    exports2.decompressGzippedContent = decompressGzippedContent;
     function buildProxyBypassRegexFromEnv(bypass) {
       try {
         return new RegExp(bypass, "i");
@@ -12704,14 +12961,15 @@ var require_Util = __commonJS({
         throw err;
       }
     }
-    exports2.buildProxyBypassRegexFromEnv = buildProxyBypassRegexFromEnv;
     function obtainContentCharset(response) {
       const nodeSupportedEncodings = ["ascii", "utf8", "utf16le", "ucs2", "base64", "binary", "hex"];
       const contentType = response.message.headers["content-type"] || "";
       const matches = contentType.match(/charset=([^;,\r\n]+)/i);
-      return matches && matches[1] && nodeSupportedEncodings.indexOf(matches[1]) != -1 ? matches[1] : "utf-8";
+      if (matches && matches[1] && nodeSupportedEncodings.indexOf(matches[1]) != -1) {
+        return matches[1];
+      }
+      return "utf-8";
     }
-    exports2.obtainContentCharset = obtainContentCharset;
   }
 });
 
@@ -12957,6 +13215,11 @@ var require_HttpClient = __commonJS({
   "../node_modules/typed-rest-client/HttpClient.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+      function adopt(value) {
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
+        });
+      }
       return new (P || (P = Promise))(function(resolve, reject2) {
         function fulfilled(value) {
           try {
@@ -12973,15 +13236,14 @@ var require_HttpClient = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : new P(function(resolve2) {
-            resolve2(result2.value);
-          }).then(fulfilled, rejected);
+          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var url = require("url");
+    exports2.HttpClient = exports2.HttpClientResponse = exports2.HttpCodes = void 0;
+    exports2.isHttps = isHttps;
     var http = require("http");
     var https = require("https");
     var util2 = require_Util();
@@ -13016,10 +13278,10 @@ var require_HttpClient = __commonJS({
       HttpCodes2[HttpCodes2["BadGateway"] = 502] = "BadGateway";
       HttpCodes2[HttpCodes2["ServiceUnavailable"] = 503] = "ServiceUnavailable";
       HttpCodes2[HttpCodes2["GatewayTimeout"] = 504] = "GatewayTimeout";
-    })(HttpCodes = exports2.HttpCodes || (exports2.HttpCodes = {}));
+    })(HttpCodes || (exports2.HttpCodes = HttpCodes = {}));
     var HttpRedirectCodes = [HttpCodes.MovedPermanently, HttpCodes.ResourceMoved, HttpCodes.SeeOther, HttpCodes.TemporaryRedirect, HttpCodes.PermanentRedirect];
     var HttpResponseRetryCodes = [HttpCodes.BadGateway, HttpCodes.ServiceUnavailable, HttpCodes.GatewayTimeout];
-    var NetworkRetryErrors = ["ECONNRESET", "ENOTFOUND", "ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNREFUSED"];
+    var NetworkRetryErrors = ["ECONNRESET", "ENOTFOUND", "ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNREFUSED", "EHOSTUNREACH"];
     var RetryableHttpVerbs = ["OPTIONS", "GET", "DELETE", "HEAD"];
     var ExponentialBackoffCeiling = 10;
     var ExponentialBackoffTimeSlice = 5;
@@ -13054,10 +13316,9 @@ var require_HttpClient = __commonJS({
     };
     exports2.HttpClientResponse = HttpClientResponse;
     function isHttps(requestUrl) {
-      let parsedUrl = url.parse(requestUrl);
+      const parsedUrl = new URL(requestUrl);
       return parsedUrl.protocol === "https:";
     }
-    exports2.isHttps = isHttps;
     var EnvironmentVariables;
     (function(EnvironmentVariables2) {
       EnvironmentVariables2["HTTP_PROXY"] = "HTTP_PROXY";
@@ -13074,6 +13335,10 @@ var require_HttpClient = __commonJS({
         this._maxRetries = 1;
         this._keepAlive = false;
         this._disposed = false;
+        this._httpGlobalAgentOptions = {
+          keepAlive: false,
+          timeout: 3e4
+        };
         this.userAgent = userAgent;
         this.handlers = handlers || [];
         let no_proxy = process.env[EnvironmentVariables.NO_PROXY];
@@ -13095,6 +13360,9 @@ var require_HttpClient = __commonJS({
             requestOptions.proxy.proxyBypassHosts.forEach((bypass) => {
               this._httpProxyBypassHosts.push(new RegExp(bypass, "i"));
             });
+          }
+          if (requestOptions.globalAgentOptions) {
+            this._httpGlobalAgentOptions = requestOptions.globalAgentOptions;
           }
           this._certConfig = requestOptions.cert;
           if (this._certConfig) {
@@ -13163,7 +13431,7 @@ var require_HttpClient = __commonJS({
           if (this._disposed) {
             throw new Error("Client has already been disposed.");
           }
-          let parsedUrl = url.parse(requestUrl);
+          const parsedUrl = new URL(requestUrl);
           let info = this._prepareRequest(verb, parsedUrl, headers);
           let maxTries = this._allowRetries && RetryableHttpVerbs.indexOf(verb) != -1 ? this._maxRetries + 1 : 1;
           let numTries = 0;
@@ -13199,7 +13467,7 @@ var require_HttpClient = __commonJS({
               if (!redirectUrl) {
                 break;
               }
-              let parsedRedirectUrl = url.parse(redirectUrl);
+              const parsedRedirectUrl = new URL(redirectUrl, parsedUrl.href);
               if (parsedUrl.protocol == "https:" && parsedUrl.protocol != parsedRedirectUrl.protocol && !this._allowRedirectDowngrade) {
                 throw new Error("Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.");
               }
@@ -13294,13 +13562,13 @@ var require_HttpClient = __commonJS({
       _prepareRequest(method, requestUrl, headers) {
         const info = {};
         info.parsedUrl = requestUrl;
-        const usingSsl = info.parsedUrl.protocol === "https:";
+        const usingSsl = requestUrl.protocol === "https:";
         info.httpModule = usingSsl ? https : http;
         const defaultPort = usingSsl ? 443 : 80;
         info.options = {};
-        info.options.host = info.parsedUrl.hostname;
-        info.options.port = info.parsedUrl.port ? parseInt(info.parsedUrl.port) : defaultPort;
-        info.options.path = (info.parsedUrl.pathname || "") + (info.parsedUrl.search || "");
+        info.options.host = requestUrl.hostname;
+        info.options.port = requestUrl.port ? parseInt(requestUrl.port) : defaultPort;
+        info.options.path = requestUrl.pathname + requestUrl.search;
         info.options.method = method;
         info.options.timeout = this.requestOptions && this.requestOptions.socketTimeout || this._socketTimeout;
         this._socketTimeout = info.options.timeout;
@@ -13308,8 +13576,8 @@ var require_HttpClient = __commonJS({
         if (this.userAgent != null) {
           info.options.headers["user-agent"] = this.userAgent;
         }
-        info.options.agent = this._getAgent(info.parsedUrl);
-        if (this.handlers && !this._isPresigned(url.format(requestUrl))) {
+        info.options.agent = this._getAgent(requestUrl);
+        if (this.handlers && !this._isPresigned(requestUrl.href)) {
           this.handlers.forEach((handler) => {
             handler.prepareRequest(info.options);
           });
@@ -13362,7 +13630,7 @@ var require_HttpClient = __commonJS({
             proxy: {
               proxyAuth: proxy.proxyAuth,
               host: proxy.proxyUrl.hostname,
-              port: proxy.proxyUrl.port
+              port: Number(proxy.proxyUrl.port) || (proxy.proxyUrl.protocol === "https:" ? 443 : 80)
             }
           };
           let tunnelAgent;
@@ -13381,7 +13649,11 @@ var require_HttpClient = __commonJS({
           this._agent = agent;
         }
         if (!agent) {
-          agent = usingSsl ? https.globalAgent : http.globalAgent;
+          const globalAgentOptions = {
+            keepAlive: this._httpGlobalAgentOptions.keepAlive,
+            timeout: this._httpGlobalAgentOptions.timeout
+          };
+          agent = usingSsl ? new https.Agent(globalAgentOptions) : new http.Agent(globalAgentOptions);
         }
         if (usingSsl && this._ignoreSslError) {
           agent.options = Object.assign(agent.options || {}, { rejectUnauthorized: false });
@@ -13411,7 +13683,7 @@ var require_HttpClient = __commonJS({
         let proxyAuth;
         if (proxyConfig) {
           if (proxyConfig.proxyUrl.length > 0) {
-            proxyUrl = url.parse(proxyConfig.proxyUrl);
+            proxyUrl = new URL(proxyConfig.proxyUrl);
           }
           if (proxyConfig.proxyUsername || proxyConfig.proxyPassword) {
             proxyAuth = proxyConfig.proxyUsername + ":" + proxyConfig.proxyPassword;
@@ -13814,7 +14086,7 @@ var require_semver = __commonJS({
     }
     exports2.diff = diff;
     function diff(version1, version2) {
-      if (eq2(version1, version2)) {
+      if (eq(version1, version2)) {
         return null;
       } else {
         var v1 = parse(version1);
@@ -13893,8 +14165,8 @@ var require_semver = __commonJS({
     function lt(a, b, loose) {
       return compare(a, b, loose) < 0;
     }
-    exports2.eq = eq2;
-    function eq2(a, b, loose) {
+    exports2.eq = eq;
+    function eq(a, b, loose) {
       return compare(a, b, loose) === 0;
     }
     exports2.neq = neq;
@@ -13927,7 +14199,7 @@ var require_semver = __commonJS({
         case "":
         case "=":
         case "==":
-          return eq2(a, b, loose);
+          return eq(a, b, loose);
         case "!=":
           return neq(a, b, loose);
         case ">":
@@ -14535,77 +14807,595 @@ var require_semver_compare = __commonJS({
   }
 });
 
-// ../node_modules/uuid/lib/rng.js
-var require_rng = __commonJS({
-  "../node_modules/uuid/lib/rng.js"(exports2, module2) {
-    var crypto = require("crypto");
-    module2.exports = function nodeRNG() {
-      return crypto.randomBytes(16);
-    };
+// ../node_modules/uuid/dist/cjs/max.js
+var require_max2 = __commonJS({
+  "../node_modules/uuid/dist/cjs/max.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.default = "ffffffff-ffff-ffff-ffff-ffffffffffff";
   }
 });
 
-// ../node_modules/uuid/lib/bytesToUuid.js
-var require_bytesToUuid = __commonJS({
-  "../node_modules/uuid/lib/bytesToUuid.js"(exports2, module2) {
+// ../node_modules/uuid/dist/cjs/nil.js
+var require_nil = __commonJS({
+  "../node_modules/uuid/dist/cjs/nil.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.default = "00000000-0000-0000-0000-000000000000";
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/regex.js
+var require_regex = __commonJS({
+  "../node_modules/uuid/dist/cjs/regex.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/i;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/validate.js
+var require_validate = __commonJS({
+  "../node_modules/uuid/dist/cjs/validate.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var regex_js_1 = require_regex();
+    function validate(uuid) {
+      return typeof uuid === "string" && regex_js_1.default.test(uuid);
+    }
+    exports2.default = validate;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/parse.js
+var require_parse2 = __commonJS({
+  "../node_modules/uuid/dist/cjs/parse.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var validate_js_1 = require_validate();
+    function parse(uuid) {
+      if (!(0, validate_js_1.default)(uuid)) {
+        throw TypeError("Invalid UUID");
+      }
+      let v;
+      return Uint8Array.of((v = parseInt(uuid.slice(0, 8), 16)) >>> 24, v >>> 16 & 255, v >>> 8 & 255, v & 255, (v = parseInt(uuid.slice(9, 13), 16)) >>> 8, v & 255, (v = parseInt(uuid.slice(14, 18), 16)) >>> 8, v & 255, (v = parseInt(uuid.slice(19, 23), 16)) >>> 8, v & 255, (v = parseInt(uuid.slice(24, 36), 16)) / 1099511627776 & 255, v / 4294967296 & 255, v >>> 24 & 255, v >>> 16 & 255, v >>> 8 & 255, v & 255);
+    }
+    exports2.default = parse;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/stringify.js
+var require_stringify2 = __commonJS({
+  "../node_modules/uuid/dist/cjs/stringify.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.unsafeStringify = void 0;
+    var validate_js_1 = require_validate();
     var byteToHex = [];
-    for (i = 0; i < 256; ++i) {
-      byteToHex[i] = (i + 256).toString(16).substr(1);
+    for (let i = 0; i < 256; ++i) {
+      byteToHex.push((i + 256).toString(16).slice(1));
     }
-    var i;
-    function bytesToUuid(buf, offset) {
-      var i2 = offset || 0;
-      var bth = byteToHex;
-      return [
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        "-",
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        "-",
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        "-",
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        "-",
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        bth[buf[i2++]],
-        bth[buf[i2++]]
-      ].join("");
+    function unsafeStringify(arr, offset = 0) {
+      return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
     }
-    module2.exports = bytesToUuid;
+    exports2.unsafeStringify = unsafeStringify;
+    function stringify(arr, offset = 0) {
+      const uuid = unsafeStringify(arr, offset);
+      if (!(0, validate_js_1.default)(uuid)) {
+        throw TypeError("Stringified UUID is invalid");
+      }
+      return uuid;
+    }
+    exports2.default = stringify;
   }
 });
 
-// ../node_modules/uuid/v4.js
+// ../node_modules/uuid/dist/cjs/rng.js
+var require_rng = __commonJS({
+  "../node_modules/uuid/dist/cjs/rng.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var crypto_1 = require("crypto");
+    var rnds8Pool = new Uint8Array(256);
+    var poolPtr = rnds8Pool.length;
+    function rng() {
+      if (poolPtr > rnds8Pool.length - 16) {
+        (0, crypto_1.randomFillSync)(rnds8Pool);
+        poolPtr = 0;
+      }
+      return rnds8Pool.slice(poolPtr, poolPtr += 16);
+    }
+    exports2.default = rng;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/v1.js
+var require_v1 = __commonJS({
+  "../node_modules/uuid/dist/cjs/v1.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.updateV1State = void 0;
+    var rng_js_1 = require_rng();
+    var stringify_js_1 = require_stringify2();
+    var _state = {};
+    function v1(options, buf, offset) {
+      var _a;
+      let bytes;
+      const isV6 = (options == null ? void 0 : options._v6) ?? false;
+      if (options) {
+        const optionsKeys = Object.keys(options);
+        if (optionsKeys.length === 1 && optionsKeys[0] === "_v6") {
+          options = void 0;
+        }
+      }
+      if (options) {
+        bytes = v1Bytes(options.random ?? ((_a = options.rng) == null ? void 0 : _a.call(options)) ?? (0, rng_js_1.default)(), options.msecs, options.nsecs, options.clockseq, options.node, buf, offset);
+      } else {
+        const now = Date.now();
+        const rnds = (0, rng_js_1.default)();
+        updateV1State(_state, now, rnds);
+        bytes = v1Bytes(rnds, _state.msecs, _state.nsecs, isV6 ? void 0 : _state.clockseq, isV6 ? void 0 : _state.node, buf, offset);
+      }
+      return buf ?? (0, stringify_js_1.unsafeStringify)(bytes);
+    }
+    function updateV1State(state, now, rnds) {
+      state.msecs ??= -Infinity;
+      state.nsecs ??= 0;
+      if (now === state.msecs) {
+        state.nsecs++;
+        if (state.nsecs >= 1e4) {
+          state.node = void 0;
+          state.nsecs = 0;
+        }
+      } else if (now > state.msecs) {
+        state.nsecs = 0;
+      } else if (now < state.msecs) {
+        state.node = void 0;
+      }
+      if (!state.node) {
+        state.node = rnds.slice(10, 16);
+        state.node[0] |= 1;
+        state.clockseq = (rnds[8] << 8 | rnds[9]) & 16383;
+      }
+      state.msecs = now;
+      return state;
+    }
+    exports2.updateV1State = updateV1State;
+    function v1Bytes(rnds, msecs, nsecs, clockseq, node, buf, offset = 0) {
+      if (rnds.length < 16) {
+        throw new Error("Random bytes length must be >= 16");
+      }
+      if (!buf) {
+        buf = new Uint8Array(16);
+        offset = 0;
+      } else {
+        if (offset < 0 || offset + 16 > buf.length) {
+          throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);
+        }
+      }
+      msecs ??= Date.now();
+      nsecs ??= 0;
+      clockseq ??= (rnds[8] << 8 | rnds[9]) & 16383;
+      node ??= rnds.slice(10, 16);
+      msecs += 122192928e5;
+      const tl2 = ((msecs & 268435455) * 1e4 + nsecs) % 4294967296;
+      buf[offset++] = tl2 >>> 24 & 255;
+      buf[offset++] = tl2 >>> 16 & 255;
+      buf[offset++] = tl2 >>> 8 & 255;
+      buf[offset++] = tl2 & 255;
+      const tmh = msecs / 4294967296 * 1e4 & 268435455;
+      buf[offset++] = tmh >>> 8 & 255;
+      buf[offset++] = tmh & 255;
+      buf[offset++] = tmh >>> 24 & 15 | 16;
+      buf[offset++] = tmh >>> 16 & 255;
+      buf[offset++] = clockseq >>> 8 | 128;
+      buf[offset++] = clockseq & 255;
+      for (let n = 0; n < 6; ++n) {
+        buf[offset++] = node[n];
+      }
+      return buf;
+    }
+    exports2.default = v1;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/v1ToV6.js
+var require_v1ToV6 = __commonJS({
+  "../node_modules/uuid/dist/cjs/v1ToV6.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var parse_js_1 = require_parse2();
+    var stringify_js_1 = require_stringify2();
+    function v1ToV6(uuid) {
+      const v1Bytes = typeof uuid === "string" ? (0, parse_js_1.default)(uuid) : uuid;
+      const v6Bytes = _v1ToV6(v1Bytes);
+      return typeof uuid === "string" ? (0, stringify_js_1.unsafeStringify)(v6Bytes) : v6Bytes;
+    }
+    exports2.default = v1ToV6;
+    function _v1ToV6(v1Bytes) {
+      return Uint8Array.of((v1Bytes[6] & 15) << 4 | v1Bytes[7] >> 4 & 15, (v1Bytes[7] & 15) << 4 | (v1Bytes[4] & 240) >> 4, (v1Bytes[4] & 15) << 4 | (v1Bytes[5] & 240) >> 4, (v1Bytes[5] & 15) << 4 | (v1Bytes[0] & 240) >> 4, (v1Bytes[0] & 15) << 4 | (v1Bytes[1] & 240) >> 4, (v1Bytes[1] & 15) << 4 | (v1Bytes[2] & 240) >> 4, 96 | v1Bytes[2] & 15, v1Bytes[3], v1Bytes[8], v1Bytes[9], v1Bytes[10], v1Bytes[11], v1Bytes[12], v1Bytes[13], v1Bytes[14], v1Bytes[15]);
+    }
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/md5.js
+var require_md5 = __commonJS({
+  "../node_modules/uuid/dist/cjs/md5.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var crypto_1 = require("crypto");
+    function md5(bytes) {
+      if (Array.isArray(bytes)) {
+        bytes = Buffer.from(bytes);
+      } else if (typeof bytes === "string") {
+        bytes = Buffer.from(bytes, "utf8");
+      }
+      return (0, crypto_1.createHash)("md5").update(bytes).digest();
+    }
+    exports2.default = md5;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/v35.js
+var require_v35 = __commonJS({
+  "../node_modules/uuid/dist/cjs/v35.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.URL = exports2.DNS = exports2.stringToBytes = void 0;
+    var parse_js_1 = require_parse2();
+    var stringify_js_1 = require_stringify2();
+    function stringToBytes(str) {
+      str = unescape(encodeURIComponent(str));
+      const bytes = new Uint8Array(str.length);
+      for (let i = 0; i < str.length; ++i) {
+        bytes[i] = str.charCodeAt(i);
+      }
+      return bytes;
+    }
+    exports2.stringToBytes = stringToBytes;
+    exports2.DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+    exports2.URL = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
+    function v35(version2, hash, value, namespace, buf, offset) {
+      const valueBytes = typeof value === "string" ? stringToBytes(value) : value;
+      const namespaceBytes = typeof namespace === "string" ? (0, parse_js_1.default)(namespace) : namespace;
+      if (typeof namespace === "string") {
+        namespace = (0, parse_js_1.default)(namespace);
+      }
+      if ((namespace == null ? void 0 : namespace.length) !== 16) {
+        throw TypeError("Namespace must be array-like (16 iterable integer values, 0-255)");
+      }
+      let bytes = new Uint8Array(16 + valueBytes.length);
+      bytes.set(namespaceBytes);
+      bytes.set(valueBytes, namespaceBytes.length);
+      bytes = hash(bytes);
+      bytes[6] = bytes[6] & 15 | version2;
+      bytes[8] = bytes[8] & 63 | 128;
+      if (buf) {
+        offset = offset || 0;
+        if (offset < 0 || offset + 16 > buf.length) {
+          throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);
+        }
+        for (let i = 0; i < 16; ++i) {
+          buf[offset + i] = bytes[i];
+        }
+        return buf;
+      }
+      return (0, stringify_js_1.unsafeStringify)(bytes);
+    }
+    exports2.default = v35;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/v3.js
+var require_v3 = __commonJS({
+  "../node_modules/uuid/dist/cjs/v3.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.URL = exports2.DNS = void 0;
+    var md5_js_1 = require_md5();
+    var v35_js_1 = require_v35();
+    var v35_js_2 = require_v35();
+    Object.defineProperty(exports2, "DNS", { enumerable: true, get: function() {
+      return v35_js_2.DNS;
+    } });
+    Object.defineProperty(exports2, "URL", { enumerable: true, get: function() {
+      return v35_js_2.URL;
+    } });
+    function v3(value, namespace, buf, offset) {
+      return (0, v35_js_1.default)(48, md5_js_1.default, value, namespace, buf, offset);
+    }
+    v3.DNS = v35_js_1.DNS;
+    v3.URL = v35_js_1.URL;
+    exports2.default = v3;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/native.js
+var require_native = __commonJS({
+  "../node_modules/uuid/dist/cjs/native.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var crypto_1 = require("crypto");
+    exports2.default = { randomUUID: crypto_1.randomUUID };
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/v4.js
 var require_v4 = __commonJS({
-  "../node_modules/uuid/v4.js"(exports2, module2) {
-    var rng = require_rng();
-    var bytesToUuid = require_bytesToUuid();
+  "../node_modules/uuid/dist/cjs/v4.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var native_js_1 = require_native();
+    var rng_js_1 = require_rng();
+    var stringify_js_1 = require_stringify2();
     function v4(options, buf, offset) {
-      var i = buf && offset || 0;
-      if (typeof options == "string") {
-        buf = options === "binary" ? new Array(16) : null;
-        options = null;
+      var _a;
+      if (native_js_1.default.randomUUID && !buf && !options) {
+        return native_js_1.default.randomUUID();
       }
       options = options || {};
-      var rnds = options.random || (options.rng || rng)();
+      const rnds = options.random ?? ((_a = options.rng) == null ? void 0 : _a.call(options)) ?? (0, rng_js_1.default)();
+      if (rnds.length < 16) {
+        throw new Error("Random bytes length must be >= 16");
+      }
       rnds[6] = rnds[6] & 15 | 64;
       rnds[8] = rnds[8] & 63 | 128;
       if (buf) {
-        for (var ii = 0; ii < 16; ++ii) {
-          buf[i + ii] = rnds[ii];
+        offset = offset || 0;
+        if (offset < 0 || offset + 16 > buf.length) {
+          throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);
+        }
+        for (let i = 0; i < 16; ++i) {
+          buf[offset + i] = rnds[i];
+        }
+        return buf;
+      }
+      return (0, stringify_js_1.unsafeStringify)(rnds);
+    }
+    exports2.default = v4;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/sha1.js
+var require_sha1 = __commonJS({
+  "../node_modules/uuid/dist/cjs/sha1.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var crypto_1 = require("crypto");
+    function sha1(bytes) {
+      if (Array.isArray(bytes)) {
+        bytes = Buffer.from(bytes);
+      } else if (typeof bytes === "string") {
+        bytes = Buffer.from(bytes, "utf8");
+      }
+      return (0, crypto_1.createHash)("sha1").update(bytes).digest();
+    }
+    exports2.default = sha1;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/v5.js
+var require_v5 = __commonJS({
+  "../node_modules/uuid/dist/cjs/v5.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.URL = exports2.DNS = void 0;
+    var sha1_js_1 = require_sha1();
+    var v35_js_1 = require_v35();
+    var v35_js_2 = require_v35();
+    Object.defineProperty(exports2, "DNS", { enumerable: true, get: function() {
+      return v35_js_2.DNS;
+    } });
+    Object.defineProperty(exports2, "URL", { enumerable: true, get: function() {
+      return v35_js_2.URL;
+    } });
+    function v5(value, namespace, buf, offset) {
+      return (0, v35_js_1.default)(80, sha1_js_1.default, value, namespace, buf, offset);
+    }
+    v5.DNS = v35_js_1.DNS;
+    v5.URL = v35_js_1.URL;
+    exports2.default = v5;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/v6.js
+var require_v6 = __commonJS({
+  "../node_modules/uuid/dist/cjs/v6.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var stringify_js_1 = require_stringify2();
+    var v1_js_1 = require_v1();
+    var v1ToV6_js_1 = require_v1ToV6();
+    function v6(options, buf, offset) {
+      options ??= {};
+      offset ??= 0;
+      let bytes = (0, v1_js_1.default)({ ...options, _v6: true }, new Uint8Array(16));
+      bytes = (0, v1ToV6_js_1.default)(bytes);
+      if (buf) {
+        if (offset < 0 || offset + 16 > buf.length) {
+          throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);
+        }
+        for (let i = 0; i < 16; i++) {
+          buf[offset + i] = bytes[i];
+        }
+        return buf;
+      }
+      return (0, stringify_js_1.unsafeStringify)(bytes);
+    }
+    exports2.default = v6;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/v6ToV1.js
+var require_v6ToV1 = __commonJS({
+  "../node_modules/uuid/dist/cjs/v6ToV1.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var parse_js_1 = require_parse2();
+    var stringify_js_1 = require_stringify2();
+    function v6ToV1(uuid) {
+      const v6Bytes = typeof uuid === "string" ? (0, parse_js_1.default)(uuid) : uuid;
+      const v1Bytes = _v6ToV1(v6Bytes);
+      return typeof uuid === "string" ? (0, stringify_js_1.unsafeStringify)(v1Bytes) : v1Bytes;
+    }
+    exports2.default = v6ToV1;
+    function _v6ToV1(v6Bytes) {
+      return Uint8Array.of((v6Bytes[3] & 15) << 4 | v6Bytes[4] >> 4 & 15, (v6Bytes[4] & 15) << 4 | (v6Bytes[5] & 240) >> 4, (v6Bytes[5] & 15) << 4 | v6Bytes[6] & 15, v6Bytes[7], (v6Bytes[1] & 15) << 4 | (v6Bytes[2] & 240) >> 4, (v6Bytes[2] & 15) << 4 | (v6Bytes[3] & 240) >> 4, 16 | (v6Bytes[0] & 240) >> 4, (v6Bytes[0] & 15) << 4 | (v6Bytes[1] & 240) >> 4, v6Bytes[8], v6Bytes[9], v6Bytes[10], v6Bytes[11], v6Bytes[12], v6Bytes[13], v6Bytes[14], v6Bytes[15]);
+    }
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/v7.js
+var require_v7 = __commonJS({
+  "../node_modules/uuid/dist/cjs/v7.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.updateV7State = void 0;
+    var rng_js_1 = require_rng();
+    var stringify_js_1 = require_stringify2();
+    var _state = {};
+    function v7(options, buf, offset) {
+      var _a;
+      let bytes;
+      if (options) {
+        bytes = v7Bytes(options.random ?? ((_a = options.rng) == null ? void 0 : _a.call(options)) ?? (0, rng_js_1.default)(), options.msecs, options.seq, buf, offset);
+      } else {
+        const now = Date.now();
+        const rnds = (0, rng_js_1.default)();
+        updateV7State(_state, now, rnds);
+        bytes = v7Bytes(rnds, _state.msecs, _state.seq, buf, offset);
+      }
+      return buf ?? (0, stringify_js_1.unsafeStringify)(bytes);
+    }
+    function updateV7State(state, now, rnds) {
+      state.msecs ??= -Infinity;
+      state.seq ??= 0;
+      if (now > state.msecs) {
+        state.seq = rnds[6] << 23 | rnds[7] << 16 | rnds[8] << 8 | rnds[9];
+        state.msecs = now;
+      } else {
+        state.seq = state.seq + 1 | 0;
+        if (state.seq === 0) {
+          state.msecs++;
         }
       }
-      return buf || bytesToUuid(rnds);
+      return state;
     }
-    module2.exports = v4;
+    exports2.updateV7State = updateV7State;
+    function v7Bytes(rnds, msecs, seq, buf, offset = 0) {
+      if (rnds.length < 16) {
+        throw new Error("Random bytes length must be >= 16");
+      }
+      if (!buf) {
+        buf = new Uint8Array(16);
+        offset = 0;
+      } else {
+        if (offset < 0 || offset + 16 > buf.length) {
+          throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);
+        }
+      }
+      msecs ??= Date.now();
+      seq ??= rnds[6] * 127 << 24 | rnds[7] << 16 | rnds[8] << 8 | rnds[9];
+      buf[offset++] = msecs / 1099511627776 & 255;
+      buf[offset++] = msecs / 4294967296 & 255;
+      buf[offset++] = msecs / 16777216 & 255;
+      buf[offset++] = msecs / 65536 & 255;
+      buf[offset++] = msecs / 256 & 255;
+      buf[offset++] = msecs & 255;
+      buf[offset++] = 112 | seq >>> 28 & 15;
+      buf[offset++] = seq >>> 20 & 255;
+      buf[offset++] = 128 | seq >>> 14 & 63;
+      buf[offset++] = seq >>> 6 & 255;
+      buf[offset++] = seq << 2 & 255 | rnds[10] & 3;
+      buf[offset++] = rnds[11];
+      buf[offset++] = rnds[12];
+      buf[offset++] = rnds[13];
+      buf[offset++] = rnds[14];
+      buf[offset++] = rnds[15];
+      return buf;
+    }
+    exports2.default = v7;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/version.js
+var require_version = __commonJS({
+  "../node_modules/uuid/dist/cjs/version.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var validate_js_1 = require_validate();
+    function version2(uuid) {
+      if (!(0, validate_js_1.default)(uuid)) {
+        throw TypeError("Invalid UUID");
+      }
+      return parseInt(uuid.slice(14, 15), 16);
+    }
+    exports2.default = version2;
+  }
+});
+
+// ../node_modules/uuid/dist/cjs/index.js
+var require_cjs = __commonJS({
+  "../node_modules/uuid/dist/cjs/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.version = exports2.validate = exports2.v7 = exports2.v6ToV1 = exports2.v6 = exports2.v5 = exports2.v4 = exports2.v3 = exports2.v1ToV6 = exports2.v1 = exports2.stringify = exports2.parse = exports2.NIL = exports2.MAX = void 0;
+    var max_js_1 = require_max2();
+    Object.defineProperty(exports2, "MAX", { enumerable: true, get: function() {
+      return max_js_1.default;
+    } });
+    var nil_js_1 = require_nil();
+    Object.defineProperty(exports2, "NIL", { enumerable: true, get: function() {
+      return nil_js_1.default;
+    } });
+    var parse_js_1 = require_parse2();
+    Object.defineProperty(exports2, "parse", { enumerable: true, get: function() {
+      return parse_js_1.default;
+    } });
+    var stringify_js_1 = require_stringify2();
+    Object.defineProperty(exports2, "stringify", { enumerable: true, get: function() {
+      return stringify_js_1.default;
+    } });
+    var v1_js_1 = require_v1();
+    Object.defineProperty(exports2, "v1", { enumerable: true, get: function() {
+      return v1_js_1.default;
+    } });
+    var v1ToV6_js_1 = require_v1ToV6();
+    Object.defineProperty(exports2, "v1ToV6", { enumerable: true, get: function() {
+      return v1ToV6_js_1.default;
+    } });
+    var v3_js_1 = require_v3();
+    Object.defineProperty(exports2, "v3", { enumerable: true, get: function() {
+      return v3_js_1.default;
+    } });
+    var v4_js_1 = require_v4();
+    Object.defineProperty(exports2, "v4", { enumerable: true, get: function() {
+      return v4_js_1.default;
+    } });
+    var v5_js_1 = require_v5();
+    Object.defineProperty(exports2, "v5", { enumerable: true, get: function() {
+      return v5_js_1.default;
+    } });
+    var v6_js_1 = require_v6();
+    Object.defineProperty(exports2, "v6", { enumerable: true, get: function() {
+      return v6_js_1.default;
+    } });
+    var v6ToV1_js_1 = require_v6ToV1();
+    Object.defineProperty(exports2, "v6ToV1", { enumerable: true, get: function() {
+      return v6ToV1_js_1.default;
+    } });
+    var v7_js_1 = require_v7();
+    Object.defineProperty(exports2, "v7", { enumerable: true, get: function() {
+      return v7_js_1.default;
+    } });
+    var validate_js_1 = require_validate();
+    Object.defineProperty(exports2, "validate", { enumerable: true, get: function() {
+      return validate_js_1.default;
+    } });
+    var version_js_1 = require_version();
+    Object.defineProperty(exports2, "version", { enumerable: true, get: function() {
+      return version_js_1.default;
+    } });
   }
 });
 
@@ -14614,7 +15404,7 @@ var require_package = __commonJS({
   "../node_modules/azure-pipelines-tool-lib/package.json"(exports2, module2) {
     module2.exports = {
       name: "azure-pipelines-tool-lib",
-      version: "2.0.12",
+      version: "2.281.0",
       description: "Azure Pipelines Tool Installer Lib for CI/CD Tasks",
       main: "tool.js",
       scripts: {
@@ -14638,12 +15428,11 @@ var require_package = __commonJS({
       homepage: "https://github.com/microsoft/azure-pipelines-tool-lib#readme",
       dependencies: {
         "@types/semver": "^5.3.0",
-        "@types/uuid": "^3.4.5",
-        "azure-pipelines-task-lib": "^5.2.7",
+        "azure-pipelines-task-lib": "^5.280.3",
         semver: "^5.7.0",
         "semver-compare": "^1.0.0",
-        "typed-rest-client": "^1.8.6",
-        uuid: "^3.3.2"
+        "typed-rest-client": "^3.1.2",
+        uuid: "^11.1.1"
       },
       devDependencies: {
         "@types/mocha": "^5.2.7",
@@ -14651,11 +15440,16 @@ var require_package = __commonJS({
         "@types/shelljs": "^0.8.4",
         "@types/xml2js": "^0.4.5",
         mocha: "^6.2.3",
-        nock: "13.0.4",
-        shelljs: "^0.8.5",
+        nock: "13.5.6",
+        shelljs: "^0.10.0",
         typescript: "^4.0.5",
         xml2js: "^0.4.23",
         nyc: "^17.0.0"
+      },
+      overrides: {
+        minimatch: "^3.1.5",
+        "js-yaml@3.x": { ".": "^3.15.2" },
+        uuid: "^11.1.1"
       }
     };
   }
@@ -14723,7 +15517,7 @@ var require_tool = __commonJS({
     var util2 = require("util");
     var tl2 = require("azure-pipelines-task-lib/task");
     var cmp = require_semver_compare();
-    var uuidV4 = require_v4();
+    var { v4: uuidV4 } = require_cjs();
     var pkg = require_package();
     var libJson = require_lib5();
     var englishMessages = libJson.messages || {};
@@ -17395,52 +18189,160 @@ var require_GitInterfaces = __commonJS({
 var require_quote = __commonJS({
   "../node_modules/shell-quote/quote.js"(exports2, module2) {
     "use strict";
+    var OPS = (
+      /** @type {const} */
+      [
+        "||",
+        "&&",
+        ";;&",
+        ";;",
+        ";&",
+        "|&",
+        "<(",
+        ">(",
+        "<<<",
+        "<<-",
+        "<<",
+        ">>",
+        ">&",
+        ">|",
+        "&>>",
+        "&>",
+        "<&",
+        "<>",
+        "&",
+        ";",
+        "(",
+        ")",
+        "|",
+        "<",
+        ">"
+      ]
+    );
+    var LINE_TERMINATORS = /[\n\r\u2028\u2029]/;
+    var GLOB_SHELL_SPECIAL = /[\s#!"$&'():;<=>@\\^`|~]/g;
     module2.exports = function quote(xs) {
+      var sawComment = false;
       return xs.map(function(s) {
+        if (sawComment && typeof s === "string" && LINE_TERMINATORS.test(s)) {
+          throw new TypeError("a token after a `comment` must not contain line terminators");
+        }
         if (s === "") {
-          return "''";
+          return (
+            /** @type {const} */
+            "''"
+          );
         }
         if (s && typeof s === "object") {
-          return s.op.replace(/(.)/g, "\\$1");
+          if ("op" in s && s.op === "glob") {
+            if (typeof s.pattern !== "string") {
+              throw new TypeError("glob token requires a string `pattern`");
+            }
+            if (LINE_TERMINATORS.test(s.pattern)) {
+              throw new TypeError("glob `pattern` must not contain line terminators");
+            }
+            if (s.pattern === "") {
+              return (
+                /** @type {const} */
+                "''"
+              );
+            }
+            return s.pattern.replace(GLOB_SHELL_SPECIAL, "\\$&");
+          }
+          if ("op" in s && typeof s.op === "string") {
+            if (OPS.indexOf(s.op) < 0) {
+              throw new TypeError("invalid `op` value: " + JSON.stringify(s.op));
+            }
+            return s.op.replace(/[\s\S]/g, "\\$&");
+          }
+          if ("comment" in s && typeof s.comment === "string") {
+            if (LINE_TERMINATORS.test(s.comment)) {
+              throw new TypeError("`comment` must not contain line terminators");
+            }
+            sawComment = true;
+            return "#" + s.comment;
+          }
+          throw new TypeError("unrecognized object token shape");
+        }
+        if (/'/.test(s) && /!/.test(s)) {
+          return "'" + s.replace(/'/g, `'"'"'`) + "'";
         }
         if (/["\s\\]/.test(s) && !/'/.test(s)) {
-          return "'" + s.replace(/(['])/g, "\\$1") + "'";
+          return "'" + s + "'";
         }
         if (/["'\s]/.test(s)) {
-          return '"' + s.replace(/(["\\$`!])/g, "\\$1") + '"';
+          return '"' + s.replace(/(["\\$`])/g, "\\$1") + '"';
         }
-        return String(s).replace(/([A-Za-z]:)?([#!"$&'()*,:;<=>?@[\\\]^`{|}])/g, "$1\\$2");
+        return String(s).replace(/([A-Za-z]:)?([#!"$&'()*,:;<=>?@[\\\]^`{|}~])/g, "$1\\$2");
       }).join(" ");
     };
   }
 });
 
 // ../node_modules/shell-quote/parse.js
-var require_parse2 = __commonJS({
+var require_parse3 = __commonJS({
   "../node_modules/shell-quote/parse.js"(exports2, module2) {
     "use strict";
-    var CONTROL = "(?:" + [
-      "\\|\\|",
-      "\\&\\&",
-      ";;",
-      "\\|\\&",
-      "\\<\\(",
-      "\\<\\<\\<",
-      ">>",
-      ">\\&",
-      "<\\&",
-      "[&;()|<>]"
-    ].join("|") + ")";
+    var CONTROL = (
+      /** @type {const} */
+      "(?:" + /** @type {const} */
+      [
+        "\\|\\|",
+        "\\&(?:\\&|>>?)",
+        // `&&`, `&>`, and `&>>`
+        ";;\\&?",
+        // `;;` and `;;&`
+        "[;|]\\&",
+        // `;&` and `|&`
+        "\\<\\(",
+        "\\<\\<\\<",
+        "\\<\\<-",
+        "\\<\\<(?!\\()",
+        // `<<(` stays `<` and `<(`, as zsh reads it; other shells reject it
+        ">>",
+        ">[&|(]",
+        // `>&`, `>|`, and `>(`
+        "<[&>]",
+        // `<&` and `<>`
+        "[&;()|<>]"
+      ].join(
+        /** @type {const} */
+        "|"
+      ) + /** @type {const} */
+      ")"
+    );
     var controlRE = new RegExp("^" + CONTROL + "$");
-    var META = "|&;()<> \\t";
-    var SINGLE_QUOTE = '"((\\\\"|[^"])*?)"';
-    var DOUBLE_QUOTE = "'((\\\\'|[^'])*?)'";
+    var META = (
+      /** @type {const} */
+      "|&;()<> \\t"
+    );
+    var SINGLE_QUOTE = (
+      /** @type {const} */
+      "'([^']*?)'"
+    );
+    var ANSI_C_BODY = "(?:\\\\[\\s\\S]|[^\\\\'])*?";
+    var ANSI_C_QUOTE = "\\$'" + ANSI_C_BODY + "'";
+    var ansiCAt = new RegExp("\\$'" + ANSI_C_BODY + "(?:(')|\\\\?$)", "g");
+    var ANSI_C_LETTERS = "abeEfnrtv";
+    var ANSI_C_CHARS = "\x07\b\x1B\x1B\f\n\r	\v";
     var hash = /^#$/;
-    var SQ = "'";
-    var DQ = '"';
-    var DS = "$";
+    var SQ = (
+      /** @type {const} */
+      "'"
+    );
+    var DQ = (
+      /** @type {const} */
+      '"'
+    );
+    var DS = (
+      /** @type {const} */
+      "$"
+    );
     var TOKEN = "";
-    var mult = 4294967296;
+    var mult = (
+      /** @type {const} */
+      4294967296
+    );
     for (i = 0; i < 4; i++) {
       TOKEN += (mult * Math.random()).toString(16);
     }
@@ -17451,7 +18353,7 @@ var require_parse2 = __commonJS({
       var matches = [];
       var matchObj;
       while (matchObj = r.exec(s)) {
-        matches.push(matchObj);
+        matches[matches.length] = matchObj;
         if (r.lastIndex === matchObj.index) {
           r.lastIndex += 1;
         }
@@ -17471,16 +18373,46 @@ var require_parse2 = __commonJS({
       }
       return pre + r;
     }
+    var ansiCEscape = /\\([0-7]{1,3}|x[\dA-Fa-f]{1,2}|u[\dA-Fa-f]{1,4}|U[\dA-Fa-f]{1,8}|c(?:\\\\|[\s\S])|[abeEfnrtv\\'"?])/g;
+    function expandAnsiCEscape(m, escape2) {
+      var kind = escape2.charAt(0);
+      if (kind === "c") {
+        var ctrl = escape2.charAt(1);
+        return ctrl === "?" ? "\x7F" : String.fromCharCode(ctrl.charCodeAt(0) & 31);
+      }
+      if (kind === "x" || kind === "u" || kind === "U") {
+        var cp = parseInt(escape2.slice(1), 16);
+        if (cp > 1114111) {
+          return m;
+        }
+        return String.fromCharCode.apply(null, cp > 65535 ? [55232 + (cp >> 10), 56320 + (cp & 1023)] : [cp]);
+      }
+      if (kind >= "0" && kind <= "7") {
+        return String.fromCharCode(parseInt(escape2, 8) & 255);
+      }
+      var letter = ANSI_C_LETTERS.indexOf(escape2);
+      return letter < 0 ? escape2 : ANSI_C_CHARS.charAt(letter);
+    }
+    function expandAnsiC(body) {
+      return body.replace(ansiCEscape, expandAnsiCEscape).split("\0")[0];
+    }
+    function closesAnsiC(s, i2) {
+      ansiCAt.lastIndex = i2;
+      return !!/** @type {RegExpExecArray} */
+      ansiCAt.exec(s)[1];
+    }
     function parseInternal(string, env, opts) {
       if (!opts) {
         opts = {};
       }
       var BS = opts.escape || "\\";
-      var BAREWORD = "(\\" + BS + `['"` + META + `]|[^\\s'"` + META + "])+";
+      var ifs = opts.splitUnquoted === true ? " 	\n" : typeof opts.splitUnquoted === "string" ? opts.splitUnquoted : "";
+      var BAREWORD = "(\\" + BS + `['"$\\` + BS + META + "]|\\$\\$|\\$(?!" + ANSI_C_QUOTE.slice(2) + `)|[^\\s'"$` + META + "])+";
+      var DOUBLE_QUOTE = '"(?:\\' + BS + '[\\s\\S]|[^"\\' + BS + '])*"';
       var chunker = new RegExp([
         "(" + CONTROL + ")",
         // control chars
-        "(" + BAREWORD + "|" + SINGLE_QUOTE + "|" + DOUBLE_QUOTE + ")+"
+        "(" + ANSI_C_QUOTE + "|" + BAREWORD + "|" + DOUBLE_QUOTE + "|" + SINGLE_QUOTE + ")+"
       ].join("|"), "g");
       var matches = matchAll(string, chunker);
       if (matches.length === 0) {
@@ -17496,11 +18428,17 @@ var require_parse2 = __commonJS({
           return void 0;
         }
         if (controlRE.test(s)) {
-          return { op: s };
+          return (
+            /** @type {ControlOperator} */
+            { op: s }
+          );
         }
         var quote = false;
         var esc = false;
         var out = "";
+        var words = [];
+        var sawQuote = false;
+        var pendingNw = null;
         var isGlob = false;
         var i2;
         function parseEnvVar() {
@@ -17513,15 +18451,24 @@ var require_parse2 = __commonJS({
             if (s.charAt(i2) === "}") {
               throw new Error("Bad substitution: " + s.slice(i2 - 2, i2 + 1));
             }
-            varend = s.indexOf("}", i2);
-            if (varend < 0) {
+            var depth = 1;
+            varend = i2;
+            while (depth > 0 && varend < s.length) {
+              if (s.charAt(varend) === "{" && s.charAt(varend - 1) === "$") {
+                depth += 1;
+              } else if (s.charAt(varend) === "}") {
+                depth -= 1;
+              }
+              varend += 1;
+            }
+            if (depth !== 0) {
               throw new Error("Bad substitution: " + s.slice(i2));
             }
+            varend -= 1;
             varname = s.slice(i2, varend);
             i2 = varend;
-          } else if (/[*@#?$!_-]/.test(char)) {
+          } else if (/[*@#?$!-]/.test(char)) {
             varname = char;
-            i2 += 1;
           } else {
             var slicedFromI = s.slice(i2);
             varend = slicedFromI.match(/[^\w\d_]/);
@@ -17530,13 +18477,40 @@ var require_parse2 = __commonJS({
               i2 = s.length;
             } else {
               varname = slicedFromI.slice(0, varend.index);
-              i2 += varend.index - 1;
+              i2 += /** @type {number} */
+              varend.index - 1;
             }
           }
-          return getVar(env, "", varname);
+          return getVar(
+            /** @type {NonNullable<typeof env>} */
+            env,
+            "",
+            varname
+          );
+        }
+        function flushRun() {
+          if (pendingNw === null) {
+            return;
+          }
+          if (pendingNw === 0) {
+            if (out !== "") {
+              words[words.length] = out;
+              out = "";
+            }
+          } else {
+            words[words.length] = out;
+            out = "";
+            for (var fe = 1; fe < pendingNw; fe += 1) {
+              words[words.length] = "";
+            }
+          }
+          pendingNw = null;
         }
         for (i2 = 0; i2 < s.length; i2++) {
           var c = s.charAt(i2);
+          if (ifs && c !== DS) {
+            flushRun();
+          }
           isGlob = isGlob || !quote && (c === "*" || c === "?");
           if (esc) {
             out += c;
@@ -17563,51 +18537,111 @@ var require_parse2 = __commonJS({
             }
           } else if (c === DQ || c === SQ) {
             quote = c;
+            sawQuote = true;
           } else if (controlRE.test(c)) {
-            return { op: s };
+            return (
+              /** @type {ControlOperator} */
+              { op: s }
+            );
           } else if (hash.test(c)) {
             commented = true;
             var commentObj = { comment: string.slice(match.index + i2 + 1) };
             if (out.length) {
-              return [out, commentObj];
+              return (
+                /** @type {const} */
+                [out, commentObj]
+              );
             }
-            return [commentObj];
+            return (
+              /** @type {const} */
+              [commentObj]
+            );
           } else if (c === BS) {
             esc = true;
+          } else if (c === DS && s.charAt(i2 + 1) === SQ && closesAnsiC(s, i2)) {
+            flushRun();
+            sawQuote = true;
+            out += expandAnsiC(s.slice(i2 + 2, ansiCAt.lastIndex - 1));
+            i2 = ansiCAt.lastIndex - 1;
           } else if (c === DS) {
-            out += parseEnvVar();
+            var value = parseEnvVar();
+            if (!ifs) {
+              out += value;
+            } else {
+              for (var vi = 0; vi < value.length; vi += 1) {
+                var vc = value.charAt(vi);
+                if (ifs.indexOf(vc) < 0) {
+                  flushRun();
+                  out += vc;
+                } else if (pendingNw === null) {
+                  pendingNw = vc === " " || vc === "	" || vc === "\n" ? 0 : 1;
+                } else if (vc !== " " && vc !== "	" && vc !== "\n") {
+                  pendingNw += 1;
+                }
+              }
+            }
           } else {
             out += c;
           }
         }
         if (isGlob) {
-          return { op: "glob", pattern: out };
+          return (
+            /** @type {GlobPattern} */
+            { op: "glob", pattern: out }
+          );
+        }
+        if (ifs) {
+          if (pendingNw !== null && pendingNw > 0) {
+            words[words.length] = out;
+            out = "";
+            for (var te = 1; te < pendingNw; te += 1) {
+              words[words.length] = "";
+            }
+          }
+          if (out !== "" || sawQuote && words.length === 0) {
+            words[words.length] = out;
+          }
+          return words;
         }
         return out;
-      }).reduce(function(prev, arg) {
-        return typeof arg === "undefined" ? prev : prev.concat(arg);
-      }, []);
+      }).reduce(
+        function(prev, arg) {
+          if (typeof arg === "undefined") {
+            return prev;
+          }
+          [].concat(arg).forEach(function(entry) {
+            prev[prev.length] = entry;
+          });
+          return prev;
+        },
+        /** @type {ParseEntry[]} */
+        []
+      );
     }
     module2.exports = function parse(s, env, opts) {
       var mapped = parseInternal(s, env, opts);
       if (typeof env !== "function") {
         return mapped;
       }
-      return mapped.reduce(function(acc, s2) {
-        if (typeof s2 === "object") {
-          return acc.concat(s2);
-        }
-        var xs = s2.split(RegExp("(" + TOKEN + ".*?" + TOKEN + ")", "g"));
-        if (xs.length === 1) {
-          return acc.concat(xs[0]);
-        }
-        return acc.concat(xs.filter(Boolean).map(function(x) {
-          if (startsWithToken.test(x)) {
-            return JSON.parse(x.split(TOKEN)[1]);
+      return mapped.reduce(
+        function(acc, s2) {
+          if (typeof s2 === "object") {
+            acc[acc.length] = s2;
+            return acc;
           }
-          return x;
-        }));
-      }, []);
+          var xs = s2.split(RegExp("(" + TOKEN + ".*?" + TOKEN + ")", "g"));
+          if (xs.length === 1) {
+            acc[acc.length] = xs[0];
+            return acc;
+          }
+          xs.filter(Boolean).forEach(function(x) {
+            acc[acc.length] = startsWithToken.test(x) ? JSON.parse(x.split(TOKEN)[1]) : x;
+          });
+          return acc;
+        },
+        /** @type {ParseEntry[]} */
+        []
+      );
     };
   }
 });
@@ -17617,7 +18651,7 @@ var require_shell_quote = __commonJS({
   "../node_modules/shell-quote/index.js"(exports2) {
     "use strict";
     exports2.quote = require_quote();
-    exports2.parse = require_parse2();
+    exports2.parse = require_parse3();
   }
 });
 
@@ -17635,11 +18669,11 @@ __export(utils_exports, {
 function isMergeCommit(parents) {
   return parents.trim().split(/\s+/).filter(Boolean).length >= 2;
 }
-function gitExtraHeaderEnv(header, env = process.env) {
+function gitExtraHeaderEnv(url, header, env = process.env) {
   const index = parseInt(env.GIT_CONFIG_COUNT ?? "", 10) || 0;
   return {
     GIT_CONFIG_COUNT: `${index + 1}`,
-    [`GIT_CONFIG_KEY_${index}`]: "http.extraheader",
+    [`GIT_CONFIG_KEY_${index}`]: `http.${url}.extraheader`,
     [`GIT_CONFIG_VALUE_${index}`]: header
   };
 }
@@ -75956,7 +76990,7 @@ var require_bearertoken = __commonJS({
 var VERSION2, root, ArrayProto, ObjProto, SymbolProto, push, slice, toString, hasOwnProperty, supportsArrayBuffer, supportsDataView, nativeIsArray, nativeKeys, nativeCreate, nativeIsView, _isNaN, _isFinite, hasEnumBug, nonEnumerableProps, MAX_ARRAY_INDEX;
 var init_setup = __esm({
   "../node_modules/underscore/modules/_setup.js"() {
-    VERSION2 = "1.13.6";
+    VERSION2 = "1.13.8";
     root = typeof self == "object" && self.self === self && self || typeof global == "object" && global.global === global && global || Function("return this")() || {};
     ArrayProto = Array.prototype;
     ObjProto = Object.prototype;
@@ -76165,18 +77199,18 @@ var init_hasObjectTag = __esm({
 });
 
 // ../node_modules/underscore/modules/_stringTagBug.js
-var hasStringTagBug, isIE11;
+var hasDataViewBug, isIE11;
 var init_stringTagBug = __esm({
   "../node_modules/underscore/modules/_stringTagBug.js"() {
     init_setup();
     init_hasObjectTag();
-    hasStringTagBug = supportsDataView && hasObjectTag_default(new DataView(new ArrayBuffer(8)));
+    hasDataViewBug = supportsDataView && (!/\[native code\]/.test(String(DataView)) || hasObjectTag_default(new DataView(new ArrayBuffer(8))));
     isIE11 = typeof Map !== "undefined" && hasObjectTag_default(/* @__PURE__ */ new Map());
   }
 });
 
 // ../node_modules/underscore/modules/isDataView.js
-function ie10IsDataView(obj) {
+function alternateIsDataView(obj) {
   return obj != null && isFunction_default(obj.getInt8) && isArrayBuffer_default(obj.buffer);
 }
 var isDataView, isDataView_default;
@@ -76187,7 +77221,7 @@ var init_isDataView = __esm({
     init_isArrayBuffer();
     init_stringTagBug();
     isDataView = tagTester("DataView");
-    isDataView_default = hasStringTagBug ? ie10IsDataView : isDataView;
+    isDataView_default = hasDataViewBug ? alternateIsDataView : isDataView;
   }
 });
 
@@ -76453,84 +77487,102 @@ var init_toBufferView = __esm({
 });
 
 // ../node_modules/underscore/modules/isEqual.js
-function eq(a, b, aStack, bStack) {
-  if (a === b) return a !== 0 || 1 / a === 1 / b;
-  if (a == null || b == null) return false;
-  if (a !== a) return b !== b;
-  var type = typeof a;
-  if (type !== "function" && type !== "object" && typeof b != "object") return false;
-  return deepEq(a, b, aStack, bStack);
-}
-function deepEq(a, b, aStack, bStack) {
-  if (a instanceof _) a = a._wrapped;
-  if (b instanceof _) b = b._wrapped;
-  var className = toString.call(a);
-  if (className !== toString.call(b)) return false;
-  if (hasStringTagBug && className == "[object Object]" && isDataView_default(a)) {
-    if (!isDataView_default(b)) return false;
-    className = tagDataView;
-  }
-  switch (className) {
-    // These types are compared by value.
-    case "[object RegExp]":
-    // RegExps are coerced to strings for comparison (Note: '' + /a/i === '/a/i')
-    case "[object String]":
-      return "" + a === "" + b;
-    case "[object Number]":
-      if (+a !== +a) return +b !== +b;
-      return +a === 0 ? 1 / +a === 1 / b : +a === +b;
-    case "[object Date]":
-    case "[object Boolean]":
-      return +a === +b;
-    case "[object Symbol]":
-      return SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b);
-    case "[object ArrayBuffer]":
-    case tagDataView:
-      return deepEq(toBufferView(a), toBufferView(b), aStack, bStack);
-  }
-  var areArrays = className === "[object Array]";
-  if (!areArrays && isTypedArray_default(a)) {
-    var byteLength = getByteLength_default(a);
-    if (byteLength !== getByteLength_default(b)) return false;
-    if (a.buffer === b.buffer && a.byteOffset === b.byteOffset) return true;
-    areArrays = true;
-  }
-  if (!areArrays) {
-    if (typeof a != "object" || typeof b != "object") return false;
-    var aCtor = a.constructor, bCtor = b.constructor;
-    if (aCtor !== bCtor && !(isFunction_default(aCtor) && aCtor instanceof aCtor && isFunction_default(bCtor) && bCtor instanceof bCtor) && ("constructor" in a && "constructor" in b)) {
+function isEqual(a, b) {
+  var todo = [{ a, b }];
+  var aStack = [], bStack = [];
+  while (todo.length) {
+    var frame = todo.pop();
+    if (frame === true) {
+      aStack.pop();
+      bStack.pop();
+      continue;
+    }
+    a = frame.a;
+    b = frame.b;
+    if (a === b) {
+      if (a !== 0 || 1 / a === 1 / b) continue;
       return false;
     }
-  }
-  aStack = aStack || [];
-  bStack = bStack || [];
-  var length = aStack.length;
-  while (length--) {
-    if (aStack[length] === a) return bStack[length] === b;
-  }
-  aStack.push(a);
-  bStack.push(b);
-  if (areArrays) {
-    length = a.length;
-    if (length !== b.length) return false;
-    while (length--) {
-      if (!eq(a[length], b[length], aStack, bStack)) return false;
+    if (a == null || b == null) return false;
+    if (a !== a) {
+      if (b !== b) continue;
+      return false;
     }
-  } else {
-    var _keys = keys(a), key;
-    length = _keys.length;
-    if (keys(b).length !== length) return false;
+    var type = typeof a;
+    if (type !== "function" && type !== "object" && typeof b != "object") return false;
+    if (a instanceof _) a = a._wrapped;
+    if (b instanceof _) b = b._wrapped;
+    var className = toString.call(a);
+    if (className !== toString.call(b)) return false;
+    if (hasDataViewBug && className == "[object Object]" && isDataView_default(a)) {
+      if (!isDataView_default(b)) return false;
+      className = tagDataView;
+    }
+    switch (className) {
+      // These types are compared by value.
+      case "[object RegExp]":
+      // RegExps are coerced to strings for comparison (Note: '' + /a/i === '/a/i')
+      case "[object String]":
+        if ("" + a === "" + b) continue;
+        return false;
+      case "[object Number]":
+        todo.push({ a: +a, b: +b });
+        continue;
+      case "[object Date]":
+      case "[object Boolean]":
+        if (+a === +b) continue;
+        return false;
+      case "[object Symbol]":
+        if (SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b)) continue;
+        return false;
+      case "[object ArrayBuffer]":
+      case tagDataView:
+        todo.push({ a: toBufferView(a), b: toBufferView(b) });
+        continue;
+    }
+    var areArrays = className === "[object Array]";
+    if (!areArrays && isTypedArray_default(a)) {
+      var byteLength = getByteLength_default(a);
+      if (byteLength !== getByteLength_default(b)) return false;
+      if (a.buffer === b.buffer && a.byteOffset === b.byteOffset) continue;
+      areArrays = true;
+    }
+    if (!areArrays) {
+      if (typeof a != "object" || typeof b != "object") return false;
+      var aCtor = a.constructor, bCtor = b.constructor;
+      if (aCtor !== bCtor && !(isFunction_default(aCtor) && aCtor instanceof aCtor && isFunction_default(bCtor) && bCtor instanceof bCtor) && ("constructor" in a && "constructor" in b)) {
+        return false;
+      }
+    }
+    var length = aStack.length;
     while (length--) {
-      key = _keys[length];
-      if (!(has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
+      if (aStack[length] === a) {
+        if (bStack[length] === b) break;
+        return false;
+      }
+    }
+    if (length >= 0) continue;
+    aStack.push(a);
+    bStack.push(b);
+    todo.push(true);
+    if (areArrays) {
+      length = a.length;
+      if (length !== b.length) return false;
+      while (length--) {
+        todo.push({ a: a[length], b: b[length] });
+      }
+    } else {
+      var _keys = keys(a), key;
+      length = _keys.length;
+      if (keys(b).length !== length) return false;
+      while (length--) {
+        key = _keys[length];
+        if (!has(b, key)) return false;
+        todo.push({ a: a[key], b: b[key] });
+      }
     }
   }
-  aStack.pop();
-  bStack.pop();
   return true;
-}
-function isEqual(a, b) {
-  return eq(a, b);
 }
 var tagDataView;
 var init_isEqual = __esm({
@@ -77319,24 +78371,26 @@ var init_isArrayLike = __esm({
 });
 
 // ../node_modules/underscore/modules/_flatten.js
-function flatten(input, depth, strict, output) {
-  output = output || [];
-  if (!depth && depth !== 0) {
-    depth = Infinity;
-  } else if (depth <= 0) {
-    return output.concat(input);
-  }
-  var idx = output.length;
-  for (var i = 0, length = getLength_default(input); i < length; i++) {
-    var value = input[i];
-    if (isArrayLike_default(value) && (isArray_default(value) || isArguments_default(value))) {
-      if (depth > 1) {
-        flatten(value, depth - 1, strict, output);
-        idx = output.length;
-      } else {
-        var j = 0, len = value.length;
-        while (j < len) output[idx++] = value[j++];
-      }
+function flatten(input, depth, strict) {
+  if (!depth && depth !== 0) depth = Infinity;
+  var output = [], idx = 0, i = 0, length = getLength_default(input) || 0, stack = [];
+  while (true) {
+    if (i >= length) {
+      if (!stack.length) break;
+      var frame = stack.pop();
+      i = frame.i;
+      input = frame.v;
+      length = getLength_default(input);
+      continue;
+    }
+    var value = input[i++];
+    if (stack.length >= depth) {
+      output[idx++] = value;
+    } else if (isArrayLike_default(value) && (isArray_default(value) || isArguments_default(value))) {
+      stack.push({ i, v: input });
+      i = 0;
+      input = value;
+      length = getLength_default(input);
     } else if (!strict) {
       output[idx++] = value;
     }
@@ -82023,8 +83077,14 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         const token = process.env.SYSTEM_ACCESSTOKEN;
         if (withCredentials && token !== void 0) {
           tl2.setSecret(token);
+          if (!process.env.BUILD_REPOSITORY_URI) {
+            throw new Error("Missing Azure Pipelines predefined variable: BUILD_REPOSITORY_URI");
+          }
+          const repositoryUrl = new URL(process.env.BUILD_REPOSITORY_URI);
+          repositoryUrl.username = "";
+          repositoryUrl.password = "";
           const env = (_a = options.env) !== null && _a !== void 0 ? _a : process.env;
-          options.env = Object.assign(Object.assign({}, env), (0, utils_12.gitExtraHeaderEnv)(`AUTHORIZATION: bearer ${token}`, env));
+          options.env = Object.assign(Object.assign({}, env), (0, utils_12.gitExtraHeaderEnv)(repositoryUrl.toString(), `AUTHORIZATION: bearer ${token}`, env));
         }
         result2.exitCode = yield tl2.execAsync("git", args, options).catch((error) => {
           tl2.warning(`Git command git ${args.join(" ")} failed: ${error.message}
