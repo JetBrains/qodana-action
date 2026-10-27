@@ -113,6 +113,10 @@ async function getLatestNightlyTag(): Promise<string> {
 export async function getNightlyTag(nightlyVersion: string): Promise<string> {
   if (!nightlyVersion) return ''
   let version = nightlyVersion === 'latest' ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`
+  // the tag becomes a part of the download URL path, and nightly binaries are not checksum-verified
+  if (!/^v\d{4}\.\d+-nightly$/.test(version)) {
+    throw Error(`Invalid nightly version: ${nightlyVersion}`)
+  }
   console.warn(`Using nightly version: ${version}`)
   return version
 }
@@ -430,6 +434,10 @@ export function validateBranchName(branchName: string): string {
     throw new Error(
       `Invalid branch name: not allowed characters are used: ${branchName}`
     )
+  }
+  // a leading dash would be interpreted by git as an option
+  if (branchName.startsWith('-') || branchName.includes('..')) {
+    throw new Error(`Invalid branch name: ${branchName}`)
   }
   return branchName
 }

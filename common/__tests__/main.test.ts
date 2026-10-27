@@ -15,7 +15,7 @@
  */
 
 import {expect, test, describe, beforeEach} from '@jest/globals'
-import {getCoverageFromSarif, getNativeModePrefix, getSanityProblemsCount, parseEnvVarNames, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
+import {getCoverageFromSarif, getNativeModePrefix, getNightlyTag, getSanityProblemsCount, parseEnvVarNames, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
   getCoverageStats,
   getReportURL, parseSarif
@@ -25,6 +25,7 @@ import * as path from 'path'
 import * as os from 'os'
 import {outputEmptyFixture, problemDescriptorsDefaultFixture} from './common.test.utils'
 import {
+  gitExtraHeaderEnv,
   isMergeCommit,
   MERGE_COMMIT_PARENTS_ARGS,
   parseRawArguments,
@@ -564,5 +565,56 @@ describe('parseRawArguments', () => {
     test('tabs are treated as separators', () => {
       expect(parseRawArguments('--flag\tvalue')).toEqual(['--flag', 'value'])
     })
+  })
+})
+
+describe('gitExtraHeaderEnv', () => {
+  test('adds the first entry when no git config is passed via environment', () => {
+    expect(gitExtraHeaderEnv('X: y', {})).toEqual({
+      GIT_CONFIG_COUNT: '1',
+      GIT_CONFIG_KEY_0: 'http.extraheader',
+      GIT_CONFIG_VALUE_0: 'X: y'
+    })
+  })
+
+  test('appends to the entries already passed via environment', () => {
+    expect(
+      gitExtraHeaderEnv('X: y', {GIT_CONFIG_COUNT: '2'})
+    ).toEqual({
+      GIT_CONFIG_COUNT: '3',
+      GIT_CONFIG_KEY_2: 'http.extraheader',
+      GIT_CONFIG_VALUE_2: 'X: y'
+    })
+  })
+})
+
+describe('getNightlyTag', () => {
+  test('returns empty tag for stable version', async () => {
+    expect(await getNightlyTag('')).toEqual('')
+  })
+
+  test('builds nightly tag from version', async () => {
+    expect(await getNightlyTag('2026.2')).toEqual('v2026.2-nightly')
+  })
+
+  test('rejects versions that do not match the nightly tag format', async () => {
+    for (const version of ['2026.2.1', '2026', 'v2026.2', '2026.2-rc']) {
+      await expect(getNightlyTag(version)).rejects.toThrow(
+        'Invalid nightly version'
+      )
+    }
+  })
+
+  test('rejects versions that would alter the download URL', async () => {
+    for (const version of [
+      '../../../../attacker/repo/releases/download/v1',
+      '2026.2/x',
+      '2026.2?x',
+      '2026.2#x'
+    ]) {
+      await expect(getNightlyTag(version)).rejects.toThrow(
+        'Invalid nightly version'
+      )
+    }
   })
 })

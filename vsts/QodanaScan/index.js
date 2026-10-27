@@ -9865,6 +9865,9 @@ async function getLatestNightlyTag() {
 async function getNightlyTag(nightlyVersion) {
   if (!nightlyVersion) return "";
   let version2 = nightlyVersion === "latest" ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`;
+  if (!/^v\d{4}\.\d+-nightly$/.test(version2)) {
+    throw Error(`Invalid nightly version: ${nightlyVersion}`);
+  }
   console.warn(`Using nightly version: ${version2}`);
   return version2;
 }
@@ -10015,6 +10018,9 @@ function validateBranchName(branchName) {
     throw new Error(
       `Invalid branch name: not allowed characters are used: ${branchName}`
     );
+  }
+  if (branchName.startsWith("-") || branchName.includes("..")) {
+    throw new Error(`Invalid branch name: ${branchName}`);
   }
   return branchName;
 }
@@ -17620,6 +17626,7 @@ var utils_exports = {};
 __export(utils_exports, {
   MERGE_COMMIT_PARENTS_ARGS: () => MERGE_COMMIT_PARENTS_ARGS,
   MERGE_COMMIT_PR_WARNING: () => MERGE_COMMIT_PR_WARNING,
+  gitExtraHeaderEnv: () => gitExtraHeaderEnv,
   isMergeCommit: () => isMergeCommit,
   parseRawArguments: () => parseRawArguments,
   parseRules: () => parseRules,
@@ -17627,6 +17634,14 @@ __export(utils_exports, {
 });
 function isMergeCommit(parents) {
   return parents.trim().split(/\s+/).filter(Boolean).length >= 2;
+}
+function gitExtraHeaderEnv(header, env = process.env) {
+  const index = parseInt(env.GIT_CONFIG_COUNT ?? "", 10) || 0;
+  return {
+    GIT_CONFIG_COUNT: `${index + 1}`,
+    [`GIT_CONFIG_KEY_${index}`]: "http.extraheader",
+    [`GIT_CONFIG_VALUE_${index}`]: header
+  };
 }
 function setDeprecationWarningCallback(callback) {
   deprecationWarningCallback = callback;
@@ -81981,6 +81996,7 @@ To enable prMode, consider adding "fetchDepth: 0".`;
     }
     function gitOutput(args_1, withCredentials_1) {
       return __awaiter2(this, arguments, void 0, function* (args, withCredentials, options = {}) {
+        var _a;
         const inputs = getInputs();
         if (options.cwd === void 0 && inputs.workingDirectory !== "") {
           options.cwd = inputs.workingDirectory;
@@ -82004,12 +82020,11 @@ To enable prMode, consider adding "fetchDepth: 0".`;
         });
         options.outStream = outStream;
         options.errStream = errStream;
-        if (withCredentials && process.env.SYSTEM_ACCESSTOKEN !== void 0) {
-          args = [
-            "-c",
-            `http.extraheader="AUTHORIZATION: bearer ${process.env.SYSTEM_ACCESSTOKEN}"`,
-            ...args
-          ];
+        const token = process.env.SYSTEM_ACCESSTOKEN;
+        if (withCredentials && token !== void 0) {
+          tl2.setSecret(token);
+          const env = (_a = options.env) !== null && _a !== void 0 ? _a : process.env;
+          options.env = Object.assign(Object.assign({}, env), (0, utils_12.gitExtraHeaderEnv)(`AUTHORIZATION: bearer ${token}`, env));
         }
         result2.exitCode = yield tl2.execAsync("git", args, options).catch((error) => {
           tl2.warning(`Git command git ${args.join(" ")} failed: ${error.message}

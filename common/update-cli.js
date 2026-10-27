@@ -1,5 +1,4 @@
 const fs = require("fs");
-const http = require("http");
 const https = require("https");
 const {createHash} = require("crypto");
 const {readFileSync} = require("fs");
@@ -10,6 +9,15 @@ const checksumsKtPath = "plugin/src/main/kotlin/org/jetbrains/qodana/Checksums.k
 
 const PLATFORMS = ["windows", "linux", "darwin"];
 const ARCHS = ["x86_64", "arm64"];
+// versions are interpolated into shell commands, so they must be strictly validated
+const VERSION_REGEX = /^\d+\.\d+\.\d+$/;
+
+function validateVersion(version) {
+    if (typeof version !== "string" || !VERSION_REGEX.test(version)) {
+        throw new Error(`Invalid version: ${version}`);
+    }
+    return version;
+}
 
 function sha256sum(file) {
     const hash = createHash("sha256");
@@ -19,9 +27,12 @@ function sha256sum(file) {
 
 function downloadFile(url, destinationPath) {
     return new Promise((resolve, reject) => {
-        const protocol = url.startsWith("https") ? https : http;
+        if (!url.startsWith("https://")) {
+            reject(new Error(`Refusing to download over insecure connection: ${url}`));
+            return;
+        }
 
-        protocol.get(url, response => {
+        https.get(url, response => {
             if (response.statusCode === 200) {
                 const file = fs.createWriteStream(destinationPath);
                 response.pipe(file);
@@ -191,9 +202,9 @@ function replaceStringsInProject(newString, oldString) {
 
 async function main() {
     try {
-        const currentVersion = JSON.parse(fs.readFileSync(cliJsonPath, "utf-8")).version;
+        const currentVersion = validateVersion(JSON.parse(fs.readFileSync(cliJsonPath, "utf-8")).version);
         console.log("Current version:", currentVersion);
-        const latestVersion = await getLatestRelease();
+        const latestVersion = validateVersion(await getLatestRelease());
         console.log("Latest version:", latestVersion);
         console.log("Downloading new checksums...");
         await downloadFile(`https://github.com/jetbrains/qodana-cli/releases/latest/download/checksums.txt`, "checksums.txt");

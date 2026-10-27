@@ -24,9 +24,12 @@ jobs:
           java-version: 11
           cache: gradle
       - name: Run linters and test
-        run: ./gradlew clean :plugin:build :plugin:publishPlugins -Pgradle.publish.key=${{ secrets.GRADLE_KEY }} -Pgradle.publish.secret=${{ secrets.GRADLE_TOKEN }} -PbuildNumber=${{ env.PATCH_VERSION }}
+        run: ./gradlew clean :plugin:build :plugin:publishPlugins -Pgradle.publish.key="$GRADLE_KEY" -Pgradle.publish.secret="$GRADLE_TOKEN" -PbuildNumber="$PATCH_VERSION"
+        env:
+          GRADLE_KEY: ${{ secrets.GRADLE_KEY }}
+          GRADLE_TOKEN: ${{ secrets.GRADLE_TOKEN }}
       - name: Publish JAR to Space
-        run: ./gradlew :plugin:publish -PbuildNumber=${{ env.PATCH_VERSION }}
+        run: ./gradlew :plugin:publish -PbuildNumber="$PATCH_VERSION"
         env:
           JB_SPACE_INTELLIJ_CLIENT_ID: ${{ secrets.MAVEN_SPACE_USERNAME }}
           JB_SPACE_INTELLIJ_CLIENT_SECRET: ${{ secrets.MAVEN_SPACE_PASSWORD }}
@@ -81,9 +84,11 @@ jobs:
 
       - name: Import GPG key
         run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          printf '%s\n' "$GPG_PRIVATE_KEY" | gpg --batch --import
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           gpgconf --reload gpg-agent
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
       - name: Configure Maven settings
         run: |
@@ -103,8 +108,9 @@ jobs:
       - name: Update version and publish
         run: |
           cd maven
-          mvn versions:set -DnewVersion=${{ env.VERSION }} -DgenerateBackupPoms=false
-          mvn clean deploy -Prelease -DskipTests -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
+          mvn versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+          mvn clean deploy -Prelease -DskipTests -Dgpg.passphrase="$GPG_PASSPHRASE"
         env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

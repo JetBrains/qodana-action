@@ -10121,6 +10121,9 @@ async function getLatestNightlyTag() {
 async function getNightlyTag(nightlyVersion) {
   if (!nightlyVersion) return "";
   let version2 = nightlyVersion === "latest" ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`;
+  if (!/^v\d{4}\.\d+-nightly$/.test(version2)) {
+    throw Error(`Invalid nightly version: ${nightlyVersion}`);
+  }
   console.warn(`Using nightly version: ${version2}`);
   return version2;
 }
@@ -10269,6 +10272,9 @@ function validateBranchName(branchName) {
     throw new Error(
       `Invalid branch name: not allowed characters are used: ${branchName}`
     );
+  }
+  if (branchName.startsWith("-") || branchName.includes("..")) {
+    throw new Error(`Invalid branch name: ${branchName}`);
   }
   return branchName;
 }
@@ -10605,6 +10611,7 @@ var utils_exports = {};
 __export(utils_exports, {
   MERGE_COMMIT_PARENTS_ARGS: () => MERGE_COMMIT_PARENTS_ARGS,
   MERGE_COMMIT_PR_WARNING: () => MERGE_COMMIT_PR_WARNING,
+  gitExtraHeaderEnv: () => gitExtraHeaderEnv,
   isMergeCommit: () => isMergeCommit,
   parseRawArguments: () => parseRawArguments,
   parseRules: () => parseRules,
@@ -10612,6 +10619,14 @@ __export(utils_exports, {
 });
 function isMergeCommit(parents) {
   return parents.trim().split(/\s+/).filter(Boolean).length >= 2;
+}
+function gitExtraHeaderEnv(header, env = process.env) {
+  const index = parseInt(env.GIT_CONFIG_COUNT ?? "", 10) || 0;
+  return {
+    GIT_CONFIG_COUNT: `${index + 1}`,
+    [`GIT_CONFIG_KEY_${index}`]: "http.extraheader",
+    [`GIT_CONFIG_VALUE_${index}`]: header
+  };
 }
 function setDeprecationWarningCallback(callback) {
   deprecationWarningCallback = callback;
@@ -10725,6 +10740,7 @@ var init_utils = __esm({
       "HEAD"
     ];
     __name(isMergeCommit, "isMergeCommit");
+    __name(gitExtraHeaderEnv, "gitExtraHeaderEnv");
     deprecationWarningCallback = /* @__PURE__ */ __name((message) => console.warn(message), "deprecationWarningCallback");
     __name(setDeprecationWarningCallback, "setDeprecationWarningCallback");
     __name(parseRules, "parseRules");
@@ -49535,12 +49551,12 @@ var require_utils5 = __commonJS({
       return def ? value !== "false" : value === "true";
     }
     __name(getQodanaBooleanArg, "getQodanaBooleanArg");
-    function execAsync(executable, args, ignoreReturnCode) {
-      return __awaiter2(this, void 0, void 0, function* () {
+    function execAsync(executable_1, args_1, ignoreReturnCode_1) {
+      return __awaiter2(this, arguments, void 0, function* (executable, args, ignoreReturnCode, env = process.env) {
         return new Promise((resolve, reject) => {
           let stdout = "";
           let stderr = "";
-          const proc = (0, child_process_1.spawn)(executable, args);
+          const proc = (0, child_process_1.spawn)(executable, args, { env });
           proc.stdout.on("data", (data) => {
             stdout += data.toString();
           });
@@ -49583,8 +49599,8 @@ Stderr: ${stderr}`));
     }
     __name(execAsync, "execAsync");
     function gitOutput(args_1) {
-      return __awaiter2(this, arguments, void 0, function* (args, ignoreReturnCode = false) {
-        const result = yield execAsync("git", args, true);
+      return __awaiter2(this, arguments, void 0, function* (args, ignoreReturnCode = false, env = process.env) {
+        const result = yield execAsync("git", args, true, env);
         debug(`Git command with args ${args.join(" ")} output: ${(0, node_util_1.inspect)(result)})}`);
         if (result.returnCode !== 0 && ignoreReturnCode) {
           console.warn(`Git command failed: git ${args.join(" ")}
@@ -49601,8 +49617,8 @@ Stderr: ${result.stderr}`);
     }
     __name(gitOutput, "gitOutput");
     function git(args_1) {
-      return __awaiter2(this, arguments, void 0, function* (args, ignoreReturnCode = false) {
-        return (yield gitOutput(args, ignoreReturnCode)).returnCode;
+      return __awaiter2(this, arguments, void 0, function* (args, ignoreReturnCode = false, env = process.env) {
+        return (yield gitOutput(args, ignoreReturnCode, env)).returnCode;
       });
     }
     __name(git, "git");
@@ -49610,22 +49626,27 @@ Stderr: ${result.stderr}`);
       return process.env.CI_PIPELINE_SOURCE === "merge_request_event";
     }
     __name(isMergeRequest, "isMergeRequest");
-    function downloadTool(url) {
+    function withDownloadedFile(url, callback) {
       return __awaiter2(this, void 0, void 0, function* () {
-        const tempPath = `${os.tmpdir()}/qodana-cli-${Date.now()}`;
-        const writer = fs4.createWriteStream(tempPath);
-        const response = yield (0, axios_1.default)({
-          url,
-          method: "GET",
-          responseType: "stream"
-        });
-        const data = response.data;
-        data.pipe(writer);
-        yield (0, util_1.promisify)(stream.finished)(writer);
-        return tempPath;
+        const tempDir = fs4.mkdtempSync(path_1.default.join(os.tmpdir(), "qodana-cli-download-"));
+        try {
+          const tempPath = path_1.default.join(tempDir, "qodana-cli-archive");
+          const writer = fs4.createWriteStream(tempPath);
+          const response = yield (0, axios_1.default)({
+            url,
+            method: "GET",
+            responseType: "stream"
+          });
+          const data = response.data;
+          data.pipe(writer);
+          yield (0, util_1.promisify)(stream.finished)(writer);
+          return yield callback(tempPath);
+        } finally {
+          fs4.rmSync(tempDir, { recursive: true, force: true });
+        }
       });
     }
-    __name(downloadTool, "downloadTool");
+    __name(withDownloadedFile, "withDownloadedFile");
     function getCliVersion() {
       return __awaiter2(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
@@ -49645,26 +49666,26 @@ Stderr: ${result.stderr}`);
         const arch = (0, qodana_12.getProcessArchName)();
         const platform = (0, qodana_12.getProcessPlatformName)();
         const nightlyTag = yield (0, qodana_12.getNightlyTag)(nightlyVersion);
-        const temp = yield downloadTool((0, qodana_12.getQodanaUrl)(arch, platform, nightlyTag));
-        if (!nightlyVersion) {
-          const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
-          const actualChecksum = (0, qodana_12.sha256sum)(temp);
-          if (actualChecksum !== expectedChecksum) {
-            throw new Error((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
+        const extractRoot = yield withDownloadedFile((0, qodana_12.getQodanaUrl)(arch, platform, nightlyTag), (archive) => __awaiter2(this, void 0, void 0, function* () {
+          if (!nightlyVersion) {
+            const expectedChecksum = (0, qodana_12.getQodanaSha256)(arch, platform);
+            const actualChecksum = (0, qodana_12.sha256sum)(archive);
+            if (actualChecksum !== expectedChecksum) {
+              throw new Error((0, qodana_12.getQodanaSha256MismatchMessage)(expectedChecksum, actualChecksum));
+            }
           }
-        }
-        const extractRoot = `${os.tmpdir()}/qodana-cli`;
-        fs4.mkdirSync(extractRoot, { recursive: true });
-        if (process.platform === "win32") {
-          const zip = new adm_zip_1.default(temp);
-          zip.extractAllTo(extractRoot, true);
-        } else {
-          yield tar.x({
-            C: extractRoot,
-            f: temp
-          });
-        }
-        fs4.rmSync(temp, { force: true });
+          const root = fs4.mkdtempSync(path_1.default.join(os.tmpdir(), "qodana-cli-"));
+          if (process.platform === "win32") {
+            const zip = new adm_zip_1.default(archive);
+            zip.extractAllTo(root, true);
+          } else {
+            yield tar.x({
+              C: root,
+              f: archive
+            });
+          }
+          return root;
+        }));
         const separator = process.platform === "win32" ? ";" : ":";
         process.env.PATH = process.env.PATH + separator + extractRoot;
       });
@@ -49965,16 +49986,18 @@ ${statusOutput.stdout}`);
           throw new Error("Missing GitLab CI predefined variables: CI_SERVER_URL and CI_PROJECT_PATH");
         }
         const token = process.env.QODANA_GITLAB_TOKEN || "";
-        const url = new URL(`${serverUrl}/${projectPath}.git`);
-        url.username = output_12.COMMIT_USER;
-        url.password = token;
-        const pushUrl = url.toString();
+        const pushUrl = new URL(`${serverUrl}/${projectPath}.git`).toString();
+        let env = process.env;
+        if (token !== "") {
+          const credentials = Buffer.from(`${output_12.COMMIT_USER}:${token}`).toString("base64");
+          env = Object.assign(Object.assign({}, process.env), (0, utils_12.gitExtraHeaderEnv)(`Authorization: Basic ${credentials}`));
+        }
         const pushArgs = ["push"];
         if (force) {
           pushArgs.push("--force");
         }
         pushArgs.push("-o", "ci.skip", pushUrl, branch);
-        yield git(pushArgs);
+        yield git(pushArgs, false, env);
       });
     }
     __name(gitPush, "gitPush");
