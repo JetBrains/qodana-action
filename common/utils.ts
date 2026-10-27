@@ -22,6 +22,24 @@ export interface Rule {
   fullDescription: string
 }
 
+/**
+ * Returns environment variables that add an `http.extraheader` entry to a git invocation.
+ * Safe to use for credentials.
+ * @param header the HTTP header, e.g. `Authorization: Basic ...`.
+ * @param env the environment the git command is going to be run with.
+ */
+export function gitExtraHeaderEnv(
+  header: string,
+  env: NodeJS.ProcessEnv = process.env
+): Record<string, string> {
+  const index = parseInt(env.GIT_CONFIG_COUNT ?? '', 10) || 0
+  return {
+    GIT_CONFIG_COUNT: `${index + 1}`,
+    [`GIT_CONFIG_KEY_${index}`]: 'http.extraheader',
+    [`GIT_CONFIG_VALUE_${index}`]: header
+  }
+}
+
 // Callback type for platform-specific deprecation warning
 export type DeprecationWarningCallback = (message: string) => void
 

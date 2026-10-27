@@ -30546,6 +30546,9 @@ async function getLatestNightlyTag() {
 async function getNightlyTag(nightlyVersion) {
   if (!nightlyVersion) return "";
   let version3 = nightlyVersion === "latest" ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`;
+  if (!/^v\d{4}\.\d+-nightly$/.test(version3)) {
+    throw Error(`Invalid nightly version: ${nightlyVersion}`);
+  }
   console.warn(`Using nightly version: ${version3}`);
   return version3;
 }
@@ -30666,6 +30669,9 @@ function validateBranchName(branchName) {
     throw new Error(
       `Invalid branch name: not allowed characters are used: ${branchName}`
     );
+  }
+  if (branchName.startsWith("-") || branchName.includes("..")) {
+    throw new Error(`Invalid branch name: ${branchName}`);
   }
   return branchName;
 }
@@ -134647,10 +134653,19 @@ var require_shell_quote = __commonJS({
 // ../common/utils.ts
 var utils_exports = {};
 __export(utils_exports, {
+  gitExtraHeaderEnv: () => gitExtraHeaderEnv,
   parseRawArguments: () => parseRawArguments,
   parseRules: () => parseRules,
   setDeprecationWarningCallback: () => setDeprecationWarningCallback
 });
+function gitExtraHeaderEnv(header, env = process.env) {
+  const index = parseInt(env.GIT_CONFIG_COUNT ?? "", 10) || 0;
+  return {
+    GIT_CONFIG_COUNT: `${index + 1}`,
+    [`GIT_CONFIG_KEY_${index}`]: "http.extraheader",
+    [`GIT_CONFIG_VALUE_${index}`]: header
+  };
+}
 function setDeprecationWarningCallback(callback) {
   deprecationWarningCallback = callback;
 }
@@ -134755,6 +134770,7 @@ var init_utils3 = __esm({
   "../common/utils.ts"() {
     "use strict";
     import_shell_quote = __toESM(require_shell_quote());
+    __name(gitExtraHeaderEnv, "gitExtraHeaderEnv");
     deprecationWarningCallback = /* @__PURE__ */ __name((message) => console.warn(message), "deprecationWarningCallback");
     __name(setDeprecationWarningCallback, "setDeprecationWarningCallback");
     __name(parseRules, "parseRules");
@@ -135505,8 +135521,6 @@ var require_utils10 = __commonJS({
     var annotations_1 = require_annotations();
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     var path_1 = __importDefault2(require("path"));
-    var fs3 = __importStar3(require("fs"));
-    var os = __importStar3(require("os"));
     var output_12 = require_output();
     var output_2 = (init_output(), __toCommonJS(output_exports));
     var utils_12 = (init_utils3(), __toCommonJS(utils_exports));
@@ -135560,7 +135574,11 @@ var require_utils10 = __commonJS({
         }
         const targetBranch = pr.base.ref;
         const sourceBranch = pr.head.ref;
-        const fetchResult = yield gitOutput(["fetch", "origin", targetBranch, sourceBranch], { ignoreReturnCode: true });
+        const fetchResult = yield gitOutput(
+          // branch names come from the pull request payload, keep git from parsing them as options
+          ["fetch", "origin", "--", targetBranch, sourceBranch],
+          { ignoreReturnCode: true }
+        );
         if (fetchResult.exitCode === 0) {
           const mergeBase = yield gitOutput(["merge-base", `origin/${targetBranch}`, `origin/${sourceBranch}`], { ignoreReturnCode: true });
           if (mergeBase.exitCode === 0) {
@@ -135938,8 +135956,6 @@ Stderr: ${result.stderr}`);
     __name(gitOutput, "gitOutput");
     function createPr(title, repo, base, head) {
       return __awaiter3(this, void 0, void 0, function* () {
-        const prBodyFile = path_1.default.join(os.tmpdir(), "pr-body.txt");
-        fs3.writeFileSync(prBodyFile, (0, output_12.prFixesBody)(getWorkflowRunUrl()));
         yield exec.getExecOutput("gh", [
           "pr",
           "create",
@@ -135947,13 +135963,15 @@ Stderr: ${result.stderr}`);
           repo,
           "--title",
           title,
+          // read the body from stdin to avoid a temporary file that can be *potentially* hijacked
           "--body-file",
-          prBodyFile,
+          "-",
           "--base",
           base,
           "--head",
           head
         ], {
+          input: Buffer.from((0, output_12.prFixesBody)(getWorkflowRunUrl())),
           env: Object.assign(Object.assign({}, process.env), { GH_TOKEN: getInputs().githubToken })
         });
       });

@@ -82,6 +82,19 @@ test('validate branch names', () => {
   }
 })
 
+test('reject branch names that git could parse as options', () => {
+  let invalidBranchNames = [
+    '--upload-pack=touch',
+    '-b',
+    'main..feature',
+    'main feature',
+    'main;rm'
+  ]
+  for (let branchName of invalidBranchNames) {
+    expect(() => validateBranchName(branchName)).toThrow('Invalid branch name')
+  }
+})
+
 test('qodana scan command args', () => {
   const inputs = inputsDefaultFixture()
   const result = getQodanaScanArgs(

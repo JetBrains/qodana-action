@@ -46,8 +46,6 @@ import {
   VERSION
 } from '../../common/qodana'
 import path from 'path'
-import * as fs from 'fs'
-import * as os from 'os'
 import {prFixesBody} from './output'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 import {
@@ -141,7 +139,8 @@ async function getPrSha(): Promise<string> {
   const targetBranch = pr.base.ref
   const sourceBranch = pr.head.ref
   const fetchResult = await gitOutput(
-    ['fetch', 'origin', targetBranch, sourceBranch],
+    // branch names come from the pull request payload, keep git from parsing them as options
+    ['fetch', 'origin', '--', targetBranch, sourceBranch],
     {ignoreReturnCode: true}
   )
   if (fetchResult.exitCode === 0) {
@@ -732,8 +731,6 @@ async function createPr(
   base: string,
   head: string
 ): Promise<void> {
-  const prBodyFile = path.join(os.tmpdir(), 'pr-body.txt')
-  fs.writeFileSync(prBodyFile, prFixesBody(getWorkflowRunUrl()))
   await exec.getExecOutput(
     'gh',
     [
@@ -743,14 +740,16 @@ async function createPr(
       repo,
       '--title',
       title,
+      // read the body from stdin to avoid a temporary file that can be *potentially* hijacked
       '--body-file',
-      prBodyFile,
+      '-',
       '--base',
       base,
       '--head',
       head
     ],
     {
+      input: Buffer.from(prFixesBody(getWorkflowRunUrl())),
       env: {
         ...process.env,
         GH_TOKEN: getInputs().githubToken
