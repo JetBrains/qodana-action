@@ -414,6 +414,21 @@ jobs:
       - name: Install dependencies
         if: steps.filter.outputs.azure-dev == 'true'
         run: npm ci && cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli
+      # agents cache tasks by version, so every dev publish needs a new task version to be picked up
+      - name: Use dev extension version for the task
+        if: steps.filter.outputs.azure-dev == 'true'
+        run: |
+          DEV_VERSION=$(jq -r .version vsts/vss-extension.dev.json)
+          PROD_VERSION=$(jq -r .version vsts/vss-extension.json)
+          if [ "${DEV_VERSION%.*}" != "${PROD_VERSION%.*}" ]; then
+            echo "::error::Dev version $DEV_VERSION is not on the release line of $PROD_VERSION"
+            exit 1
+          fi
+          IFS=. read -r MAJOR MINOR PATCH <<< "$DEV_VERSION"
+          jq --argjson major "$MAJOR" --argjson minor "$MINOR" --argjson patch "$PATCH" \
+            '.version = {Major: $major, Minor: $minor, Patch: $patch}' \
+            vsts/QodanaScan/task.json > task.json.tmp
+          mv task.json.tmp vsts/QodanaScan/task.json
       - name: Package and publish
         id: publisher-run
         if: steps.filter.outputs.azure-dev == 'true'
