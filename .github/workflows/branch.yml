@@ -12,9 +12,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@master
-      - uses: connor-baer/action-sync-branch@main
-        with:
-          branch: latest
-          token: ${{ secrets.GITHUB_TOKEN }}
-          force: false
+      - name: Fast-forward latest to main
+        run: gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/latest" -f sha="$GITHUB_SHA" -F force=false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
