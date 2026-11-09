@@ -323,3 +323,73 @@ describe('putReaction', () => {
     expect(getOctokit).not.toHaveBeenCalled()
   })
 })
+
+describe('postResultsToPRComments', () => {
+  type Utils = typeof import('../src/utils')
+  type GitHubModule = typeof import('@actions/github')
+
+  function load(createComment: jest.Mock): {
+    utils: Utils
+    github: GitHubModule
+  } {
+    jest.resetModules()
+    jest.doMock('@actions/core', () => ({
+      getInput: () => '',
+      getBooleanInput: () => false,
+      warning: jest.fn(),
+      debug: jest.fn()
+    }))
+    const freshGitHub = require('@actions/github') as GitHubModule
+    Object.defineProperty(freshGitHub, 'context', {
+      value: {
+        repo: {owner: 'JetBrains', repo: 'qodana-action'},
+        issue: {owner: 'JetBrains', repo: 'qodana-action', number: 7},
+        payload: {pull_request: {number: 7}}
+      },
+      configurable: true
+    })
+    const listComments = jest.fn().mockResolvedValue({data: []})
+    jest.spyOn(freshGitHub, 'getOctokit').mockReturnValue({
+      rest: {issues: {listComments, createComment}}
+    } as never)
+    return {utils: require('../src/utils') as Utils, github: freshGitHub}
+  }
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('reports a comment GitHub refused, which tells that the token cannot write the pull request', async () => {
+    const {utils} = load(
+      jest
+        .fn()
+        .mockRejectedValue(new Error('Resource not accessible by integration'))
+    )
+
+    expect(
+      await utils.postResultsToPRComments('Qodana', 'summary', '', true)
+    ).toBe(false)
+  })
+
+  it('reports a comment GitHub created', async () => {
+    const createComment = jest.fn().mockResolvedValue({})
+    const {utils} = load(createComment)
+
+    expect(
+      await utils.postResultsToPRComments('Qodana', 'summary', '', true)
+    ).toBe(true)
+    expect(createComment).toHaveBeenCalledWith(
+      expect.objectContaining({issue_number: 7})
+    )
+  })
+
+  it('reports no failure when no comment is to be posted', async () => {
+    const createComment = jest.fn()
+    const {utils} = load(createComment)
+
+    expect(
+      await utils.postResultsToPRComments('Qodana', 'summary', '', false)
+    ).toBe(true)
+    expect(createComment).not.toHaveBeenCalled()
+  })
+})

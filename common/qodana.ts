@@ -318,6 +318,9 @@ export interface Inputs {
   commitMessage: string
   nightlyVersion: string
   useInstalledCli: boolean
+  enableEdictFeedback: boolean
+  edictStateDir: string
+  edictInspectionsDir: string
   workingDirectory: string
   sarifArtifactLocation: string
 }

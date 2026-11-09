@@ -36,6 +36,7 @@ import {
   pushQuickFixes
 } from './utils'
 import {publishOutput} from './output'
+import {postEdictFeedback, prepareEdictFeedback} from './edictFeedback'
 
 // Catch and log any unhandled exceptions.  These exceptions can leak out of the uploadChunk method in
 // @actions/toolkit when a failed upload closes the file descriptor causing any in-process reads to
@@ -53,10 +54,12 @@ function setFailed(message: string, exitCode: number): void {
  * - gathers all action inputs
  * - loads caches
  * - creates the directories for Qodana results to ensure the correct permissions
+ * - selects the Edict inspections to give feedback with, if enabled
  * - runs the Qodana image
  * - uploads the report as the job artifact
  * - saves caches
  * - uploads action annotations
+ * - comments on the pull request with findings of the Edict inspections
  * Every step except the Qodana image run is optional.
  */
 async function main(): Promise<void> {
@@ -81,12 +84,15 @@ async function main(): Promise<void> {
       restoreCachesPromise
     ])
     const reservedCacheKey = await restoreCachesPromise
+    if (inputs.enableEdictFeedback) {
+      await prepareEdictFeedback(inputs)
+    }
     const exitCode = (await qodana(inputs)) as QodanaExitCode
     const canUploadCache =
       isNeedToUploadCache(inputs.useCaches, inputs.cacheDefaultBranchOnly) &&
       isExecutionSuccessful(exitCode)
 
-    await Promise.all([
+    const [, , , published] = await Promise.all([
       pushQuickFixes(inputs.pushFixes, inputs.commitMessage),
       uploadArtifacts(
         inputs.resultsDir,
@@ -110,6 +116,10 @@ async function main(): Promise<void> {
         isExecutionSuccessful(exitCode)
       )
     ])
+    // after the quick fixes, whose git commands would race with the push of the Edict state
+    if (inputs.enableEdictFeedback) {
+      await postEdictFeedback(inputs, published)
+    }
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`, exitCode)
     } else if (exitCode === QodanaExitCode.FailThreshold) {

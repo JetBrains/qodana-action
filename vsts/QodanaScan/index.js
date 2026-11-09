@@ -82881,6 +82881,9 @@ var require_utils4 = __commonJS({
         useCaches: false,
         cacheDefaultBranchOnly: false,
         githubToken: "",
+        enableEdictFeedback: false,
+        edictStateDir: "",
+        edictInspectionsDir: "",
         sarifArtifactLocation: tl2.getInput("sarifArtifactLocation", false) || "CodeAnalysisLogs"
       };
       return cachedInputs;

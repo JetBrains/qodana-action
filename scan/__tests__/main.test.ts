@@ -15,7 +15,12 @@
  */
 
 import {expect, test} from '@jest/globals'
+import * as core from '@actions/core'
 import {AnnotationProperties} from '@actions/core'
+import * as exec from '@actions/exec'
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
 import {
   getQodanaScanArgs,
   Inputs,
@@ -33,6 +38,12 @@ import {
   VIEW_REPORT_OPTIONS,
   DEPENDENCY_CHARS_LIMIT
 } from '../src/output'
+import {
+  addEdictParams,
+  EDICT_FEEDBACK_UNAVAILABLE,
+  postEdictFeedback,
+  prepareEdictFeedback
+} from '../src/edictFeedback'
 
 test('test typical summary output', () => {
   const result = getSummary(
@@ -147,6 +158,161 @@ test('qodana scan command args ignore environment variables in native mode', () 
     '${{ runner.temp }}/qodana-results',
     '--ide'
   ])
+})
+
+describe('Edict feedback', () => {
+  /** Inputs of a project in a subdirectory with its own configuration file, with Edict feedback on. */
+  function edictInputs(
+    args = ['-i', 'backend', '--config', 'qodana.edict.yaml']
+  ): Inputs {
+    return {...inputsDefaultFixture(), args, enableEdictFeedback: true}
+  }
+
+  let warning: jest.SpyInstance
+
+  beforeEach(() => {
+    warning = jest.spyOn(core, 'warning').mockImplementation(() => undefined)
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  /** Answers every CLI run with [exitCode]. */
+  function cli(exitCode: number): jest.SpyInstance {
+    return jest
+      .spyOn(exec, 'getExecOutput')
+      .mockResolvedValue({exitCode, stdout: '', stderr: ''})
+  }
+
+  test('scan mounts the inspections into the container and names the mount', () => {
+    const scanArgs = ['scan']
+    addEdictParams(scanArgs, edictInputs())
+    expect(scanArgs).toEqual([
+      'scan',
+      '-v',
+      '/runner/temp/edict-feedback:/data/edict-feedback',
+      '--property',
+      'qodana.internal.inspections.kts.dir=/data/edict-feedback'
+    ])
+  })
+
+  test('scan names the inspections on the host in native mode', () => {
+    const scanArgs = ['scan']
+    addEdictParams(scanArgs, edictInputs(['--ide', '/opt/idea']))
+    expect(scanArgs).toEqual([
+      'scan',
+      '--property',
+      'qodana.internal.inspections.kts.dir=/runner/temp/edict-feedback'
+    ])
+  })
+
+  test('scan runs no Edict inspections when feedback is off', () => {
+    const scanArgs = ['scan']
+    addEdictParams(scanArgs, inputsDefaultFixture())
+    expect(scanArgs).toEqual(['scan'])
+  })
+
+  test('prepare creates the inspections directory for the mount and runs in the project directory with its configuration', async () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'edict-feedback-test-')
+    )
+    const inputs = {
+      ...edictInputs(),
+      edictInspectionsDir: path.join(tempDir, 'edict-feedback')
+    }
+    const run = cli(0)
+
+    try {
+      await prepareEdictFeedback(inputs)
+
+      expect(fs.existsSync(inputs.edictInspectionsDir)).toBe(true)
+    } finally {
+      fs.rmSync(tempDir, {recursive: true, force: true})
+    }
+    expect(run).toHaveBeenCalledWith(
+      'qodana',
+      [
+        'edict',
+        'feedback',
+        'prepare',
+        '--state-dir',
+        '/runner/temp/edict-state',
+        '--output-dir',
+        inputs.edictInspectionsDir,
+        '--config',
+        'qodana.edict.yaml'
+      ],
+      {ignoreReturnCode: true, cwd: 'backend', env: undefined}
+    )
+    expect(warning).not.toHaveBeenCalled()
+  })
+
+  test('a command the CLI cannot run is a warning, not a failure of the action', async () => {
+    jest
+      .spyOn(exec, 'getExecOutput')
+      .mockRejectedValue(new Error('Unable to locate executable file: qodana'))
+
+    await postEdictFeedback(edictInputs(), true)
+
+    expect(warning).toHaveBeenCalledWith(
+      `${EDICT_FEEDBACK_UNAVAILABLE}: qodana edict feedback post failed – Unable to locate executable file: qodana`
+    )
+  })
+
+  test('post comments with the findings of the scan report and the token', async () => {
+    const run = cli(0)
+
+    await postEdictFeedback(
+      {
+        ...edictInputs(),
+        githubToken: 'token',
+        resultsDir: '/runner/temp/qodana-results'
+      },
+      true
+    )
+
+    expect(run).toHaveBeenCalledWith(
+      'qodana',
+      [
+        'edict',
+        'feedback',
+        'post',
+        '--state-dir',
+        '/runner/temp/edict-state',
+        '--sarif',
+        '/runner/temp/qodana-results/qodana.sarif.json',
+        '--config',
+        'qodana.edict.yaml'
+      ],
+      expect.objectContaining({
+        cwd: 'backend',
+        env: expect.objectContaining({GITHUB_TOKEN: 'token'})
+      })
+    )
+    expect(warning).not.toHaveBeenCalled()
+  })
+
+  test('post comments nothing when the results could not be published to the pull request', async () => {
+    const run = cli(0)
+
+    await postEdictFeedback(edictInputs(), false)
+
+    expect(run).not.toHaveBeenCalled()
+    expect(warning).toHaveBeenCalledWith(
+      `${EDICT_FEEDBACK_UNAVAILABLE}: Qodana could not publish its results to the pull request`
+    )
+  })
+
+  test('a failed post is a warning', async () => {
+    cli(1)
+
+    await postEdictFeedback(edictInputs(), true)
+
+    expect(warning).toHaveBeenCalledWith(
+      `${EDICT_FEEDBACK_UNAVAILABLE}: qodana edict feedback post failed with exit code 1`
+    )
+  })
 })
 
 test('test sarif with problems to output annotations', () => {
@@ -269,6 +435,9 @@ export function inputsDefaultFixture(): Inputs {
     commitMessage: '',
     nightlyVersion: '',
     useInstalledCli: false,
+    enableEdictFeedback: false,
+    edictStateDir: '/runner/temp/edict-state',
+    edictInspectionsDir: '/runner/temp/edict-feedback',
     workingDirectory: '',
     sarifArtifactLocation: ''
   }

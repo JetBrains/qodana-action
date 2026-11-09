@@ -281,6 +281,7 @@ with:
 | `github-token`              | GitHub token to access the repository: post annotations, comments. Optional.                                                                                                                                                 | `${{ github.token }}`                               |
 | `push-fixes`                | Push Qodana fixes to the repository, can be `none`, `branch` to the current branch, or `pull-request`. Optional.                                                                                                             | `none`                                              |
 | `use-installed-cli`         | Use a Qodana CLI already available on `PATH` instead of downloading one. Optional.                                                                                                                                           | `false`                                             |
+| `enable-edict-feedback`     | Comment on pull requests with findings of Edict inspections that are not promoted yet, asking for a reaction. Needs the Edict state branch in this repository and a token that writes contents and pull requests. Optional. | `false`                                             |
 | `env-vars-to-linter`        | Comma-separated names of environment variables whose values should be passed to the Qodana linter container. Docker mode only; ignored in native mode because the linter already inherits the process environment. Optional. | `"                                                  |
 
 ## Issue Tracker

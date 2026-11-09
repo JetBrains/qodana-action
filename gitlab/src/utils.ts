@@ -94,6 +94,9 @@ export function getInputs(): Inputs {
     cacheDefaultBranchOnly: false,
     githubToken: '',
     artifactName: '',
+    enableEdictFeedback: false,
+    edictStateDir: '',
+    edictInspectionsDir: '',
     workingDirectory: '',
     sarifArtifactLocation: ''
   }

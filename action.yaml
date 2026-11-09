@@ -78,6 +78,10 @@ inputs:
     description: 'Use a Qodana CLI already available on PATH instead of downloading one.'
     required: false
     default: "false"
+  enable-edict-feedback:
+    description: 'Comment on pull requests with findings of Edict inspections that are not promoted yet, asking for a reaction. Needs the Edict state branch in this repository and a token that writes contents and pull requests.'
+    required: false
+    default: "false"
 runs:
   using: 'node24'
   main: 'scan/dist/index.js'

@@ -48,8 +48,10 @@ import {
   VERSION,
   isPullSkipped
 } from '../../common/qodana'
+import os from 'os'
 import path from 'path'
 import {prFixesBody} from './output'
+import {addEdictParams} from './edictFeedback'
 import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
 import {
   isMergeCommit,
@@ -104,6 +106,7 @@ export function getInputs(): Inputs {
   const rawArgs = core.getInput('args')
   const argList = parseRawArguments(rawArgs)
   const nativePrefix = getNativeModePrefix(argList)
+  const tempDir = process.env['RUNNER_TEMP'] || os.tmpdir()
   cachedInputs = {
     args: argList,
     envVarsToLinter: parseEnvVarNames(core.getInput('env-vars-to-linter')),
@@ -124,6 +127,9 @@ export function getInputs(): Inputs {
     commitMessage: core.getInput('commit-message'),
     nightlyVersion: core.getInput('nightly-version'),
     useInstalledCli: core.getBooleanInput('use-installed-cli'),
+    enableEdictFeedback: core.getBooleanInput('enable-edict-feedback'),
+    edictStateDir: path.join(tempDir, 'edict-state'),
+    edictInspectionsDir: path.join(tempDir, 'edict-feedback'),
     // not used by the action
     workingDirectory: '',
     sarifArtifactLocation: ''
@@ -222,6 +228,7 @@ export async function qodana(
       inputs.cacheDir,
       inputs.envVarsToLinter
     )
+    addEdictParams(args, inputs)
     if (inputs.prMode) {
       await warnIfMergeCommitCheckout()
       const sha = await getPrSha()
@@ -514,18 +521,19 @@ export function getWorkflowRunUrl(): string {
  * @param content The comment to post.
  * @param sourceDir The analyzed directory inside project
  * @param postComment Whether to post a comment or not.
+ * @returns false when GitHub refused or failed the comment, true otherwise, also when none was posted.
  */
 export async function postResultsToPRComments(
   toolName: string,
   content: string,
   sourceDir: string,
   postComment: boolean
-): Promise<void> {
+): Promise<boolean> {
   const pr = github.context.payload.pull_request as
     | PullRequestPayload
     | undefined
   if (!postComment || !pr) {
-    return
+    return true
   }
   // source dir needed in case of monorepo with projects analyzed by the same tool
   const comment_tag_pattern = getCommentTag(toolName, sourceDir)
@@ -533,10 +541,9 @@ export async function postResultsToPRComments(
   const client = github.getOctokit(getInputs().githubToken)
   const comment_id = await findCommentByTag(client, comment_tag_pattern)
   if (comment_id !== -1) {
-    await updateComment(client, comment_id, body)
-  } else {
-    await createComment(client, body)
+    return await updateComment(client, comment_id, body)
   }
+  return await createComment(client, body)
 }
 
 /**
@@ -568,12 +575,12 @@ export async function findCommentByTag(
  * Asynchronously creates a comment on the current issue using the provided body text.
  * @param client The Octokit REST API client to be used for creating the comment.
  * @param body The text content of the comment to be created.
- * @returns A Promise that resolves when the comment is successfully created.
+ * @returns A Promise that resolves to whether the comment was created.
  */
 export async function createComment(
   client: InstanceType<typeof GitHub>,
   body: string
-): Promise<void> {
+): Promise<boolean> {
   try {
     await client.rest.issues.createComment({
       owner: github.context.repo.owner,
@@ -581,8 +588,10 @@ export async function createComment(
       issue_number: github.context.issue.number,
       body
     })
+    return true
   } catch (error) {
     core.debug(`Failed to post comment – ${(error as Error).message}`)
+    return false
   }
 }
 
@@ -594,13 +603,13 @@ export async function createComment(
  * @param client The Octokit REST API client to be used for updating the comment.
  * @param comment_id The ID of the GitHub comment to be updated.
  * @param body The new content of the comment.
- * @returns A Promise that resolves to void after attempted comment update.
+ * @returns A Promise that resolves to whether the comment was updated.
  */
 export async function updateComment(
   client: InstanceType<typeof GitHub>,
   comment_id: number,
   body: string
-): Promise<void> {
+): Promise<boolean> {
   try {
     await client.rest.issues.updateComment({
       owner: github.context.repo.owner,
@@ -608,8 +617,10 @@ export async function updateComment(
       comment_id,
       body
     })
+    return true
   } catch (error) {
     core.debug(`Failed to update comment – ${(error as Error).message}`)
+    return false
   }
 }
 

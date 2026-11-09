@@ -77,6 +77,7 @@ so that the action will upload the files as the job artifacts:
  * @param isPrMode
  * @param execute whether to execute the promise or not.
  * @param useAnnotations whether to publish annotations or not.
+ * @returns whether the results were published, with the pull request comment if one was posted.
  */
 export async function publishOutput(
   failedByThreshold: boolean,
@@ -87,9 +88,9 @@ export async function publishOutput(
   postComment: boolean,
   isPrMode: boolean,
   execute: boolean
-): Promise<void> {
+): Promise<boolean> {
   if (!execute) {
-    return
+    return false
   }
   try {
     const problems = parseSarif(`${resultsDir}/${QODANA_SARIF_NAME}`)
@@ -124,7 +125,7 @@ export async function publishOutput(
     )
     // source dir is needed for project distinction in monorepo
     const jobName = `${toolName}` + (sourceDir === '' ? '' : ` (${sourceDir})`)
-    await Promise.all([
+    const [, commented] = await Promise.all([
       putReaction(
         getInputs().githubToken,
         ANALYSIS_FINISHED_REACTION,
@@ -139,12 +140,14 @@ export async function publishOutput(
       core.summary.addRaw(problems.summary).write(),
       publishAnnotations(jobName, problems, failedByThreshold, useAnnotations)
     ])
+    return commented
   } catch (error) {
     core.warning(
       `Qodana has problems with publishing results to GitHub – ${
         (error as Error).message
       }`
     )
+    return false
   }
 }
 

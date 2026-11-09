@@ -137213,7 +137213,7 @@ so that the action will upload the files as the job artifacts:
       return __awaiter3(this, void 0, void 0, function* () {
         var _a;
         if (!execute) {
-          return;
+          return false;
         }
         try {
           const problems = (0, annotations_1.parseSarif)(`${resultsDir}/${qodana_12.QODANA_SARIF_NAME}`);
@@ -137225,14 +137225,16 @@ so that the action will upload the files as the job artifacts:
           const toolName = (_a = problems.title.split("found by ")[1]) !== null && _a !== void 0 ? _a : output_12.QODANA_CHECK_NAME;
           problems.summary = (0, output_12.getSummary)(toolName, projectDir, sourceDir, problemsDescriptions, coverageInfo, licensesInfo.packages, licensesInfo.licenses, reportUrl, isPrMode, exports2.DEPENDENCY_CHARS_LIMIT, exports2.VIEW_REPORT_OPTIONS, sanityProblemsCount);
           const jobName = `${toolName}` + (sourceDir === "" ? "" : ` (${sourceDir})`);
-          yield Promise.all([
+          const [, commented] = yield Promise.all([
             (0, utils_12.putReaction)((0, utils_12.getInputs)().githubToken, utils_12.ANALYSIS_FINISHED_REACTION, utils_12.ANALYSIS_STARTED_REACTION),
             (0, utils_12.postResultsToPRComments)(toolName, problems.summary, sourceDir, postComment),
             core2.summary.addRaw(problems.summary).write(),
             (0, annotations_1.publishAnnotations)(jobName, problems, failedByThreshold, useAnnotations)
           ]);
+          return commented;
         } catch (error) {
           core2.warning(`Qodana has problems with publishing results to GitHub \u2013 ${error.message}`);
+          return false;
         }
       });
     }
@@ -137270,6 +137272,156 @@ Best,
 [Qodana Scan \u{1F916}](https://github.com/marketplace/actions/qodana-scan)_`;
     }
     __name(prFixesBody, "prFixesBody");
+  }
+});
+
+// lib/edictFeedback.js
+var require_edictFeedback = __commonJS({
+  "lib/edictFeedback.js"(exports2) {
+    "use strict";
+    var __createBinding3 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: /* @__PURE__ */ __name(function() {
+          return m[k];
+        }, "get") };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault3 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar3 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys2 = /* @__PURE__ */ __name(function(o) {
+        ownKeys2 = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys2(o);
+      }, "ownKeys");
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys2(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding3(result, mod, k[i]);
+        }
+        __setModuleDefault3(result, mod);
+        return result;
+      };
+    })();
+    var __awaiter3 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
+      function adopt(value) {
+        return value instanceof P ? value : new P(function(resolve) {
+          resolve(value);
+        });
+      }
+      __name(adopt, "adopt");
+      return new (P || (P = Promise))(function(resolve, reject) {
+        function fulfilled(value) {
+          try {
+            step(generator.next(value));
+          } catch (e) {
+            reject(e);
+          }
+        }
+        __name(fulfilled, "fulfilled");
+        function rejected(value) {
+          try {
+            step(generator["throw"](value));
+          } catch (e) {
+            reject(e);
+          }
+        }
+        __name(rejected, "rejected");
+        function step(result) {
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+        }
+        __name(step, "step");
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+      });
+    };
+    var __importDefault2 = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.EDICT_FEEDBACK_UNAVAILABLE = void 0;
+    exports2.prepareEdictFeedback = prepareEdictFeedback;
+    exports2.addEdictParams = addEdictParams;
+    exports2.postEdictFeedback = postEdictFeedback;
+    var core2 = __importStar3(require_core());
+    var exec = __importStar3(require_exec());
+    var io2 = __importStar3(require_io());
+    var path_1 = __importDefault2(require("path"));
+    var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
+    exports2.EDICT_FEEDBACK_UNAVAILABLE = "Edict promotion comments are unavailable";
+    var INSPECTIONS_DIR_PROPERTY = "qodana.internal.inspections.kts.dir";
+    var CONTAINER_INSPECTIONS_DIR = "/data/edict-feedback";
+    function prepareEdictFeedback(inputs) {
+      return __awaiter3(this, void 0, void 0, function* () {
+        yield io2.mkdirP(inputs.edictInspectionsDir);
+        yield edictFeedback(inputs.args, "prepare", [
+          "--state-dir",
+          inputs.edictStateDir,
+          "--output-dir",
+          inputs.edictInspectionsDir
+        ]);
+      });
+    }
+    __name(prepareEdictFeedback, "prepareEdictFeedback");
+    function addEdictParams(scanArgs, inputs) {
+      if (!inputs.enableEdictFeedback) {
+        return;
+      }
+      if ((0, qodana_12.isNativeMode)(inputs.args)) {
+        scanArgs.push("--property", `${INSPECTIONS_DIR_PROPERTY}=${inputs.edictInspectionsDir}`);
+      } else {
+        scanArgs.push("-v", `${inputs.edictInspectionsDir}:${CONTAINER_INSPECTIONS_DIR}`, "--property", `${INSPECTIONS_DIR_PROPERTY}=${CONTAINER_INSPECTIONS_DIR}`);
+      }
+    }
+    __name(addEdictParams, "addEdictParams");
+    function postEdictFeedback(inputs, published) {
+      return __awaiter3(this, void 0, void 0, function* () {
+        if (!published) {
+          core2.warning(`${exports2.EDICT_FEEDBACK_UNAVAILABLE}: Qodana could not publish its results to the pull request`);
+          return;
+        }
+        yield edictFeedback(inputs.args, "post", [
+          "--state-dir",
+          inputs.edictStateDir,
+          "--sarif",
+          path_1.default.resolve(inputs.resultsDir, qodana_12.QODANA_SARIF_NAME)
+        ], Object.assign(Object.assign({}, process.env), { GITHUB_TOKEN: inputs.githubToken }));
+      });
+    }
+    __name(postEdictFeedback, "postEdictFeedback");
+    function edictFeedback(args, command, commandArgs, env) {
+      return __awaiter3(this, void 0, void 0, function* () {
+        const config = (0, qodana_12.extractArg)("--config", "--config", args);
+        const projectDir = (0, qodana_12.extractArg)("-i", "--project-dir", args);
+        try {
+          const { exitCode } = yield exec.getExecOutput(qodana_12.EXECUTABLE, [
+            "edict",
+            "feedback",
+            command,
+            ...commandArgs,
+            ...config ? ["--config", config] : []
+          ], { ignoreReturnCode: true, cwd: projectDir || void 0, env });
+          if (exitCode !== 0) {
+            core2.warning(`${exports2.EDICT_FEEDBACK_UNAVAILABLE}: qodana edict feedback ${command} failed with exit code ${exitCode}`);
+          }
+        } catch (error) {
+          core2.warning(`${exports2.EDICT_FEEDBACK_UNAVAILABLE}: qodana edict feedback ${command} failed \u2013 ${error.message}`);
+        }
+      });
+    }
+    __name(edictFeedback, "edictFeedback");
   }
 });
 
@@ -137373,8 +137525,10 @@ var require_utils10 = __commonJS({
     var artifact_1 = __importDefault2(require_artifact2());
     var annotations_1 = require_annotations();
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
+    var os_1 = __importDefault2(require("os"));
     var path_1 = __importDefault2(require("path"));
     var output_12 = require_output();
+    var edictFeedback_12 = require_edictFeedback();
     var output_2 = (init_output(), __toCommonJS(output_exports));
     var utils_12 = (init_utils3(), __toCommonJS(utils_exports));
     (0, utils_12.setDeprecationWarningCallback)((message) => {
@@ -137391,6 +137545,7 @@ var require_utils10 = __commonJS({
       const rawArgs = core2.getInput("args");
       const argList = (0, utils_12.parseRawArguments)(rawArgs);
       const nativePrefix = (0, qodana_12.getNativeModePrefix)(argList);
+      const tempDir = process.env["RUNNER_TEMP"] || os_1.default.tmpdir();
       cachedInputs = {
         args: argList,
         envVarsToLinter: (0, qodana_12.parseEnvVarNames)(core2.getInput("env-vars-to-linter")),
@@ -137412,6 +137567,9 @@ var require_utils10 = __commonJS({
         commitMessage: core2.getInput("commit-message"),
         nightlyVersion: core2.getInput("nightly-version"),
         useInstalledCli: core2.getBooleanInput("use-installed-cli"),
+        enableEdictFeedback: core2.getBooleanInput("enable-edict-feedback"),
+        edictStateDir: path_1.default.join(tempDir, "edict-state"),
+        edictInspectionsDir: path_1.default.join(tempDir, "edict-feedback"),
         // not used by the action
         workingDirectory: "",
         sarifArtifactLocation: ""
@@ -137481,6 +137639,7 @@ var require_utils10 = __commonJS({
             core2.warning(qodana_12.ENV_VARS_TO_LINTER_NATIVE_WARNING);
           }
           args = (0, qodana_12.getQodanaScanArgs)(inputs.args, inputs.resultsDir, inputs.cacheDir, inputs.envVarsToLinter);
+          (0, edictFeedback_12.addEdictParams)(args, inputs);
           if (inputs.prMode) {
             yield warnIfMergeCommitCheckout();
             const sha = yield getPrSha();
@@ -137693,7 +137852,7 @@ ${statusOutput.stdout}`);
       return __awaiter3(this, void 0, void 0, function* () {
         const pr = github.context.payload.pull_request;
         if (!postComment || !pr) {
-          return;
+          return true;
         }
         const comment_tag_pattern = (0, output_2.getCommentTag)(toolName, sourceDir);
         const body = `${content}
@@ -137701,10 +137860,9 @@ ${comment_tag_pattern}`;
         const client = github.getOctokit(getInputs().githubToken);
         const comment_id = yield findCommentByTag(client, comment_tag_pattern);
         if (comment_id !== -1) {
-          yield updateComment(client, comment_id, body);
-        } else {
-          yield createComment(client, body);
+          return yield updateComment(client, comment_id, body);
         }
+        return yield createComment(client, body);
       });
     }
     __name(postResultsToPRComments, "postResultsToPRComments");
@@ -137733,8 +137891,10 @@ ${comment_tag_pattern}`;
             issue_number: github.context.issue.number,
             body
           });
+          return true;
         } catch (error) {
           core2.debug(`Failed to post comment \u2013 ${error.message}`);
+          return false;
         }
       });
     }
@@ -137748,8 +137908,10 @@ ${comment_tag_pattern}`;
             comment_id,
             body
           });
+          return true;
         } catch (error) {
           core2.debug(`Failed to update comment \u2013 ${error.message}`);
+          return false;
         }
       });
     }
@@ -137958,6 +138120,7 @@ var io = __importStar2(require_io());
 var qodana_1 = (init_qodana(), __toCommonJS(qodana_exports));
 var utils_1 = require_utils10();
 var output_1 = require_output();
+var edictFeedback_1 = require_edictFeedback();
 process.on("uncaughtException", (e) => core.warning(e.message));
 function setFailed(message, exitCode) {
   process.exitCode = exitCode;
@@ -137977,14 +138140,20 @@ function main() {
         restoreCachesPromise
       ]);
       const reservedCacheKey = yield restoreCachesPromise;
+      if (inputs.enableEdictFeedback) {
+        yield (0, edictFeedback_1.prepareEdictFeedback)(inputs);
+      }
       const exitCode = yield (0, utils_1.qodana)(inputs);
       const canUploadCache = (0, utils_1.isNeedToUploadCache)(inputs.useCaches, inputs.cacheDefaultBranchOnly) && (0, qodana_1.isExecutionSuccessful)(exitCode);
-      yield Promise.all([
+      const [, , , published] = yield Promise.all([
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage),
         (0, utils_1.uploadArtifacts)(inputs.resultsDir, inputs.artifactName, inputs.uploadResult),
         (0, utils_1.uploadCaches)(inputs.cacheDir, inputs.primaryCacheKey, reservedCacheKey, canUploadCache),
         (0, output_1.publishOutput)(exitCode === qodana_1.QodanaExitCode.FailThreshold, (0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.useAnnotations, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode))
       ]);
+      if (inputs.enableEdictFeedback) {
+        yield (0, edictFeedback_1.postEdictFeedback)(inputs, published);
+      }
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`, exitCode);
       } else if (exitCode === qodana_1.QodanaExitCode.FailThreshold) {

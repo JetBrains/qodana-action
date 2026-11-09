@@ -105,6 +105,9 @@ export function getInputs(): Inputs {
     useCaches: false,
     cacheDefaultBranchOnly: false,
     githubToken: '',
+    enableEdictFeedback: false,
+    edictStateDir: '',
+    edictInspectionsDir: '',
     sarifArtifactLocation:
       tl.getInput('sarifArtifactLocation', false) || 'CodeAnalysisLogs'
   }
