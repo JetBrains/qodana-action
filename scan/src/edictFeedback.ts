@@ -22,7 +22,6 @@ import {
   EXECUTABLE,
   extractArg,
   Inputs,
-  isNativeMode,
   QODANA_SARIF_NAME
 } from '../../common/qodana'
 
@@ -30,11 +29,11 @@ import {
 export const EDICT_FEEDBACK_UNAVAILABLE =
   'Edict promotion comments are unavailable'
 
-/** The property that makes Qodana run the inspections of a directory without reporting their findings. */
+/**
+ * The property that makes Qodana run the inspections of a directory without reporting their findings. It names the
+ * directory on the host: the CLI, which knows whether the analysis runs in a container, mounts it there.
+ */
 const INSPECTIONS_DIR_PROPERTY = 'qodana.internal.inspections.kts.dir'
-
-/** Where the inspections directory is mounted in the Qodana container. */
-const CONTAINER_INSPECTIONS_DIR = '/data/edict-feedback'
 
 /**
  * Runs `qodana edict feedback prepare`, which copies the Edict inspections whose findings may become review comments
@@ -61,19 +60,10 @@ export function addEdictParams(scanArgs: string[], inputs: Inputs): void {
   if (!inputs.enableEdictFeedback) {
     return
   }
-  if (isNativeMode(inputs.args)) {
-    scanArgs.push(
-      '--property',
-      `${INSPECTIONS_DIR_PROPERTY}=${inputs.edictInspectionsDir}`
-    )
-  } else {
-    scanArgs.push(
-      '-v',
-      `${inputs.edictInspectionsDir}:${CONTAINER_INSPECTIONS_DIR}`,
-      '--property',
-      `${INSPECTIONS_DIR_PROPERTY}=${CONTAINER_INSPECTIONS_DIR}`
-    )
-  }
+  scanArgs.push(
+    '--property',
+    `${INSPECTIONS_DIR_PROPERTY}=${inputs.edictInspectionsDir}`
+  )
 }
 
 /**

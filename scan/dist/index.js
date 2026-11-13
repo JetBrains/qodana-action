@@ -137362,7 +137362,6 @@ var require_edictFeedback = __commonJS({
     var qodana_12 = (init_qodana(), __toCommonJS(qodana_exports));
     exports2.EDICT_FEEDBACK_UNAVAILABLE = "Edict promotion comments are unavailable";
     var INSPECTIONS_DIR_PROPERTY = "qodana.internal.inspections.kts.dir";
-    var CONTAINER_INSPECTIONS_DIR = "/data/edict-feedback";
     function prepareEdictFeedback(inputs) {
       return __awaiter3(this, void 0, void 0, function* () {
         yield io2.mkdirP(inputs.edictInspectionsDir);
@@ -137379,11 +137378,7 @@ var require_edictFeedback = __commonJS({
       if (!inputs.enableEdictFeedback) {
         return;
       }
-      if ((0, qodana_12.isNativeMode)(inputs.args)) {
-        scanArgs.push("--property", `${INSPECTIONS_DIR_PROPERTY}=${inputs.edictInspectionsDir}`);
-      } else {
-        scanArgs.push("-v", `${inputs.edictInspectionsDir}:${CONTAINER_INSPECTIONS_DIR}`, "--property", `${INSPECTIONS_DIR_PROPERTY}=${CONTAINER_INSPECTIONS_DIR}`);
-      }
+      scanArgs.push("--property", `${INSPECTIONS_DIR_PROPERTY}=${inputs.edictInspectionsDir}`);
     }
     __name(addEdictParams, "addEdictParams");
     function postEdictFeedback(inputs, published) {

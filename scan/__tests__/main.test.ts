@@ -185,26 +185,21 @@ describe('Edict feedback', () => {
       .mockResolvedValue({exitCode, stdout: '', stderr: ''})
   }
 
-  test('scan mounts the inspections into the container and names the mount', () => {
-    const scanArgs = ['scan']
-    addEdictParams(scanArgs, edictInputs())
-    expect(scanArgs).toEqual([
-      'scan',
-      '-v',
-      '/runner/temp/edict-feedback:/data/edict-feedback',
-      '--property',
-      'qodana.internal.inspections.kts.dir=/data/edict-feedback'
-    ])
-  })
-
-  test('scan names the inspections on the host in native mode', () => {
-    const scanArgs = ['scan']
-    addEdictParams(scanArgs, edictInputs(['--ide', '/opt/idea']))
-    expect(scanArgs).toEqual([
+  test('scan names the inspections on the host, whether it runs in a container or natively', () => {
+    // The CLI mounts the directory into a container; only it knows the run is native when qodana.yaml says so.
+    const runs = [edictInputs(), edictInputs(['--ide', '/opt/idea'])].map(
+      inputs => {
+        const scanArgs = ['scan']
+        addEdictParams(scanArgs, inputs)
+        return scanArgs
+      }
+    )
+    const hostDirectory = [
       'scan',
       '--property',
       'qodana.internal.inspections.kts.dir=/runner/temp/edict-feedback'
-    ])
+    ]
+    expect(runs).toEqual([hostDirectory, hostDirectory])
   })
 
   test('scan runs no Edict inspections when feedback is off', () => {
