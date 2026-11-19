@@ -193,7 +193,7 @@ async function installCli(nightlyVersion: string): Promise<void> {
 /**
  * Prepares the agent for qodana scan: install Qodana CLI and pull the linter.
  * @param args qodana arguments
- * @param nightlyVersion nightly version to use (e.g. '2026.2'), empty for stable
+ * @param nightlyVersion nightly version to use (e.g. '2026.3'), empty for stable
  * @param useInstalledCli use or not already installed qodana-cli
  */
 export async function prepareAgent(

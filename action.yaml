@@ -28,11 +28,11 @@ inputs:
   primary-cache-key:
     description: 'Set the primary cache key'
     required: false
-    default: "qodana-2026.2-${{ github.ref }}-${{ github.sha }}"
+    default: "qodana-2026.3-${{ github.ref }}-${{ github.sha }}"
   additional-cache-key:
     description: 'Set the additional cache key'
     required: false
-    default: "qodana-2026.2-${{ github.ref }}"
+    default: "qodana-2026.3-${{ github.ref }}"
   cache-default-branch-only:
     description: 'Upload cache for the default branch only'
     required: false
@@ -70,7 +70,7 @@ inputs:
     required: false
     default: "🤖 Apply quick-fixes by Qodana"
   nightly-version:
-    description: 'Qodana CLI nightly version to use (e.g. 2026.2 or latest). Downloads CLI from tag v{version}-nightly.'
+    description: 'Qodana CLI nightly version to use (e.g. 2026.3 or latest). Downloads CLI from tag v{version}-nightly.'
     required: false
     default: ""
     deprecationMessage: 'This option is for development purposes only. Do not use it in production.'
