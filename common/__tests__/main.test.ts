@@ -598,11 +598,11 @@ describe('getNightlyTag', () => {
   })
 
   test('builds nightly tag from version', async () => {
-    expect(await getNightlyTag('2026.2')).toEqual('v2026.2-nightly')
+    expect(await getNightlyTag('2026.3')).toEqual('v2026.3-nightly')
   })
 
   test('rejects versions that do not match the nightly tag format', async () => {
-    for (const version of ['2026.2.1', '2026', 'v2026.2', '2026.2-rc']) {
+    for (const version of ['2026.3.1', '2026', 'v2026.3', '2026.3-rc']) {
       await expect(getNightlyTag(version)).rejects.toThrow(
         'Invalid nightly version'
       )
@@ -612,9 +612,9 @@ describe('getNightlyTag', () => {
   test('rejects versions that would alter the download URL', async () => {
     for (const version of [
       '../../../../attacker/repo/releases/download/v1',
-      '2026.2/x',
-      '2026.2?x',
-      '2026.2#x'
+      '2026.3/x',
+      '2026.3?x',
+      '2026.3#x'
     ]) {
       await expect(getNightlyTag(version)).rejects.toThrow(
         'Invalid nightly version'

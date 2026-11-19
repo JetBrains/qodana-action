@@ -21,7 +21,7 @@ Add the Qodana Maven plugin to your `pom.xml`:
         <plugin>
             <groupId>io.github.qodana</groupId>
             <artifactId>qodana-maven-plugin</artifactId>
-            <version>2026.2.4</version>
+            <version>2026.3.1</version>
         </plugin>
     </plugins>
 </build>

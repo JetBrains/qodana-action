@@ -9,8 +9,8 @@
   "author": "JetBrains",
   "version": {
     "Major": 2026,
-    "Minor": 2,
-    "Patch": 4
+    "Minor": 3,
+    "Patch": 1
   },
   "instanceNameFormat": "Qodana Scan",
   "inputs": [
@@ -73,7 +73,7 @@
     {
       "name": "nightlyVersion",
       "type": "string",
-      "label": "Qodana CLI nightly version (e.g. 2026.2 or latest)",
+      "label": "Qodana CLI nightly version (e.g. 2026.3 or latest)",
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "This option is for development purposes only. Do not use it in production."
