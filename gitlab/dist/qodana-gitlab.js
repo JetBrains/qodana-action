@@ -52371,6 +52371,21 @@ Stderr: ${result.stderr}`);
       return getQodanaStringArg("CACHE_DIR", `${process.env["CI_PROJECT_DIR"]}/.qodana/cache`);
     }
     __name(getInitialCacheLocation, "getInitialCacheLocation");
+    function moveDirectory(from, to) {
+      fs4.rmSync(to, { recursive: true, force: true });
+      fs4.mkdirSync(path_1.default.dirname(to), { recursive: true });
+      try {
+        fs4.renameSync(from, to);
+      } catch (e) {
+        if (e.code !== "EXDEV") {
+          throw e;
+        }
+        debug(`${from} and ${to} are on different file systems; copying`);
+        fs4.cpSync(from, to, { recursive: true });
+        fs4.rmSync(from, { recursive: true, force: true });
+      }
+    }
+    __name(moveDirectory, "moveDirectory");
     function prepareCaches(cacheDir) {
       const initialCacheLocation = getInitialCacheLocation();
       debug(`Initial cache location: ${initialCacheLocation}`);
@@ -52378,16 +52393,16 @@ Stderr: ${result.stderr}`);
         debug(`Initial cache location matches cacheDir (${cacheDir}); skipping copy`);
         return;
       }
-      if (fs4.existsSync(initialCacheLocation)) {
-        debug(`Copying cache from ${initialCacheLocation} to ${cacheDir}`);
-        fs4.cpSync(initialCacheLocation, cacheDir, { recursive: true });
-      } else {
+      if (!fs4.existsSync(initialCacheLocation)) {
         debug(`No cache at location: ${initialCacheLocation}`);
+        return;
       }
+      debug(`Moving cache from ${initialCacheLocation} to ${cacheDir}`);
+      moveDirectory(initialCacheLocation, cacheDir);
     }
     __name(prepareCaches, "prepareCaches");
-    function uploadCache(cacheDir, execute) {
-      if (!execute) {
+    function uploadCache(cacheDir, useCaches) {
+      if (!useCaches) {
         return;
       }
       try {
@@ -52396,8 +52411,12 @@ Stderr: ${result.stderr}`);
           debug(`Initial cache location matches cacheDir (${cacheDir}); skipping upload`);
           return;
         }
-        debug(`Deleting initial cache at ${initialCacheLocation} and saving cache from ${cacheDir}`);
-        fs4.cpSync(cacheDir, initialCacheLocation, { recursive: true, force: true });
+        if (!fs4.existsSync(cacheDir)) {
+          debug(`No cache at ${cacheDir}; skipping upload`);
+          return;
+        }
+        debug(`Moving cache from ${cacheDir} to ${initialCacheLocation}`);
+        moveDirectory(cacheDir, initialCacheLocation);
       } catch (e) {
         console.error(`Failed to upload cache: ${e.message}`);
       }
@@ -52669,18 +52688,21 @@ function setFailed(message, exitCode) {
 __name(setFailed, "setFailed");
 function main() {
   return __awaiter(this, void 0, void 0, function* () {
+    let restoreCache = /* @__PURE__ */ __name(() => {
+    }, "restoreCache");
     try {
       const inputs = (0, utils_1.getInputs)();
       fs3.mkdirSync(inputs.resultsDir, { recursive: true });
       fs3.mkdirSync(inputs.cacheDir, { recursive: true });
       (0, utils_1.prepareCaches)(inputs.cacheDir);
+      restoreCache = /* @__PURE__ */ __name(() => (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches), "restoreCache");
       yield (0, utils_1.prepareAgent)(inputs.nightlyVersion, inputs.useInstalledCli);
       const exitCode = yield (0, utils_1.qodanaScan)();
       yield Promise.all([
         (0, output_1.publishOutput)((0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode)),
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage)
       ]);
-      (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches && (exitCode === qodana_1.QodanaExitCode.Success || exitCode === qodana_1.QodanaExitCode.FailThreshold));
+      restoreCache();
       (0, utils_1.uploadArtifacts)(inputs.resultsDir);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`, exitCode);
@@ -52688,6 +52710,7 @@ function main() {
         setFailed(qodana_1.FAIL_THRESHOLD_OUTPUT, exitCode);
       }
     } catch (error) {
+      restoreCache();
       setFailed(error.message, 1);
     }
   });
