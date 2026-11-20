@@ -403,7 +403,30 @@ function getInitialCacheLocation(): string {
   )
 }
 
+/**
+ * Moves a directory, replacing the target. A rename on the same file system takes no time whatever the size;
+ * across file systems the directory is copied and then deleted.
+ */
+function moveDirectory(from: string, to: string): void {
+  fs.rmSync(to, {recursive: true, force: true})
+  fs.mkdirSync(path.dirname(to), {recursive: true})
+  try {
+    fs.renameSync(from, to)
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code !== 'EXDEV') {
+      throw e
+    }
+    debug(`${from} and ${to} are on different file systems; copying`)
+    fs.cpSync(from, to, {recursive: true})
+    fs.rmSync(from, {recursive: true, force: true})
+  }
+}
+
 // at this moment any changes inside .qodana dir may affect analysis results
+/**
+ * Moves the cache that GitLab restored into the project to cacheDir, outside the project,
+ * so the IDE does not see a copy of it in the project during the scan. uploadCache moves it back.
+ */
 export function prepareCaches(cacheDir: string): void {
   const initialCacheLocation = getInitialCacheLocation()
   debug(`Initial cache location: ${initialCacheLocation}`)
@@ -413,16 +436,20 @@ export function prepareCaches(cacheDir: string): void {
     )
     return
   }
-  if (fs.existsSync(initialCacheLocation)) {
-    debug(`Copying cache from ${initialCacheLocation} to ${cacheDir}`)
-    fs.cpSync(initialCacheLocation, cacheDir, {recursive: true})
-  } else {
+  if (!fs.existsSync(initialCacheLocation)) {
     debug(`No cache at location: ${initialCacheLocation}`)
+    return
   }
+  debug(`Moving cache from ${initialCacheLocation} to ${cacheDir}`)
+  moveDirectory(initialCacheLocation, cacheDir)
 }
 
-export function uploadCache(cacheDir: string, execute: boolean): void {
-  if (!execute) {
+/**
+ * Moves the cache back into the project for GitLab to save. It runs whatever the scan result:
+ * prepareCaches moved the restored cache away, so not moving it back would leave the project without a cache.
+ */
+export function uploadCache(cacheDir: string, useCaches: boolean): void {
+  if (!useCaches) {
     return
   }
   try {
@@ -433,10 +460,12 @@ export function uploadCache(cacheDir: string, execute: boolean): void {
       )
       return
     }
-    debug(
-      `Deleting initial cache at ${initialCacheLocation} and saving cache from ${cacheDir}`
-    )
-    fs.cpSync(cacheDir, initialCacheLocation, {recursive: true, force: true})
+    if (!fs.existsSync(cacheDir)) {
+      debug(`No cache at ${cacheDir}; skipping upload`)
+      return
+    }
+    debug(`Moving cache from ${cacheDir} to ${initialCacheLocation}`)
+    moveDirectory(cacheDir, initialCacheLocation)
   } catch (e) {
     console.error(`Failed to upload cache: ${(e as Error).message}`)
   }

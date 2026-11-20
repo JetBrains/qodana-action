@@ -22,11 +22,13 @@ function setFailed(message: string, exitCode: number): void {
 }
 
 async function main(): Promise<void> {
+  let restoreCache = (): void => {}
   try {
     const inputs = getInputs()
     fs.mkdirSync(inputs.resultsDir, {recursive: true})
     fs.mkdirSync(inputs.cacheDir, {recursive: true})
     prepareCaches(inputs.cacheDir)
+    restoreCache = () => uploadCache(inputs.cacheDir, inputs.useCaches)
     await prepareAgent(inputs.nightlyVersion, inputs.useInstalledCli)
 
     const exitCode = (await qodanaScan()) as QodanaExitCode
@@ -43,12 +45,7 @@ async function main(): Promise<void> {
       pushQuickFixes(inputs.pushFixes, inputs.commitMessage)
     ])
 
-    uploadCache(
-      inputs.cacheDir,
-      inputs.useCaches &&
-        (exitCode === QodanaExitCode.Success ||
-          exitCode === QodanaExitCode.FailThreshold)
-    )
+    restoreCache()
     uploadArtifacts(inputs.resultsDir)
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`, exitCode)
@@ -56,6 +53,8 @@ async function main(): Promise<void> {
       setFailed(FAIL_THRESHOLD_OUTPUT, exitCode)
     }
   } catch (error) {
+    // the cache was moved out of the project, so it goes back even when the job fails
+    restoreCache()
     setFailed((error as Error).message, 1)
   }
 }
