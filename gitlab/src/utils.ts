@@ -72,9 +72,10 @@ export function getInputs(): Inputs {
     envVarsToLinter: parseEnvVarNames(
       getQodanaStringArg('ENV_VARS_TO_LINTER', '')
     ),
-    // user given results and cache dirs are used in uploadCache, prepareCaches and uploadArtifacts
-    resultsDir: `${baseDir()}/results`,
-    cacheDir: `${baseDir()}/cache`,
+    // locations used during the scan; the user given results and cache dirs (QODANA_RESULTS_DIR, QODANA_CACHE_DIR)
+    // are the project paths used in uploadCache, prepareCaches and uploadArtifacts
+    resultsDir: getQodanaStringArg('SCAN_RESULTS_DIR', `${baseDir()}/results`),
+    cacheDir: getQodanaStringArg('SCAN_CACHE_DIR', `${baseDir()}/cache`),
     uploadResult: getQodanaBooleanArg('UPLOAD_RESULT', false),
     prMode: getQodanaBooleanArg('MR_MODE', true),
     pushFixes: pushFixes,
@@ -406,8 +407,18 @@ function getInitialCacheLocation(): string {
 /**
  * Moves a directory, replacing the target. A rename on the same file system takes no time whatever the size;
  * across file systems the directory is copied and then deleted.
+ * Does nothing when both paths are the same or there is nothing to move, so the target is never lost.
  */
 function moveDirectory(from: string, to: string): void {
+  if (path.resolve(from) == path.resolve(to)) {
+    debug(`${from} is already at ${to}; nothing to move`)
+    return
+  }
+  if (!fs.existsSync(from)) {
+    debug(`Nothing to move at ${from}`)
+    return
+  }
+  debug(`Moving ${from} to ${to}`)
   fs.rmSync(to, {recursive: true, force: true})
   fs.mkdirSync(path.dirname(to), {recursive: true})
   try {
@@ -426,48 +437,43 @@ function moveDirectory(from: string, to: string): void {
 /**
  * Moves the cache that GitLab restored into the project to cacheDir, outside the project,
  * so the IDE does not see a copy of it in the project during the scan. uploadCache moves it back.
+ * Without useCaches the cache is left to the job configuration.
  */
-export function prepareCaches(cacheDir: string): void {
-  const initialCacheLocation = getInitialCacheLocation()
-  debug(`Initial cache location: ${initialCacheLocation}`)
-  if (path.resolve(initialCacheLocation) == path.resolve(cacheDir)) {
-    debug(
-      `Initial cache location matches cacheDir (${cacheDir}); skipping copy`
-    )
+export function prepareCaches(cacheDir: string, useCaches: boolean): void {
+  if (!useCaches) {
     return
   }
-  if (!fs.existsSync(initialCacheLocation)) {
-    debug(`No cache at location: ${initialCacheLocation}`)
-    return
-  }
-  debug(`Moving cache from ${initialCacheLocation} to ${cacheDir}`)
-  moveDirectory(initialCacheLocation, cacheDir)
+  moveDirectory(getInitialCacheLocation(), cacheDir)
 }
 
 /**
- * Moves the cache back into the project for GitLab to save. It runs whatever the scan result:
- * prepareCaches moved the restored cache away, so not moving it back would leave the project without a cache.
+ * Moves the cache back into the project for GitLab to save. Runs after a successful scan
+ * or a scan that failed the quality gate; after other failures discardCache runs instead.
  */
 export function uploadCache(cacheDir: string, useCaches: boolean): void {
   if (!useCaches) {
     return
   }
   try {
-    const initialCacheLocation = getInitialCacheLocation()
-    if (path.resolve(initialCacheLocation) == path.resolve(cacheDir)) {
-      debug(
-        `Initial cache location matches cacheDir (${cacheDir}); skipping upload`
-      )
-      return
-    }
-    if (!fs.existsSync(cacheDir)) {
-      debug(`No cache at ${cacheDir}; skipping upload`)
-      return
-    }
-    debug(`Moving cache from ${cacheDir} to ${initialCacheLocation}`)
-    moveDirectory(cacheDir, initialCacheLocation)
+    moveDirectory(cacheDir, getInitialCacheLocation())
   } catch (e) {
     console.error(`Failed to upload cache: ${(e as Error).message}`)
+  }
+}
+
+/**
+ * Removes the cache after a failed run, so GitLab does not save a cache the failure may have left incomplete.
+ * If path does not exists GitLab keeps the previously saved cache instead of uploading corrupted one.
+ */
+export function discardCache(cacheDir: string, useCaches: boolean): void {
+  if (!useCaches) {
+    return
+  }
+  try {
+    debug(`Removing cache at ${cacheDir}`)
+    fs.rmSync(cacheDir, {recursive: true, force: true})
+  } catch (e) {
+    console.error(`Failed to remove cache: ${(e as Error).message}`)
   }
 }
 
@@ -479,9 +485,8 @@ export function uploadArtifacts(resultsDir: string): void {
       console.warn('CI_PROJECT_DIR is not defined, skipping artifacts upload')
       return
     }
-    const resultsArtifactPath = path.join(ciProjectDir, resultDir)
-    debug(`Copying artifacts from ${resultsDir} to ${resultsArtifactPath}`)
-    fs.cpSync(resultsDir, resultsArtifactPath, {recursive: true})
+    // QODANA_RESULTS_DIR may be relative to the project or absolute
+    moveDirectory(resultsDir, path.resolve(ciProjectDir, resultDir))
   } catch (e) {
     console.error(`Failed to upload artifacts: ${(e as Error).message}`)
   }

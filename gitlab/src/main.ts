@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import {
+  discardCache,
   getInputs,
   prepareAgent,
   prepareCaches,
@@ -22,13 +23,11 @@ function setFailed(message: string, exitCode: number): void {
 }
 
 async function main(): Promise<void> {
-  let restoreCache = (): void => {}
+  const inputs = getInputs()
   try {
-    const inputs = getInputs()
     fs.mkdirSync(inputs.resultsDir, {recursive: true})
     fs.mkdirSync(inputs.cacheDir, {recursive: true})
-    prepareCaches(inputs.cacheDir)
-    restoreCache = () => uploadCache(inputs.cacheDir, inputs.useCaches)
+    prepareCaches(inputs.cacheDir, inputs.useCaches)
     await prepareAgent(inputs.nightlyVersion, inputs.useInstalledCli)
 
     const exitCode = (await qodanaScan()) as QodanaExitCode
@@ -45,7 +44,13 @@ async function main(): Promise<void> {
       pushQuickFixes(inputs.pushFixes, inputs.commitMessage)
     ])
 
-    restoreCache()
+    // after pushQuickFixes, which commits everything in the project;
+    // a failed quality gate still means a complete scan, so its cache is kept
+    if (isExecutionSuccessful(exitCode)) {
+      uploadCache(inputs.cacheDir, inputs.useCaches)
+    } else {
+      discardCache(inputs.cacheDir, inputs.useCaches)
+    }
     uploadArtifacts(inputs.resultsDir)
     if (!isExecutionSuccessful(exitCode)) {
       setFailed(`qodana scan failed with exit code ${exitCode}`, exitCode)
@@ -53,10 +58,12 @@ async function main(): Promise<void> {
       setFailed(FAIL_THRESHOLD_OUTPUT, exitCode)
     }
   } catch (error) {
-    // the cache was moved out of the project, so it goes back even when the job fails
-    restoreCache()
+    // uphold contract: if we manage cache, if we sure cahces are correct - keep them, if they are not sure -
+    // don't upload them by removing the directory where GitLab expects caches
+    discardCache(inputs.cacheDir, inputs.useCaches)
     setFailed((error as Error).message, 1)
   }
 }
 
-void main()
+// getInputs fails on invalid inputs, before there is a cache to handle
+main().catch((error: Error) => setFailed(error.message, 1))
