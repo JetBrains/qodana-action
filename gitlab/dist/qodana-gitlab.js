@@ -52040,6 +52040,7 @@ var require_utils5 = __commonJS({
     exports2.qodanaScan = qodanaScan;
     exports2.prepareCaches = prepareCaches;
     exports2.uploadCache = uploadCache;
+    exports2.discardCache = discardCache;
     exports2.uploadArtifacts = uploadArtifacts;
     exports2.getWorkflowRunUrl = getWorkflowRunUrl;
     exports2.postResultsToPRComments = postResultsToPRComments;
@@ -52084,9 +52085,10 @@ var require_utils5 = __commonJS({
       cachedInputs = {
         args: argList,
         envVarsToLinter: (0, qodana_12.parseEnvVarNames)(getQodanaStringArg("ENV_VARS_TO_LINTER", "")),
-        // user given results and cache dirs are used in uploadCache, prepareCaches and uploadArtifacts
-        resultsDir: `${baseDir()}/results`,
-        cacheDir: `${baseDir()}/cache`,
+        // locations used during the scan; the user given results and cache dirs (QODANA_RESULTS_DIR, QODANA_CACHE_DIR)
+        // are the project paths used in uploadCache, prepareCaches and uploadArtifacts
+        resultsDir: getQodanaStringArg("SCAN_RESULTS_DIR", `${baseDir()}/results`),
+        cacheDir: getQodanaStringArg("SCAN_CACHE_DIR", `${baseDir()}/cache`),
         uploadResult: getQodanaBooleanArg("UPLOAD_RESULT", false),
         prMode: getQodanaBooleanArg("MR_MODE", true),
         pushFixes,
@@ -52372,6 +52374,15 @@ Stderr: ${result.stderr}`);
     }
     __name(getInitialCacheLocation, "getInitialCacheLocation");
     function moveDirectory(from, to) {
+      if (path_1.default.resolve(from) == path_1.default.resolve(to)) {
+        debug(`${from} is already at ${to}; nothing to move`);
+        return;
+      }
+      if (!fs4.existsSync(from)) {
+        debug(`Nothing to move at ${from}`);
+        return;
+      }
+      debug(`Moving ${from} to ${to}`);
       fs4.rmSync(to, { recursive: true, force: true });
       fs4.mkdirSync(path_1.default.dirname(to), { recursive: true });
       try {
@@ -52386,19 +52397,11 @@ Stderr: ${result.stderr}`);
       }
     }
     __name(moveDirectory, "moveDirectory");
-    function prepareCaches(cacheDir) {
-      const initialCacheLocation = getInitialCacheLocation();
-      debug(`Initial cache location: ${initialCacheLocation}`);
-      if (path_1.default.resolve(initialCacheLocation) == path_1.default.resolve(cacheDir)) {
-        debug(`Initial cache location matches cacheDir (${cacheDir}); skipping copy`);
+    function prepareCaches(cacheDir, useCaches) {
+      if (!useCaches) {
         return;
       }
-      if (!fs4.existsSync(initialCacheLocation)) {
-        debug(`No cache at location: ${initialCacheLocation}`);
-        return;
-      }
-      debug(`Moving cache from ${initialCacheLocation} to ${cacheDir}`);
-      moveDirectory(initialCacheLocation, cacheDir);
+      moveDirectory(getInitialCacheLocation(), cacheDir);
     }
     __name(prepareCaches, "prepareCaches");
     function uploadCache(cacheDir, useCaches) {
@@ -52406,22 +52409,24 @@ Stderr: ${result.stderr}`);
         return;
       }
       try {
-        const initialCacheLocation = getInitialCacheLocation();
-        if (path_1.default.resolve(initialCacheLocation) == path_1.default.resolve(cacheDir)) {
-          debug(`Initial cache location matches cacheDir (${cacheDir}); skipping upload`);
-          return;
-        }
-        if (!fs4.existsSync(cacheDir)) {
-          debug(`No cache at ${cacheDir}; skipping upload`);
-          return;
-        }
-        debug(`Moving cache from ${cacheDir} to ${initialCacheLocation}`);
-        moveDirectory(cacheDir, initialCacheLocation);
+        moveDirectory(cacheDir, getInitialCacheLocation());
       } catch (e) {
         console.error(`Failed to upload cache: ${e.message}`);
       }
     }
     __name(uploadCache, "uploadCache");
+    function discardCache(cacheDir, useCaches) {
+      if (!useCaches) {
+        return;
+      }
+      try {
+        debug(`Removing cache at ${cacheDir}`);
+        fs4.rmSync(cacheDir, { recursive: true, force: true });
+      } catch (e) {
+        console.error(`Failed to remove cache: ${e.message}`);
+      }
+    }
+    __name(discardCache, "discardCache");
     function uploadArtifacts(resultsDir) {
       try {
         const resultDir = getQodanaStringArg("RESULTS_DIR", ".qodana/results");
@@ -52430,9 +52435,7 @@ Stderr: ${result.stderr}`);
           console.warn("CI_PROJECT_DIR is not defined, skipping artifacts upload");
           return;
         }
-        const resultsArtifactPath = path_1.default.join(ciProjectDir, resultDir);
-        debug(`Copying artifacts from ${resultsDir} to ${resultsArtifactPath}`);
-        fs4.cpSync(resultsDir, resultsArtifactPath, { recursive: true });
+        moveDirectory(resultsDir, path_1.default.resolve(ciProjectDir, resultDir));
       } catch (e) {
         console.error(`Failed to upload artifacts: ${e.message}`);
       }
@@ -52688,21 +52691,22 @@ function setFailed(message, exitCode) {
 __name(setFailed, "setFailed");
 function main() {
   return __awaiter(this, void 0, void 0, function* () {
-    let restoreCache = /* @__PURE__ */ __name(() => {
-    }, "restoreCache");
+    const inputs = (0, utils_1.getInputs)();
     try {
-      const inputs = (0, utils_1.getInputs)();
       fs3.mkdirSync(inputs.resultsDir, { recursive: true });
       fs3.mkdirSync(inputs.cacheDir, { recursive: true });
-      (0, utils_1.prepareCaches)(inputs.cacheDir);
-      restoreCache = /* @__PURE__ */ __name(() => (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches), "restoreCache");
+      (0, utils_1.prepareCaches)(inputs.cacheDir, inputs.useCaches);
       yield (0, utils_1.prepareAgent)(inputs.nightlyVersion, inputs.useInstalledCli);
       const exitCode = yield (0, utils_1.qodanaScan)();
       yield Promise.all([
         (0, output_1.publishOutput)((0, qodana_1.extractArg)("-i", "--project-dir", inputs.args), (0, qodana_1.extractArg)("-d", "--source-directory", inputs.args), inputs.resultsDir, inputs.postComment, inputs.prMode, (0, qodana_1.isExecutionSuccessful)(exitCode)),
         (0, utils_1.pushQuickFixes)(inputs.pushFixes, inputs.commitMessage)
       ]);
-      restoreCache();
+      if ((0, qodana_1.isExecutionSuccessful)(exitCode)) {
+        (0, utils_1.uploadCache)(inputs.cacheDir, inputs.useCaches);
+      } else {
+        (0, utils_1.discardCache)(inputs.cacheDir, inputs.useCaches);
+      }
       (0, utils_1.uploadArtifacts)(inputs.resultsDir);
       if (!(0, qodana_1.isExecutionSuccessful)(exitCode)) {
         setFailed(`qodana scan failed with exit code ${exitCode}`, exitCode);
@@ -52710,13 +52714,13 @@ function main() {
         setFailed(qodana_1.FAIL_THRESHOLD_OUTPUT, exitCode);
       }
     } catch (error) {
-      restoreCache();
+      (0, utils_1.discardCache)(inputs.cacheDir, inputs.useCaches);
       setFailed(error.message, 1);
     }
   });
 }
 __name(main, "main");
-void main();
+main().catch((error) => setFailed(error.message, 1));
 /*! Bundled license information:
 
 mime-db/index.js:
