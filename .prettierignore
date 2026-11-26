@@ -1,0 +1,4 @@
+# Committed bundles: never reformat them, even when Prettier runs on all files.
+# node_modules and everything in .gitignore are ignored by default: https://prettier.io/docs/ignore
+**/dist/
+vsts/QodanaScan/

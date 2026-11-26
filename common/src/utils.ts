@@ -70,8 +70,9 @@ export function gitExtraHeaderEnv(
 export type DeprecationWarningCallback = (message: string) => void
 
 // Settable callback for platform-specific warning output
-let deprecationWarningCallback: DeprecationWarningCallback = (message: string) =>
-  console.warn(message)
+let deprecationWarningCallback: DeprecationWarningCallback = (
+  message: string
+) => console.warn(message)
 
 /**
  * Sets the callback function for deprecation warnings.
@@ -208,10 +209,7 @@ function parseCommaSeparated(rawArgs: string): string[] {
 /**
  * Shows deprecation warning for comma-separated format with suggested fix.
  */
-function warnDeprecatedCommaFormat(
-  original: string,
-  parsed: string[]
-): void {
+function warnDeprecatedCommaFormat(original: string, parsed: string[]): void {
   const suggestedStr = parsed
     .map(arg => (arg.includes(' ') ? `"${arg}"` : arg))
     .join(' ')

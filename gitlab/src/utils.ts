@@ -16,17 +16,17 @@ import {
   PULL_REQUEST,
   PushFixesType,
   sha256sum,
-  validateBranchName
-} from '../../common/qodana'
-import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
-import {
+  validateBranchName,
+  COMMIT_EMAIL,
+  COMMIT_USER,
+  getCommentTag,
   gitExtraHeaderEnv,
   isMergeCommit,
   MERGE_COMMIT_PARENTS_ARGS,
   MERGE_COMMIT_PR_WARNING,
   parseRawArguments,
   setDeprecationWarningCallback
-} from '../../common/utils'
+} from '@qodana/ci-common'
 import {getGitlabApi} from './gitlabApiProvider'
 import {prFixesBody} from './output'
 import {DiscussionSchema} from '@gitbeaker/rest'

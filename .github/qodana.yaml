@@ -11,12 +11,11 @@ exclude:
       - scan/node_modules/
       - vsts/node_modules/
       - scan/jest.config.js
-      - common/lib
-      - scan/lib
       - scan/dist
       - scan/__tests__
-      - vsts/lib
       - vsts/QodanaScan
+      - gitlab/node_modules/
+      - gitlab/dist
       - build.gradle.kts
       - settings.gradle.kts
 include:

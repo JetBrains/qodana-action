@@ -3,22 +3,17 @@
 # Detect what's staged so we only run the relevant steps.
 staged="$(git diff --cached --name-only --diff-filter=ACMR)"
 
-# 1. Build first. `npm run lint` is type-aware (@typescript-eslint) and cross-workspace
-#    imports need .d.ts output from `tsc -b`. Without a fresh build, lint can give
-#    false errors
-echo "$staged" | grep -qE '^(common|scan|vsts|gitlab)/.*\.ts$' && npm run build
+# 1. Type-check all workspaces: they import common's sources, so a change in common
+#    can break any of them.
+echo "$staged" | grep -qE '^(common|scan|vsts|gitlab)/.*\.ts$' && npm run typecheck
 
-# 2. Lint only workspaces whose .ts files changed. Each workspace's lint script
-#    runs prettier --write + eslint --fix over its own **/*.ts
-echo "$staged" | grep -qE '^common/.*\.ts$' && npm run -w common lint
-echo "$staged" | grep -qE '^scan/.*\.ts$'   && npm run -w scan   lint
-echo "$staged" | grep -qE '^vsts/.*\.ts$'   && npm run -w vsts   lint
-echo "$staged" | grep -qE '^gitlab/.*\.ts$' && npm run -w gitlab lint
+# 2. Lint: prettier --write + eslint --fix over all workspaces
+echo "$staged" | grep -qE '^(common|scan|vsts|gitlab)/.*\.ts$' && npm run lint
 
-# 3. Repackage bundles whose sources changed.
-echo "$staged" | grep -qE '^scan/src/'             && npm run -w scan   package
-echo "$staged" | grep -qE '^vsts/src/'             && npm run -w vsts   package
-echo "$staged" | grep -qE '^(common|gitlab)/src/'  && npm run -w gitlab package
+# 3. Repackage bundles whose sources changed. Every bundle includes common (sources and cli.json).
+echo "$staged" | grep -qE '^(common/src/|common/cli\.json$|scan/src/)'   && npm run -w scan   package
+echo "$staged" | grep -qE '^(common/src/|common/cli\.json$|vsts/src/)'   && npm run -w vsts   package
+echo "$staged" | grep -qE '^(common/src/|common/cli\.json$|gitlab/src/)' && npm run -w gitlab package
 
 # 4. Restage exactly what we may have touched:
 #    - the dist/ directories that esbuild just wrote

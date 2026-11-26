@@ -15,22 +15,30 @@
  */
 
 import {expect, test, describe, beforeEach} from '@jest/globals'
-import {getCoverageFromSarif, getNativeModePrefix, getNightlyTag, getSanityProblemsCount, parseEnvVarNames, QODANA_OPEN_IN_IDE_NAME, QODANA_REPORT_URL_NAME} from "../qodana";
 import {
-  getCoverageStats,
-  getReportURL, parseSarif
-} from '../output'
+  getCoverageFromSarif,
+  getNativeModePrefix,
+  getNightlyTag,
+  getSanityProblemsCount,
+  parseEnvVarNames,
+  QODANA_OPEN_IN_IDE_NAME,
+  QODANA_REPORT_URL_NAME
+} from '../src/qodana'
+import {getCoverageStats, getReportURL, parseSarif} from '../src/output'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import {outputEmptyFixture, problemDescriptorsDefaultFixture} from './common.test.utils'
+import {
+  outputEmptyFixture,
+  problemDescriptorsDefaultFixture
+} from './common.test.utils'
 import {
   gitExtraHeaderEnv,
   isMergeCommit,
   MERGE_COMMIT_PARENTS_ARGS,
   parseRawArguments,
   setDeprecationWarningCallback
-} from '../utils'
+} from '../src/utils'
 
 test('test passed coverage output using diff', () => {
   const result = getCoverageStats(
@@ -68,7 +76,7 @@ test('test sarif with problems to output annotations', () => {
   const output = problemDescriptorsDefaultFixture()
   const result = parseSarif(
     '__tests__/data/some.sarif.json',
-    "This is a test help string"
+    'This is a test help string'
   )
   expect(result.problemDescriptions).toEqual(output)
 })
@@ -77,7 +85,7 @@ test('test sarif with problems and baseline to output annotations', () => {
   const output = problemDescriptorsDefaultFixture()
   const result = parseSarif(
     '__tests__/data/with.baseline.sarif.json',
-    "This is a test help string"
+    'This is a test help string'
   )
   expect(result.problemDescriptions).toEqual(output)
 })
@@ -86,7 +94,7 @@ test('test sarif with no problems to output annotations', () => {
   const output = outputEmptyFixture()
   const result = parseSarif(
     '__tests__/data/empty.sarif.json',
-    "This is a test help string"
+    'This is a test help string'
   )
   expect(result.problemDescriptions).toEqual(output)
 })
@@ -100,7 +108,9 @@ test('test sanity problems count from sarif without sanity results', () => {
 })
 
 test('test sanity problems count from missing sarif file', () => {
-  expect(getSanityProblemsCount('__tests__/data/does.not.exist.json')).toEqual(0)
+  expect(getSanityProblemsCount('__tests__/data/does.not.exist.json')).toEqual(
+    0
+  )
 })
 
 describe('getReportURL', () => {
@@ -209,7 +219,9 @@ describe('getNativeModePrefix', () => {
   })
 
   test('returns native-true- when --within-docker false is present', () => {
-    expect(getNativeModePrefix(['--within-docker', 'false'])).toBe('native-true-')
+    expect(getNativeModePrefix(['--within-docker', 'false'])).toBe(
+      'native-true-'
+    )
   })
 })
 
@@ -278,7 +290,9 @@ describe('parseRawArguments', () => {
     })
 
     test('single argument', () => {
-      expect(parseRawArguments('--print-problems')).toEqual(['--print-problems'])
+      expect(parseRawArguments('--print-problems')).toEqual([
+        '--print-problems'
+      ])
     })
 
     test('basic flags with values', () => {
@@ -318,9 +332,12 @@ describe('parseRawArguments', () => {
     })
 
     test('multiple properties', () => {
-      expect(
-        parseRawArguments('--property a=1 --property b=2')
-      ).toEqual(['--property', 'a=1', '--property', 'b=2'])
+      expect(parseRawArguments('--property a=1 --property b=2')).toEqual([
+        '--property',
+        'a=1',
+        '--property',
+        'b=2'
+      ])
     })
 
     test('complex real-world example', () => {
@@ -389,7 +406,7 @@ describe('parseRawArguments', () => {
     })
 
     test('mixed quotes - single containing double', () => {
-      expect(parseRawArguments("--msg 'say \"hello\"'")).toEqual([
+      expect(parseRawArguments('--msg \'say "hello"\'')).toEqual([
         '--msg',
         'say "hello"'
       ])
@@ -414,9 +431,9 @@ describe('parseRawArguments', () => {
     })
 
     test('multiple quoted arguments', () => {
-      expect(
-        parseRawArguments('--first "arg one" --second "arg two"')
-      ).toEqual(['--first', 'arg one', '--second', 'arg two'])
+      expect(parseRawArguments('--first "arg one" --second "arg two"')).toEqual(
+        ['--first', 'arg one', '--second', 'arg two']
+      )
     })
   })
 

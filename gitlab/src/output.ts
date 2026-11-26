@@ -4,15 +4,13 @@ import {
   getReportURL,
   getSummary,
   parseSarif,
-  QODANA_CHECK_NAME
-} from '../../common/output'
-import {
+  QODANA_CHECK_NAME,
   getCoverageFromSarif,
   getSanityProblemsCount,
   QODANA_SARIF_NAME,
   QODANA_SHORT_SARIF_NAME,
   VERSION
-} from '../../common/qodana'
+} from '@qodana/ci-common'
 import {getWorkflowRunUrl, postResultsToPRComments} from './utils'
 
 export const DEPENDENCY_CHARS_LIMIT = 65336 // 65,336 chars is the GitLab limit for a comment

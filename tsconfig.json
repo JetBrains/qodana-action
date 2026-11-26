@@ -1,8 +1,0 @@
-{
-  "references": [
-    { "path": "common" },
-    { "path": "scan" },
-    { "path": "vsts" }
-  ],
-  "files": []
-}

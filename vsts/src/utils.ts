@@ -27,17 +27,7 @@ import {
   MERGE_COMMIT_PARENTS_ARGS,
   MERGE_COMMIT_PR_WARNING,
   parseRawArguments,
-  setDeprecationWarningCallback
-} from '../../common/utils'
-
-// Set up platform-specific deprecation warning callback for Azure Pipelines
-setDeprecationWarningCallback((message: string) => {
-  tl.warning(message)
-})
-
-let cachedInputs: Inputs | null = null
-
-import {
+  setDeprecationWarningCallback,
   BRANCH,
   compressFolder,
   ENV_VARS_TO_LINTER_NATIVE_WARNING,
@@ -59,9 +49,19 @@ import {
   sha256sum,
   validateBranchName,
   VERSION,
-  isPullSkipped
-} from '../../common/qodana'
-import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
+  isPullSkipped,
+  COMMIT_EMAIL,
+  COMMIT_USER,
+  getCommentTag
+} from '@qodana/ci-common'
+
+// Set up platform-specific deprecation warning callback for Azure Pipelines
+setDeprecationWarningCallback((message: string) => {
+  tl.warning(message)
+})
+
+let cachedInputs: Inputs | null = null
+
 import {getGitApi} from './gitApiProvider'
 import {prFixesBody} from './output'
 
@@ -403,7 +403,7 @@ async function gitOutput(
     collectionUrl.username = ''
     collectionUrl.password = ''
     // pass the token via environment: command line arguments are logged and visible to other processes
-    const env = options.env ?? (process.env as Record<string, string>)
+    const env = options.env ?? process.env
     options.env = {
       ...env,
       ...gitExtraHeaderEnv(

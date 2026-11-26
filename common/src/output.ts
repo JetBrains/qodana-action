@@ -19,9 +19,10 @@ import {
   QODANA_LICENSES_JSON,
   QODANA_LICENSES_MD,
   QODANA_OPEN_IN_IDE_NAME,
-  QODANA_REPORT_URL_NAME, VERSION,
-} from "./qodana";
-import * as fs from "fs";
+  QODANA_REPORT_URL_NAME,
+  VERSION
+} from './qodana'
+import * as fs from 'fs'
 import type {Log, Result} from 'sarif'
 import {parseRules, Rule} from './utils'
 
@@ -61,7 +62,7 @@ export interface LicenseEntry {
 }
 
 export interface LicenseInfo {
-  licenses: string,
+  licenses: string
   packages: number
 }
 
@@ -138,7 +139,7 @@ ${message}
 function makeConclusion(
   conclusion: string,
   failedByThreshold: boolean,
-  useDiffBlock: boolean,
+  useDiffBlock: boolean
 ): string {
   if (useDiffBlock) {
     return failedByThreshold ? `- ${conclusion}` : `+ ${conclusion}`
@@ -168,7 +169,7 @@ ${makeConclusion(conclusion, c.freshCoverage < c.freshCoverageThreshold, useDiff
 ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`
   }
 
-  const coverageBlock =  [
+  const coverageBlock = [
     `@@ Code coverage @@`,
     `${stats}`,
     `# Calculated according to the filters of your coverage tool`
@@ -176,9 +177,7 @@ ${c.freshLines} lines analyzed, ${c.freshCoveredLines} lines covered`
   return useDiffBlock ? wrapToDiffBlock(coverageBlock) : coverageBlock
 }
 
-export function getLicenseInfo(
-  resultsDir: string,
-): LicenseInfo {
+export function getLicenseInfo(resultsDir: string): LicenseInfo {
   let licensesInfo = ''
   let packages = 0
   const licensesJson = `${resultsDir}/projectStructure/${QODANA_LICENSES_JSON}`
@@ -194,7 +193,7 @@ export function getLicenseInfo(
       )
     }
   }
-  return { licenses: licensesInfo, packages: packages }
+  return {licenses: licensesInfo, packages: packages}
 }
 
 export function getReportURL(resultsDir: string): string {
@@ -222,14 +221,14 @@ ${body}
 </details>`
 }
 
-function getViewReportText(reportUrl: string, viewReportOptions: string): string {
+function getViewReportText(
+  reportUrl: string,
+  viewReportOptions: string
+): string {
   if (reportUrl !== '') {
     return `☁️ [View the detailed Qodana report](${reportUrl})`
   }
-  return wrapToToggleBlock(
-    'View the detailed Qodana report',
-    viewReportOptions
-  )
+  return wrapToToggleBlock('View the detailed Qodana report', viewReportOptions)
 }
 
 /**
@@ -237,7 +236,10 @@ function getViewReportText(reportUrl: string, viewReportOptions: string): string
  * @param annotations The annotations to generate the table row from.
  * @param level The level to generate the table row for.
  */
-function getRowsByLevel(annotations: ProblemDescriptor[], level: string): string {
+function getRowsByLevel(
+  annotations: ProblemDescriptor[],
+  level: string
+): string {
   const problems = annotations.reduce(
     (map: Map<string, number>, e) =>
       map.set(

@@ -1,5 +1,5 @@
 import {expect, test} from '@jest/globals'
-import {getSummary} from '../../common/output'
+import {getSummary} from '@qodana/ci-common'
 import {DEPENDENCY_CHARS_LIMIT, VIEW_REPORT_OPTIONS} from '../src/output'
 import {isSarifArtifactNameSupported} from '../src/utils'
 import {
