@@ -1,6 +1,7 @@
 {
   "name": "@qodana/ci",
   "version": "1.0.0",
+  "private": true,
   "description": "Common code for Qodana Scan GitHub action and Qodana Azure Pipelines extension.",
   "license": "Apache-2.0",
   "repository": {
@@ -21,12 +22,8 @@
       "url": "https://github.com/tiulpin"
     },
     {
-      "name": "Anastasia Kuznetsova",
-      "url": "https://github.com/a-kuznetsova"
-    },
-    {
-      "name": "Anton Monakov",
-      "url": "https://github.com/zeitgen"
+      "name": "Andrei Iurko",
+      "url": "https://github.com/AndreiIurko"
     }
   ],
   "workspaces": [
@@ -36,18 +33,18 @@
     "gitlab"
   ],
   "devDependencies": {
-    "@types/shell-quote": "^1.7.5",
+    "@jest/globals": "^30.3.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.5.2",
     "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "esbuild": "0.28.0",
     "eslint": "^8.57.1",
     "eslint-plugin-jest": "^29.15.1",
-    "eslint-plugin-prettier": "^5.5.5",
     "husky": "^9.1.7",
+    "jest": "^30.3.0",
     "prettier": "3.8.1",
-    "prettier-eslint": "^16.4.2",
-    "ts-node": "^10.9.2",
+    "ts-jest": "^29.4.9",
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "shell-quote": "^1.12.0"
   }
 }

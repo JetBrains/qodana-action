@@ -10120,7 +10120,7 @@ async function getLatestNightlyTag() {
 }
 async function getNightlyTag(nightlyVersion) {
   if (!nightlyVersion) return "";
-  let version2 = nightlyVersion === "latest" ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`;
+  const version2 = nightlyVersion === "latest" ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`;
   if (!/^v\d{4}\.\d+-nightly$/.test(version2)) {
     throw Error(`Invalid nightly version: ${nightlyVersion}`);
   }
@@ -10155,9 +10155,9 @@ function isNativeMode(args) {
   if (args.includes("--ide") || args.includes("--within-docker=false")) {
     return true;
   }
-  let index = args.findIndex((arg) => arg == "--within-docker");
+  const index = args.findIndex((arg) => arg == "--within-docker");
   if (index == -1) return false;
-  let nextIndex = index + 1;
+  const nextIndex = index + 1;
   return args.length > nextIndex && args[nextIndex] == "false";
 }
 function isPullSkipped(args) {

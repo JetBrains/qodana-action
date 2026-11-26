@@ -92,10 +92,10 @@ async function getLatestNightlyTag(): Promise<string> {
       `Could not resolve latest qodana-cli release: ${util.inspect(response)}`
     )
   }
-  const releases = (await response.json()) as Array<{
+  const releases = (await response.json()) as {
     tag_name: string
     prerelease: boolean
-  }>
+  }[]
   const nightlyRelease = releases.find(r => r.tag_name.endsWith('-nightly'))
   if (nightlyRelease?.tag_name) {
     return nightlyRelease.tag_name
@@ -112,7 +112,7 @@ async function getLatestNightlyTag(): Promise<string> {
  */
 export async function getNightlyTag(nightlyVersion: string): Promise<string> {
   if (!nightlyVersion) return ''
-  let version = nightlyVersion === 'latest' ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`
+  const version = nightlyVersion === 'latest' ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`
   // the tag becomes a part of the download URL path, and nightly binaries are not checksum-verified
   if (!/^v\d{4}\.\d+-nightly$/.test(version)) {
     throw Error(`Invalid nightly version: ${nightlyVersion}`)
@@ -181,10 +181,10 @@ export function isNativeMode(args: string[]): boolean {
     return true
   }
 
-  let index = args.findIndex(arg => arg =='--within-docker')
+  const index = args.findIndex(arg => arg =='--within-docker')
 
   if (index == -1) return false
-  let nextIndex = index + 1
+  const nextIndex = index + 1
 
   return args.length > nextIndex && args[nextIndex] == 'false';
 }
@@ -292,8 +292,8 @@ export function parseEnvVarNames(rawNames: string): string[] {
 export const NONE = 'none'
 export const BRANCH = 'branch'
 export const PULL_REQUEST = 'pull-request'
-const PUSH_FIXES_TYPES = [NONE, BRANCH, PULL_REQUEST]
-export type PushFixesType = (typeof PUSH_FIXES_TYPES)[number]
+// Any string: the platforms pass the raw input value without checking it against the values above.
+export type PushFixesType = string
 
 /**
  * The context of the current run – described in action.yaml.
@@ -337,6 +337,31 @@ export interface Coverage {
 }
 
 /**
+ * The part of a Qodana SARIF file read by getCoverageFromSarif and getSanityProblemsCount.
+ */
+interface QodanaSarif {
+  runs: {
+    properties: {
+      coverage?: {
+        totalCoverage?: number
+        totalLines?: number
+        totalCoveredLines?: number
+        freshCoverage?: number
+        freshLines?: number
+        freshCoveredLines?: number
+      }
+      qodanaFailureConditions?: {
+        testCoverageThresholds?: {
+          totalCoverage?: number
+          freshCoverage?: number
+        }
+      }
+      'qodana.sanity.results'?: unknown[]
+    }
+  }[]
+}
+
+/**
  * Read the coverage information from the SARIF file.
  * @param sarifPath the path to the SARIF file.
  */
@@ -344,7 +369,7 @@ export function getCoverageFromSarif(sarifPath: string): Coverage {
   if (fs.existsSync(sarifPath)) {
     const sarifContents = JSON.parse(
       fs.readFileSync(sarifPath, {encoding: 'utf8'})
-    )
+    ) as QodanaSarif
     if (sarifContents.runs[0].properties['coverage']) {
       return {
         totalCoverage:
@@ -394,7 +419,7 @@ export function getSanityProblemsCount(sarifPath: string): number {
   if (fs.existsSync(sarifPath)) {
     const sarifContents = JSON.parse(
       fs.readFileSync(sarifPath, {encoding: 'utf8'})
-    )
+    ) as QodanaSarif
     return (
       sarifContents.runs?.[0]?.properties?.['qodana.sanity.results']?.length ?? 0
     )
