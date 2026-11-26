@@ -7,34 +7,6 @@ permissions:
   contents: write
 
 jobs:
-  gradle:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Extract version from tag
-        id: extract_version
-        run: |
-          TAG_NAME=${GITHUB_REF##*/}
-          PATCH_VERSION=$(echo $TAG_NAME | sed -r 's/[^0-9]*([0-9]*)\.([0-9]*)\.([0-9]*)(-.*)?/\3/')
-          echo "PATCH_VERSION=${PATCH_VERSION}" >> $GITHUB_ENV
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: zulu
-          java-version: 11
-          cache: gradle
-      - name: Run linters and test
-        run: ./gradlew clean :plugin:build :plugin:publishPlugins -Pgradle.publish.key="$GRADLE_KEY" -Pgradle.publish.secret="$GRADLE_TOKEN" -PbuildNumber="$PATCH_VERSION"
-        env:
-          GRADLE_KEY: ${{ secrets.GRADLE_KEY }}
-          GRADLE_TOKEN: ${{ secrets.GRADLE_TOKEN }}
-      - name: Publish JAR to Space
-        run: ./gradlew :plugin:publish -PbuildNumber="$PATCH_VERSION"
-        env:
-          JB_SPACE_INTELLIJ_CLIENT_ID: ${{ secrets.MAVEN_SPACE_USERNAME }}
-          JB_SPACE_INTELLIJ_CLIENT_SECRET: ${{ secrets.MAVEN_SPACE_PASSWORD }}
   github:
     runs-on: ubuntu-latest
     steps:
@@ -44,79 +16,6 @@ jobs:
           persist-credentials: false
       - run: |
           ./changelog.sh > changelog.md
-          gh release create ${GITHUB_REF##*/} -F changelog.md
+          gh release create ${GITHUB_REF##*/} -F changelog.md --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  azure:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - name: Set Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .node-version
-          cache: npm
-      - name: Install dependencies
-        run: cd vsts && npm install && cd QodanaScan && npm install && npm i -g tfx-cli
-      - name: Package and publish
-        run: |
-          cd vsts && npm run azure
-          mv JetBrains.qodana-*.vsix qodana.vsix
-          tfx extension publish --publisher JetBrains --vsix qodana.vsix -t $AZURE_TOKEN
-        env:
-          AZURE_TOKEN: ${{ secrets.AZURE_TOKEN }}
-
-  maven:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Extract version from tag
-        run: |
-          TAG_NAME=${GITHUB_REF##*/}
-          VERSION=$(echo $TAG_NAME | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: zulu
-          java-version: 17
-          cache: maven
-
-      - name: Import GPG key
-        run: |
-          printf '%s\n' "$GPG_PRIVATE_KEY" | gpg --batch --import
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          gpgconf --reload gpg-agent
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-
-      - name: Configure Maven settings
-        run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml << 'EOF'
-          <settings>
-            <servers>
-              <server>
-                <id>central</id>
-                <username>${env.MAVEN_CENTRAL_USERNAME}</username>
-                <password>${env.MAVEN_CENTRAL_PASSWORD}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
-
-      - name: Update version and publish
-        run: |
-          cd maven
-          mvn versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
-          mvn clean deploy -Prelease -DskipTests -Dgpg.passphrase="$GPG_PASSPHRASE"
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
