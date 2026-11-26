@@ -8,7 +8,7 @@
     "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
     "test": "jest --config jest.config.js",
     "bump-dev": "jq '.version |= (split(\".\") | .[2] = (. [2]| tonumber + 1 | tostring) | join(\".\"))' vss-extension.dev.json > tmp.json && mv tmp.json vss-extension.dev.json\n",
-    "package": "npm run bump-dev && cd QodanaScan && npm ci && cd .. && esbuild lib/main.js --platform=node --bundle --outfile=QodanaScan/index.js --target=node16 --external:shelljs --external:azure-pipelines-task-lib",
+    "package": "npm run bump-dev && cd QodanaScan && npm ci && cd .. && esbuild src/main.ts --platform=node --format=cjs --bundle --outfile=QodanaScan/index.js --target=node16 --external:shelljs --external:azure-pipelines-task-lib",
     "readme": "cp ../.github/md/azure.md README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2022.2/topics/azure-pipelines.md >> README.md && cat ../.github/md/tracker.md >> README.md",
     "azure": "tfx extension create --manifests vss-extension.json",
     "azure-dev": "tfx extension create --manifests vss-extension.dev.json"

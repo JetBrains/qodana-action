@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
     "build": "tsc --build .",
-    "package": "esbuild lib/main.js --platform=node --keep-names --bundle --outfile=dist/qodana-gitlab.js",
+    "package": "esbuild src/main.ts --platform=node --format=cjs --keep-names --bundle --outfile=dist/qodana-gitlab.js",
     "test": "jest --config jest.config.js"
   },
   "repository": {
