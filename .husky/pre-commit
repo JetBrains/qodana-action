@@ -7,12 +7,8 @@ staged="$(git diff --cached --name-only --diff-filter=ACMR)"
 #    can break any of them.
 echo "$staged" | grep -qE '^(common|scan|vsts|gitlab)/.*\.ts$' && npm run typecheck
 
-# 2. Lint only workspaces whose .ts files changed. Each workspace's lint script
-#    runs prettier --write + eslint --fix over its own **/*.ts
-echo "$staged" | grep -qE '^common/.*\.ts$' && npm run -w common lint
-echo "$staged" | grep -qE '^scan/.*\.ts$'   && npm run -w scan   lint
-echo "$staged" | grep -qE '^vsts/.*\.ts$'   && npm run -w vsts   lint
-echo "$staged" | grep -qE '^gitlab/.*\.ts$' && npm run -w gitlab lint
+# 2. Lint: prettier --write + eslint --fix over all workspaces
+echo "$staged" | grep -qE '^(common|scan|vsts|gitlab)/.*\.ts$' && npm run lint
 
 # 3. Repackage bundles whose sources changed. Every bundle includes common (sources and cli.json).
 echo "$staged" | grep -qE '^(common/src/|common/cli\.json$|scan/src/)'   && npm run -w scan   package

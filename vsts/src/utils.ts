@@ -403,7 +403,7 @@ async function gitOutput(
     collectionUrl.username = ''
     collectionUrl.password = ''
     // pass the token via environment: command line arguments are logged and visible to other processes
-    const env = options.env ?? (process.env as Record<string, string>)
+    const env = options.env ?? process.env
     options.env = {
       ...env,
       ...gitExtraHeaderEnv(

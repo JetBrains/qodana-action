@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as core from '@actions/core'
 import {
   getCoverageFromSarif,

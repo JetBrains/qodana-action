@@ -49,6 +49,17 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci && npm run typecheck
+      # Runs before the rebuilds below: `npm run -w vsts package` bumps vsts/vss-extension.dev.json
+      - name: Lint the code
+        run: npm run lint
+      - name: Verify the code is linted and formatted
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::npm run lint changed files. This is normally done by the pre-commit hook (installed automatically via husky's 'prepare' script when you run 'npm install' / 'npm ci'). If you see this in CI, run 'npm ci && npm run lint' locally and commit the result."
+            git status --short
+            git diff
+            exit 1
+          fi
       - name: Rebuild scan/dist/
         run: cd scan && npm run package
       - name: Verify scan/dist/ is up to date
@@ -95,8 +106,8 @@ jobs:
         with:
           name: dist
           path: gitlab/dist/
-      - name: Lint the code
-        run: npm run lint && npm run test
+      - name: Run the tests
+        run: npm run test
 
   test-action:
     runs-on: ${{ matrix.os }}

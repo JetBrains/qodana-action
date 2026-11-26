@@ -5,7 +5,6 @@
   "author": "JetBrains",
   "license": "Apache-2.0",
   "scripts": {
-    "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
     "package": "esbuild src/main.ts --platform=node --format=cjs --keep-names --bundle --outfile=dist/index.js",
     "test": "jest --config jest.config.js",
     "readme": "cp ../.github/md/github.md ../README.md && curl -sS https://raw.githubusercontent.com/JetBrains/Qodana/2026.3/topics/github.md >> ../README.md && cat ../.github/md/tracker.md >> ../README.md"

@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
+const base = require('../jest.config.base')
+
 module.exports = {
-  clearMocks: true,
-  moduleFileExtensions: ['js', 'ts'],
-  testMatch: ['**/*.test.ts'],
-  transform: {
-    '^.+\\.ts$': 'ts-jest'
-  },
-  verbose: false,
-  testTimeout: 400000,
+  ...base,
   collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.ts'],
-  coverageReporters: ['html', ['lcovonly', { projectRoot: '../' }], 'text-summary'],
-  coveragePathIgnorePatterns: ['node_modules', 'src/utils.ts', 'src/main.ts'],
+  coveragePathIgnorePatterns: [
+    ...base.coveragePathIgnorePatterns,
+    'src/utils.ts',
+    'src/main.ts'
+  ]
 }
