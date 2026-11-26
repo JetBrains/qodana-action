@@ -35,57 +35,21 @@ Install all dependencies:
 npm install
 ```
 
-Run everything in all subprojects:
+The TypeScript code lives in npm workspaces: `common` (the `@qodana/ci-common` package shared by the others),
+`scan` (GitHub action), `vsts` (Azure extension) and `gitlab` (GitLab CI component).
+`tsc` only type-checks the code; [esbuild](https://esbuild.github.io/) bundles the sources of each extension into a single file.
+
+Run from the repository root:
 
 ```sh
-npm run all
-```
-
-### GitHub action
-
-`cd` into the project directory
-
-```sh
-cd scan
-```
-
-Build the project:
-
-```sh
-npm run build
-```
-
-Lint your code with [ESLint](https://eslint.org/):
-
-```sh
-npm run lint
+npm run typecheck   # type-check all workspaces, tests included
+npm run lint        # format with Prettier and lint with ESLint
+npm run test        # run the tests of all workspaces
+npm run package     # bundle scan/dist, vsts/QodanaScan and gitlab/dist
+npm run all         # all of the above
 ```
 
 ### Azure extension
-
-`cd` into the project directory:
-
-```sh
-cd vsts
-```
-
-Build the project:
-
-```sh
-npm run build
-```
-
-Lint your code with [ESLint](https://eslint.org/):
-
-```sh
-npm run lint
-```
-
-Run all required commands to check everything locally for the release:
-
-```sh
-npm run all
-```
 
 Update the version – edit the following artifacts:
 
@@ -98,7 +62,7 @@ If you forget to do this, repository tests will fail.
 Test extension packing:
 
 ```sh
-npm run azure-dev
+npm run -w vsts azure-dev
 ```
 
 Also, if you change [vsts/vss-extension.dev.json](vsts/vss-extension.dev.json), release job will automatically publish the test version of an extension. 

@@ -15,8 +15,6 @@ on:
       - 'src/**'
       - '*gradle*'
       - 'plugin/**'
-      - 'common/src/**'
-      - 'common/build.gradle.kts'
 
 permissions:
   contents: read

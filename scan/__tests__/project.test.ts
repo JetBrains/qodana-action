@@ -22,7 +22,7 @@ import {
   VERSION,
   SUPPORTED_PLATFORMS,
   SUPPORTED_ARCHS
-} from '../../common/qodana'
+} from '@qodana/ci-common'
 import * as fs from 'fs'
 
 import path = require('path')

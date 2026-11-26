@@ -14,7 +14,7 @@ import {
   FAIL_THRESHOLD_OUTPUT,
   isExecutionSuccessful,
   QodanaExitCode
-} from '../../common/qodana'
+} from '@qodana/ci-common'
 import {publishOutput} from './output'
 
 function setFailed(message: string, exitCode: number): void {

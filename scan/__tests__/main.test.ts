@@ -19,15 +19,15 @@ import {AnnotationProperties} from '@actions/core'
 import {
   getQodanaScanArgs,
   Inputs,
-  validateBranchName
-} from '../../common/qodana'
+  validateBranchName,
+  getSummary
+} from '@qodana/ci-common'
 import {
   Annotation,
   getGitHubCheckConclusion,
   parseSarif,
   toAnnotationProperties
 } from '../src/annotations'
-import {getSummary} from '../../common/output'
 import {
   annotationsToProblemDescriptors,
   VIEW_REPORT_OPTIONS,

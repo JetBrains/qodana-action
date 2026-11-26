@@ -33676,7 +33676,7 @@ var checksum = {
   linux_x86_64: "dae6d31f481ed15c6c016fd746e907978f0c1437010326fa04a92f13c7c52338"
 };
 
-// ../common/qodana.ts
+// ../common/src/qodana.ts
 var import_crypto = require("crypto");
 var fs = __toESM(require("fs"));
 var import_jszip = __toESM(require_lib3());
@@ -33820,9 +33820,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir, envVarsToLinter = [], env
 __name(getQodanaScanArgs, "getQodanaScanArgs");
 function parseEnvVarNames(rawNames) {
   const names = rawNames.split(",").map((name) => name.trim()).filter((name) => name !== "");
-  const invalidName = names.find(
-    (name) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)
-  );
+  const invalidName = names.find((name) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name));
   if (invalidName) {
     throw new Error(`Invalid environment variable name: ${invalidName}`);
   }
@@ -33898,10 +33896,10 @@ function validateBranchName(branchName) {
 }
 __name(validateBranchName, "validateBranchName");
 
-// ../common/output.ts
+// ../common/src/output.ts
 var fs2 = __toESM(require("fs"));
 
-// ../common/utils.ts
+// ../common/src/utils.ts
 var import_shell_quote = __toESM(require_shell_quote());
 var MERGE_COMMIT_PR_WARNING = "Detected a merge-commit checkout (HEAD has multiple parents) while running in pull request mode. The scan may report problems from files not changed by the pull request, because the diff includes target-branch changes merged into the checkout. Check out the pull request source-branch head before scanning.";
 var MERGE_COMMIT_PARENTS_ARGS = [
@@ -34031,7 +34029,7 @@ function parseRawArguments(rawArgs) {
 }
 __name(parseRawArguments, "parseRawArguments");
 
-// ../common/output.ts
+// ../common/src/output.ts
 var COMMIT_USER = "qodana-bot";
 var COMMIT_EMAIL = "qodana-support@jetbrains.com";
 var QODANA_CHECK_NAME = "Qodana";
@@ -34176,10 +34174,7 @@ function getViewReportText(reportUrl, viewReportOptions) {
   if (reportUrl !== "") {
     return `\u2601\uFE0F [View the detailed Qodana report](${reportUrl})`;
   }
-  return wrapToToggleBlock(
-    "View the detailed Qodana report",
-    viewReportOptions
-  );
+  return wrapToToggleBlock("View the detailed Qodana report", viewReportOptions);
 }
 __name(getViewReportText, "getViewReportText");
 function getRowsByLevel(annotations, level) {

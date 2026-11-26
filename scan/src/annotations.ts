@@ -20,8 +20,7 @@ import {AnnotationProperties} from '@actions/core'
 import * as fs from 'fs'
 import type {Log, Result} from 'sarif'
 import {getWorkflowRunUrl, publishGitHubCheck} from './utils'
-import {getProblemPlural} from '../../common/output'
-import {parseRules, Rule} from '../../common/utils'
+import {getProblemPlural, parseRules, Rule} from '@qodana/ci-common'
 import {OriginalUriBaseIds, resolveLocationUri} from './sarifPaths'
 
 function getQodanaHelpString(): string {

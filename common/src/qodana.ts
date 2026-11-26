@@ -15,7 +15,7 @@
  */
 
 // noinspection JSUnusedGlobalSymbols
-import {checksum, version} from './cli.json'
+import {checksum, version} from '../cli.json'
 import {createHash} from 'crypto'
 import * as fs from 'fs'
 import path from 'path'
@@ -100,7 +100,7 @@ async function getLatestNightlyTag(): Promise<string> {
   if (nightlyRelease?.tag_name) {
     return nightlyRelease.tag_name
   } else {
-    throw Error("No nightly release found")
+    throw Error('No nightly release found')
   }
 }
 
@@ -112,7 +112,10 @@ async function getLatestNightlyTag(): Promise<string> {
  */
 export async function getNightlyTag(nightlyVersion: string): Promise<string> {
   if (!nightlyVersion) return ''
-  const version = nightlyVersion === 'latest' ? await getLatestNightlyTag() : `v${nightlyVersion}-nightly`
+  const version =
+    nightlyVersion === 'latest'
+      ? await getLatestNightlyTag()
+      : `v${nightlyVersion}-nightly`
   // the tag becomes a part of the download URL path, and nightly binaries are not checksum-verified
   if (!/^v\d{4}\.\d+-nightly$/.test(version)) {
     throw Error(`Invalid nightly version: ${nightlyVersion}`)
@@ -181,12 +184,12 @@ export function isNativeMode(args: string[]): boolean {
     return true
   }
 
-  const index = args.findIndex(arg => arg =='--within-docker')
+  const index = args.findIndex(arg => arg == '--within-docker')
 
   if (index == -1) return false
   const nextIndex = index + 1
 
-  return args.length > nextIndex && args[nextIndex] == 'false';
+  return args.length > nextIndex && args[nextIndex] == 'false'
 }
 
 export function isPullSkipped(args: string[]): boolean {
@@ -279,9 +282,7 @@ export function parseEnvVarNames(rawNames: string): string[] {
     .map(name => name.trim())
     .filter(name => name !== '')
 
-  const invalidName = names.find(
-    name => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)
-  )
+  const invalidName = names.find(name => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name))
   if (invalidName) {
     throw new Error(`Invalid environment variable name: ${invalidName}`)
   }
@@ -421,7 +422,8 @@ export function getSanityProblemsCount(sarifPath: string): number {
       fs.readFileSync(sarifPath, {encoding: 'utf8'})
     ) as QodanaSarif
     return (
-      sarifContents.runs?.[0]?.properties?.['qodana.sanity.results']?.length ?? 0
+      sarifContents.runs?.[0]?.properties?.['qodana.sanity.results']?.length ??
+      0
     )
   }
   return 0

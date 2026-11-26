@@ -1,6 +1,6 @@
 import {expect, test} from '@jest/globals'
 import {DEPENDENCY_CHARS_LIMIT, VIEW_REPORT_OPTIONS} from '../src/output'
-import {getSummary} from '../../common/output'
+import {getSummary} from '@qodana/ci-common'
 import {
   outputEmptyFixture,
   problemDescriptorsDefaultFixture

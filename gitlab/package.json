@@ -4,10 +4,8 @@
   "private": true,
   "author": "JetBrains",
   "license": "Apache-2.0",
-  "main": "lib/main.js",
   "scripts": {
     "lint": "prettier --write '**/*.ts' && eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
-    "build": "tsc --build .",
     "package": "esbuild src/main.ts --platform=node --format=cjs --keep-names --bundle --outfile=dist/qodana-gitlab.js",
     "test": "jest --config jest.config.js"
   },
@@ -17,6 +15,7 @@
   },
   "dependencies": {
     "@gitbeaker/rest": "^43.8.0",
+    "@qodana/ci-common": "*",
     "adm-zip": "^0.6.1",
     "axios": "1.20.0",
     "tar": "^7.5.22"

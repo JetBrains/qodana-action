@@ -46,18 +46,18 @@ import {
   sha256sum,
   validateBranchName,
   VERSION,
-  isPullSkipped
-} from '../../common/qodana'
-import path from 'path'
-import {prFixesBody} from './output'
-import {COMMIT_EMAIL, COMMIT_USER, getCommentTag} from '../../common/output'
-import {
+  isPullSkipped,
+  COMMIT_EMAIL,
+  COMMIT_USER,
+  getCommentTag,
   isMergeCommit,
   MERGE_COMMIT_PARENTS_ARGS,
   MERGE_COMMIT_PR_WARNING,
   parseRawArguments,
   setDeprecationWarningCallback
-} from '../../common/utils'
+} from '@qodana/ci-common'
+import path from 'path'
+import {prFixesBody} from './output'
 
 // Set up platform-specific deprecation warning callback for GitHub Actions
 setDeprecationWarningCallback((message: string) => {

@@ -20,7 +20,7 @@ import {
   QodanaExitCode,
   isExecutionSuccessful,
   extractArg
-} from '../../common/qodana'
+} from '@qodana/ci-common'
 import {
   getInputs,
   prepareAgent,

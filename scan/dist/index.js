@@ -30450,6 +30450,484 @@ var require_lib4 = __commonJS({
   }
 });
 
+// ../node_modules/shell-quote/quote.js
+var require_quote = __commonJS({
+  "../node_modules/shell-quote/quote.js"(exports2, module2) {
+    "use strict";
+    var OPS = (
+      /** @type {const} */
+      [
+        "||",
+        "&&",
+        ";;&",
+        ";;",
+        ";&",
+        "|&",
+        "<(",
+        ">(",
+        "<<<",
+        "<<-",
+        "<<",
+        ">>",
+        ">&",
+        ">|",
+        "&>>",
+        "&>",
+        "<&",
+        "<>",
+        "&",
+        ";",
+        "(",
+        ")",
+        "|",
+        "<",
+        ">"
+      ]
+    );
+    var LINE_TERMINATORS = /[\n\r\u2028\u2029]/;
+    var GLOB_SHELL_SPECIAL = /[\s#!"$&'():;<=>@\\^`|~]/g;
+    module2.exports = /* @__PURE__ */ __name(function quote(xs) {
+      var sawComment = false;
+      return xs.map(function(s) {
+        if (sawComment && typeof s === "string" && LINE_TERMINATORS.test(s)) {
+          throw new TypeError("a token after a `comment` must not contain line terminators");
+        }
+        if (s === "") {
+          return (
+            /** @type {const} */
+            "''"
+          );
+        }
+        if (s && typeof s === "object") {
+          if ("op" in s && s.op === "glob") {
+            if (typeof s.pattern !== "string") {
+              throw new TypeError("glob token requires a string `pattern`");
+            }
+            if (LINE_TERMINATORS.test(s.pattern)) {
+              throw new TypeError("glob `pattern` must not contain line terminators");
+            }
+            if (s.pattern === "") {
+              return (
+                /** @type {const} */
+                "''"
+              );
+            }
+            return s.pattern.replace(GLOB_SHELL_SPECIAL, "\\$&");
+          }
+          if ("op" in s && typeof s.op === "string") {
+            if (OPS.indexOf(s.op) < 0) {
+              throw new TypeError("invalid `op` value: " + JSON.stringify(s.op));
+            }
+            return s.op.replace(/[\s\S]/g, "\\$&");
+          }
+          if ("comment" in s && typeof s.comment === "string") {
+            if (LINE_TERMINATORS.test(s.comment)) {
+              throw new TypeError("`comment` must not contain line terminators");
+            }
+            sawComment = true;
+            return "#" + s.comment;
+          }
+          throw new TypeError("unrecognized object token shape");
+        }
+        if (/'/.test(s) && /!/.test(s)) {
+          return "'" + s.replace(/'/g, `'"'"'`) + "'";
+        }
+        if (/["\s\\]/.test(s) && !/'/.test(s)) {
+          return "'" + s + "'";
+        }
+        if (/["'\s]/.test(s)) {
+          return '"' + s.replace(/(["\\$`])/g, "\\$1") + '"';
+        }
+        return String(s).replace(/([A-Za-z]:)?([#!"$&'()*,:;<=>?@[\\\]^`{|}~])/g, "$1\\$2");
+      }).join(" ");
+    }, "quote");
+  }
+});
+
+// ../node_modules/shell-quote/parse.js
+var require_parse2 = __commonJS({
+  "../node_modules/shell-quote/parse.js"(exports2, module2) {
+    "use strict";
+    var CONTROL = (
+      /** @type {const} */
+      "(?:" + /** @type {const} */
+      [
+        "\\|\\|",
+        "\\&(?:\\&|>>?)",
+        // `&&`, `&>`, and `&>>`
+        ";;\\&?",
+        // `;;` and `;;&`
+        "[;|]\\&",
+        // `;&` and `|&`
+        "\\<\\(",
+        "\\<\\<\\<",
+        "\\<\\<-",
+        "\\<\\<(?!\\()",
+        // `<<(` stays `<` and `<(`, as zsh reads it; other shells reject it
+        ">>",
+        ">[&|(]",
+        // `>&`, `>|`, and `>(`
+        "<[&>]",
+        // `<&` and `<>`
+        "[&;()|<>]"
+      ].join(
+        /** @type {const} */
+        "|"
+      ) + /** @type {const} */
+      ")"
+    );
+    var controlRE = new RegExp("^" + CONTROL + "$");
+    var META = (
+      /** @type {const} */
+      "|&;()<> \\t"
+    );
+    var SINGLE_QUOTE = (
+      /** @type {const} */
+      "'([^']*?)'"
+    );
+    var ANSI_C_BODY = "(?:\\\\[\\s\\S]|[^\\\\'])*?";
+    var ANSI_C_QUOTE = "\\$'" + ANSI_C_BODY + "'";
+    var ansiCAt = new RegExp("\\$'" + ANSI_C_BODY + "(?:(')|\\\\?$)", "g");
+    var ANSI_C_LETTERS = "abeEfnrtv";
+    var ANSI_C_CHARS = "\x07\b\x1B\x1B\f\n\r	\v";
+    var hash = /^#$/;
+    var SQ = (
+      /** @type {const} */
+      "'"
+    );
+    var DQ = (
+      /** @type {const} */
+      '"'
+    );
+    var DS = (
+      /** @type {const} */
+      "$"
+    );
+    var TOKEN = "";
+    var mult = (
+      /** @type {const} */
+      4294967296
+    );
+    for (i = 0; i < 4; i++) {
+      TOKEN += (mult * Math.random()).toString(16);
+    }
+    var i;
+    var startsWithToken = new RegExp("^" + TOKEN);
+    function matchAll(s, r) {
+      var origIndex = r.lastIndex;
+      var matches = [];
+      var matchObj;
+      while (matchObj = r.exec(s)) {
+        matches[matches.length] = matchObj;
+        if (r.lastIndex === matchObj.index) {
+          r.lastIndex += 1;
+        }
+      }
+      r.lastIndex = origIndex;
+      return matches;
+    }
+    __name(matchAll, "matchAll");
+    function getVar(env, pre, key) {
+      var r = typeof env === "function" ? env(key) : env[key];
+      if (typeof r === "undefined" && key != "") {
+        r = "";
+      } else if (typeof r === "undefined") {
+        r = "$";
+      }
+      if (typeof r === "object") {
+        return pre + TOKEN + JSON.stringify(r) + TOKEN;
+      }
+      return pre + r;
+    }
+    __name(getVar, "getVar");
+    var ansiCEscape = /\\([0-7]{1,3}|x[\dA-Fa-f]{1,2}|u[\dA-Fa-f]{1,4}|U[\dA-Fa-f]{1,8}|c(?:\\\\|[\s\S])|[abeEfnrtv\\'"?])/g;
+    function expandAnsiCEscape(m, escape) {
+      var kind = escape.charAt(0);
+      if (kind === "c") {
+        var ctrl = escape.charAt(1);
+        return ctrl === "?" ? "\x7F" : String.fromCharCode(ctrl.charCodeAt(0) & 31);
+      }
+      if (kind === "x" || kind === "u" || kind === "U") {
+        var cp = parseInt(escape.slice(1), 16);
+        if (cp > 1114111) {
+          return m;
+        }
+        return String.fromCharCode.apply(null, cp > 65535 ? [55232 + (cp >> 10), 56320 + (cp & 1023)] : [cp]);
+      }
+      if (kind >= "0" && kind <= "7") {
+        return String.fromCharCode(parseInt(escape, 8) & 255);
+      }
+      var letter = ANSI_C_LETTERS.indexOf(escape);
+      return letter < 0 ? escape : ANSI_C_CHARS.charAt(letter);
+    }
+    __name(expandAnsiCEscape, "expandAnsiCEscape");
+    function expandAnsiC(body) {
+      return body.replace(ansiCEscape, expandAnsiCEscape).split("\0")[0];
+    }
+    __name(expandAnsiC, "expandAnsiC");
+    function closesAnsiC(s, i2) {
+      ansiCAt.lastIndex = i2;
+      return !!/** @type {RegExpExecArray} */
+      ansiCAt.exec(s)[1];
+    }
+    __name(closesAnsiC, "closesAnsiC");
+    function parseInternal(string, env, opts) {
+      if (!opts) {
+        opts = {};
+      }
+      var BS = opts.escape || "\\";
+      var ifs = opts.splitUnquoted === true ? " 	\n" : typeof opts.splitUnquoted === "string" ? opts.splitUnquoted : "";
+      var BAREWORD = "(\\" + BS + `['"$\\` + BS + META + "]|\\$\\$|\\$(?!" + ANSI_C_QUOTE.slice(2) + `)|[^\\s'"$` + META + "])+";
+      var DOUBLE_QUOTE = '"(?:\\' + BS + '[\\s\\S]|[^"\\' + BS + '])*"';
+      var chunker = new RegExp([
+        "(" + CONTROL + ")",
+        // control chars
+        "(" + ANSI_C_QUOTE + "|" + BAREWORD + "|" + DOUBLE_QUOTE + "|" + SINGLE_QUOTE + ")+"
+      ].join("|"), "g");
+      var matches = matchAll(string, chunker);
+      if (matches.length === 0) {
+        return [];
+      }
+      if (!env) {
+        env = {};
+      }
+      var commented = false;
+      return matches.map(function(match) {
+        var s = match[0];
+        if (!s || commented) {
+          return void 0;
+        }
+        if (controlRE.test(s)) {
+          return (
+            /** @type {ControlOperator} */
+            { op: s }
+          );
+        }
+        var quote = false;
+        var esc = false;
+        var out = "";
+        var words = [];
+        var sawQuote = false;
+        var pendingNw = null;
+        var isGlob = false;
+        var i2;
+        function parseEnvVar() {
+          i2 += 1;
+          var varend;
+          var varname;
+          var char = s.charAt(i2);
+          if (char === "{") {
+            i2 += 1;
+            if (s.charAt(i2) === "}") {
+              throw new Error("Bad substitution: " + s.slice(i2 - 2, i2 + 1));
+            }
+            var depth = 1;
+            varend = i2;
+            while (depth > 0 && varend < s.length) {
+              if (s.charAt(varend) === "{" && s.charAt(varend - 1) === "$") {
+                depth += 1;
+              } else if (s.charAt(varend) === "}") {
+                depth -= 1;
+              }
+              varend += 1;
+            }
+            if (depth !== 0) {
+              throw new Error("Bad substitution: " + s.slice(i2));
+            }
+            varend -= 1;
+            varname = s.slice(i2, varend);
+            i2 = varend;
+          } else if (/[*@#?$!-]/.test(char)) {
+            varname = char;
+          } else {
+            var slicedFromI = s.slice(i2);
+            varend = slicedFromI.match(/[^\w\d_]/);
+            if (!varend) {
+              varname = slicedFromI;
+              i2 = s.length;
+            } else {
+              varname = slicedFromI.slice(0, varend.index);
+              i2 += /** @type {number} */
+              varend.index - 1;
+            }
+          }
+          return getVar(
+            /** @type {NonNullable<typeof env>} */
+            env,
+            "",
+            varname
+          );
+        }
+        __name(parseEnvVar, "parseEnvVar");
+        function flushRun() {
+          if (pendingNw === null) {
+            return;
+          }
+          if (pendingNw === 0) {
+            if (out !== "") {
+              words[words.length] = out;
+              out = "";
+            }
+          } else {
+            words[words.length] = out;
+            out = "";
+            for (var fe = 1; fe < pendingNw; fe += 1) {
+              words[words.length] = "";
+            }
+          }
+          pendingNw = null;
+        }
+        __name(flushRun, "flushRun");
+        for (i2 = 0; i2 < s.length; i2++) {
+          var c = s.charAt(i2);
+          if (ifs && c !== DS) {
+            flushRun();
+          }
+          isGlob = isGlob || !quote && (c === "*" || c === "?");
+          if (esc) {
+            out += c;
+            esc = false;
+          } else if (quote) {
+            if (c === quote) {
+              quote = false;
+            } else if (quote == SQ) {
+              out += c;
+            } else {
+              if (c === BS) {
+                i2 += 1;
+                c = s.charAt(i2);
+                if (c === DQ || c === BS || c === DS) {
+                  out += c;
+                } else {
+                  out += BS + c;
+                }
+              } else if (c === DS) {
+                out += parseEnvVar();
+              } else {
+                out += c;
+              }
+            }
+          } else if (c === DQ || c === SQ) {
+            quote = c;
+            sawQuote = true;
+          } else if (controlRE.test(c)) {
+            return (
+              /** @type {ControlOperator} */
+              { op: s }
+            );
+          } else if (hash.test(c)) {
+            commented = true;
+            var commentObj = { comment: string.slice(match.index + i2 + 1) };
+            if (out.length) {
+              return (
+                /** @type {const} */
+                [out, commentObj]
+              );
+            }
+            return (
+              /** @type {const} */
+              [commentObj]
+            );
+          } else if (c === BS) {
+            esc = true;
+          } else if (c === DS && s.charAt(i2 + 1) === SQ && closesAnsiC(s, i2)) {
+            flushRun();
+            sawQuote = true;
+            out += expandAnsiC(s.slice(i2 + 2, ansiCAt.lastIndex - 1));
+            i2 = ansiCAt.lastIndex - 1;
+          } else if (c === DS) {
+            var value = parseEnvVar();
+            if (!ifs) {
+              out += value;
+            } else {
+              for (var vi = 0; vi < value.length; vi += 1) {
+                var vc = value.charAt(vi);
+                if (ifs.indexOf(vc) < 0) {
+                  flushRun();
+                  out += vc;
+                } else if (pendingNw === null) {
+                  pendingNw = vc === " " || vc === "	" || vc === "\n" ? 0 : 1;
+                } else if (vc !== " " && vc !== "	" && vc !== "\n") {
+                  pendingNw += 1;
+                }
+              }
+            }
+          } else {
+            out += c;
+          }
+        }
+        if (isGlob) {
+          return (
+            /** @type {GlobPattern} */
+            { op: "glob", pattern: out }
+          );
+        }
+        if (ifs) {
+          if (pendingNw !== null && pendingNw > 0) {
+            words[words.length] = out;
+            out = "";
+            for (var te = 1; te < pendingNw; te += 1) {
+              words[words.length] = "";
+            }
+          }
+          if (out !== "" || sawQuote && words.length === 0) {
+            words[words.length] = out;
+          }
+          return words;
+        }
+        return out;
+      }).reduce(
+        function(prev, arg) {
+          if (typeof arg === "undefined") {
+            return prev;
+          }
+          [].concat(arg).forEach(function(entry) {
+            prev[prev.length] = entry;
+          });
+          return prev;
+        },
+        /** @type {ParseEntry[]} */
+        []
+      );
+    }
+    __name(parseInternal, "parseInternal");
+    module2.exports = /* @__PURE__ */ __name(function parse2(s, env, opts) {
+      var mapped = parseInternal(s, env, opts);
+      if (typeof env !== "function") {
+        return mapped;
+      }
+      return mapped.reduce(
+        function(acc, s2) {
+          if (typeof s2 === "object") {
+            acc[acc.length] = s2;
+            return acc;
+          }
+          var xs = s2.split(RegExp("(" + TOKEN + ".*?" + TOKEN + ")", "g"));
+          if (xs.length === 1) {
+            acc[acc.length] = xs[0];
+            return acc;
+          }
+          xs.filter(Boolean).forEach(function(x) {
+            acc[acc.length] = startsWithToken.test(x) ? JSON.parse(x.split(TOKEN)[1]) : x;
+          });
+          return acc;
+        },
+        /** @type {ParseEntry[]} */
+        []
+      );
+    }, "parse");
+  }
+});
+
+// ../node_modules/shell-quote/index.js
+var require_shell_quote = __commonJS({
+  "../node_modules/shell-quote/index.js"(exports2) {
+    "use strict";
+    exports2.quote = require_quote();
+    exports2.parse = require_parse2();
+  }
+});
+
 // ../node_modules/@actions/glob/lib/internal-glob-options-helper.js
 var require_internal_glob_options_helper = __commonJS({
   "../node_modules/@actions/glob/lib/internal-glob-options-helper.js"(exports2) {
@@ -135589,484 +136067,6 @@ var require_artifact2 = __commonJS({
   }
 });
 
-// ../node_modules/shell-quote/quote.js
-var require_quote = __commonJS({
-  "../node_modules/shell-quote/quote.js"(exports2, module2) {
-    "use strict";
-    var OPS = (
-      /** @type {const} */
-      [
-        "||",
-        "&&",
-        ";;&",
-        ";;",
-        ";&",
-        "|&",
-        "<(",
-        ">(",
-        "<<<",
-        "<<-",
-        "<<",
-        ">>",
-        ">&",
-        ">|",
-        "&>>",
-        "&>",
-        "<&",
-        "<>",
-        "&",
-        ";",
-        "(",
-        ")",
-        "|",
-        "<",
-        ">"
-      ]
-    );
-    var LINE_TERMINATORS = /[\n\r\u2028\u2029]/;
-    var GLOB_SHELL_SPECIAL = /[\s#!"$&'():;<=>@\\^`|~]/g;
-    module2.exports = /* @__PURE__ */ __name(function quote(xs) {
-      var sawComment = false;
-      return xs.map(function(s) {
-        if (sawComment && typeof s === "string" && LINE_TERMINATORS.test(s)) {
-          throw new TypeError("a token after a `comment` must not contain line terminators");
-        }
-        if (s === "") {
-          return (
-            /** @type {const} */
-            "''"
-          );
-        }
-        if (s && typeof s === "object") {
-          if ("op" in s && s.op === "glob") {
-            if (typeof s.pattern !== "string") {
-              throw new TypeError("glob token requires a string `pattern`");
-            }
-            if (LINE_TERMINATORS.test(s.pattern)) {
-              throw new TypeError("glob `pattern` must not contain line terminators");
-            }
-            if (s.pattern === "") {
-              return (
-                /** @type {const} */
-                "''"
-              );
-            }
-            return s.pattern.replace(GLOB_SHELL_SPECIAL, "\\$&");
-          }
-          if ("op" in s && typeof s.op === "string") {
-            if (OPS.indexOf(s.op) < 0) {
-              throw new TypeError("invalid `op` value: " + JSON.stringify(s.op));
-            }
-            return s.op.replace(/[\s\S]/g, "\\$&");
-          }
-          if ("comment" in s && typeof s.comment === "string") {
-            if (LINE_TERMINATORS.test(s.comment)) {
-              throw new TypeError("`comment` must not contain line terminators");
-            }
-            sawComment = true;
-            return "#" + s.comment;
-          }
-          throw new TypeError("unrecognized object token shape");
-        }
-        if (/'/.test(s) && /!/.test(s)) {
-          return "'" + s.replace(/'/g, `'"'"'`) + "'";
-        }
-        if (/["\s\\]/.test(s) && !/'/.test(s)) {
-          return "'" + s + "'";
-        }
-        if (/["'\s]/.test(s)) {
-          return '"' + s.replace(/(["\\$`])/g, "\\$1") + '"';
-        }
-        return String(s).replace(/([A-Za-z]:)?([#!"$&'()*,:;<=>?@[\\\]^`{|}~])/g, "$1\\$2");
-      }).join(" ");
-    }, "quote");
-  }
-});
-
-// ../node_modules/shell-quote/parse.js
-var require_parse2 = __commonJS({
-  "../node_modules/shell-quote/parse.js"(exports2, module2) {
-    "use strict";
-    var CONTROL = (
-      /** @type {const} */
-      "(?:" + /** @type {const} */
-      [
-        "\\|\\|",
-        "\\&(?:\\&|>>?)",
-        // `&&`, `&>`, and `&>>`
-        ";;\\&?",
-        // `;;` and `;;&`
-        "[;|]\\&",
-        // `;&` and `|&`
-        "\\<\\(",
-        "\\<\\<\\<",
-        "\\<\\<-",
-        "\\<\\<(?!\\()",
-        // `<<(` stays `<` and `<(`, as zsh reads it; other shells reject it
-        ">>",
-        ">[&|(]",
-        // `>&`, `>|`, and `>(`
-        "<[&>]",
-        // `<&` and `<>`
-        "[&;()|<>]"
-      ].join(
-        /** @type {const} */
-        "|"
-      ) + /** @type {const} */
-      ")"
-    );
-    var controlRE = new RegExp("^" + CONTROL + "$");
-    var META = (
-      /** @type {const} */
-      "|&;()<> \\t"
-    );
-    var SINGLE_QUOTE = (
-      /** @type {const} */
-      "'([^']*?)'"
-    );
-    var ANSI_C_BODY = "(?:\\\\[\\s\\S]|[^\\\\'])*?";
-    var ANSI_C_QUOTE = "\\$'" + ANSI_C_BODY + "'";
-    var ansiCAt = new RegExp("\\$'" + ANSI_C_BODY + "(?:(')|\\\\?$)", "g");
-    var ANSI_C_LETTERS = "abeEfnrtv";
-    var ANSI_C_CHARS = "\x07\b\x1B\x1B\f\n\r	\v";
-    var hash = /^#$/;
-    var SQ = (
-      /** @type {const} */
-      "'"
-    );
-    var DQ = (
-      /** @type {const} */
-      '"'
-    );
-    var DS = (
-      /** @type {const} */
-      "$"
-    );
-    var TOKEN = "";
-    var mult = (
-      /** @type {const} */
-      4294967296
-    );
-    for (i = 0; i < 4; i++) {
-      TOKEN += (mult * Math.random()).toString(16);
-    }
-    var i;
-    var startsWithToken = new RegExp("^" + TOKEN);
-    function matchAll(s, r) {
-      var origIndex = r.lastIndex;
-      var matches = [];
-      var matchObj;
-      while (matchObj = r.exec(s)) {
-        matches[matches.length] = matchObj;
-        if (r.lastIndex === matchObj.index) {
-          r.lastIndex += 1;
-        }
-      }
-      r.lastIndex = origIndex;
-      return matches;
-    }
-    __name(matchAll, "matchAll");
-    function getVar(env, pre, key) {
-      var r = typeof env === "function" ? env(key) : env[key];
-      if (typeof r === "undefined" && key != "") {
-        r = "";
-      } else if (typeof r === "undefined") {
-        r = "$";
-      }
-      if (typeof r === "object") {
-        return pre + TOKEN + JSON.stringify(r) + TOKEN;
-      }
-      return pre + r;
-    }
-    __name(getVar, "getVar");
-    var ansiCEscape = /\\([0-7]{1,3}|x[\dA-Fa-f]{1,2}|u[\dA-Fa-f]{1,4}|U[\dA-Fa-f]{1,8}|c(?:\\\\|[\s\S])|[abeEfnrtv\\'"?])/g;
-    function expandAnsiCEscape(m, escape) {
-      var kind = escape.charAt(0);
-      if (kind === "c") {
-        var ctrl = escape.charAt(1);
-        return ctrl === "?" ? "\x7F" : String.fromCharCode(ctrl.charCodeAt(0) & 31);
-      }
-      if (kind === "x" || kind === "u" || kind === "U") {
-        var cp = parseInt(escape.slice(1), 16);
-        if (cp > 1114111) {
-          return m;
-        }
-        return String.fromCharCode.apply(null, cp > 65535 ? [55232 + (cp >> 10), 56320 + (cp & 1023)] : [cp]);
-      }
-      if (kind >= "0" && kind <= "7") {
-        return String.fromCharCode(parseInt(escape, 8) & 255);
-      }
-      var letter = ANSI_C_LETTERS.indexOf(escape);
-      return letter < 0 ? escape : ANSI_C_CHARS.charAt(letter);
-    }
-    __name(expandAnsiCEscape, "expandAnsiCEscape");
-    function expandAnsiC(body) {
-      return body.replace(ansiCEscape, expandAnsiCEscape).split("\0")[0];
-    }
-    __name(expandAnsiC, "expandAnsiC");
-    function closesAnsiC(s, i2) {
-      ansiCAt.lastIndex = i2;
-      return !!/** @type {RegExpExecArray} */
-      ansiCAt.exec(s)[1];
-    }
-    __name(closesAnsiC, "closesAnsiC");
-    function parseInternal(string, env, opts) {
-      if (!opts) {
-        opts = {};
-      }
-      var BS = opts.escape || "\\";
-      var ifs = opts.splitUnquoted === true ? " 	\n" : typeof opts.splitUnquoted === "string" ? opts.splitUnquoted : "";
-      var BAREWORD = "(\\" + BS + `['"$\\` + BS + META + "]|\\$\\$|\\$(?!" + ANSI_C_QUOTE.slice(2) + `)|[^\\s'"$` + META + "])+";
-      var DOUBLE_QUOTE = '"(?:\\' + BS + '[\\s\\S]|[^"\\' + BS + '])*"';
-      var chunker = new RegExp([
-        "(" + CONTROL + ")",
-        // control chars
-        "(" + ANSI_C_QUOTE + "|" + BAREWORD + "|" + DOUBLE_QUOTE + "|" + SINGLE_QUOTE + ")+"
-      ].join("|"), "g");
-      var matches = matchAll(string, chunker);
-      if (matches.length === 0) {
-        return [];
-      }
-      if (!env) {
-        env = {};
-      }
-      var commented = false;
-      return matches.map(function(match) {
-        var s = match[0];
-        if (!s || commented) {
-          return void 0;
-        }
-        if (controlRE.test(s)) {
-          return (
-            /** @type {ControlOperator} */
-            { op: s }
-          );
-        }
-        var quote = false;
-        var esc = false;
-        var out = "";
-        var words = [];
-        var sawQuote = false;
-        var pendingNw = null;
-        var isGlob = false;
-        var i2;
-        function parseEnvVar() {
-          i2 += 1;
-          var varend;
-          var varname;
-          var char = s.charAt(i2);
-          if (char === "{") {
-            i2 += 1;
-            if (s.charAt(i2) === "}") {
-              throw new Error("Bad substitution: " + s.slice(i2 - 2, i2 + 1));
-            }
-            var depth = 1;
-            varend = i2;
-            while (depth > 0 && varend < s.length) {
-              if (s.charAt(varend) === "{" && s.charAt(varend - 1) === "$") {
-                depth += 1;
-              } else if (s.charAt(varend) === "}") {
-                depth -= 1;
-              }
-              varend += 1;
-            }
-            if (depth !== 0) {
-              throw new Error("Bad substitution: " + s.slice(i2));
-            }
-            varend -= 1;
-            varname = s.slice(i2, varend);
-            i2 = varend;
-          } else if (/[*@#?$!-]/.test(char)) {
-            varname = char;
-          } else {
-            var slicedFromI = s.slice(i2);
-            varend = slicedFromI.match(/[^\w\d_]/);
-            if (!varend) {
-              varname = slicedFromI;
-              i2 = s.length;
-            } else {
-              varname = slicedFromI.slice(0, varend.index);
-              i2 += /** @type {number} */
-              varend.index - 1;
-            }
-          }
-          return getVar(
-            /** @type {NonNullable<typeof env>} */
-            env,
-            "",
-            varname
-          );
-        }
-        __name(parseEnvVar, "parseEnvVar");
-        function flushRun() {
-          if (pendingNw === null) {
-            return;
-          }
-          if (pendingNw === 0) {
-            if (out !== "") {
-              words[words.length] = out;
-              out = "";
-            }
-          } else {
-            words[words.length] = out;
-            out = "";
-            for (var fe = 1; fe < pendingNw; fe += 1) {
-              words[words.length] = "";
-            }
-          }
-          pendingNw = null;
-        }
-        __name(flushRun, "flushRun");
-        for (i2 = 0; i2 < s.length; i2++) {
-          var c = s.charAt(i2);
-          if (ifs && c !== DS) {
-            flushRun();
-          }
-          isGlob = isGlob || !quote && (c === "*" || c === "?");
-          if (esc) {
-            out += c;
-            esc = false;
-          } else if (quote) {
-            if (c === quote) {
-              quote = false;
-            } else if (quote == SQ) {
-              out += c;
-            } else {
-              if (c === BS) {
-                i2 += 1;
-                c = s.charAt(i2);
-                if (c === DQ || c === BS || c === DS) {
-                  out += c;
-                } else {
-                  out += BS + c;
-                }
-              } else if (c === DS) {
-                out += parseEnvVar();
-              } else {
-                out += c;
-              }
-            }
-          } else if (c === DQ || c === SQ) {
-            quote = c;
-            sawQuote = true;
-          } else if (controlRE.test(c)) {
-            return (
-              /** @type {ControlOperator} */
-              { op: s }
-            );
-          } else if (hash.test(c)) {
-            commented = true;
-            var commentObj = { comment: string.slice(match.index + i2 + 1) };
-            if (out.length) {
-              return (
-                /** @type {const} */
-                [out, commentObj]
-              );
-            }
-            return (
-              /** @type {const} */
-              [commentObj]
-            );
-          } else if (c === BS) {
-            esc = true;
-          } else if (c === DS && s.charAt(i2 + 1) === SQ && closesAnsiC(s, i2)) {
-            flushRun();
-            sawQuote = true;
-            out += expandAnsiC(s.slice(i2 + 2, ansiCAt.lastIndex - 1));
-            i2 = ansiCAt.lastIndex - 1;
-          } else if (c === DS) {
-            var value = parseEnvVar();
-            if (!ifs) {
-              out += value;
-            } else {
-              for (var vi = 0; vi < value.length; vi += 1) {
-                var vc = value.charAt(vi);
-                if (ifs.indexOf(vc) < 0) {
-                  flushRun();
-                  out += vc;
-                } else if (pendingNw === null) {
-                  pendingNw = vc === " " || vc === "	" || vc === "\n" ? 0 : 1;
-                } else if (vc !== " " && vc !== "	" && vc !== "\n") {
-                  pendingNw += 1;
-                }
-              }
-            }
-          } else {
-            out += c;
-          }
-        }
-        if (isGlob) {
-          return (
-            /** @type {GlobPattern} */
-            { op: "glob", pattern: out }
-          );
-        }
-        if (ifs) {
-          if (pendingNw !== null && pendingNw > 0) {
-            words[words.length] = out;
-            out = "";
-            for (var te = 1; te < pendingNw; te += 1) {
-              words[words.length] = "";
-            }
-          }
-          if (out !== "" || sawQuote && words.length === 0) {
-            words[words.length] = out;
-          }
-          return words;
-        }
-        return out;
-      }).reduce(
-        function(prev, arg) {
-          if (typeof arg === "undefined") {
-            return prev;
-          }
-          [].concat(arg).forEach(function(entry) {
-            prev[prev.length] = entry;
-          });
-          return prev;
-        },
-        /** @type {ParseEntry[]} */
-        []
-      );
-    }
-    __name(parseInternal, "parseInternal");
-    module2.exports = /* @__PURE__ */ __name(function parse2(s, env, opts) {
-      var mapped = parseInternal(s, env, opts);
-      if (typeof env !== "function") {
-        return mapped;
-      }
-      return mapped.reduce(
-        function(acc, s2) {
-          if (typeof s2 === "object") {
-            acc[acc.length] = s2;
-            return acc;
-          }
-          var xs = s2.split(RegExp("(" + TOKEN + ".*?" + TOKEN + ")", "g"));
-          if (xs.length === 1) {
-            acc[acc.length] = xs[0];
-            return acc;
-          }
-          xs.filter(Boolean).forEach(function(x) {
-            acc[acc.length] = startsWithToken.test(x) ? JSON.parse(x.split(TOKEN)[1]) : x;
-          });
-          return acc;
-        },
-        /** @type {ParseEntry[]} */
-        []
-      );
-    }, "parse");
-  }
-});
-
-// ../node_modules/shell-quote/index.js
-var require_shell_quote = __commonJS({
-  "../node_modules/shell-quote/index.js"(exports2) {
-    "use strict";
-    exports2.quote = require_quote();
-    exports2.parse = require_parse2();
-  }
-});
-
 // src/main.ts
 var core4 = __toESM(require_core());
 var io = __toESM(require_io());
@@ -136082,7 +136082,7 @@ var checksum = {
   linux_x86_64: "dae6d31f481ed15c6c016fd746e907978f0c1437010326fa04a92f13c7c52338"
 };
 
-// ../common/qodana.ts
+// ../common/src/qodana.ts
 var import_crypto = require("crypto");
 var fs = __toESM(require("fs"));
 var import_path = __toESM(require("path"));
@@ -136256,9 +136256,7 @@ function getQodanaScanArgs(args, resultsDir, cacheDir2, envVarsToLinter = [], en
 __name(getQodanaScanArgs, "getQodanaScanArgs");
 function parseEnvVarNames(rawNames) {
   const names = rawNames.split(",").map((name) => name.trim()).filter((name) => name !== "");
-  const invalidName = names.find(
-    (name) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)
-  );
+  const invalidName = names.find((name) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name));
   if (invalidName) {
     throw new Error(`Invalid environment variable name: ${invalidName}`);
   }
@@ -136371,22 +136369,10 @@ async function compressFolder(srcDir, destFile) {
 }
 __name(compressFolder, "compressFolder");
 
-// src/utils.ts
-var cache = __toESM(require_cache3());
-var core3 = __toESM(require_core());
-var exec = __toESM(require_exec());
-var github = __toESM(require_github());
-var tc = __toESM(require_tool_cache());
-var import_artifact = __toESM(require_artifact2());
-
-// src/annotations.ts
-var core = __toESM(require_core());
-var fs3 = __toESM(require("fs"));
-
-// ../common/output.ts
+// ../common/src/output.ts
 var fs2 = __toESM(require("fs"));
 
-// ../common/utils.ts
+// ../common/src/utils.ts
 var import_shell_quote = __toESM(require_shell_quote());
 var MERGE_COMMIT_PR_WARNING = "Detected a merge-commit checkout (HEAD has multiple parents) while running in pull request mode. The scan may report problems from files not changed by the pull request, because the diff includes target-branch changes merged into the checkout. Check out the pull request source-branch head before scanning.";
 var MERGE_COMMIT_PARENTS_ARGS = [
@@ -136507,7 +136493,7 @@ function parseRawArguments(rawArgs) {
 }
 __name(parseRawArguments, "parseRawArguments");
 
-// ../common/output.ts
+// ../common/src/output.ts
 var COMMIT_USER = "qodana-bot";
 var COMMIT_EMAIL = "qodana-support@jetbrains.com";
 var QODANA_CHECK_NAME = "Qodana";
@@ -136607,10 +136593,7 @@ function getViewReportText(reportUrl, viewReportOptions) {
   if (reportUrl !== "") {
     return `\u2601\uFE0F [View the detailed Qodana report](${reportUrl})`;
   }
-  return wrapToToggleBlock(
-    "View the detailed Qodana report",
-    viewReportOptions
-  );
+  return wrapToToggleBlock("View the detailed Qodana report", viewReportOptions);
 }
 __name(getViewReportText, "getViewReportText");
 function getRowsByLevel(annotations, level) {
@@ -136719,6 +136702,18 @@ function getCommentTag(toolName, sourceDir) {
   return `<!-- JetBrains/qodana-action@v${VERSION} : ${toolName}, ${sourceDir} -->`;
 }
 __name(getCommentTag, "getCommentTag");
+
+// src/utils.ts
+var cache = __toESM(require_cache3());
+var core3 = __toESM(require_core());
+var exec = __toESM(require_exec());
+var github = __toESM(require_github());
+var tc = __toESM(require_tool_cache());
+var import_artifact = __toESM(require_artifact2());
+
+// src/annotations.ts
+var core = __toESM(require_core());
+var fs3 = __toESM(require("fs"));
 
 // src/sarifPaths.ts
 var CyclicUriBaseIdError = class extends Error {
@@ -136835,7 +136830,7 @@ function parseResult(result, rules, originalUriBaseIds) {
   };
 }
 __name(parseResult, "parseResult");
-function parseSarif(path3) {
+function parseSarif2(path3) {
   const sarif = JSON.parse(
     fs3.readFileSync(path3, { encoding: "utf8" })
   );
@@ -136861,7 +136856,7 @@ function parseSarif(path3) {
     annotations
   };
 }
-__name(parseSarif, "parseSarif");
+__name(parseSarif2, "parseSarif");
 function getGitHubCheckConclusion(annotations, failedByThreshold) {
   if (failedByThreshold) {
     return FAILURE_STATUS;
@@ -136911,7 +136906,7 @@ async function publishOutput(failedByThreshold, projectDir, sourceDir, resultsDi
     return;
   }
   try {
-    const problems = parseSarif(`${resultsDir}/${QODANA_SARIF_NAME}`);
+    const problems = parseSarif2(`${resultsDir}/${QODANA_SARIF_NAME}`);
     const reportUrl = getReportURL(resultsDir);
     const sanityProblemsCount = getSanityProblemsCount(
       `${resultsDir}/${QODANA_SARIF_NAME}`

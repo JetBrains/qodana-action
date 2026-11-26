@@ -21,8 +21,18 @@ import {
   getSanityProblemsCount,
   QODANA_SARIF_NAME,
   QODANA_SHORT_SARIF_NAME,
-  VERSION
-} from '../../common/qodana'
+  VERSION,
+  FAILURE_LEVEL,
+  getCoverageStats,
+  getLicenseInfo,
+  getReportURL,
+  getSummary,
+  LicenseInfo,
+  NOTICE_LEVEL,
+  ProblemDescriptor,
+  QODANA_CHECK_NAME,
+  WARNING_LEVEL
+} from '@qodana/ci-common'
 import {
   ANALYSIS_FINISHED_REACTION,
   ANALYSIS_STARTED_REACTION,
@@ -37,18 +47,6 @@ import {
   parseSarif,
   publishAnnotations
 } from './annotations'
-import {
-  FAILURE_LEVEL,
-  getCoverageStats,
-  getLicenseInfo,
-  getReportURL,
-  getSummary,
-  LicenseInfo,
-  NOTICE_LEVEL,
-  ProblemDescriptor,
-  QODANA_CHECK_NAME,
-  WARNING_LEVEL
-} from '../../common/output'
 
 export const DEPENDENCY_CHARS_LIMIT = 65000 // 65k chars is the GitHub limit for a comment
 export const VIEW_REPORT_OPTIONS = `To be able to view the detailed Qodana report, you can either:

@@ -1,4 +1,4 @@
-import {ProblemDescriptor} from '../output'
+import {ProblemDescriptor} from '../src/output'
 
 export function problemDescriptorsDefaultFixture(): ProblemDescriptor[] {
   return [

@@ -48,7 +48,7 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - name: Install dependencies
-        run: npm ci && npm run build
+        run: npm ci && npm run typecheck
       - name: Rebuild scan/dist/
         run: cd scan && npm run package
       - name: Verify scan/dist/ is up to date

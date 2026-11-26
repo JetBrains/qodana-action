@@ -20,17 +20,15 @@ import {
   getSanityProblemsCount,
   QODANA_SARIF_NAME,
   QODANA_SHORT_SARIF_NAME,
-  VERSION
-} from '../../common/qodana'
-import {getWorkflowRunUrl, postResultsToPRComments, postSummary} from './utils'
-import {
+  VERSION,
   getCoverageStats,
   getLicenseInfo,
   getReportURL,
   getSummary,
   parseSarif,
   QODANA_CHECK_NAME
-} from '../../common/output'
+} from '@qodana/ci-common'
+import {getWorkflowRunUrl, postResultsToPRComments, postSummary} from './utils'
 
 export const DEPENDENCY_CHARS_LIMIT = 150000 // 150k chars is the Azure DevOps limit for a comment
 export const VIEW_REPORT_OPTIONS = `To be able to view the detailed Qodana report, you can either:

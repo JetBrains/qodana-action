@@ -11,12 +11,9 @@
     "lint": "eslint --fix **/*.ts -c ../.github/linters/.eslintrc.yml",
     "test": "jest --config jest.config.js"
   },
-  "files": [
-    "qodana.ts",
-    "output.ts",
-    "utils.ts",
-    "cli.json"
-  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "dependencies": {
     "jszip": "^3.10.1",
     "shell-quote": "^1.12.0"

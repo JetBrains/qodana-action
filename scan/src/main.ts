@@ -21,7 +21,7 @@ import {
   QodanaExitCode,
   isExecutionSuccessful,
   extractArg
-} from '../../common/qodana'
+} from '@qodana/ci-common'
 import {
   ANALYSIS_FINISHED_REACTION,
   ANALYSIS_STARTED_REACTION,
